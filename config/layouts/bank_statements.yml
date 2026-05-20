@@ -2,640 +2,165 @@ layouts:
   cba_standard:
     bank: Commonwealth Bank of Australia
     bank_code: CBA
+    renderer: cba
+    variant: standard
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 28
-      subheader: 16
-      body: 11
-      footer: 9
-    header:
-      logo_text: "Commonwealth Bank"
-      logo_x: 100
-      logo_y: 80
-      color: "#12107D"
-      background_color: "#F5F5F5"
-      height: 120
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 150
-        font_size: 11
-      - name: description
-        header_text: "Description"
-        x: 260
-        width: 900
-        font_size: 11
-      - name: debit
-        header_text: "Withdrawals"
-        x: 1170
-        width: 180
-        font_size: 11
-      - name: credit
-        header_text: "Deposits"
-        x: 1360
-        width: 180
-        font_size: 11
-      - name: balance
-        header_text: "Balance"
-        x: 1550
-        width: 200
-        font_size: 11
-    row_height: 30
-    table_start_y: 450
+      body: 18
+      footer: 10
     margin: 100
-    date_format: "DD MMM YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
+    row_height: 45
+    bank_name_color: "#12107D"
+    column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
+    show_opening_balance: true
+    show_footer_transaction_types: true
+    date_format: "DD/MM/YYYY"
 
-  cba_detailed:
+  cba_date_grouped:
     bank: Commonwealth Bank of Australia
     bank_code: CBA
+    renderer: cba
+    variant: date_grouped
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 28
-      subheader: 16
-      body: 10
-      footer: 9
-    header:
-      logo_text: "Commonwealth Bank"
-      logo_x: 100
-      logo_y: 80
-      color: "#12107D"
-      background_color: "#F5F5F5"
-      height: 120
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 140
-        font_size: 10
-      - name: description
-        header_text: "Transaction Description"
-        x: 250
-        width: 850
-        font_size: 10
-      - name: reference
-        header_text: "Reference"
-        x: 1110
-        width: 150
-        font_size: 10
-      - name: debit
-        header_text: "Debits"
-        x: 1270
-        width: 160
-        font_size: 10
-      - name: credit
-        header_text: "Credits"
-        x: 1440
-        width: 160
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1610
-        width: 170
-        font_size: 10
-    row_height: 28
-    table_start_y: 450
+      body: 18
+      footer: 10
     margin: 100
-    date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    include_reference_number: true
-
-  cba_summary:
-    bank: Commonwealth Bank of Australia
-    bank_code: CBA
-    page_dimensions:
-      width: 2480
-      height: 3508
-    font_sizes:
-      header: 28
-      subheader: 14
-      body: 11
-      footer: 9
-    header:
-      logo_text: "Commonwealth Bank"
-      logo_x: 100
-      logo_y: 80
-      color: "#12107D"
-      background_color: "#F5F5F5"
-      height: 120
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 160
-        font_size: 11
-      - name: description
-        header_text: "Description"
-        x: 270
-        width: 950
-        font_size: 11
-      - name: amount
-        header_text: "Amount"
-        x: 1230
-        width: 180
-        font_size: 11
-      - name: balance
-        header_text: "Balance"
-        x: 1420
-        width: 200
-        font_size: 11
-    row_height: 32
-    table_start_y: 450
-    margin: 100
-    date_format: "D MMM YYYY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    include_totals_row: true
+    row_height: 45
+    bank_name_color: "#12107D"
+    column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
+    show_opening_balance: true
+    show_footer_transaction_types: true
+    date_grouping: true
+    date_format: "DD MMM YYYY"
 
   westpac_standard:
     bank: Westpac Banking Corporation
     bank_code: WBC
+    renderer: westpac
+    variant: standard
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 26
-      subheader: 15
-      body: 11
+      body: 16
+      sub_description: 13
       footer: 9
-    header:
-      logo_text: "westpac"
-      logo_x: 100
-      logo_y: 90
-      color: "#C41E3A"
-      background_color: "#FFFFFF"
-      height: 110
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 140
-        font_size: 11
-      - name: description
-        header_text: "Description"
-        x: 250
-        width: 920
-        font_size: 11
-      - name: debit
-        header_text: "Withdrawals"
-        x: 1180
-        width: 170
-        font_size: 11
-      - name: credit
-        header_text: "Deposits"
-        x: 1360
-        width: 170
-        font_size: 11
-      - name: balance
-        header_text: "Balance"
-        x: 1540
-        width: 180
-        font_size: 11
-    row_height: 30
-    table_start_y: 440
-    margin: 100
-    date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-
-  westpac_grid:
-    bank: Westpac Banking Corporation
-    bank_code: WBC
-    page_dimensions:
-      width: 2480
-      height: 3508
-    font_sizes:
-      header: 26
-      subheader: 14
-      body: 10
-      footer: 9
-    header:
-      logo_text: "westpac"
-      logo_x: 100
-      logo_y: 90
-      color: "#C41E3A"
-      background_color: "#F9F9F9"
-      height: 110
-    columns:
-      - name: date
-        header_text: "Trans Date"
-        x: 100
-        width: 130
-        font_size: 10
-      - name: post_date
-        header_text: "Post Date"
-        x: 240
-        width: 130
-        font_size: 10
-      - name: description
-        header_text: "Description"
-        x: 380
-        width: 720
-        font_size: 10
-      - name: debit
-        header_text: "Out"
-        x: 1110
-        width: 140
-        font_size: 10
-      - name: credit
-        header_text: "In"
-        x: 1260
-        width: 140
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1410
-        width: 160
-        font_size: 10
-    row_height: 28
-    table_start_y: 440
-    margin: 100
-    date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    include_posting_date: true
-    include_grid_lines: true
-
-  westpac_corporate:
-    bank: Westpac Banking Corporation
-    bank_code: WBC
-    page_dimensions:
-      width: 2480
-      height: 3508
-    font_sizes:
-      header: 24
-      subheader: 13
-      body: 10
-      footer: 8
-    header:
-      logo_text: "WESTPAC CORPORATE"
-      logo_x: 100
-      logo_y: 95
-      color: "#003D7A"
-      background_color: "#E8E8E8"
-      height: 100
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 120
-        font_size: 10
-      - name: description
-        header_text: "Reference"
-        x: 230
-        width: 880
-        font_size: 10
-      - name: cheque_number
-        header_text: "Cheque"
-        x: 1120
-        width: 100
-        font_size: 10
-      - name: debit
-        header_text: "Debits"
-        x: 1230
-        width: 160
-        font_size: 10
-      - name: credit
-        header_text: "Credits"
-        x: 1400
-        width: 160
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1570
-        width: 160
-        font_size: 10
-    row_height: 26
-    table_start_y: 440
-    margin: 100
-    date_format: "DD MMM YYYY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    include_cheque_column: true
-
-  nab_standard:
-    bank: National Australia Bank
-    bank_code: NAB
-    page_dimensions:
-      width: 2480
-      height: 3508
-    font_sizes:
-      header: 26
-      subheader: 15
-      body: 11
-      footer: 9
-    header:
-      logo_text: "National Australia Bank"
-      logo_x: 100
-      logo_y: 85
-      color: "#003366"
-      background_color: "#FFFFFF"
-      height: 115
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 150
-        font_size: 11
-      - name: description
-        header_text: "Description"
-        x: 260
-        width: 900
-        font_size: 11
-      - name: debit
-        header_text: "Withdrawals"
-        x: 1170
-        width: 170
-        font_size: 11
-      - name: credit
-        header_text: "Deposits"
-        x: 1350
-        width: 170
-        font_size: 11
-      - name: balance
-        header_text: "Balance"
-        x: 1530
-        width: 190
-        font_size: 11
-    row_height: 30
-    table_start_y: 450
-    margin: 100
+    margin: 80
+    row_height: 40
+    logo_color: "#C41E3A"
     date_format: "DD MMM YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
 
-  nab_multiline:
-    bank: National Australia Bank
-    bank_code: NAB
+  westpac_premium:
+    bank: Westpac Banking Corporation
+    bank_code: WBC
+    renderer: westpac
+    variant: premium
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 26
-      subheader: 14
-      body: 10
+      body: 16
+      sub_description: 13
       footer: 9
-    header:
-      logo_text: "National Australia Bank"
-      logo_x: 100
-      logo_y: 85
-      color: "#003366"
-      background_color: "#F5F5F5"
-      height: 115
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 130
-        font_size: 10
-      - name: description
-        header_text: "Particulars"
-        x: 240
-        width: 950
-        font_size: 10
-      - name: debit
-        header_text: "Debit"
-        x: 1200
-        width: 160
-        font_size: 10
-      - name: credit
-        header_text: "Credit"
-        x: 1370
-        width: 160
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1540
-        width: 180
-        font_size: 10
-    row_height: 28
-    table_start_y: 450
-    margin: 100
-    date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    allow_multiline_descriptions: true
+    margin: 80
+    row_height: 40
+    logo_color: "#C41E3A"
+    show_rewards_section: true
+    date_format: "DD MMM YY"
+
+  nab_classic:
+    bank: National Australia Bank
+    bank_code: NAB
+    renderer: nab
+    variant: classic
+    page_dimensions:
+      width: 2480
+      height: 3508
+    font_sizes:
+      header: 26
+      body: 16
+      sub_description: 13
+      footer: 9
+    margin: 80
+    row_height: 42
+    header_bar_color: "#E8F0FE"
+    balance_suffix: "Cr"
+    date_grouping: true
+    show_references: true
+    show_brought_forward: true
+    date_format: "DD MMM YYYY"
 
   nab_dense:
     bank: National Australia Bank
     bank_code: NAB
+    renderer: nab
+    variant: dense
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 24
-      subheader: 13
-      body: 9
+      body: 14
+      sub_description: 11
       footer: 8
-    header:
-      logo_text: "National Australia Bank"
-      logo_x: 100
-      logo_y: 90
-      color: "#003366"
-      background_color: "#FFFFFF"
-      height: 100
-    columns:
-      - name: date
-        header_text: "Dt"
-        x: 100
-        width: 110
-        font_size: 9
-      - name: description
-        header_text: "Particulars"
-        x: 220
-        width: 930
-        font_size: 9
-      - name: debit
-        header_text: "Withdrawals"
-        x: 1160
-        width: 150
-        font_size: 9
-      - name: credit
-        header_text: "Deposits"
-        x: 1320
-        width: 150
-        font_size: 9
-      - name: balance
-        header_text: "Balance"
-        x: 1480
-        width: 160
-        font_size: 9
-    row_height: 24
-    table_start_y: 450
-    margin: 100
+    margin: 80
+    row_height: 32
+    header_bar_color: "#E8F0FE"
+    balance_suffix: "Cr"
+    date_grouping: true
+    show_references: false
+    show_brought_forward: true
     date_format: "DD MMM YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
 
   anz_standard:
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
+    renderer: anz
+    variant: standard
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 28
-      subheader: 16
-      body: 11
-      footer: 9
-    header:
-      logo_text: "ANZ"
-      logo_x: 100
-      logo_y: 80
-      color: "#0061B5"
-      background_color: "#F0F0F0"
-      height: 120
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 150
-        font_size: 11
-      - name: description
-        header_text: "Description"
-        x: 260
-        width: 900
-        font_size: 11
-      - name: debit
-        header_text: "Debit"
-        x: 1170
-        width: 180
-        font_size: 11
-      - name: credit
-        header_text: "Credit"
-        x: 1360
-        width: 180
-        font_size: 11
-      - name: balance
-        header_text: "Balance"
-        x: 1550
-        width: 200
-        font_size: 11
-    row_height: 30
-    table_start_y: 450
+      body: 18
+      sub_description: 14
+      footer: 10
     margin: 100
+    row_height: 45
+    header_color: "#0061B5"
+    balance_suffix_debit: "DR"
+    balance_suffix_credit: "CR"
+    show_totals_row: true
+    show_brought_forward: true
     date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
 
   anz_modern:
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
+    renderer: anz
+    variant: modern
     page_dimensions:
       width: 2480
       height: 3508
     font_sizes:
       header: 26
-      subheader: 14
-      body: 10
-      footer: 8
-    header:
-      logo_text: "ANZ"
-      logo_x: 100
-      logo_y: 85
-      color: "#0061B5"
-      background_color: "#FFFFFF"
-      height: 110
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 130
-        font_size: 10
-      - name: description
-        header_text: "Transaction"
-        x: 240
-        width: 920
-        font_size: 10
-      - name: debit
-        header_text: "Withdrawn"
-        x: 1170
-        width: 160
-        font_size: 10
-      - name: credit
-        header_text: "Deposited"
-        x: 1340
-        width: 160
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1510
-        width: 180
-        font_size: 10
-    row_height: 28
-    table_start_y: 440
+      body: 16
+      sub_description: 13
+      footer: 9
     margin: 100
+    row_height: 40
+    header_color: "#0061B5"
+    balance_suffix_debit: "DR"
+    balance_suffix_credit: "CR"
+    show_totals_row: true
+    show_brought_forward: true
     date_format: "DD MMM YYYY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-
-  anz_wrapped:
-    bank: Australia and New Zealand Banking Group
-    bank_code: ANZ
-    page_dimensions:
-      width: 2480
-      height: 3508
-    font_sizes:
-      header: 24
-      subheader: 13
-      body: 10
-      footer: 8
-    header:
-      logo_text: "ANZ"
-      logo_x: 100
-      logo_y: 90
-      color: "#0061B5"
-      background_color: "#F8F8F8"
-      height: 105
-    columns:
-      - name: date
-        header_text: "Date"
-        x: 100
-        width: 140
-        font_size: 10
-      - name: description
-        header_text: "Description"
-        x: 250
-        width: 900
-        font_size: 10
-      - name: debit
-        header_text: "Out"
-        x: 1160
-        width: 160
-        font_size: 10
-      - name: credit
-        header_text: "In"
-        x: 1330
-        width: 160
-        font_size: 10
-      - name: balance
-        header_text: "Balance"
-        x: 1500
-        width: 190
-        font_size: 10
-    row_height: 30
-    table_start_y: 440
-    margin: 100
-    date_format: "DD/MM/YY"
-    include_account_header: true
-    include_opening_balance: true
-    include_statement_period: true
-    allow_text_wrapping: true
