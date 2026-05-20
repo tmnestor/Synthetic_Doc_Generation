@@ -123,6 +123,27 @@ def draw_separator(
     draw.text((margin, y), dash, font=font, fill=fill)
 
 
+def draw_separator_line(
+    draw: ImageDraw.ImageDraw,
+    x1: int,
+    x2: int,
+    y: int,
+    color: str = "black",
+    width: int = 1,
+) -> None:
+    """Draw a thin horizontal rule from x1 to x2 at vertical position y.
+
+    Args:
+        draw: PIL ImageDraw object.
+        x1: Left x coordinate.
+        x2: Right x coordinate.
+        y: Vertical position.
+        color: Line color (hex or name).
+        width: Line width in pixels.
+    """
+    draw.line([(x1, y), (x2, y)], fill=color, width=width)
+
+
 def draw_line_item(
     draw: ImageDraw.ImageDraw,
     desc: str,
