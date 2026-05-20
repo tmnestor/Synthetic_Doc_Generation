@@ -24,17 +24,13 @@ _GT_DIR = Path(__file__).parent.parent / "ground_truth"
 # ── layout IDs per document type ────────────────────────────────────────────
 _BANK_LAYOUTS = [
     "cba_standard",
-    "cba_detailed",
-    "cba_summary",
+    "cba_date_grouped",
     "westpac_standard",
-    "westpac_grid",
-    "westpac_corporate",
-    "nab_standard",
-    "nab_multiline",
+    "westpac_premium",
+    "nab_classic",
     "nab_dense",
     "anz_standard",
     "anz_modern",
-    "anz_wrapped",
 ]
 
 _RECEIPT_LAYOUTS = [
@@ -251,7 +247,11 @@ def _rand_card_last4(rng: random.Random) -> str:
 
 
 def _generate_bank_entries(rng: random.Random, count: int) -> dict:
-    """Generate bank statement ground truth entries."""
+    """Generate bank statement ground truth entries.
+
+    Each entry has 25-40 transactions, chronologically sorted within the
+    statement period month.
+    """
     entries: dict = {}
     layouts = _BANK_LAYOUTS
 
@@ -265,15 +265,16 @@ def _generate_bank_entries(rng: random.Random, count: int) -> dict:
         suburb, postcode, state = loc
 
         # Statement period: 1-month window
-        d, m, y = _rand_date(rng)
-        # Start of month
+        _d, m, y = _rand_date(rng)
         period_start = _fmt_date(1, m, y)
         max_day = 28 if m == 2 else 30 if m in (4, 6, 9, 11) else 31
         period_end = _fmt_date(max_day, m, y)
         statement_range = f"{period_start} - {period_end}"
 
-        # 8-15 transactions
-        n_txns = rng.randint(8, 15)
+        # 25-40 transactions, sorted by day within the month
+        n_txns = rng.randint(25, 40)
+        txn_days = sorted(rng.randint(1, max_day) for _ in range(n_txns))
+
         txn_dates = []
         txn_descs = []
         txn_debits = []
@@ -281,8 +282,7 @@ def _generate_bank_entries(rng: random.Random, count: int) -> dict:
 
         closing_balance = _rand_amount(rng, 500, 15000)
 
-        for _j in range(n_txns):
-            txn_day = rng.randint(1, max_day)
+        for txn_day in txn_days:
             txn_dates.append(_fmt_date(txn_day, m, y))
 
             is_debit = rng.random() < 0.80  # 80% debits
