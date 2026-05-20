@@ -1,0 +1,42 @@
+output_dir: output
+derived_dir: derived
+ground_truth_dir: ground_truth
+
+document_types:
+  bank_statements:
+    ground_truth: ground_truth/bank_statements.yml
+    layouts: config/layouts/bank_statements.yml
+    output_subdir: bank_statements
+    generate_clean: true
+    generate_degraded: true
+  receipts:
+    ground_truth: ground_truth/receipts.yml
+    layouts: config/layouts/receipts.yml
+    output_subdir: receipts
+    generate_clean: true
+    generate_degraded: true
+  invoices:
+    ground_truth: ground_truth/invoices.yml
+    layouts: config/layouts/invoices.yml
+    output_subdir: invoices
+    generate_clean: true
+    generate_degraded: true
+  cc_statements:
+    ground_truth: ground_truth/cc_statements.yml
+    layouts: config/layouts/cc_statements.yml
+    output_subdir: cc_statements
+    generate_clean: true
+    generate_degraded: true
+
+degradation:
+  paper_tint_alpha: [0.03, 0.08]
+  contrast_factor: [0.85, 0.95]
+  brightness_factor: [0.90, 1.00]
+  blur_radius: [0.3, 0.8]
+  rotation_degrees: [0.5, 2.0]
+  noise_density: [0.001, 0.005]
+  jpeg_quality: [70, 85]
+
+derived_formats:
+  csv: true
+  jsonl: true

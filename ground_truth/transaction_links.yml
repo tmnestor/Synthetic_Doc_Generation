@@ -1,0 +1,1100 @@
+LINK001:
+  source_type: RECEIPT
+  source_id: CASER001
+  target_type: BANK_STATEMENT
+  target_id: CASEB041
+  target_transaction_index: 1
+  match_fields:
+    date: 20/09/2024
+    amount: '137.73'
+  match_difficulty: easy
+LINK002:
+  source_type: RECEIPT
+  source_id: CASER002
+  target_type: BANK_STATEMENT
+  target_id: CASEB048
+  target_transaction_index: 4
+  match_fields:
+    date: 31/12/2024
+    amount: '138.33'
+  match_difficulty: easy
+LINK003:
+  source_type: RECEIPT
+  source_id: CASER003
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 2
+  match_fields:
+    date: 02/11/2023
+    amount: '118.72'
+  match_difficulty: easy
+LINK004:
+  source_type: RECEIPT
+  source_id: CASER004
+  target_type: BANK_STATEMENT
+  target_id: CASEB044
+  target_transaction_index: 8
+  match_fields:
+    date: 01/09/2023
+    amount: '279.71'
+  match_difficulty: easy
+LINK005:
+  source_type: RECEIPT
+  source_id: CASER005
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 6
+  match_fields:
+    date: 04/06/2024
+    amount: '401.61'
+  match_difficulty: easy
+LINK006:
+  source_type: RECEIPT
+  source_id: CASER006
+  target_type: BANK_STATEMENT
+  target_id: CASEB002
+  target_transaction_index: 1
+  match_fields:
+    date: 26/11/2024
+    amount: '80.96'
+  match_difficulty: easy
+LINK007:
+  source_type: RECEIPT
+  source_id: CASER007
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 8
+  match_fields:
+    date: 27/12/2023
+    amount: '33.12'
+  match_difficulty: hard
+LINK008:
+  source_type: RECEIPT
+  source_id: CASER008
+  target_type: BANK_STATEMENT
+  target_id: CASEB036
+  target_transaction_index: 3
+  match_fields:
+    date: 09/10/2023
+    amount: '67.32'
+  match_difficulty: hard
+LINK009:
+  source_type: RECEIPT
+  source_id: CASER009
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 7
+  match_fields:
+    date: 08/04/2024
+    amount: '17.54'
+  match_difficulty: hard
+LINK010:
+  source_type: RECEIPT
+  source_id: CASER010
+  target_type: BANK_STATEMENT
+  target_id: CASEB052
+  target_transaction_index: 13
+  match_fields:
+    date: 01/10/2024
+    amount: '119.23'
+  match_difficulty: easy
+LINK011:
+  source_type: RECEIPT
+  source_id: CASER011
+  target_type: BANK_STATEMENT
+  target_id: CASEB049
+  target_transaction_index: 2
+  match_fields:
+    date: 26/09/2023
+    amount: '297.39'
+  match_difficulty: medium
+LINK012:
+  source_type: RECEIPT
+  source_id: CASER012
+  target_type: BANK_STATEMENT
+  target_id: CASEB018
+  target_transaction_index: 2
+  match_fields:
+    date: 22/01/2023
+    amount: '349.54'
+  match_difficulty: easy
+LINK013:
+  source_type: RECEIPT
+  source_id: CASER013
+  target_type: BANK_STATEMENT
+  target_id: CASEB049
+  target_transaction_index: 5
+  match_fields:
+    date: 09/04/2024
+    amount: '104.68'
+  match_difficulty: easy
+LINK014:
+  source_type: RECEIPT
+  source_id: CASER014
+  target_type: BANK_STATEMENT
+  target_id: CASEB006
+  target_transaction_index: 6
+  match_fields:
+    date: 22/10/2023
+    amount: '180.93'
+  match_difficulty: easy
+LINK015:
+  source_type: RECEIPT
+  source_id: CASER015
+  target_type: BANK_STATEMENT
+  target_id: CASEB023
+  target_transaction_index: 5
+  match_fields:
+    date: 26/03/2023
+    amount: '209.17'
+  match_difficulty: hard
+LINK016:
+  source_type: RECEIPT
+  source_id: CASER016
+  target_type: BANK_STATEMENT
+  target_id: CASEB052
+  target_transaction_index: 0
+  match_fields:
+    date: 27/04/2023
+    amount: '104.71'
+  match_difficulty: medium
+LINK017:
+  source_type: RECEIPT
+  source_id: CASER017
+  target_type: BANK_STATEMENT
+  target_id: CASEB008
+  target_transaction_index: 6
+  match_fields:
+    date: 14/01/2024
+    amount: '102.45'
+  match_difficulty: easy
+LINK018:
+  source_type: RECEIPT
+  source_id: CASER018
+  target_type: BANK_STATEMENT
+  target_id: CASEB036
+  target_transaction_index: 4
+  match_fields:
+    date: 12/05/2023
+    amount: '62.73'
+  match_difficulty: hard
+LINK019:
+  source_type: RECEIPT
+  source_id: CASER019
+  target_type: BANK_STATEMENT
+  target_id: CASEB037
+  target_transaction_index: 3
+  match_fields:
+    date: 26/11/2023
+    amount: '118.43'
+  match_difficulty: easy
+LINK020:
+  source_type: RECEIPT
+  source_id: CASER020
+  target_type: BANK_STATEMENT
+  target_id: CASEB003
+  target_transaction_index: 10
+  match_fields:
+    date: 09/12/2024
+    amount: '285.66'
+  match_difficulty: easy
+LINK021:
+  source_type: RECEIPT
+  source_id: CASER021
+  target_type: BANK_STATEMENT
+  target_id: CASEB050
+  target_transaction_index: 4
+  match_fields:
+    date: 13/03/2023
+    amount: '3.84'
+  match_difficulty: easy
+LINK022:
+  source_type: RECEIPT
+  source_id: CASER022
+  target_type: BANK_STATEMENT
+  target_id: CASEB055
+  target_transaction_index: 3
+  match_fields:
+    date: 25/01/2023
+    amount: '87.36'
+  match_difficulty: easy
+LINK023:
+  source_type: RECEIPT
+  source_id: CASER023
+  target_type: BANK_STATEMENT
+  target_id: CASEB025
+  target_transaction_index: 4
+  match_fields:
+    date: 17/03/2023
+    amount: '20.17'
+  match_difficulty: medium
+LINK024:
+  source_type: RECEIPT
+  source_id: CASER024
+  target_type: BANK_STATEMENT
+  target_id: CASEB054
+  target_transaction_index: 5
+  match_fields:
+    date: 15/09/2024
+    amount: '145.01'
+  match_difficulty: easy
+LINK025:
+  source_type: RECEIPT
+  source_id: CASER025
+  target_type: BANK_STATEMENT
+  target_id: CASEB024
+  target_transaction_index: 5
+  match_fields:
+    date: 16/06/2024
+    amount: '127.44'
+  match_difficulty: easy
+LINK026:
+  source_type: RECEIPT
+  source_id: CASER026
+  target_type: BANK_STATEMENT
+  target_id: CASEB043
+  target_transaction_index: 4
+  match_fields:
+    date: 01/05/2024
+    amount: '74.44'
+  match_difficulty: easy
+LINK027:
+  source_type: RECEIPT
+  source_id: CASER027
+  target_type: BANK_STATEMENT
+  target_id: CASEB039
+  target_transaction_index: 2
+  match_fields:
+    date: 09/04/2024
+    amount: '51.57'
+  match_difficulty: hard
+LINK028:
+  source_type: RECEIPT
+  source_id: CASER028
+  target_type: BANK_STATEMENT
+  target_id: CASEB011
+  target_transaction_index: 7
+  match_fields:
+    date: 24/11/2024
+    amount: '143.68'
+  match_difficulty: medium
+LINK029:
+  source_type: RECEIPT
+  source_id: CASER029
+  target_type: BANK_STATEMENT
+  target_id: CASEB041
+  target_transaction_index: 8
+  match_fields:
+    date: 04/03/2023
+    amount: '64.66'
+  match_difficulty: easy
+LINK030:
+  source_type: RECEIPT
+  source_id: CASER030
+  target_type: BANK_STATEMENT
+  target_id: CASEB044
+  target_transaction_index: 5
+  match_fields:
+    date: 26/05/2024
+    amount: '70.26'
+  match_difficulty: easy
+LINK031:
+  source_type: RECEIPT
+  source_id: CASER031
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 0
+  match_fields:
+    date: 04/01/2024
+    amount: '134.23'
+  match_difficulty: medium
+LINK032:
+  source_type: RECEIPT
+  source_id: CASER032
+  target_type: BANK_STATEMENT
+  target_id: CASEB018
+  target_transaction_index: 1
+  match_fields:
+    date: 16/05/2023
+    amount: '170.18'
+  match_difficulty: easy
+LINK033:
+  source_type: RECEIPT
+  source_id: CASER033
+  target_type: BANK_STATEMENT
+  target_id: CASEB037
+  target_transaction_index: 5
+  match_fields:
+    date: 25/06/2023
+    amount: '5.25'
+  match_difficulty: easy
+LINK034:
+  source_type: RECEIPT
+  source_id: CASER034
+  target_type: BANK_STATEMENT
+  target_id: CASEB042
+  target_transaction_index: 7
+  match_fields:
+    date: 12/01/2023
+    amount: '269.34'
+  match_difficulty: medium
+LINK035:
+  source_type: RECEIPT
+  source_id: CASER035
+  target_type: BANK_STATEMENT
+  target_id: CASEB030
+  target_transaction_index: 2
+  match_fields:
+    date: 23/08/2023
+    amount: '175.24'
+  match_difficulty: medium
+LINK036:
+  source_type: RECEIPT
+  source_id: CASER036
+  target_type: BANK_STATEMENT
+  target_id: CASEB016
+  target_transaction_index: 4
+  match_fields:
+    date: 05/09/2023
+    amount: '193.05'
+  match_difficulty: hard
+LINK037:
+  source_type: RECEIPT
+  source_id: CASER037
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 6
+  match_fields:
+    date: 24/06/2023
+    amount: '39.57'
+  match_difficulty: medium
+LINK038:
+  source_type: RECEIPT
+  source_id: CASER038
+  target_type: BANK_STATEMENT
+  target_id: CASEB009
+  target_transaction_index: 8
+  match_fields:
+    date: 05/09/2024
+    amount: '70.89'
+  match_difficulty: medium
+LINK039:
+  source_type: RECEIPT
+  source_id: CASER039
+  target_type: BANK_STATEMENT
+  target_id: CASEB049
+  target_transaction_index: 0
+  match_fields:
+    date: 16/11/2024
+    amount: '178.97'
+  match_difficulty: easy
+LINK040:
+  source_type: RECEIPT
+  source_id: CASER040
+  target_type: BANK_STATEMENT
+  target_id: CASEB010
+  target_transaction_index: 10
+  match_fields:
+    date: 02/12/2024
+    amount: '132.15'
+  match_difficulty: easy
+LINK041:
+  source_type: RECEIPT
+  source_id: CASER041
+  target_type: BANK_STATEMENT
+  target_id: CASEB051
+  target_transaction_index: 6
+  match_fields:
+    date: 24/09/2023
+    amount: '338.69'
+  match_difficulty: hard
+LINK042:
+  source_type: RECEIPT
+  source_id: CASER042
+  target_type: BANK_STATEMENT
+  target_id: CASEB025
+  target_transaction_index: 6
+  match_fields:
+    date: 20/09/2023
+    amount: '176.61'
+  match_difficulty: hard
+LINK043:
+  source_type: RECEIPT
+  source_id: CASER043
+  target_type: BANK_STATEMENT
+  target_id: CASEB034
+  target_transaction_index: 4
+  match_fields:
+    date: 15/08/2024
+    amount: '94.97'
+  match_difficulty: hard
+LINK044:
+  source_type: RECEIPT
+  source_id: CASER044
+  target_type: BANK_STATEMENT
+  target_id: CASEB044
+  target_transaction_index: 1
+  match_fields:
+    date: 27/12/2023
+    amount: '169.88'
+  match_difficulty: hard
+LINK045:
+  source_type: RECEIPT
+  source_id: CASER045
+  target_type: BANK_STATEMENT
+  target_id: CASEB050
+  target_transaction_index: 5
+  match_fields:
+    date: 09/04/2023
+    amount: '242.55'
+  match_difficulty: easy
+LINK046:
+  source_type: RECEIPT
+  source_id: CASER046
+  target_type: BANK_STATEMENT
+  target_id: CASEB019
+  target_transaction_index: 6
+  match_fields:
+    date: 23/12/2024
+    amount: '108.48'
+  match_difficulty: easy
+LINK047:
+  source_type: RECEIPT
+  source_id: CASER047
+  target_type: BANK_STATEMENT
+  target_id: CASEB030
+  target_transaction_index: 0
+  match_fields:
+    date: 21/12/2023
+    amount: '178.52'
+  match_difficulty: medium
+LINK048:
+  source_type: RECEIPT
+  source_id: CASER048
+  target_type: BANK_STATEMENT
+  target_id: CASEB049
+  target_transaction_index: 2
+  match_fields:
+    date: 19/10/2024
+    amount: '121.32'
+  match_difficulty: hard
+LINK049:
+  source_type: RECEIPT
+  source_id: CASER049
+  target_type: BANK_STATEMENT
+  target_id: CASEB041
+  target_transaction_index: 4
+  match_fields:
+    date: 18/08/2023
+    amount: '122.73'
+  match_difficulty: hard
+LINK050:
+  source_type: RECEIPT
+  source_id: CASER050
+  target_type: BANK_STATEMENT
+  target_id: CASEB013
+  target_transaction_index: 2
+  match_fields:
+    date: 03/04/2023
+    amount: '84.03'
+  match_difficulty: medium
+LINK051:
+  source_type: RECEIPT
+  source_id: CASER051
+  target_type: BANK_STATEMENT
+  target_id: CASEB035
+  target_transaction_index: 8
+  match_fields:
+    date: 12/06/2023
+    amount: '134.24'
+  match_difficulty: easy
+LINK052:
+  source_type: RECEIPT
+  source_id: CASER052
+  target_type: BANK_STATEMENT
+  target_id: CASEB039
+  target_transaction_index: 5
+  match_fields:
+    date: 02/12/2023
+    amount: '31.05'
+  match_difficulty: medium
+LINK053:
+  source_type: RECEIPT
+  source_id: CASER053
+  target_type: BANK_STATEMENT
+  target_id: CASEB008
+  target_transaction_index: 5
+  match_fields:
+    date: 01/08/2024
+    amount: '366.87'
+  match_difficulty: medium
+LINK054:
+  source_type: RECEIPT
+  source_id: CASER054
+  target_type: BANK_STATEMENT
+  target_id: CASEB004
+  target_transaction_index: 3
+  match_fields:
+    date: 19/07/2023
+    amount: '263.05'
+  match_difficulty: hard
+LINK055:
+  source_type: RECEIPT
+  source_id: CASER055
+  target_type: BANK_STATEMENT
+  target_id: CASEB006
+  target_transaction_index: 11
+  match_fields:
+    date: 28/05/2023
+    amount: '177.11'
+  match_difficulty: medium
+LINK056:
+  source_type: INVOICE
+  source_id: CASEI001
+  target_type: BANK_STATEMENT
+  target_id: CASEB049
+  target_transaction_index: 8
+  match_fields:
+    date: 13/08/2024
+    amount: '2029.04'
+  match_difficulty: easy
+LINK057:
+  source_type: INVOICE
+  source_id: CASEI002
+  target_type: BANK_STATEMENT
+  target_id: CASEB009
+  target_transaction_index: 10
+  match_fields:
+    date: 21/01/2024
+    amount: '33526.43'
+  match_difficulty: medium
+LINK058:
+  source_type: INVOICE
+  source_id: CASEI003
+  target_type: BANK_STATEMENT
+  target_id: CASEB011
+  target_transaction_index: 4
+  match_fields:
+    date: 19/04/2024
+    amount: '4119.94'
+  match_difficulty: hard
+LINK059:
+  source_type: INVOICE
+  source_id: CASEI004
+  target_type: BANK_STATEMENT
+  target_id: CASEB028
+  target_transaction_index: 3
+  match_fields:
+    date: 30/07/2023
+    amount: '2960.60'
+  match_difficulty: hard
+LINK060:
+  source_type: INVOICE
+  source_id: CASEI005
+  target_type: BANK_STATEMENT
+  target_id: CASEB046
+  target_transaction_index: 4
+  match_fields:
+    date: 29/06/2023
+    amount: '9440.73'
+  match_difficulty: medium
+LINK061:
+  source_type: INVOICE
+  source_id: CASEI006
+  target_type: BANK_STATEMENT
+  target_id: CASEB042
+  target_transaction_index: 5
+  match_fields:
+    date: 22/04/2023
+    amount: '27991.52'
+  match_difficulty: medium
+LINK062:
+  source_type: INVOICE
+  source_id: CASEI007
+  target_type: BANK_STATEMENT
+  target_id: CASEB029
+  target_transaction_index: 1
+  match_fields:
+    date: 05/08/2024
+    amount: '4354.04'
+  match_difficulty: easy
+LINK063:
+  source_type: INVOICE
+  source_id: CASEI008
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 1
+  match_fields:
+    date: 22/12/2023
+    amount: '6073.76'
+  match_difficulty: medium
+LINK064:
+  source_type: INVOICE
+  source_id: CASEI009
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 8
+  match_fields:
+    date: 13/07/2023
+    amount: '4963.49'
+  match_difficulty: easy
+LINK065:
+  source_type: INVOICE
+  source_id: CASEI010
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 3
+  match_fields:
+    date: 13/09/2023
+    amount: '2221.12'
+  match_difficulty: easy
+LINK066:
+  source_type: INVOICE
+  source_id: CASEI011
+  target_type: BANK_STATEMENT
+  target_id: CASEB005
+  target_transaction_index: 11
+  match_fields:
+    date: 06/08/2024
+    amount: '5187.14'
+  match_difficulty: easy
+LINK067:
+  source_type: INVOICE
+  source_id: CASEI012
+  target_type: BANK_STATEMENT
+  target_id: CASEB015
+  target_transaction_index: 1
+  match_fields:
+    date: 14/07/2023
+    amount: '3434.33'
+  match_difficulty: easy
+LINK068:
+  source_type: INVOICE
+  source_id: CASEI013
+  target_type: BANK_STATEMENT
+  target_id: CASEB022
+  target_transaction_index: 1
+  match_fields:
+    date: 17/02/2024
+    amount: '13672.24'
+  match_difficulty: hard
+LINK069:
+  source_type: INVOICE
+  source_id: CASEI014
+  target_type: BANK_STATEMENT
+  target_id: CASEB018
+  target_transaction_index: 7
+  match_fields:
+    date: 02/12/2023
+    amount: '9460.08'
+  match_difficulty: easy
+LINK070:
+  source_type: INVOICE
+  source_id: CASEI015
+  target_type: BANK_STATEMENT
+  target_id: CASEB035
+  target_transaction_index: 2
+  match_fields:
+    date: 15/01/2024
+    amount: '14659.26'
+  match_difficulty: hard
+LINK071:
+  source_type: INVOICE
+  source_id: CASEI016
+  target_type: BANK_STATEMENT
+  target_id: CASEB031
+  target_transaction_index: 3
+  match_fields:
+    date: 21/10/2024
+    amount: '1362.14'
+  match_difficulty: medium
+LINK072:
+  source_type: INVOICE
+  source_id: CASEI017
+  target_type: BANK_STATEMENT
+  target_id: CASEB013
+  target_transaction_index: 1
+  match_fields:
+    date: 30/06/2024
+    amount: '3835.52'
+  match_difficulty: easy
+LINK073:
+  source_type: INVOICE
+  source_id: CASEI018
+  target_type: BANK_STATEMENT
+  target_id: CASEB043
+  target_transaction_index: 6
+  match_fields:
+    date: 22/10/2024
+    amount: '8020.14'
+  match_difficulty: medium
+LINK074:
+  source_type: INVOICE
+  source_id: CASEI019
+  target_type: BANK_STATEMENT
+  target_id: CASEB027
+  target_transaction_index: 7
+  match_fields:
+    date: 27/07/2024
+    amount: '19484.25'
+  match_difficulty: easy
+LINK075:
+  source_type: INVOICE
+  source_id: CASEI020
+  target_type: BANK_STATEMENT
+  target_id: CASEB044
+  target_transaction_index: 10
+  match_fields:
+    date: 24/08/2023
+    amount: '4891.30'
+  match_difficulty: easy
+LINK076:
+  source_type: INVOICE
+  source_id: CASEI021
+  target_type: BANK_STATEMENT
+  target_id: CASEB004
+  target_transaction_index: 6
+  match_fields:
+    date: 29/03/2024
+    amount: '3696.45'
+  match_difficulty: medium
+LINK077:
+  source_type: INVOICE
+  source_id: CASEI022
+  target_type: BANK_STATEMENT
+  target_id: CASEB016
+  target_transaction_index: 3
+  match_fields:
+    date: 14/10/2023
+    amount: '897.86'
+  match_difficulty: easy
+LINK078:
+  source_type: INVOICE
+  source_id: CASEI023
+  target_type: BANK_STATEMENT
+  target_id: CASEB035
+  target_transaction_index: 7
+  match_fields:
+    date: 07/11/2023
+    amount: '10123.99'
+  match_difficulty: easy
+LINK079:
+  source_type: INVOICE
+  source_id: CASEI024
+  target_type: BANK_STATEMENT
+  target_id: CASEB028
+  target_transaction_index: 2
+  match_fields:
+    date: 19/12/2024
+    amount: '5432.59'
+  match_difficulty: medium
+LINK080:
+  source_type: INVOICE
+  source_id: CASEI025
+  target_type: BANK_STATEMENT
+  target_id: CASEB016
+  target_transaction_index: 1
+  match_fields:
+    date: 26/08/2024
+    amount: '4591.40'
+  match_difficulty: medium
+LINK081:
+  source_type: INVOICE
+  source_id: CASEI026
+  target_type: BANK_STATEMENT
+  target_id: CASEB007
+  target_transaction_index: 0
+  match_fields:
+    date: 10/09/2023
+    amount: '18143.75'
+  match_difficulty: hard
+LINK082:
+  source_type: INVOICE
+  source_id: CASEI027
+  target_type: BANK_STATEMENT
+  target_id: CASEB006
+  target_transaction_index: 12
+  match_fields:
+    date: 11/01/2024
+    amount: '7049.24'
+  match_difficulty: easy
+LINK083:
+  source_type: INVOICE
+  source_id: CASEI028
+  target_type: BANK_STATEMENT
+  target_id: CASEB011
+  target_transaction_index: 6
+  match_fields:
+    date: 02/12/2024
+    amount: '7959.23'
+  match_difficulty: medium
+LINK084:
+  source_type: INVOICE
+  source_id: CASEI029
+  target_type: BANK_STATEMENT
+  target_id: CASEB014
+  target_transaction_index: 6
+  match_fields:
+    date: 17/08/2023
+    amount: '21523.40'
+  match_difficulty: easy
+LINK085:
+  source_type: INVOICE
+  source_id: CASEI030
+  target_type: BANK_STATEMENT
+  target_id: CASEB011
+  target_transaction_index: 6
+  match_fields:
+    date: 24/04/2023
+    amount: '4040.12'
+  match_difficulty: easy
+LINK086:
+  source_type: INVOICE
+  source_id: CASEI031
+  target_type: BANK_STATEMENT
+  target_id: CASEB025
+  target_transaction_index: 4
+  match_fields:
+    date: 25/10/2023
+    amount: '3913.27'
+  match_difficulty: medium
+LINK087:
+  source_type: INVOICE
+  source_id: CASEI032
+  target_type: BANK_STATEMENT
+  target_id: CASEB028
+  target_transaction_index: 11
+  match_fields:
+    date: 06/03/2024
+    amount: '420.90'
+  match_difficulty: hard
+LINK088:
+  source_type: INVOICE
+  source_id: CASEI033
+  target_type: BANK_STATEMENT
+  target_id: CASEB010
+  target_transaction_index: 3
+  match_fields:
+    date: 05/05/2024
+    amount: '3695.18'
+  match_difficulty: medium
+LINK089:
+  source_type: INVOICE
+  source_id: CASEI034
+  target_type: BANK_STATEMENT
+  target_id: CASEB004
+  target_transaction_index: 0
+  match_fields:
+    date: 13/02/2023
+    amount: '872.18'
+  match_difficulty: medium
+LINK090:
+  source_type: INVOICE
+  source_id: CASEI035
+  target_type: BANK_STATEMENT
+  target_id: CASEB004
+  target_transaction_index: 7
+  match_fields:
+    date: 11/05/2024
+    amount: '15914.45'
+  match_difficulty: hard
+LINK091:
+  source_type: INVOICE
+  source_id: CASEI036
+  target_type: BANK_STATEMENT
+  target_id: CASEB011
+  target_transaction_index: 0
+  match_fields:
+    date: 15/02/2024
+    amount: '25678.03'
+  match_difficulty: hard
+LINK092:
+  source_type: INVOICE
+  source_id: CASEI037
+  target_type: BANK_STATEMENT
+  target_id: CASEB055
+  target_transaction_index: 2
+  match_fields:
+    date: 04/08/2023
+    amount: '12103.93'
+  match_difficulty: easy
+LINK093:
+  source_type: INVOICE
+  source_id: CASEI038
+  target_type: BANK_STATEMENT
+  target_id: CASEB039
+  target_transaction_index: 1
+  match_fields:
+    date: 15/09/2024
+    amount: '18863.43'
+  match_difficulty: easy
+LINK094:
+  source_type: INVOICE
+  source_id: CASEI039
+  target_type: BANK_STATEMENT
+  target_id: CASEB026
+  target_transaction_index: 1
+  match_fields:
+    date: 23/09/2024
+    amount: '11768.33'
+  match_difficulty: hard
+LINK095:
+  source_type: INVOICE
+  source_id: CASEI040
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 9
+  match_fields:
+    date: 04/09/2024
+    amount: '1372.34'
+  match_difficulty: easy
+LINK096:
+  source_type: INVOICE
+  source_id: CASEI041
+  target_type: BANK_STATEMENT
+  target_id: CASEB040
+  target_transaction_index: 1
+  match_fields:
+    date: 27/04/2023
+    amount: '3942.81'
+  match_difficulty: medium
+LINK097:
+  source_type: INVOICE
+  source_id: CASEI042
+  target_type: BANK_STATEMENT
+  target_id: CASEB038
+  target_transaction_index: 9
+  match_fields:
+    date: 20/07/2024
+    amount: '24406.06'
+  match_difficulty: hard
+LINK098:
+  source_type: INVOICE
+  source_id: CASEI043
+  target_type: BANK_STATEMENT
+  target_id: CASEB017
+  target_transaction_index: 3
+  match_fields:
+    date: 28/03/2024
+    amount: '88.09'
+  match_difficulty: medium
+LINK099:
+  source_type: INVOICE
+  source_id: CASEI044
+  target_type: BANK_STATEMENT
+  target_id: CASEB017
+  target_transaction_index: 6
+  match_fields:
+    date: 28/05/2023
+    amount: '14357.04'
+  match_difficulty: easy
+LINK100:
+  source_type: INVOICE
+  source_id: CASEI045
+  target_type: BANK_STATEMENT
+  target_id: CASEB043
+  target_transaction_index: 10
+  match_fields:
+    date: 06/11/2023
+    amount: '9002.40'
+  match_difficulty: medium
+LINK101:
+  source_type: INVOICE
+  source_id: CASEI046
+  target_type: BANK_STATEMENT
+  target_id: CASEB021
+  target_transaction_index: 1
+  match_fields:
+    date: 05/11/2024
+    amount: '267.52'
+  match_difficulty: easy
+LINK102:
+  source_type: INVOICE
+  source_id: CASEI047
+  target_type: BANK_STATEMENT
+  target_id: CASEB030
+  target_transaction_index: 1
+  match_fields:
+    date: 03/03/2024
+    amount: '36493.30'
+  match_difficulty: easy
+LINK103:
+  source_type: INVOICE
+  source_id: CASEI048
+  target_type: BANK_STATEMENT
+  target_id: CASEB035
+  target_transaction_index: 3
+  match_fields:
+    date: 08/12/2024
+    amount: '2912.75'
+  match_difficulty: hard
+LINK104:
+  source_type: INVOICE
+  source_id: CASEI049
+  target_type: BANK_STATEMENT
+  target_id: CASEB009
+  target_transaction_index: 5
+  match_fields:
+    date: 24/03/2023
+    amount: '4073.42'
+  match_difficulty: easy
+LINK105:
+  source_type: INVOICE
+  source_id: CASEI050
+  target_type: BANK_STATEMENT
+  target_id: CASEB016
+  target_transaction_index: 5
+  match_fields:
+    date: 15/08/2023
+    amount: '11988.83'
+  match_difficulty: medium
+LINK106:
+  source_type: INVOICE
+  source_id: CASEI051
+  target_type: BANK_STATEMENT
+  target_id: CASEB029
+  target_transaction_index: 13
+  match_fields:
+    date: 16/11/2023
+    amount: '2461.37'
+  match_difficulty: hard
+LINK107:
+  source_type: INVOICE
+  source_id: CASEI052
+  target_type: BANK_STATEMENT
+  target_id: CASEB040
+  target_transaction_index: 12
+  match_fields:
+    date: 03/09/2023
+    amount: '2474.85'
+  match_difficulty: hard
+LINK108:
+  source_type: INVOICE
+  source_id: CASEI053
+  target_type: BANK_STATEMENT
+  target_id: CASEB043
+  target_transaction_index: 13
+  match_fields:
+    date: 26/06/2024
+    amount: '9716.58'
+  match_difficulty: hard
+LINK109:
+  source_type: INVOICE
+  source_id: CASEI054
+  target_type: BANK_STATEMENT
+  target_id: CASEB043
+  target_transaction_index: 1
+  match_fields:
+    date: 25/07/2024
+    amount: '3403.95'
+  match_difficulty: easy
+LINK110:
+  source_type: INVOICE
+  source_id: CASEI055
+  target_type: BANK_STATEMENT
+  target_id: CASEB017
+  target_transaction_index: 1
+  match_fields:
+    date: 06/01/2023
+    amount: '14426.82'
+  match_difficulty: easy

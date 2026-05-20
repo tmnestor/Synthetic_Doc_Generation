@@ -1,0 +1,909 @@
+CASER001:
+  layout: receipt_thermal_80mm
+  degradation_seed: 7564
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Bunnings Warehouse
+    BUSINESS_ABN: 40 723 806 733
+    BUSINESS_ADDRESS: 123 Main St, Alexandria NSW 2015
+    INVOICE_DATE: 20/09/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '12.52'
+    TOTAL_AMOUNT: '137.73'
+    LINE_ITEM_DESCRIPTIONS: Car Air Freshener|Wine Red 750ml|Bread White 700g|Chips
+      BBQ 175g|USB Hub 4-port|Milk 2L
+    LINE_ITEM_QUANTITIES: 1|2|2|2|1|3
+    LINE_ITEM_PRICES: 13.23|33.29|3.18|3.67|33.27|3.65
+    LINE_ITEM_TOTAL_PRICES: 13.23|66.58|6.36|7.34|33.27|10.95
+CASER002:
+  layout: receipt_thermal_57mm
+  degradation_seed: 4795
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Woolworths
+    BUSINESS_ABN: 21 152 495 935
+    BUSINESS_ADDRESS: 100 George St, Sydney NSW 2000
+    INVOICE_DATE: 31/12/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '12.58'
+    TOTAL_AMOUNT: '138.33'
+    LINE_ITEM_DESCRIPTIONS: Bread White 700g|Sparkling Water 12pk|Chips BBQ 175g|Motor
+      Oil 5L|Pens Ballpoint 10pk
+    LINE_ITEM_QUANTITIES: 2|3|3|1|3
+    LINE_ITEM_PRICES: 3.02|15.45|3.86|53.09|7.09
+    LINE_ITEM_TOTAL_PRICES: 6.04|46.35|11.58|53.09|21.27
+CASER003:
+  layout: receipt_retail_tax
+  degradation_seed: 7642
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Coles
+    BUSINESS_ABN: 20 454 781 354
+    BUSINESS_ADDRESS: 800 Toorak Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 02/11/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '10.79'
+    TOTAL_AMOUNT: '118.72'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|Motor Oil 5L|Milk 2L
+    LINE_ITEM_QUANTITIES: 1|2|2
+    LINE_ITEM_PRICES: 3.80|52.95|4.51
+    LINE_ITEM_TOTAL_PRICES: 3.80|105.90|9.02
+CASER004:
+  layout: receipt_fuel
+  degradation_seed: 2185
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Officeworks
+    BUSINESS_ABN: 29 538 004 105
+    BUSINESS_ADDRESS: 245 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 01/09/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '25.43'
+    TOTAL_AMOUNT: '279.71'
+    LINE_ITEM_DESCRIPTIONS: Wine Red 750ml|Chicken Breast 500g|Beer Case 24|Drill
+      Bit Set|Shampoo 400ml|Car Air Freshener
+    LINE_ITEM_QUANTITIES: 3|2|1|2|2|3
+    LINE_ITEM_PRICES: 20.01|8.58|58.64|56.62|6.23|6.06
+    LINE_ITEM_TOTAL_PRICES: 60.03|17.16|58.64|113.24|12.46|18.18
+CASER005:
+  layout: receipt_professional
+  degradation_seed: 2106
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: JB Hi-Fi
+    BUSINESS_ABN: 60 063 604 270
+    BUSINESS_ADDRESS: 2 Parliament Sq, Melbourne VIC 3002
+    INVOICE_DATE: 04/06/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '36.51'
+    TOTAL_AMOUNT: '401.61'
+    LINE_ITEM_DESCRIPTIONS: Laundry Powder 2kg|Drill Bit Set|Garden Hose 20m|Wine
+      Red 750ml|Printer Paper A4 500pk
+    LINE_ITEM_QUANTITIES: 2|1|2|3|2
+    LINE_ITEM_PRICES: 17.63|66.66|92.94|31.83|9.16
+    LINE_ITEM_TOTAL_PRICES: 35.26|66.66|185.88|95.49|18.32
+CASER006:
+  layout: receipt_hospitality
+  degradation_seed: 9462
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Harvey Norman
+    BUSINESS_ABN: 27 876 142 095
+    BUSINESS_ADDRESS: A1 Richmond Rd, Homebush West NSW 2140
+    INVOICE_DATE: 26/11/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '7.36'
+    TOTAL_AMOUNT: '80.96'
+    LINE_ITEM_DESCRIPTIONS: Car Air Freshener|Wine Red 750ml
+    LINE_ITEM_QUANTITIES: 1|2
+    LINE_ITEM_PRICES: 13.00|33.98
+    LINE_ITEM_TOTAL_PRICES: 13.00|67.96
+CASER007:
+  layout: receipt_thermal_80mm
+  degradation_seed: 6792
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Kmart Australia
+    BUSINESS_ABN: 84 881 142 599
+    BUSINESS_ADDRESS: 690 Springvale Rd, Mulgrave VIC 3170
+    INVOICE_DATE: 27/12/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '3.01'
+    TOTAL_AMOUNT: '33.12'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|Shampoo 400ml|Chicken Breast 500g
+    LINE_ITEM_QUANTITIES: 2|2|1
+    LINE_ITEM_PRICES: 5.86|5.53|10.34
+    LINE_ITEM_TOTAL_PRICES: 11.72|11.06|10.34
+CASER008:
+  layout: receipt_thermal_57mm
+  degradation_seed: 4965
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Big W
+    BUSINESS_ABN: 46 387 960 451
+    BUSINESS_ADDRESS: 1 Woolworths Way, Bella Vista NSW 2153
+    INVOICE_DATE: 09/10/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '6.12'
+    TOTAL_AMOUNT: '67.32'
+    LINE_ITEM_DESCRIPTIONS: Beer Case 24|Car Air Freshener
+    LINE_ITEM_QUANTITIES: 1|1
+    LINE_ITEM_PRICES: 59.97|7.35
+    LINE_ITEM_TOTAL_PRICES: 59.97|7.35
+CASER009:
+  layout: receipt_retail_tax
+  degradation_seed: 2285
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Chemist Warehouse
+    BUSINESS_ABN: 72 067 710 775
+    BUSINESS_ADDRESS: 250 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 08/04/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '1.59'
+    TOTAL_AMOUNT: '17.54'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|Potting Mix 25L
+    LINE_ITEM_QUANTITIES: 2|1
+    LINE_ITEM_PRICES: 4.05|9.44
+    LINE_ITEM_TOTAL_PRICES: 8.10|9.44
+CASER010:
+  layout: receipt_fuel
+  degradation_seed: 3101
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Dan Murphy's
+    BUSINESS_ABN: 50 883 570 584
+    BUSINESS_ADDRESS: 47-61 Egan St, Richmond VIC 3121
+    INVOICE_DATE: 01/10/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '10.84'
+    TOTAL_AMOUNT: '119.23'
+    LINE_ITEM_DESCRIPTIONS: Bread White 700g|Pens Ballpoint 10pk|HDMI Cable 2m|Potting
+      Mix 25L|Batteries AA 8pk
+    LINE_ITEM_QUANTITIES: 2|3|2|3|1
+    LINE_ITEM_PRICES: 4.80|9.21|16.21|11.36|15.50
+    LINE_ITEM_TOTAL_PRICES: 9.60|27.63|32.42|34.08|15.50
+CASER011:
+  layout: receipt_professional
+  degradation_seed: 6171
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: BP Australia
+    BUSINESS_ABN: 74 680 507 709
+    BUSINESS_ADDRESS: 717 Bourke St, Docklands VIC 3008
+    INVOICE_DATE: 26/09/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '27.04'
+    TOTAL_AMOUNT: '297.39'
+    LINE_ITEM_DESCRIPTIONS: Pens Ballpoint 10pk|Drill Bit Set|Bread White 700g|Paint
+      Brush Set
+    LINE_ITEM_QUANTITIES: 2|3|2|3
+    LINE_ITEM_PRICES: 6.36|67.67|4.95|23.92
+    LINE_ITEM_TOTAL_PRICES: 12.72|203.01|9.90|71.76
+CASER012:
+  layout: receipt_hospitality
+  degradation_seed: 4066
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Shell Australia
+    BUSINESS_ABN: 14 697 285 898
+    BUSINESS_ADDRESS: 8 Redfern Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 22/01/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '31.78'
+    TOTAL_AMOUNT: '349.54'
+    LINE_ITEM_DESCRIPTIONS: USB Hub 4-port|Garden Hose 20m
+    LINE_ITEM_QUANTITIES: 1|3
+    LINE_ITEM_PRICES: 24.76|108.26
+    LINE_ITEM_TOTAL_PRICES: 24.76|324.78
+CASER013:
+  layout: receipt_thermal_80mm
+  degradation_seed: 3947
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Ampol Limited
+    BUSINESS_ABN: 50 823 097 776
+    BUSINESS_ADDRESS: 29-33 Bourke Rd, Alexandria NSW 2015
+    INVOICE_DATE: 09/04/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '9.52'
+    TOTAL_AMOUNT: '104.68'
+    LINE_ITEM_DESCRIPTIONS: Potting Mix 25L|Batteries AA 8pk|HDMI Cable 2m|Chips BBQ
+      175g
+    LINE_ITEM_QUANTITIES: 2|2|2|2
+    LINE_ITEM_PRICES: 13.09|15.01|20.40|3.84
+    LINE_ITEM_TOTAL_PRICES: 26.18|30.02|40.80|7.68
+CASER014:
+  layout: receipt_thermal_57mm
+  degradation_seed: 7240
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: 7-Eleven Australia
+    BUSINESS_ABN: 86 613 583 397
+    BUSINESS_ADDRESS: 357 Ferntree Gully Rd, Mount Waverley VIC 3149
+    INVOICE_DATE: 22/10/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '16.45'
+    TOTAL_AMOUNT: '180.93'
+    LINE_ITEM_DESCRIPTIONS: Pasta 500g|Beer Case 24
+    LINE_ITEM_QUANTITIES: 2|3
+    LINE_ITEM_PRICES: 3.51|57.97
+    LINE_ITEM_TOTAL_PRICES: 7.02|173.91
+CASER015:
+  layout: receipt_retail_tax
+  degradation_seed: 3676
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Myer
+    BUSINESS_ABN: 34 333 682 264
+    BUSINESS_ADDRESS: 295 Lonsdale St, Melbourne VIC 3000
+    INVOICE_DATE: 26/03/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '19.02'
+    TOTAL_AMOUNT: '209.17'
+    LINE_ITEM_DESCRIPTIONS: Tomato Sauce 500ml|Pens Ballpoint 10pk|Milk 2L|Chips BBQ
+      175g|Phone Case|Beer Case 24
+    LINE_ITEM_QUANTITIES: 1|3|3|2|3|1
+    LINE_ITEM_PRICES: 5.49|7.10|3.45|3.90|35.76|56.95
+    LINE_ITEM_TOTAL_PRICES: 5.49|21.30|10.35|7.80|107.28|56.95
+CASER016:
+  layout: receipt_fuel
+  degradation_seed: 5222
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: David Jones
+    BUSINESS_ABN: 48 215 392 751
+    BUSINESS_ADDRESS: 310 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 27/04/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '9.52'
+    TOTAL_AMOUNT: '104.71'
+    LINE_ITEM_DESCRIPTIONS: Pens Ballpoint 10pk|Motor Oil 5L|Pasta 500g
+    LINE_ITEM_QUANTITIES: 2|2|3
+    LINE_ITEM_PRICES: 8.47|39.55|2.89
+    LINE_ITEM_TOTAL_PRICES: 16.94|79.10|8.67
+CASER017:
+  layout: receipt_professional
+  degradation_seed: 4259
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Target Australia
+    BUSINESS_ABN: 58 002 585 718
+    BUSINESS_ADDRESS: 12-14 Polo Ave, Mona Vale NSW 2103
+    INVOICE_DATE: 14/01/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '9.31'
+    TOTAL_AMOUNT: '102.45'
+    LINE_ITEM_DESCRIPTIONS: HDMI Cable 2m
+    LINE_ITEM_QUANTITIES: '3'
+    LINE_ITEM_PRICES: '34.15'
+    LINE_ITEM_TOTAL_PRICES: '102.45'
+CASER018:
+  layout: receipt_hospitality
+  degradation_seed: 3373
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Spotlight
+    BUSINESS_ABN: 65 108 668 723
+    BUSINESS_ADDRESS: 91 Dunning Ave, Rosebery NSW 2018
+    INVOICE_DATE: 12/05/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '5.70'
+    TOTAL_AMOUNT: '62.73'
+    LINE_ITEM_DESCRIPTIONS: Car Air Freshener|Paint Brush Set|Pens Ballpoint 10pk
+    LINE_ITEM_QUANTITIES: 3|1|2
+    LINE_ITEM_PRICES: 9.47|20.76|6.78
+    LINE_ITEM_TOTAL_PRICES: 28.41|20.76|13.56
+CASER019:
+  layout: receipt_thermal_80mm
+  degradation_seed: 6191
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Supercheap Auto
+    BUSINESS_ABN: 73 453 076 790
+    BUSINESS_ADDRESS: 751-753 Springvale Rd, Mulgrave VIC 3170
+    INVOICE_DATE: 26/11/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '10.77'
+    TOTAL_AMOUNT: '118.43'
+    LINE_ITEM_DESCRIPTIONS: Phone Case|Motor Oil 5L|Potting Mix 25L
+    LINE_ITEM_QUANTITIES: 3|1|2
+    LINE_ITEM_PRICES: 22.14|30.53|10.74
+    LINE_ITEM_TOTAL_PRICES: 66.42|30.53|21.48
+CASER020:
+  layout: receipt_thermal_57mm
+  degradation_seed: 2311
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Repco
+    BUSINESS_ABN: 63 322 759 684
+    BUSINESS_ADDRESS: 53-57 Lonsdale St, Melbourne VIC 3000
+    INVOICE_DATE: 09/12/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '25.97'
+    TOTAL_AMOUNT: '285.66'
+    LINE_ITEM_DESCRIPTIONS: Motor Oil 5L|USB Hub 4-port|Laundry Powder 2kg|Printer
+      Paper A4 500pk|Sparkling Water 12pk
+    LINE_ITEM_QUANTITIES: 2|3|2|1|1
+    LINE_ITEM_PRICES: 51.93|43.97|13.67|9.25|13.30
+    LINE_ITEM_TOTAL_PRICES: 103.86|131.91|27.34|9.25|13.30
+CASER021:
+  layout: receipt_retail_tax
+  degradation_seed: 8752
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Bunnings Warehouse
+    BUSINESS_ABN: 46 358 313 301
+    BUSINESS_ADDRESS: 123 Main St, Alexandria NSW 2015
+    INVOICE_DATE: 13/03/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '0.35'
+    TOTAL_AMOUNT: '3.84'
+    LINE_ITEM_DESCRIPTIONS: Pasta 500g
+    LINE_ITEM_QUANTITIES: '1'
+    LINE_ITEM_PRICES: '3.84'
+    LINE_ITEM_TOTAL_PRICES: '3.84'
+CASER022:
+  layout: receipt_fuel
+  degradation_seed: 8260
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Woolworths
+    BUSINESS_ABN: 24 920 766 434
+    BUSINESS_ADDRESS: 100 George St, Sydney NSW 2000
+    INVOICE_DATE: 25/01/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '7.94'
+    TOTAL_AMOUNT: '87.36'
+    LINE_ITEM_DESCRIPTIONS: Paint Brush Set|Sparkling Water 12pk|Chicken Breast 500g|Pasta
+      500g
+    LINE_ITEM_QUANTITIES: 2|1|2|1
+    LINE_ITEM_PRICES: 26.22|13.24|9.17|3.34
+    LINE_ITEM_TOTAL_PRICES: 52.44|13.24|18.34|3.34
+CASER023:
+  layout: receipt_professional
+  degradation_seed: 8654
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Coles
+    BUSINESS_ABN: 20 187 908 753
+    BUSINESS_ADDRESS: 800 Toorak Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 17/03/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '1.83'
+    TOTAL_AMOUNT: '20.17'
+    LINE_ITEM_DESCRIPTIONS: Milk 2L|Bread White 700g
+    LINE_ITEM_QUANTITIES: 3|2
+    LINE_ITEM_PRICES: 3.57|4.73
+    LINE_ITEM_TOTAL_PRICES: 10.71|9.46
+CASER024:
+  layout: receipt_hospitality
+  degradation_seed: 8126
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Officeworks
+    BUSINESS_ABN: 12 572 611 165
+    BUSINESS_ADDRESS: 245 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 15/09/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '13.18'
+    TOTAL_AMOUNT: '145.01'
+    LINE_ITEM_DESCRIPTIONS: Wine Red 750ml|Drill Bit Set
+    LINE_ITEM_QUANTITIES: 1|2
+    LINE_ITEM_PRICES: 25.59|59.71
+    LINE_ITEM_TOTAL_PRICES: 25.59|119.42
+CASER025:
+  layout: receipt_thermal_80mm
+  degradation_seed: 9059
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: JB Hi-Fi
+    BUSINESS_ABN: 18 758 715 804
+    BUSINESS_ADDRESS: 2 Parliament Sq, Melbourne VIC 3002
+    INVOICE_DATE: 16/06/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '11.59'
+    TOTAL_AMOUNT: '127.44'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|Chicken Breast 500g|Printer Paper A4
+      500pk|Shampoo 400ml|HDMI Cable 2m
+    LINE_ITEM_QUANTITIES: 2|2|3|1|2
+    LINE_ITEM_PRICES: 4.41|7.07|16.15|7.41|24.31
+    LINE_ITEM_TOTAL_PRICES: 8.82|14.14|48.45|7.41|48.62
+CASER026:
+  layout: receipt_thermal_57mm
+  degradation_seed: 7385
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Harvey Norman
+    BUSINESS_ABN: 62 915 479 588
+    BUSINESS_ADDRESS: A1 Richmond Rd, Homebush West NSW 2140
+    INVOICE_DATE: 01/05/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '6.77'
+    TOTAL_AMOUNT: '74.44'
+    LINE_ITEM_DESCRIPTIONS: Shampoo 400ml|Potting Mix 25L|Dishwashing Liquid|Milk
+      2L
+    LINE_ITEM_QUANTITIES: 3|2|2|1
+    LINE_ITEM_PRICES: 7.62|18.59|4.88|4.64
+    LINE_ITEM_TOTAL_PRICES: 22.86|37.18|9.76|4.64
+CASER027:
+  layout: receipt_retail_tax
+  degradation_seed: 5454
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Kmart Australia
+    BUSINESS_ABN: 84 168 166 025
+    BUSINESS_ADDRESS: 690 Springvale Rd, Mulgrave VIC 3170
+    INVOICE_DATE: 09/04/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '4.69'
+    TOTAL_AMOUNT: '51.57'
+    LINE_ITEM_DESCRIPTIONS: Phone Case
+    LINE_ITEM_QUANTITIES: '3'
+    LINE_ITEM_PRICES: '17.19'
+    LINE_ITEM_TOTAL_PRICES: '51.57'
+CASER028:
+  layout: receipt_fuel
+  degradation_seed: 1813
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Big W
+    BUSINESS_ABN: 23 740 071 214
+    BUSINESS_ADDRESS: 1 Woolworths Way, Bella Vista NSW 2153
+    INVOICE_DATE: 24/11/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '13.06'
+    TOTAL_AMOUNT: '143.68'
+    LINE_ITEM_DESCRIPTIONS: Laundry Powder 2kg|Phone Case|Toilet Paper 12pk|Chicken
+      Breast 500g|Chips BBQ 175g
+    LINE_ITEM_QUANTITIES: 1|3|2|3|2
+    LINE_ITEM_PRICES: 14.90|23.66|10.18|10.44|3.06
+    LINE_ITEM_TOTAL_PRICES: 14.90|70.98|20.36|31.32|6.12
+CASER029:
+  layout: receipt_professional
+  degradation_seed: 6601
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Chemist Warehouse
+    BUSINESS_ABN: 59 489 259 023
+    BUSINESS_ADDRESS: 250 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 04/03/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '5.88'
+    TOTAL_AMOUNT: '64.66'
+    LINE_ITEM_DESCRIPTIONS: Laundry Powder 2kg|Tomato Sauce 500ml|Wine Red 750ml
+    LINE_ITEM_QUANTITIES: 2|1|1
+    LINE_ITEM_PRICES: 19.27|2.77|23.35
+    LINE_ITEM_TOTAL_PRICES: 38.54|2.77|23.35
+CASER030:
+  layout: receipt_hospitality
+  degradation_seed: 5097
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Dan Murphy's
+    BUSINESS_ABN: 96 357 762 093
+    BUSINESS_ADDRESS: 47-61 Egan St, Richmond VIC 3121
+    INVOICE_DATE: 26/05/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '6.39'
+    TOTAL_AMOUNT: '70.26'
+    LINE_ITEM_DESCRIPTIONS: HDMI Cable 2m|Printer Paper A4 500pk|Wine Red 750ml|Bread
+      White 700g
+    LINE_ITEM_QUANTITIES: 2|1|2|2
+    LINE_ITEM_PRICES: 13.85|8.56|13.64|3.36
+    LINE_ITEM_TOTAL_PRICES: 27.70|8.56|27.28|6.72
+CASER031:
+  layout: receipt_thermal_80mm
+  degradation_seed: 9534
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: BP Australia
+    BUSINESS_ABN: 11 389 561 539
+    BUSINESS_ADDRESS: 717 Bourke St, Docklands VIC 3008
+    INVOICE_DATE: 04/01/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '12.20'
+    TOTAL_AMOUNT: '134.23'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|USB Hub 4-port|Printer Paper A4 500pk|Sparkling
+      Water 12pk|Bread White 700g|Toilet Paper 12pk
+    LINE_ITEM_QUANTITIES: 2|1|1|3|2|3
+    LINE_ITEM_PRICES: 6.07|30.63|12.73|15.69|3.32|8.34
+    LINE_ITEM_TOTAL_PRICES: 12.14|30.63|12.73|47.07|6.64|25.02
+CASER032:
+  layout: receipt_thermal_57mm
+  degradation_seed: 8786
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Shell Australia
+    BUSINESS_ABN: 73 489 815 313
+    BUSINESS_ADDRESS: 8 Redfern Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 16/05/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '15.47'
+    TOTAL_AMOUNT: '170.18'
+    LINE_ITEM_DESCRIPTIONS: Shampoo 400ml|Toilet Paper 12pk|HDMI Cable 2m|Bread White
+      700g|Beer Case 24|Pasta 500g
+    LINE_ITEM_QUANTITIES: 1|2|2|2|1|3
+    LINE_ITEM_PRICES: 9.43|8.12|25.45|4.58|74.07|3.46
+    LINE_ITEM_TOTAL_PRICES: 9.43|16.24|50.90|9.16|74.07|10.38
+CASER033:
+  layout: receipt_retail_tax
+  degradation_seed: 6544
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Ampol Limited
+    BUSINESS_ABN: 38 932 870 084
+    BUSINESS_ADDRESS: 29-33 Bourke Rd, Alexandria NSW 2015
+    INVOICE_DATE: 25/06/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '0.48'
+    TOTAL_AMOUNT: '5.25'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid
+    LINE_ITEM_QUANTITIES: '1'
+    LINE_ITEM_PRICES: '5.25'
+    LINE_ITEM_TOTAL_PRICES: '5.25'
+CASER034:
+  layout: receipt_fuel
+  degradation_seed: 5107
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: 7-Eleven Australia
+    BUSINESS_ABN: 47 278 672 852
+    BUSINESS_ADDRESS: 357 Ferntree Gully Rd, Mount Waverley VIC 3149
+    INVOICE_DATE: 12/01/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '24.49'
+    TOTAL_AMOUNT: '269.34'
+    LINE_ITEM_DESCRIPTIONS: Tomato Sauce 500ml|Wine Red 750ml|Drill Bit Set|Pasta
+      500g|Sparkling Water 12pk|Pens Ballpoint 10pk
+    LINE_ITEM_QUANTITIES: 1|3|2|2|1|2
+    LINE_ITEM_PRICES: 3.45|30.14|69.30|3.33|13.51|8.35
+    LINE_ITEM_TOTAL_PRICES: 3.45|90.42|138.60|6.66|13.51|16.70
+CASER035:
+  layout: receipt_professional
+  degradation_seed: 3627
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Myer
+    BUSINESS_ABN: 25 228 308 184
+    BUSINESS_ADDRESS: 295 Lonsdale St, Melbourne VIC 3000
+    INVOICE_DATE: 23/08/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '15.93'
+    TOTAL_AMOUNT: '175.24'
+    LINE_ITEM_DESCRIPTIONS: Drill Bit Set|Shampoo 400ml|Wine Red 750ml|Pens Ballpoint
+      10pk
+    LINE_ITEM_QUANTITIES: 1|3|3|3
+    LINE_ITEM_PRICES: 56.17|7.43|22.77|9.49
+    LINE_ITEM_TOTAL_PRICES: 56.17|22.29|68.31|28.47
+CASER036:
+  layout: receipt_hospitality
+  degradation_seed: 6965
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: David Jones
+    BUSINESS_ABN: 64 856 639 443
+    BUSINESS_ADDRESS: 310 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 05/09/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '17.55'
+    TOTAL_AMOUNT: '193.05'
+    LINE_ITEM_DESCRIPTIONS: Shampoo 400ml|Laundry Powder 2kg|Drill Bit Set|HDMI Cable
+      2m
+    LINE_ITEM_QUANTITIES: 2|3|3|1
+    LINE_ITEM_PRICES: 5.01|17.06|35.20|26.25
+    LINE_ITEM_TOTAL_PRICES: 10.02|51.18|105.60|26.25
+CASER037:
+  layout: receipt_thermal_80mm
+  degradation_seed: 4110
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Target Australia
+    BUSINESS_ABN: 62 184 061 965
+    BUSINESS_ADDRESS: 12-14 Polo Ave, Mona Vale NSW 2103
+    INVOICE_DATE: 24/06/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '3.60'
+    TOTAL_AMOUNT: '39.57'
+    LINE_ITEM_DESCRIPTIONS: Car Air Freshener
+    LINE_ITEM_QUANTITIES: '3'
+    LINE_ITEM_PRICES: '13.19'
+    LINE_ITEM_TOTAL_PRICES: '39.57'
+CASER038:
+  layout: receipt_thermal_57mm
+  degradation_seed: 1521
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Spotlight
+    BUSINESS_ABN: 73 673 694 886
+    BUSINESS_ADDRESS: 91 Dunning Ave, Rosebery NSW 2018
+    INVOICE_DATE: 05/09/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '6.44'
+    TOTAL_AMOUNT: '70.89'
+    LINE_ITEM_DESCRIPTIONS: Shampoo 400ml|Batteries AA 8pk|Phone Case|Motor Oil 5L|Pasta
+      500g
+    LINE_ITEM_QUANTITIES: 1|1|1|1|2
+    LINE_ITEM_PRICES: 8.66|8.44|15.36|34.47|1.98
+    LINE_ITEM_TOTAL_PRICES: 8.66|8.44|15.36|34.47|3.96
+CASER039:
+  layout: receipt_retail_tax
+  degradation_seed: 7814
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Supercheap Auto
+    BUSINESS_ABN: 78 347 317 343
+    BUSINESS_ADDRESS: 751-753 Springvale Rd, Mulgrave VIC 3170
+    INVOICE_DATE: 16/11/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '16.27'
+    TOTAL_AMOUNT: '178.97'
+    LINE_ITEM_DESCRIPTIONS: Potting Mix 25L|Wine Red 750ml|Garden Hose 20m|Laundry
+      Powder 2kg|Bread White 700g
+    LINE_ITEM_QUANTITIES: 2|3|1|1|3
+    LINE_ITEM_PRICES: 10.65|13.63|90.74|16.68|3.12
+    LINE_ITEM_TOTAL_PRICES: 21.30|40.89|90.74|16.68|9.36
+CASER040:
+  layout: receipt_fuel
+  degradation_seed: 5075
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Repco
+    BUSINESS_ABN: 42 152 636 499
+    BUSINESS_ADDRESS: 53-57 Lonsdale St, Melbourne VIC 3000
+    INVOICE_DATE: 02/12/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '12.01'
+    TOTAL_AMOUNT: '132.15'
+    LINE_ITEM_DESCRIPTIONS: Laundry Powder 2kg|Paint Brush Set|Bread White 700g|Beer
+      Case 24|Chicken Breast 500g
+    LINE_ITEM_QUANTITIES: 2|1|1|1|1
+    LINE_ITEM_PRICES: 12.78|34.09|3.20|60.95|8.35
+    LINE_ITEM_TOTAL_PRICES: 25.56|34.09|3.20|60.95|8.35
+CASER041:
+  layout: receipt_professional
+  degradation_seed: 6529
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Bunnings Warehouse
+    BUSINESS_ABN: 52 250 836 263
+    BUSINESS_ADDRESS: 123 Main St, Alexandria NSW 2015
+    INVOICE_DATE: 24/09/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '30.79'
+    TOTAL_AMOUNT: '338.69'
+    LINE_ITEM_DESCRIPTIONS: Phone Case|Beer Case 24|Pasta 500g|Sparkling Water 12pk|Motor
+      Oil 5L
+    LINE_ITEM_QUANTITIES: 3|2|2|1|3
+    LINE_ITEM_PRICES: 20.74|66.08|3.71|14.34|40.85
+    LINE_ITEM_TOTAL_PRICES: 62.22|132.16|7.42|14.34|122.55
+CASER042:
+  layout: receipt_hospitality
+  degradation_seed: 5162
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Woolworths
+    BUSINESS_ABN: 83 177 755 303
+    BUSINESS_ADDRESS: 100 George St, Sydney NSW 2000
+    INVOICE_DATE: 20/09/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '16.06'
+    TOTAL_AMOUNT: '176.61'
+    LINE_ITEM_DESCRIPTIONS: HDMI Cable 2m|Batteries AA 8pk|Drill Bit Set|Phone Case
+    LINE_ITEM_QUANTITIES: 3|3|1|1
+    LINE_ITEM_PRICES: 21.90|11.23|55.97|21.25
+    LINE_ITEM_TOTAL_PRICES: 65.70|33.69|55.97|21.25
+CASER043:
+  layout: receipt_thermal_80mm
+  degradation_seed: 6159
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Coles
+    BUSINESS_ABN: 91 266 150 941
+    BUSINESS_ADDRESS: 800 Toorak Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 15/08/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '8.63'
+    TOTAL_AMOUNT: '94.97'
+    LINE_ITEM_DESCRIPTIONS: Milk 2L|Beer Case 24|Bread White 700g|Shampoo 400ml
+    LINE_ITEM_QUANTITIES: 3|1|2|1
+    LINE_ITEM_PRICES: 2.55|74.80|3.01|6.50
+    LINE_ITEM_TOTAL_PRICES: 7.65|74.80|6.02|6.50
+CASER044:
+  layout: receipt_thermal_57mm
+  degradation_seed: 7014
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Officeworks
+    BUSINESS_ABN: 28 262 649 816
+    BUSINESS_ADDRESS: 245 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 27/12/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '15.44'
+    TOTAL_AMOUNT: '169.88'
+    LINE_ITEM_DESCRIPTIONS: Drill Bit Set|Paint Brush Set|Garden Hose 20m
+    LINE_ITEM_QUANTITIES: 3|1|1
+    LINE_ITEM_PRICES: 33.51|22.59|46.76
+    LINE_ITEM_TOTAL_PRICES: 100.53|22.59|46.76
+CASER045:
+  layout: receipt_retail_tax
+  degradation_seed: 3832
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: JB Hi-Fi
+    BUSINESS_ABN: 27 481 166 147
+    BUSINESS_ADDRESS: 2 Parliament Sq, Melbourne VIC 3002
+    INVOICE_DATE: 09/04/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '22.05'
+    TOTAL_AMOUNT: '242.55'
+    LINE_ITEM_DESCRIPTIONS: Chicken Breast 500g|Garden Hose 20m|USB Hub 4-port
+    LINE_ITEM_QUANTITIES: 3|3|2
+    LINE_ITEM_PRICES: 13.43|41.56|38.79
+    LINE_ITEM_TOTAL_PRICES: 40.29|124.68|77.58
+CASER046:
+  layout: receipt_fuel
+  degradation_seed: 2974
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Harvey Norman
+    BUSINESS_ABN: 60 697 122 842
+    BUSINESS_ADDRESS: A1 Richmond Rd, Homebush West NSW 2140
+    INVOICE_DATE: 23/12/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '9.86'
+    TOTAL_AMOUNT: '108.48'
+    LINE_ITEM_DESCRIPTIONS: Pasta 500g|Potting Mix 25L|Motor Oil 5L|Shampoo 400ml|Bread
+      White 700g
+    LINE_ITEM_QUANTITIES: 3|2|1|2|2
+    LINE_ITEM_PRICES: 3.52|8.94|57.50|7.44|3.83
+    LINE_ITEM_TOTAL_PRICES: 10.56|17.88|57.50|14.88|7.66
+CASER047:
+  layout: receipt_professional
+  degradation_seed: 7436
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Kmart Australia
+    BUSINESS_ABN: 22 628 461 838
+    BUSINESS_ADDRESS: 690 Springvale Rd, Mulgrave VIC 3170
+    INVOICE_DATE: 21/12/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '16.23'
+    TOTAL_AMOUNT: '178.52'
+    LINE_ITEM_DESCRIPTIONS: Milk 2L|Motor Oil 5L|Sparkling Water 12pk|USB Hub 4-port|Bread
+      White 700g
+    LINE_ITEM_QUANTITIES: 2|2|1|3|1
+    LINE_ITEM_PRICES: 4.07|45.28|10.61|21.62|4.35
+    LINE_ITEM_TOTAL_PRICES: 8.14|90.56|10.61|64.86|4.35
+CASER048:
+  layout: receipt_hospitality
+  degradation_seed: 3136
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Big W
+    BUSINESS_ABN: 82 119 543 195
+    BUSINESS_ADDRESS: 1 Woolworths Way, Bella Vista NSW 2153
+    INVOICE_DATE: 19/10/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '11.03'
+    TOTAL_AMOUNT: '121.32'
+    LINE_ITEM_DESCRIPTIONS: Chicken Breast 500g|Dishwashing Liquid|Phone Case|Shampoo
+      400ml|USB Hub 4-port
+    LINE_ITEM_QUANTITIES: 1|1|3|2|2
+    LINE_ITEM_PRICES: 7.93|5.17|11.48|6.84|30.05
+    LINE_ITEM_TOTAL_PRICES: 7.93|5.17|34.44|13.68|60.10
+CASER049:
+  layout: receipt_thermal_80mm
+  degradation_seed: 9589
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Chemist Warehouse
+    BUSINESS_ABN: 96 054 580 966
+    BUSINESS_ADDRESS: 250 Bourke St, Melbourne VIC 3000
+    INVOICE_DATE: 18/08/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '11.16'
+    TOTAL_AMOUNT: '122.73'
+    LINE_ITEM_DESCRIPTIONS: Pens Ballpoint 10pk|USB Hub 4-port
+    LINE_ITEM_QUANTITIES: 3|3
+    LINE_ITEM_PRICES: 7.43|33.48
+    LINE_ITEM_TOTAL_PRICES: 22.29|100.44
+CASER050:
+  layout: receipt_thermal_57mm
+  degradation_seed: 6706
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Dan Murphy's
+    BUSINESS_ABN: 81 025 624 079
+    BUSINESS_ADDRESS: 47-61 Egan St, Richmond VIC 3121
+    INVOICE_DATE: 03/04/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '7.64'
+    TOTAL_AMOUNT: '84.03'
+    LINE_ITEM_DESCRIPTIONS: Sparkling Water 12pk|Phone Case|Batteries AA 8pk
+    LINE_ITEM_QUANTITIES: 3|1|2
+    LINE_ITEM_PRICES: 15.39|13.38|12.24
+    LINE_ITEM_TOTAL_PRICES: 46.17|13.38|24.48
+CASER051:
+  layout: receipt_retail_tax
+  degradation_seed: 2405
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: BP Australia
+    BUSINESS_ABN: 40 160 288 302
+    BUSINESS_ADDRESS: 717 Bourke St, Docklands VIC 3008
+    INVOICE_DATE: 12/06/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '12.20'
+    TOTAL_AMOUNT: '134.24'
+    LINE_ITEM_DESCRIPTIONS: Motor Oil 5L|Milk 2L|Sparkling Water 12pk|Shampoo 400ml|Chips
+      BBQ 175g
+    LINE_ITEM_QUANTITIES: 2|2|2|1|2
+    LINE_ITEM_PRICES: 47.72|4.37|8.36|6.40|3.47
+    LINE_ITEM_TOTAL_PRICES: 95.44|8.74|16.72|6.40|6.94
+CASER052:
+  layout: receipt_fuel
+  degradation_seed: 5999
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Shell Australia
+    BUSINESS_ABN: 91 626 520 297
+    BUSINESS_ADDRESS: 8 Redfern Rd, Hawthorn East VIC 3123
+    INVOICE_DATE: 02/12/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '2.82'
+    TOTAL_AMOUNT: '31.05'
+    LINE_ITEM_DESCRIPTIONS: Potting Mix 25L|Tomato Sauce 500ml
+    LINE_ITEM_QUANTITIES: 2|3
+    LINE_ITEM_PRICES: 8.16|4.91
+    LINE_ITEM_TOTAL_PRICES: 16.32|14.73
+CASER053:
+  layout: receipt_professional
+  degradation_seed: 3315
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Ampol Limited
+    BUSINESS_ABN: 89 595 388 937
+    BUSINESS_ADDRESS: 29-33 Bourke Rd, Alexandria NSW 2015
+    INVOICE_DATE: 01/08/2024
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '33.35'
+    TOTAL_AMOUNT: '366.87'
+    LINE_ITEM_DESCRIPTIONS: Toilet Paper 12pk|Beer Case 24|Drill Bit Set
+    LINE_ITEM_QUANTITIES: 1|3|3
+    LINE_ITEM_PRICES: 9.63|67.51|51.57
+    LINE_ITEM_TOTAL_PRICES: 9.63|202.53|154.71
+CASER054:
+  layout: receipt_hospitality
+  degradation_seed: 2767
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: 7-Eleven Australia
+    BUSINESS_ABN: 12 013 059 762
+    BUSINESS_ADDRESS: 357 Ferntree Gully Rd, Mount Waverley VIC 3149
+    INVOICE_DATE: 19/07/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '23.91'
+    TOTAL_AMOUNT: '263.05'
+    LINE_ITEM_DESCRIPTIONS: Paint Brush Set|Bread White 700g|Laundry Powder 2kg|Chips
+      BBQ 175g|Beer Case 24|Shampoo 400ml
+    LINE_ITEM_QUANTITIES: 1|3|2|1|3|3
+    LINE_ITEM_PRICES: 30.15|3.54|18.55|3.20|53.14|7.52
+    LINE_ITEM_TOTAL_PRICES: 30.15|10.62|37.10|3.20|159.42|22.56
+CASER055:
+  layout: receipt_thermal_80mm
+  degradation_seed: 5995
+  fields:
+    DOCUMENT_TYPE: RECEIPT
+    SUPPLIER_NAME: Myer
+    BUSINESS_ABN: 72 185 201 281
+    BUSINESS_ADDRESS: 295 Lonsdale St, Melbourne VIC 3000
+    INVOICE_DATE: 28/05/2023
+    IS_GST_INCLUDED: 'true'
+    GST_AMOUNT: '16.10'
+    TOTAL_AMOUNT: '177.11'
+    LINE_ITEM_DESCRIPTIONS: USB Hub 4-port|Dishwashing Liquid|Sparkling Water 12pk|Paint
+      Brush Set|Pasta 500g|Batteries AA 8pk
+    LINE_ITEM_QUANTITIES: 2|3|1|2|3|1
+    LINE_ITEM_PRICES: 41.00|3.81|12.01|24.90|1.55|17.22
+    LINE_ITEM_TOTAL_PRICES: 82.00|11.43|12.01|49.80|4.65|17.22

@@ -1,0 +1,495 @@
+layouts:
+  tax_invoice_standard:
+    format: tax_invoice
+    page_dimensions:
+      width: 2480
+      height: 3508
+    margin: 100
+    font_family: sans-serif
+    font_sizes:
+      header: 28
+      subheader: 16
+      body: 11
+      footer: 9
+    sections:
+      - type: header
+        name: invoice_title
+        height: 80
+        font_size: 28
+        font_weight: bold
+        text: "TAX INVOICE"
+        alignment: center
+      - type: separator
+        height: 20
+      - type: section
+        name: seller_details
+        label: "From:"
+        height: 120
+        font_size: 11
+        fields:
+          - business_name
+          - abn_number
+          - business_address
+          - business_phone
+          - business_email
+      - type: section
+        name: buyer_details
+        label: "Bill To:"
+        height: 120
+        font_size: 11
+        fields:
+          - customer_name
+          - customer_address
+          - customer_phone
+      - type: section
+        name: invoice_metadata
+        height: 80
+        font_size: 11
+        fields:
+          - invoice_number
+          - invoice_date
+          - due_date
+          - order_number
+      - type: separator
+        height: 20
+      - type: table
+        name: line_items_table
+        columns:
+          - name: item_number
+            header_text: "#"
+            width: 80
+            font_size: 10
+          - name: description
+            header_text: "Description"
+            width: 800
+            font_size: 11
+          - name: quantity
+            header_text: "Qty"
+            width: 120
+            font_size: 10
+          - name: unit_price
+            header_text: "Unit Price"
+            width: 200
+            font_size: 10
+          - name: tax_code
+            header_text: "Tax"
+            width: 150
+            font_size: 10
+          - name: total_price
+            header_text: "Total"
+            width: 200
+            font_size: 10
+        row_height: 30
+        table_start_y: 1800
+      - type: separator
+        height: 20
+      - type: totals
+        name: totals
+        fields:
+          - name: subtotal
+            label: "Subtotal (excl. GST):"
+            font_size: 11
+          - name: gst_amount
+            label: "GST (10%):"
+            font_size: 11
+          - name: total
+            label: "TOTAL (incl. GST):"
+            font_size: 13
+            font_weight: bold
+      - type: section
+        name: payment_terms
+        label: "Payment Terms:"
+        height: 60
+        font_size: 10
+        fields:
+          - payment_method
+          - bsb_number
+          - account_number
+          - account_name
+      - type: footer
+        name: footer_text
+        height: 40
+        font_size: 9
+        alignment: center
+
+  tax_invoice_gst_inclusive:
+    format: tax_invoice
+    page_dimensions:
+      width: 2480
+      height: 3508
+    margin: 100
+    font_family: sans-serif
+    font_sizes:
+      header: 28
+      subheader: 16
+      body: 11
+      footer: 9
+    gst_inclusive_mode: true
+    sections:
+      - type: header
+        name: invoice_title
+        height: 80
+        font_size: 28
+        font_weight: bold
+        text: "TAX INVOICE"
+        alignment: center
+      - type: separator
+        height: 20
+      - type: section
+        name: seller_details
+        label: "From:"
+        height: 120
+        font_size: 11
+        fields:
+          - business_name
+          - abn_number
+          - business_address
+          - business_phone
+          - business_email
+      - type: section
+        name: buyer_details
+        label: "Bill To:"
+        height: 120
+        font_size: 11
+        fields:
+          - customer_name
+          - customer_address
+          - customer_phone
+      - type: section
+        name: invoice_metadata
+        height: 80
+        font_size: 11
+        fields:
+          - invoice_number
+          - invoice_date
+          - due_date
+          - order_number
+      - type: separator
+        height: 20
+      - type: table
+        name: line_items_table
+        columns:
+          - name: item_number
+            header_text: "#"
+            width: 80
+            font_size: 10
+          - name: description
+            header_text: "Description"
+            width: 800
+            font_size: 11
+          - name: quantity
+            header_text: "Qty"
+            width: 120
+            font_size: 10
+          - name: unit_price
+            header_text: "Unit Price"
+            width: 200
+            font_size: 10
+          - name: total_price
+            header_text: "Total (inc. GST)"
+            width: 200
+            font_size: 10
+        row_height: 30
+        table_start_y: 1800
+      - type: separator
+        height: 20
+      - type: totals
+        name: totals
+        fields:
+          - name: total_gst_inclusive
+            label: "TOTAL (inc. GST):"
+            font_size: 13
+            font_weight: bold
+          - name: gst_component
+            label: "GST included (10%):"
+            font_size: 10
+      - type: section
+        name: payment_terms
+        label: "Payment Terms:"
+        height: 60
+        font_size: 10
+        fields:
+          - payment_method
+          - bsb_number
+          - account_number
+          - account_name
+      - type: footer
+        name: footer_text
+        height: 40
+        font_size: 9
+        alignment: center
+
+  tax_invoice_high_value:
+    format: tax_invoice
+    page_dimensions:
+      width: 2480
+      height: 3508
+    margin: 100
+    font_family: sans-serif
+    font_sizes:
+      header: 28
+      subheader: 16
+      body: 11
+      footer: 9
+    minimum_amount: 10000
+    sections:
+      - type: header
+        name: invoice_title
+        height: 80
+        font_size: 28
+        font_weight: bold
+        text: "TAX INVOICE"
+        alignment: center
+      - type: separator
+        height: 20
+      - type: section
+        name: seller_details
+        label: "From:"
+        height: 120
+        font_size: 11
+        fields:
+          - business_name
+          - abn_number
+          - business_address
+          - business_phone
+          - business_email
+      - type: section
+        name: buyer_details
+        label: "Bill To:"
+        height: 140
+        font_size: 11
+        required: true
+        fields:
+          - customer_name
+          - customer_abn
+          - customer_address
+          - customer_phone
+          - customer_email
+      - type: section
+        name: invoice_metadata
+        height: 100
+        font_size: 11
+        fields:
+          - invoice_number
+          - invoice_date
+          - due_date
+          - order_number
+          - purchase_order_number
+      - type: separator
+        height: 20
+      - type: table
+        name: line_items_table
+        columns:
+          - name: item_number
+            header_text: "#"
+            width: 80
+            font_size: 10
+          - name: description
+            header_text: "Description"
+            width: 800
+            font_size: 11
+          - name: quantity
+            header_text: "Qty"
+            width: 120
+            font_size: 10
+          - name: unit_price
+            header_text: "Unit Price"
+            width: 200
+            font_size: 10
+          - name: tax_code
+            header_text: "Tax"
+            width: 150
+            font_size: 10
+          - name: total_price
+            header_text: "Total"
+            width: 200
+            font_size: 10
+        row_height: 30
+        table_start_y: 1900
+      - type: separator
+        height: 20
+      - type: totals
+        name: totals
+        fields:
+          - name: subtotal
+            label: "Subtotal (excl. GST):"
+            font_size: 11
+          - name: gst_amount
+            label: "GST (10%):"
+            font_size: 11
+          - name: total
+            label: "TOTAL (incl. GST):"
+            font_size: 13
+            font_weight: bold
+      - type: section
+        name: payment_terms
+        label: "Payment Terms:"
+        height: 80
+        font_size: 10
+        fields:
+          - payment_method
+          - bsb_number
+          - account_number
+          - account_name
+          - payment_notes
+      - type: section
+        name: delivery_details
+        label: "Delivery:"
+        height: 60
+        font_size: 10
+        fields:
+          - delivery_address
+          - delivery_date
+      - type: footer
+        name: footer_text
+        height: 40
+        font_size: 9
+        alignment: center
+
+  tax_invoice_mixed:
+    format: tax_invoice
+    page_dimensions:
+      width: 2480
+      height: 3508
+    margin: 100
+    font_family: sans-serif
+    font_sizes:
+      header: 28
+      subheader: 16
+      body: 11
+      footer: 9
+    mixed_tax_mode: true
+    sections:
+      - type: header
+        name: invoice_title
+        height: 80
+        font_size: 28
+        font_weight: bold
+        text: "TAX INVOICE"
+        alignment: center
+      - type: separator
+        height: 20
+      - type: section
+        name: seller_details
+        label: "From:"
+        height: 120
+        font_size: 11
+        fields:
+          - business_name
+          - abn_number
+          - business_address
+          - business_phone
+          - business_email
+      - type: section
+        name: buyer_details
+        label: "Bill To:"
+        height: 120
+        font_size: 11
+        fields:
+          - customer_name
+          - customer_address
+          - customer_phone
+      - type: section
+        name: invoice_metadata
+        height: 80
+        font_size: 11
+        fields:
+          - invoice_number
+          - invoice_date
+          - due_date
+          - order_number
+      - type: separator
+        height: 20
+      - type: label
+        text: "GST-Applicable Items"
+        height: 24
+        font_size: 12
+        font_weight: bold
+      - type: table
+        name: taxable_items_table
+        columns:
+          - name: item_number
+            header_text: "#"
+            width: 80
+            font_size: 10
+          - name: description
+            header_text: "Description"
+            width: 800
+            font_size: 11
+          - name: quantity
+            header_text: "Qty"
+            width: 120
+            font_size: 10
+          - name: unit_price
+            header_text: "Unit Price"
+            width: 200
+            font_size: 10
+          - name: total_price
+            header_text: "Total"
+            width: 200
+            font_size: 10
+        row_height: 28
+        table_start_y: 1700
+      - type: label
+        text: "GST-Free Items"
+        height: 24
+        font_size: 12
+        font_weight: bold
+      - type: table
+        name: tax_free_items_table
+        columns:
+          - name: item_number
+            header_text: "#"
+            width: 80
+            font_size: 10
+          - name: description
+            header_text: "Description"
+            width: 800
+            font_size: 11
+          - name: quantity
+            header_text: "Qty"
+            width: 120
+            font_size: 10
+          - name: unit_price
+            header_text: "Unit Price"
+            width: 200
+            font_size: 10
+          - name: total_price
+            header_text: "Total"
+            width: 200
+            font_size: 10
+        row_height: 28
+        table_start_y: 2200
+      - type: separator
+        height: 20
+      - type: totals
+        name: totals
+        fields:
+          - name: subtotal_taxable
+            label: "Subtotal (taxable, excl. GST):"
+            font_size: 11
+          - name: subtotal_tax_free
+            label: "Subtotal (tax-free):"
+            font_size: 11
+          - name: gst_amount
+            label: "GST (10% on taxable):"
+            font_size: 11
+          - name: total
+            label: "TOTAL (incl. GST):"
+            font_size: 13
+            font_weight: bold
+      - type: section
+        name: payment_terms
+        label: "Payment Terms:"
+        height: 60
+        font_size: 10
+        fields:
+          - payment_method
+          - bsb_number
+          - account_number
+          - account_name
+      - type: footer
+        name: footer_text
+        height: 40
+        font_size: 9
+        alignment: center

@@ -1,0 +1,215 @@
+# Australian business data pools for synthetic document generation.
+
+retailers:
+  - name: Bunnings Warehouse
+    address: "123 Main St, Alexandria NSW 2015"
+    abn: "18 634 229 001"
+    category: hardware
+  - name: Woolworths
+    address: "100 George St, Sydney NSW 2000"
+    abn: "88 000 014 675"
+    category: grocery
+  - name: Coles
+    address: "800 Toorak Rd, Hawthorn East VIC 3123"
+    abn: "11 004 089 936"
+    category: grocery
+  - name: Officeworks
+    address: "245 Bourke St, Melbourne VIC 3000"
+    abn: "36 004 763 526"
+    category: office
+  - name: JB Hi-Fi
+    address: "2 Parliament Sq, Melbourne VIC 3002"
+    abn: "80 093 220 649"
+    category: electronics
+  - name: Harvey Norman
+    address: "A1 Richmond Rd, Homebush West NSW 2140"
+    abn: "85 003 237 545"
+    category: electronics
+  - name: Kmart Australia
+    address: "690 Springvale Rd, Mulgrave VIC 3170"
+    abn: "73 004 129 956"
+    category: retail
+  - name: Big W
+    address: "1 Woolworths Way, Bella Vista NSW 2153"
+    abn: "88 000 014 675"
+    category: retail
+  - name: Chemist Warehouse
+    address: "250 Bourke St, Melbourne VIC 3000"
+    abn: "42 618 648 185"
+    category: pharmacy
+  - name: Dan Murphy's
+    address: "47-61 Egan St, Richmond VIC 3121"
+    abn: "37 006 275 906"
+    category: liquor
+  - name: BP Australia
+    address: "717 Bourke St, Docklands VIC 3008"
+    abn: "27 008 560 007"
+    category: fuel
+  - name: Shell Australia
+    address: "8 Redfern Rd, Hawthorn East VIC 3123"
+    abn: "46 004 610 459"
+    category: fuel
+  - name: Ampol Limited
+    address: "29-33 Bourke Rd, Alexandria NSW 2015"
+    abn: "40 004 201 307"
+    category: fuel
+  - name: 7-Eleven Australia
+    address: "357 Ferntree Gully Rd, Mount Waverley VIC 3149"
+    abn: "65 005 825 412"
+    category: fuel
+  - name: Myer
+    address: "295 Lonsdale St, Melbourne VIC 3000"
+    abn: "83 004 153 263"
+    category: retail
+  - name: David Jones
+    address: "310 Bourke St, Melbourne VIC 3000"
+    abn: "96 000 324 945"
+    category: retail
+  - name: Target Australia
+    address: "12-14 Polo Ave, Mona Vale NSW 2103"
+    abn: "75 004 250 944"
+    category: retail
+  - name: Spotlight
+    address: "91 Dunning Ave, Rosebery NSW 2018"
+    abn: "17 007 092 579"
+    category: retail
+  - name: Supercheap Auto
+    address: "751-753 Springvale Rd, Mulgrave VIC 3170"
+    abn: "61 004 806 598"
+    category: automotive
+  - name: Repco
+    address: "53-57 Lonsdale St, Melbourne VIC 3000"
+    abn: "25 004 825 802"
+    category: automotive
+
+professional_services:
+  - name: "Smith & Associates Accounting"
+    address: "Level 12, 100 Collins St, Melbourne VIC 3000"
+    category: accounting
+  - name: "Johnson Legal"
+    address: "Suite 5, 200 George St, Sydney NSW 2000"
+    category: legal
+  - name: "Brisbane IT Solutions"
+    address: "42 Creek St, Brisbane QLD 4000"
+    category: it_services
+  - name: "Adelaide Business Consulting"
+    address: "Level 3, 77 King William St, Adelaide SA 5000"
+    category: consulting
+  - name: "Perth Marketing Group"
+    address: "Level 8, 140 St Georges Tce, Perth WA 6000"
+    category: marketing
+
+locations:
+  - suburb: Alexandria
+    postcode: "2015"
+    state: NSW
+  - suburb: Hawthorn East
+    postcode: "3123"
+    state: VIC
+  - suburb: Fortitude Valley
+    postcode: "4006"
+    state: QLD
+  - suburb: Norwood
+    postcode: "5067"
+    state: SA
+  - suburb: Subiaco
+    postcode: "6008"
+    state: WA
+  - suburb: Hobart
+    postcode: "7000"
+    state: TAS
+  - suburb: Parramatta
+    postcode: "2150"
+    state: NSW
+  - suburb: South Yarra
+    postcode: "3141"
+    state: VIC
+  - suburb: Toowoomba
+    postcode: "4350"
+    state: QLD
+  - suburb: Glenelg
+    postcode: "5045"
+    state: SA
+
+account_holders:
+  - "Sarah Johnson"
+  - "Michael Chen"
+  - "Emma Williams"
+  - "David Nguyen"
+  - "Jessica Brown"
+  - "James Wilson"
+  - "Olivia Taylor"
+  - "Daniel Lee"
+  - "Sophie Martin"
+  - "Ryan Thompson"
+  - "Hannah White"
+  - "Thomas Anderson"
+  - "Mia Robinson"
+  - "William Harris"
+  - "Charlotte Clark"
+
+transaction_patterns:
+  grocery:
+    amount_range: [20, 300]
+    descriptions:
+      - "WOOLWORTHS {location}"
+      - "COLES {location}"
+      - "ALDI {location}"
+      - "IGA {location}"
+  hardware:
+    amount_range: [15, 500]
+    descriptions:
+      - "BUNNINGS W/HOUSE {location}"
+      - "BUNNINGS WAREHOUSE {location}"
+  fuel:
+    amount_range: [40, 120]
+    descriptions:
+      - "BP {location}"
+      - "SHELL {location}"
+      - "AMPOL {location}"
+      - "7-ELEVEN {location}"
+  professional:
+    amount_range: [200, 5000]
+    descriptions:
+      - "PROF SERVICES {name}"
+      - "{name} CONSULTING"
+  office:
+    amount_range: [10, 200]
+    descriptions:
+      - "OFFICEWORKS {location}"
+  utilities:
+    amount_range: [50, 400]
+    descriptions:
+      - "DD ORIGIN ENERGY {ref}"
+      - "DD AGL {ref}"
+      - "BPAY TELSTRA CRN {crn}"
+
+bank_descriptions:
+  eftpos: "EFTPOS {merchant} {location} AUS"
+  visa_debit: "VISA DEBIT PURCHASE CARD {last4} {merchant} {location} AU"
+  bpay: "BPAY {biller} CRN {crn}"
+  direct_debit: "DD {merchant} {ref} MHF {mhf}"
+  transfer: "Transfer To {name} NetBank"
+  salary: "Salary ATO PAYROLL {ref}"
+
+banks:
+  - code: cba
+    name: Commonwealth Bank
+    bsb_prefix: "06"
+    header_color: "#FFD700"
+    header_bg: "#000000"
+  - code: westpac
+    name: Westpac
+    bsb_prefix: "03"
+    header_color: "#FFFFFF"
+    header_bg: "#D5002B"
+  - code: nab
+    name: National Australia Bank
+    bsb_prefix: "08"
+    header_color: "#FFFFFF"
+    header_bg: "#C8102E"
+  - code: anz
+    name: ANZ
+    bsb_prefix: "01"
+    header_color: "#FFFFFF"
+    header_bg: "#003087"

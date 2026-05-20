@@ -1,0 +1,1021 @@
+CASEI001:
+  layout: tax_invoice_standard
+  degradation_seed: 9212
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 56 142 670 102
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 13/08/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '184.46'
+    TOTAL_AMOUNT: '2029.04'
+    LINE_ITEM_DESCRIPTIONS: Professional consultation services|Accounting and bookkeeping
+    LINE_ITEM_QUANTITIES: 6|5
+    LINE_ITEM_PRICES: 221.08|103.62
+    LINE_ITEM_TOTAL_PRICES: 1326.48|518.10
+    PAYER_NAME: Sarah Johnson
+    PAYER_ADDRESS: 96 Alexandria St, Alexandria NSW 2015
+CASEI002:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 4726
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 94 624 975 975
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 21/01/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '3047.86'
+    TOTAL_AMOUNT: '33526.43'
+    LINE_ITEM_DESCRIPTIONS: Risk assessment review|Corporate training workshop|Professional
+      consultation services|Tax return preparation
+    LINE_ITEM_QUANTITIES: 5|6|3|7
+    LINE_ITEM_PRICES: 1260.93|3263.50|167.56|584.32
+    LINE_ITEM_TOTAL_PRICES: 6304.65|19581.00|502.68|4090.24
+    PAYER_NAME: Michael Chen
+    PAYER_ADDRESS: 33 Hawthorn East St, Hawthorn East VIC 3123
+CASEI003:
+  layout: tax_invoice_high_value
+  degradation_seed: 9582
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 31 864 610 872
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 19/04/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '374.54'
+    TOTAL_AMOUNT: '4119.94'
+    LINE_ITEM_DESCRIPTIONS: Marketing campaign management|Audit services|Accounting
+      and bookkeeping|Financial planning services
+    LINE_ITEM_QUANTITIES: 3|3|4|5
+    LINE_ITEM_PRICES: 120.68|353.64|166.26|331.48
+    LINE_ITEM_TOTAL_PRICES: 362.04|1060.92|665.04|1657.40
+    PAYER_NAME: Emma Williams
+    PAYER_ADDRESS: 20 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI004:
+  layout: tax_invoice_mixed
+  degradation_seed: 3384
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 36 558 269 580
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 30/07/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '269.15'
+    TOTAL_AMOUNT: '2960.60'
+    LINE_ITEM_DESCRIPTIONS: Trademark registration|Audit services
+    LINE_ITEM_QUANTITIES: 3|2
+    LINE_ITEM_PRICES: 722.25|262.35
+    LINE_ITEM_TOTAL_PRICES: 2166.75|524.70
+    PAYER_NAME: David Nguyen
+    PAYER_ADDRESS: 99 Norwood St, Norwood SA 5067
+CASEI005:
+  layout: tax_invoice_standard
+  degradation_seed: 4783
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 80 839 993 879
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 29/06/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '858.25'
+    TOTAL_AMOUNT: '9440.73'
+    LINE_ITEM_DESCRIPTIONS: Marketing campaign management|Financial planning services|Website
+      design and development|Trademark registration
+    LINE_ITEM_QUANTITIES: 5|4|3|5
+    LINE_ITEM_PRICES: 115.20|203.49|857.64|923.92
+    LINE_ITEM_TOTAL_PRICES: 576.00|813.96|2572.92|4619.60
+    PAYER_NAME: Jessica Brown
+    PAYER_ADDRESS: 53 Subiaco St, Subiaco WA 6008
+CASEI006:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 7348
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 58 840 124 687
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 22/04/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '2544.68'
+    TOTAL_AMOUNT: '27991.52'
+    LINE_ITEM_DESCRIPTIONS: Legal document preparation|Website design and development|Annual
+      report preparation
+    LINE_ITEM_QUANTITIES: 8|8|6
+    LINE_ITEM_PRICES: 240.23|2366.44|765.58
+    LINE_ITEM_TOTAL_PRICES: 1921.84|18931.52|4593.48
+    PAYER_NAME: James Wilson
+    PAYER_ADDRESS: 4 Hobart St, Hobart TAS 7000
+CASEI007:
+  layout: tax_invoice_high_value
+  degradation_seed: 7767
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 79 298 227 152
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 05/08/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '395.82'
+    TOTAL_AMOUNT: '4354.04'
+    LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Professional consultation
+      services
+    LINE_ITEM_QUANTITIES: 7|1
+    LINE_ITEM_PRICES: 517.59|335.09
+    LINE_ITEM_TOTAL_PRICES: 3623.13|335.09
+    PAYER_NAME: Olivia Taylor
+    PAYER_ADDRESS: 21 Parramatta St, Parramatta NSW 2150
+CASEI008:
+  layout: tax_invoice_mixed
+  degradation_seed: 8496
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 15 690 865 212
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 22/12/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '552.16'
+    TOTAL_AMOUNT: '6073.76'
+    LINE_ITEM_DESCRIPTIONS: Legal document preparation|Software development services
+    LINE_ITEM_QUANTITIES: 8|8
+    LINE_ITEM_PRICES: 460.14|230.06
+    LINE_ITEM_TOTAL_PRICES: 3681.12|1840.48
+    PAYER_NAME: Daniel Lee
+    PAYER_ADDRESS: 26 South Yarra St, South Yarra VIC 3141
+CASEI009:
+  layout: tax_invoice_standard
+  degradation_seed: 7481
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 28 175 707 624
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 13/07/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '451.23'
+    TOTAL_AMOUNT: '4963.49'
+    LINE_ITEM_DESCRIPTIONS: Website design and development|Accounting and bookkeeping|IT
+      support and maintenance|Audit services
+    LINE_ITEM_QUANTITIES: 1|8|1|4
+    LINE_ITEM_PRICES: 1945.43|125.69|204.11|339.30
+    LINE_ITEM_TOTAL_PRICES: 1945.43|1005.52|204.11|1357.20
+    PAYER_NAME: Sophie Martin
+    PAYER_ADDRESS: 6 Toowoomba St, Toowoomba QLD 4350
+CASEI010:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 5989
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 55 251 012 360
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 13/09/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '201.92'
+    TOTAL_AMOUNT: '2221.12'
+    LINE_ITEM_DESCRIPTIONS: Business strategy consulting
+    LINE_ITEM_QUANTITIES: '5'
+    LINE_ITEM_PRICES: '403.84'
+    LINE_ITEM_TOTAL_PRICES: '2019.20'
+    PAYER_NAME: Ryan Thompson
+    PAYER_ADDRESS: 67 Glenelg St, Glenelg SA 5045
+CASEI011:
+  layout: tax_invoice_high_value
+  degradation_seed: 9952
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 14 508 365 359
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 06/08/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '471.56'
+    TOTAL_AMOUNT: '5187.14'
+    LINE_ITEM_DESCRIPTIONS: Audit services|Professional consultation services|Website
+      design and development
+    LINE_ITEM_QUANTITIES: 3|8|2
+    LINE_ITEM_PRICES: 326.62|168.09|1195.50
+    LINE_ITEM_TOTAL_PRICES: 979.86|1344.72|2391.00
+    PAYER_NAME: Hannah White
+    PAYER_ADDRESS: 55 Alexandria St, Alexandria NSW 2015
+CASEI012:
+  layout: tax_invoice_mixed
+  degradation_seed: 8362
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 87 341 873 319
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 14/07/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '312.21'
+    TOTAL_AMOUNT: '3434.33'
+    LINE_ITEM_DESCRIPTIONS: Professional consultation services|Software development
+      services|Financial planning services|Audit services
+    LINE_ITEM_QUANTITIES: 4|2|3|2
+    LINE_ITEM_PRICES: 326.51|160.01|338.04|240.97
+    LINE_ITEM_TOTAL_PRICES: 1306.04|320.02|1014.12|481.94
+    PAYER_NAME: Thomas Anderson
+    PAYER_ADDRESS: 42 Hawthorn East St, Hawthorn East VIC 3123
+CASEI013:
+  layout: tax_invoice_standard
+  degradation_seed: 3369
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 31 942 716 855
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 17/02/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1242.93'
+    TOTAL_AMOUNT: '13672.24'
+    LINE_ITEM_DESCRIPTIONS: Website design and development|Annual report preparation|Tax
+      return preparation|Audit services
+    LINE_ITEM_QUANTITIES: 3|7|3|3
+    LINE_ITEM_PRICES: 1633.09|639.52|760.51|257.29
+    LINE_ITEM_TOTAL_PRICES: 4899.27|4476.64|2281.53|771.87
+    PAYER_NAME: Mia Robinson
+    PAYER_ADDRESS: 91 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI014:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 1057
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 53 122 258 471
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 02/12/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '860.01'
+    TOTAL_AMOUNT: '9460.08'
+    LINE_ITEM_DESCRIPTIONS: Marketing campaign management|Website design and development|Annual
+      report preparation
+    LINE_ITEM_QUANTITIES: 8|3|3
+    LINE_ITEM_PRICES: 128.88|1058.62|1464.39
+    LINE_ITEM_TOTAL_PRICES: 1031.04|3175.86|4393.17
+    PAYER_NAME: William Harris
+    PAYER_ADDRESS: 54 Norwood St, Norwood SA 5067
+CASEI015:
+  layout: tax_invoice_high_value
+  degradation_seed: 9967
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 38 063 865 077
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 15/01/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1332.66'
+    TOTAL_AMOUNT: '14659.26'
+    LINE_ITEM_DESCRIPTIONS: Tax return preparation|Annual report preparation|Professional
+      consultation services|Audit services
+    LINE_ITEM_QUANTITIES: 8|8|8|1
+    LINE_ITEM_PRICES: 457.05|1008.36|165.88|276.28
+    LINE_ITEM_TOTAL_PRICES: 3656.40|8066.88|1327.04|276.28
+    PAYER_NAME: Charlotte Clark
+    PAYER_ADDRESS: 64 Subiaco St, Subiaco WA 6008
+CASEI016:
+  layout: tax_invoice_mixed
+  degradation_seed: 1531
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 83 924 156 149
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 21/10/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '123.83'
+    TOTAL_AMOUNT: '1362.14'
+    LINE_ITEM_DESCRIPTIONS: Professional consultation services|Software development
+      services
+    LINE_ITEM_QUANTITIES: 3|6
+    LINE_ITEM_PRICES: 161.01|125.88
+    LINE_ITEM_TOTAL_PRICES: 483.03|755.28
+    PAYER_NAME: Sarah Johnson
+    PAYER_ADDRESS: 72 Hobart St, Hobart TAS 7000
+CASEI017:
+  layout: tax_invoice_standard
+  degradation_seed: 3643
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 75 164 829 259
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 30/06/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '348.68'
+    TOTAL_AMOUNT: '3835.52'
+    LINE_ITEM_DESCRIPTIONS: Legal document preparation
+    LINE_ITEM_QUANTITIES: '7'
+    LINE_ITEM_PRICES: '498.12'
+    LINE_ITEM_TOTAL_PRICES: '3486.84'
+    PAYER_NAME: Michael Chen
+    PAYER_ADDRESS: 12 Parramatta St, Parramatta NSW 2150
+CASEI018:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 6289
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 62 205 619 618
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 22/10/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '729.10'
+    TOTAL_AMOUNT: '8020.14'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Website design and development
+    LINE_ITEM_QUANTITIES: 6|2
+    LINE_ITEM_PRICES: 384.93|2490.73
+    LINE_ITEM_TOTAL_PRICES: 2309.58|4981.46
+    PAYER_NAME: Emma Williams
+    PAYER_ADDRESS: 89 South Yarra St, South Yarra VIC 3141
+CASEI019:
+  layout: tax_invoice_high_value
+  degradation_seed: 2790
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 23 594 176 055
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 27/07/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1771.30'
+    TOTAL_AMOUNT: '19484.25'
+    LINE_ITEM_DESCRIPTIONS: Corporate training workshop|Tax return preparation|Legal
+      document preparation|Marketing campaign management
+    LINE_ITEM_QUANTITIES: 8|5|7|4
+    LINE_ITEM_PRICES: 1509.46|498.14|357.39|161.21
+    LINE_ITEM_TOTAL_PRICES: 12075.68|2490.70|2501.73|644.84
+    PAYER_NAME: David Nguyen
+    PAYER_ADDRESS: 9 Toowoomba St, Toowoomba QLD 4350
+CASEI020:
+  layout: tax_invoice_mixed
+  degradation_seed: 9154
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 32 600 697 103
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 24/08/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '444.66'
+    TOTAL_AMOUNT: '4891.30'
+    LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Audit services|Accounting and
+      bookkeeping
+    LINE_ITEM_QUANTITIES: 5|6|8
+    LINE_ITEM_PRICES: 158.30|433.23|131.97
+    LINE_ITEM_TOTAL_PRICES: 791.50|2599.38|1055.76
+    PAYER_NAME: Jessica Brown
+    PAYER_ADDRESS: 89 Glenelg St, Glenelg SA 5045
+CASEI021:
+  layout: tax_invoice_standard
+  degradation_seed: 2932
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 85 477 520 841
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 29/03/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '336.04'
+    TOTAL_AMOUNT: '3696.45'
+    LINE_ITEM_DESCRIPTIONS: Website design and development|Marketing campaign management
+    LINE_ITEM_QUANTITIES: 4|1
+    LINE_ITEM_PRICES: 803.48|146.49
+    LINE_ITEM_TOTAL_PRICES: 3213.92|146.49
+    PAYER_NAME: James Wilson
+    PAYER_ADDRESS: 79 Alexandria St, Alexandria NSW 2015
+CASEI022:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 4478
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 41 938 530 383
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 14/10/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '81.62'
+    TOTAL_AMOUNT: '897.86'
+    LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping
+    LINE_ITEM_QUANTITIES: '6'
+    LINE_ITEM_PRICES: '136.04'
+    LINE_ITEM_TOTAL_PRICES: '816.24'
+    PAYER_NAME: Olivia Taylor
+    PAYER_ADDRESS: 53 Hawthorn East St, Hawthorn East VIC 3123
+CASEI023:
+  layout: tax_invoice_high_value
+  degradation_seed: 6592
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 91 476 922 099
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 07/11/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '920.36'
+    TOTAL_AMOUNT: '10123.99'
+    LINE_ITEM_DESCRIPTIONS: Marketing campaign management|Annual report preparation|Legal
+      document preparation
+    LINE_ITEM_QUANTITIES: 5|6|2
+    LINE_ITEM_PRICES: 130.03|1290.33|405.75
+    LINE_ITEM_TOTAL_PRICES: 650.15|7741.98|811.50
+    PAYER_NAME: Daniel Lee
+    PAYER_ADDRESS: 89 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI024:
+  layout: tax_invoice_mixed
+  degradation_seed: 6536
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 17 247 062 046
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 19/12/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '493.87'
+    TOTAL_AMOUNT: '5432.59'
+    LINE_ITEM_DESCRIPTIONS: Corporate training workshop
+    LINE_ITEM_QUANTITIES: '3'
+    LINE_ITEM_PRICES: '1646.24'
+    LINE_ITEM_TOTAL_PRICES: '4938.72'
+    PAYER_NAME: Sophie Martin
+    PAYER_ADDRESS: 79 Norwood St, Norwood SA 5067
+CASEI025:
+  layout: tax_invoice_standard
+  degradation_seed: 7782
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 34 374 067 935
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 26/08/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '417.40'
+    TOTAL_AMOUNT: '4591.40'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Software development services
+    LINE_ITEM_QUANTITIES: 8|6
+    LINE_ITEM_PRICES: 376.25|194.00
+    LINE_ITEM_TOTAL_PRICES: 3010.00|1164.00
+    PAYER_NAME: Ryan Thompson
+    PAYER_ADDRESS: 5 Subiaco St, Subiaco WA 6008
+CASEI026:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 3446
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 52 158 471 100
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 10/09/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1649.43'
+    TOTAL_AMOUNT: '18143.75'
+    LINE_ITEM_DESCRIPTIONS: Tax return preparation|Risk assessment review|Professional
+      consultation services
+    LINE_ITEM_QUANTITIES: 4|6|6
+    LINE_ITEM_PRICES: 609.83|2179.26|163.24
+    LINE_ITEM_TOTAL_PRICES: 2439.32|13075.56|979.44
+    PAYER_NAME: Hannah White
+    PAYER_ADDRESS: 73 Hobart St, Hobart TAS 7000
+CASEI027:
+  layout: tax_invoice_high_value
+  degradation_seed: 6050
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 83 134 612 067
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 11/01/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '640.84'
+    TOTAL_AMOUNT: '7049.24'
+    LINE_ITEM_DESCRIPTIONS: Audit services|Risk assessment review
+    LINE_ITEM_QUANTITIES: 7|2
+    LINE_ITEM_PRICES: 263.10|2283.35
+    LINE_ITEM_TOTAL_PRICES: 1841.70|4566.70
+    PAYER_NAME: Thomas Anderson
+    PAYER_ADDRESS: 49 Parramatta St, Parramatta NSW 2150
+CASEI028:
+  layout: tax_invoice_mixed
+  degradation_seed: 4311
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 57 731 037 279
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 02/12/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '723.57'
+    TOTAL_AMOUNT: '7959.23'
+    LINE_ITEM_DESCRIPTIONS: Legal document preparation|Financial planning services|Business
+      strategy consulting|Accounting and bookkeeping
+    LINE_ITEM_QUANTITIES: 8|5|5|6
+    LINE_ITEM_PRICES: 448.84|227.55|311.25|158.49
+    LINE_ITEM_TOTAL_PRICES: 3590.72|1137.75|1556.25|950.94
+    PAYER_NAME: Mia Robinson
+    PAYER_ADDRESS: 35 South Yarra St, South Yarra VIC 3141
+CASEI029:
+  layout: tax_invoice_standard
+  degradation_seed: 9456
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 18 047 634 030
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 17/08/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1956.67'
+    TOTAL_AMOUNT: '21523.40'
+    LINE_ITEM_DESCRIPTIONS: Risk assessment review|Tax return preparation|Software
+      development services|Business strategy consulting
+    LINE_ITEM_QUANTITIES: 6|5|3|2
+    LINE_ITEM_PRICES: 2377.82|698.99|243.12|537.75
+    LINE_ITEM_TOTAL_PRICES: 14266.92|3494.95|729.36|1075.50
+    PAYER_NAME: William Harris
+    PAYER_ADDRESS: 4 Toowoomba St, Toowoomba QLD 4350
+CASEI030:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 6119
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 47 960 287 852
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 24/04/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '367.28'
+    TOTAL_AMOUNT: '4040.12'
+    LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Website design and development|Tax
+      return preparation|Legal document preparation
+    LINE_ITEM_QUANTITIES: 1|1|2|1
+    LINE_ITEM_PRICES: 130.43|2311.52|499.98|230.93
+    LINE_ITEM_TOTAL_PRICES: 130.43|2311.52|999.96|230.93
+    PAYER_NAME: Charlotte Clark
+    PAYER_ADDRESS: 5 Glenelg St, Glenelg SA 5045
+CASEI031:
+  layout: tax_invoice_high_value
+  degradation_seed: 2927
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 65 234 135 838
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 25/10/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '355.75'
+    TOTAL_AMOUNT: '3913.27'
+    LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping|Business strategy consulting
+    LINE_ITEM_QUANTITIES: 4|6
+    LINE_ITEM_PRICES: 108.66|520.48
+    LINE_ITEM_TOTAL_PRICES: 434.64|3122.88
+    PAYER_NAME: Sarah Johnson
+    PAYER_ADDRESS: 40 Alexandria St, Alexandria NSW 2015
+CASEI032:
+  layout: tax_invoice_mixed
+  degradation_seed: 6739
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 10 300 054 374
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 06/03/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '38.26'
+    TOTAL_AMOUNT: '420.90'
+    LINE_ITEM_DESCRIPTIONS: Professional consultation services
+    LINE_ITEM_QUANTITIES: '2'
+    LINE_ITEM_PRICES: '191.32'
+    LINE_ITEM_TOTAL_PRICES: '382.64'
+    PAYER_NAME: Michael Chen
+    PAYER_ADDRESS: 36 Hawthorn East St, Hawthorn East VIC 3123
+CASEI033:
+  layout: tax_invoice_standard
+  degradation_seed: 8712
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 65 997 006 529
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 05/05/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '335.93'
+    TOTAL_AMOUNT: '3695.18'
+    LINE_ITEM_DESCRIPTIONS: Audit services|Business strategy consulting|Software development
+      services
+    LINE_ITEM_QUANTITIES: 2|6|1
+    LINE_ITEM_PRICES: 291.62|439.20|140.81
+    LINE_ITEM_TOTAL_PRICES: 583.24|2635.20|140.81
+    PAYER_NAME: Emma Williams
+    PAYER_ADDRESS: 91 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI034:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 8304
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 66 966 773 818
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 13/02/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '79.29'
+    TOTAL_AMOUNT: '872.18'
+    LINE_ITEM_DESCRIPTIONS: IT support and maintenance
+    LINE_ITEM_QUANTITIES: '7'
+    LINE_ITEM_PRICES: '113.27'
+    LINE_ITEM_TOTAL_PRICES: '792.89'
+    PAYER_NAME: David Nguyen
+    PAYER_ADDRESS: 7 Norwood St, Norwood SA 5067
+CASEI035:
+  layout: tax_invoice_high_value
+  degradation_seed: 2522
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 44 689 450 169
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 11/05/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1446.77'
+    TOTAL_AMOUNT: '15914.45'
+    LINE_ITEM_DESCRIPTIONS: Risk assessment review
+    LINE_ITEM_QUANTITIES: '8'
+    LINE_ITEM_PRICES: '1808.46'
+    LINE_ITEM_TOTAL_PRICES: '14467.68'
+    PAYER_NAME: Jessica Brown
+    PAYER_ADDRESS: 26 Subiaco St, Subiaco WA 6008
+CASEI036:
+  layout: tax_invoice_mixed
+  degradation_seed: 1495
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 97 940 559 484
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 15/02/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '2334.37'
+    TOTAL_AMOUNT: '25678.03'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Business strategy consulting|Corporate
+      training workshop|Software development services
+    LINE_ITEM_QUANTITIES: 5|7|6|6
+    LINE_ITEM_PRICES: 380.83|314.17|3014.19|192.53
+    LINE_ITEM_TOTAL_PRICES: 1904.15|2199.19|18085.14|1155.18
+    PAYER_NAME: James Wilson
+    PAYER_ADDRESS: 40 Hobart St, Hobart TAS 7000
+CASEI037:
+  layout: tax_invoice_standard
+  degradation_seed: 2162
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 38 310 707 582
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 04/08/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1100.36'
+    TOTAL_AMOUNT: '12103.93'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Corporate training workshop|Software
+      development services|Marketing campaign management
+    LINE_ITEM_QUANTITIES: 6|3|7|2
+    LINE_ITEM_PRICES: 312.98|2368.28|250.81|132.59
+    LINE_ITEM_TOTAL_PRICES: 1877.88|7104.84|1755.67|265.18
+    PAYER_NAME: Olivia Taylor
+    PAYER_ADDRESS: 45 Parramatta St, Parramatta NSW 2150
+CASEI038:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 8132
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 57 007 500 918
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 15/09/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1714.86'
+    TOTAL_AMOUNT: '18863.43'
+    LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Audit services|Risk assessment
+      review|Tax return preparation
+    LINE_ITEM_QUANTITIES: 3|7|4|7
+    LINE_ITEM_PRICES: 590.86|235.19|2202.27|702.94
+    LINE_ITEM_TOTAL_PRICES: 1772.58|1646.33|8809.08|4920.58
+    PAYER_NAME: Daniel Lee
+    PAYER_ADDRESS: 52 South Yarra St, South Yarra VIC 3141
+CASEI039:
+  layout: tax_invoice_high_value
+  degradation_seed: 8584
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 68 609 540 521
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 23/09/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1069.85'
+    TOTAL_AMOUNT: '11768.33'
+    LINE_ITEM_DESCRIPTIONS: Trademark registration|Risk assessment review
+    LINE_ITEM_QUANTITIES: 2|8
+    LINE_ITEM_PRICES: 1017.56|1082.92
+    LINE_ITEM_TOTAL_PRICES: 2035.12|8663.36
+    PAYER_NAME: Sophie Martin
+    PAYER_ADDRESS: 31 Toowoomba St, Toowoomba QLD 4350
+CASEI040:
+  layout: tax_invoice_mixed
+  degradation_seed: 2007
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 44 562 660 653
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 04/09/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '124.76'
+    TOTAL_AMOUNT: '1372.34'
+    LINE_ITEM_DESCRIPTIONS: Marketing campaign management|IT support and maintenance
+    LINE_ITEM_QUANTITIES: 2|7
+    LINE_ITEM_PRICES: 159.83|132.56
+    LINE_ITEM_TOTAL_PRICES: 319.66|927.92
+    PAYER_NAME: Ryan Thompson
+    PAYER_ADDRESS: 57 Glenelg St, Glenelg SA 5045
+CASEI041:
+  layout: tax_invoice_standard
+  degradation_seed: 8421
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 27 741 729 145
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 27/04/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '358.44'
+    TOTAL_AMOUNT: '3942.81'
+    LINE_ITEM_DESCRIPTIONS: Annual report preparation
+    LINE_ITEM_QUANTITIES: '3'
+    LINE_ITEM_PRICES: '1194.79'
+    LINE_ITEM_TOTAL_PRICES: '3584.37'
+    PAYER_NAME: Hannah White
+    PAYER_ADDRESS: 18 Alexandria St, Alexandria NSW 2015
+CASEI042:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 1133
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 55 790 165 651
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 20/07/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '2218.73'
+    TOTAL_AMOUNT: '24406.06'
+    LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Risk assessment review|Trademark
+      registration|Accounting and bookkeeping
+    LINE_ITEM_QUANTITIES: 5|5|7|6
+    LINE_ITEM_PRICES: 449.60|2369.60|1002.45|179.03
+    LINE_ITEM_TOTAL_PRICES: 2248.00|11848.00|7017.15|1074.18
+    PAYER_NAME: Thomas Anderson
+    PAYER_ADDRESS: 74 Hawthorn East St, Hawthorn East VIC 3123
+CASEI043:
+  layout: tax_invoice_high_value
+  degradation_seed: 6885
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 80 326 226 755
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 28/03/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '8.01'
+    TOTAL_AMOUNT: '88.09'
+    LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping
+    LINE_ITEM_QUANTITIES: '1'
+    LINE_ITEM_PRICES: '80.08'
+    LINE_ITEM_TOTAL_PRICES: '80.08'
+    PAYER_NAME: Mia Robinson
+    PAYER_ADDRESS: 38 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI044:
+  layout: tax_invoice_mixed
+  degradation_seed: 8130
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 10 713 178 458
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 28/05/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1305.19'
+    TOTAL_AMOUNT: '14357.04'
+    LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Website design and development
+    LINE_ITEM_QUANTITIES: 7|7
+    LINE_ITEM_PRICES: 171.28|1693.27
+    LINE_ITEM_TOTAL_PRICES: 1198.96|11852.89
+    PAYER_NAME: William Harris
+    PAYER_ADDRESS: 4 Norwood St, Norwood SA 5067
+CASEI045:
+  layout: tax_invoice_standard
+  degradation_seed: 3527
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 33 021 922 709
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 06/11/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '818.40'
+    TOTAL_AMOUNT: '9002.40'
+    LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Tax return preparation
+    LINE_ITEM_QUANTITIES: 7|6
+    LINE_ITEM_PRICES: 545.16|727.98
+    LINE_ITEM_TOTAL_PRICES: 3816.12|4367.88
+    PAYER_NAME: Charlotte Clark
+    PAYER_ADDRESS: 61 Subiaco St, Subiaco WA 6008
+CASEI046:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 8974
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 18 136 544 716
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 05/11/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '24.32'
+    TOTAL_AMOUNT: '267.52'
+    LINE_ITEM_DESCRIPTIONS: Legal document preparation
+    LINE_ITEM_QUANTITIES: '1'
+    LINE_ITEM_PRICES: '243.20'
+    LINE_ITEM_TOTAL_PRICES: '243.20'
+    PAYER_NAME: Sarah Johnson
+    PAYER_ADDRESS: 18 Hobart St, Hobart TAS 7000
+CASEI047:
+  layout: tax_invoice_high_value
+  degradation_seed: 1121
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 72 566 646 670
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 03/03/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '3317.57'
+    TOTAL_AMOUNT: '36493.30'
+    LINE_ITEM_DESCRIPTIONS: Corporate training workshop|Financial planning services|Annual
+      report preparation|Website design and development
+    LINE_ITEM_QUANTITIES: 7|8|8|4
+    LINE_ITEM_PRICES: 2633.47|292.07|946.24|1208.74
+    LINE_ITEM_TOTAL_PRICES: 18434.29|2336.56|7569.92|4834.96
+    PAYER_NAME: Michael Chen
+    PAYER_ADDRESS: 18 Parramatta St, Parramatta NSW 2150
+CASEI048:
+  layout: tax_invoice_mixed
+  degradation_seed: 8889
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 78 593 551 484
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 08/12/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '264.80'
+    TOTAL_AMOUNT: '2912.75'
+    LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Tax return preparation|Audit
+      services
+    LINE_ITEM_QUANTITIES: 6|1|6
+    LINE_ITEM_PRICES: 94.35|605.67|246.03
+    LINE_ITEM_TOTAL_PRICES: 566.10|605.67|1476.18
+    PAYER_NAME: Emma Williams
+    PAYER_ADDRESS: 92 South Yarra St, South Yarra VIC 3141
+CASEI049:
+  layout: tax_invoice_standard
+  degradation_seed: 6628
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 20 707 500 134
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 24/03/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '370.31'
+    TOTAL_AMOUNT: '4073.42'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Tax return preparation|Legal
+      document preparation
+    LINE_ITEM_QUANTITIES: 2|2|5
+    LINE_ITEM_PRICES: 233.95|657.83|383.91
+    LINE_ITEM_TOTAL_PRICES: 467.90|1315.66|1919.55
+    PAYER_NAME: David Nguyen
+    PAYER_ADDRESS: 94 Toowoomba St, Toowoomba QLD 4350
+CASEI050:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 5267
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 51 104 819 821
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 15/08/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1089.89'
+    TOTAL_AMOUNT: '11988.83'
+    LINE_ITEM_DESCRIPTIONS: Audit services|Website design and development|Accounting
+      and bookkeeping|IT support and maintenance
+    LINE_ITEM_QUANTITIES: 6|5|1|5
+    LINE_ITEM_PRICES: 440.93|1436.26|149.51|184.51
+    LINE_ITEM_TOTAL_PRICES: 2645.58|7181.30|149.51|922.55
+    PAYER_NAME: Jessica Brown
+    PAYER_ADDRESS: 66 Glenelg St, Glenelg SA 5045
+CASEI051:
+  layout: tax_invoice_high_value
+  degradation_seed: 2351
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Smith & Associates Accounting
+    BUSINESS_ABN: 34 345 198 531
+    BUSINESS_ADDRESS: Level 12, 100 Collins St, Melbourne VIC 3000
+    INVOICE_DATE: 16/11/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '223.76'
+    TOTAL_AMOUNT: '2461.37'
+    LINE_ITEM_DESCRIPTIONS: Audit services|Professional consultation services
+    LINE_ITEM_QUANTITIES: 5|1
+    LINE_ITEM_PRICES: 406.05|207.36
+    LINE_ITEM_TOTAL_PRICES: 2030.25|207.36
+    PAYER_NAME: James Wilson
+    PAYER_ADDRESS: 75 Alexandria St, Alexandria NSW 2015
+CASEI052:
+  layout: tax_invoice_mixed
+  degradation_seed: 3476
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Johnson Legal
+    BUSINESS_ABN: 58 059 863 567
+    BUSINESS_ADDRESS: Suite 5, 200 George St, Sydney NSW 2000
+    INVOICE_DATE: 03/09/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '224.99'
+    TOTAL_AMOUNT: '2474.85'
+    LINE_ITEM_DESCRIPTIONS: Software development services|Audit services|Marketing
+      campaign management
+    LINE_ITEM_QUANTITIES: 5|1|3
+    LINE_ITEM_PRICES: 257.26|390.53|191.01
+    LINE_ITEM_TOTAL_PRICES: 1286.30|390.53|573.03
+    PAYER_NAME: Olivia Taylor
+    PAYER_ADDRESS: 36 Hawthorn East St, Hawthorn East VIC 3123
+CASEI053:
+  layout: tax_invoice_standard
+  degradation_seed: 3525
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Brisbane IT Solutions
+    BUSINESS_ABN: 51 635 855 238
+    BUSINESS_ADDRESS: 42 Creek St, Brisbane QLD 4000
+    INVOICE_DATE: 26/06/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '883.33'
+    TOTAL_AMOUNT: '9716.58'
+    LINE_ITEM_DESCRIPTIONS: Annual report preparation|Website design and development|Business
+      strategy consulting
+    LINE_ITEM_QUANTITIES: 8|1|2
+    LINE_ITEM_PRICES: 762.73|1554.27|588.57
+    LINE_ITEM_TOTAL_PRICES: 6101.84|1554.27|1177.14
+    PAYER_NAME: Daniel Lee
+    PAYER_ADDRESS: 23 Fortitude Valley St, Fortitude Valley QLD 4006
+CASEI054:
+  layout: tax_invoice_gst_inclusive
+  degradation_seed: 5331
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Adelaide Business Consulting
+    BUSINESS_ABN: 28 028 113 878
+    BUSINESS_ADDRESS: Level 3, 77 King William St, Adelaide SA 5000
+    INVOICE_DATE: 25/07/2024
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '309.45'
+    TOTAL_AMOUNT: '3403.95'
+    LINE_ITEM_DESCRIPTIONS: Trademark registration|Financial planning services
+    LINE_ITEM_QUANTITIES: 3|6
+    LINE_ITEM_PRICES: 647.60|191.95
+    LINE_ITEM_TOTAL_PRICES: 1942.80|1151.70
+    PAYER_NAME: Sophie Martin
+    PAYER_ADDRESS: 50 Norwood St, Norwood SA 5067
+CASEI055:
+  layout: tax_invoice_high_value
+  degradation_seed: 8353
+  fields:
+    DOCUMENT_TYPE: INVOICE
+    SUPPLIER_NAME: Perth Marketing Group
+    BUSINESS_ABN: 34 740 246 310
+    BUSINESS_ADDRESS: Level 8, 140 St Georges Tce, Perth WA 6000
+    INVOICE_DATE: 06/01/2023
+    IS_GST_INCLUDED: 'false'
+    GST_AMOUNT: '1311.53'
+    TOTAL_AMOUNT: '14426.82'
+    LINE_ITEM_DESCRIPTIONS: Financial planning services|Marketing campaign management|Risk
+      assessment review|Website design and development
+    LINE_ITEM_QUANTITIES: 4|7|3|7
+    LINE_ITEM_PRICES: 263.56|147.46|1748.71|826.10
+    LINE_ITEM_TOTAL_PRICES: 1054.24|1032.22|5246.13|5782.70
+    PAYER_NAME: Ryan Thompson
+    PAYER_ADDRESS: 60 Subiaco St, Subiaco WA 6008
