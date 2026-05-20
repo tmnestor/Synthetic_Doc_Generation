@@ -230,10 +230,125 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 # -- Dispatch -----------------------------------------------------------------
 
 
-# Placeholder stubs — replaced in Tasks 4-6
 def render_westpac(entry: dict, layout: dict) -> Image.Image:
-    """Westpac renderer stub — replaced in Task 4."""
-    raise NotImplementedError("Westpac renderer not yet implemented")
+    """Render a Westpac bank statement.
+
+    Visual DNA: red 'Westpac' logo top-right, 'Date of Transaction' column,
+    dense multi-line layout, 'Debits'/'Credits ()' headers, page numbers.
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' dict.
+        layout: Layout config with rendering parameters.
+
+    Returns:
+        PIL Image of the rendered Westpac bank statement.
+    """
+    dims = layout["page_dimensions"]
+    width, height = dims["width"], dims["height"]
+    margin = layout["margin"]
+    font_sizes = layout["font_sizes"]
+    row_height = layout["row_height"]
+    fields = entry["fields"]
+
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+
+    font_header = load_font(font_sizes["header"], bold=True)
+    font_body = load_font(font_sizes["body"])
+    font_body_bold = load_font(font_sizes["body"], bold=True)
+    font_small = load_font(font_sizes.get("sub_description", 13))
+    font_footer = load_font(font_sizes["footer"])
+
+    right_edge = width - margin
+    y = margin
+
+    # -- Westpac logo (top-right, red) --
+    logo_color = layout.get("logo_color", "#C41E3A")
+    draw_text_right(draw, "Westpac", x_right=right_edge, y=y, font=font_header, fill=logo_color)
+    y += 50
+
+    # -- Page number (top-right) --
+    draw_text_right(draw, "Page 1 of 1", x_right=right_edge, y=y, font=font_footer, fill="#666666")
+    y += 30
+
+    # -- Account info --
+    payer = fields.get("PAYER_NAME", "")
+    date_range = fields.get("STATEMENT_DATE_RANGE", "")
+    supplier = fields.get("SUPPLIER_NAME", "Westpac")
+
+    if layout.get("show_rewards_section"):
+        draw.text((margin, y), "Rewards Points Balance Summary", font=font_body_bold, fill="black")
+        y += 30
+        draw.text((margin, y), "Available Points: 12,456", font=font_small, fill="#666666")
+        y += 25
+        draw_separator_line(draw, margin, right_edge, y, color="#CCCCCC")
+        y += 20
+
+    draw.text((margin, y), f"{supplier}: Premium CardII transactions", font=font_body_bold, fill="black")
+    y += 30
+    draw.text((margin, y), payer, font=font_body, fill="black")
+    y += 25
+    if date_range:
+        draw.text((margin, y), f"Statement Period: {date_range}", font=font_small, fill="#666666")
+        y += 25
+    y += 15
+
+    # -- Column positions --
+    col_date_x = margin
+    col_desc_x = margin + 220
+    col_debit_right = right_edge - 260
+    col_credit_right = right_edge
+
+    # -- Column headers --
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 6
+    draw.text((col_date_x, y), "Date of", font=font_body_bold, fill="black")
+    y_sub = y + 20
+    draw.text((col_date_x, y_sub), "Transaction", font=font_body_bold, fill="black")
+    draw.text((col_desc_x, y), "Description", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y, font=font_body_bold)
+    draw_text_right(draw, "Credits ()", x_right=col_credit_right, y=y, font=font_body_bold)
+    y = y_sub + 22
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 8
+
+    # -- Transactions (dense) --
+    txns = _parse_transactions(fields)
+
+    for txn in txns:
+        draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+
+        # Truncate description to fit
+        desc = txn["description"]
+        max_desc_w = col_debit_right - col_desc_x - 180
+        bbox = font_body.getbbox(desc)
+        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
+            desc = desc[:-1]
+            bbox = font_body.getbbox(desc)
+        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+
+        if txn["debit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["debit"])),
+                x_right=col_debit_right,
+                y=y,
+                font=font_body,
+            )
+        if txn["credit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["credit"])),
+                x_right=col_credit_right,
+                y=y,
+                font=font_body,
+            )
+        y += row_height
+
+    # -- Bottom rule --
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+
+    return img
 
 
 def render_nab(entry: dict, layout: dict) -> Image.Image:
