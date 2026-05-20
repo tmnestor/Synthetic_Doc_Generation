@@ -1,58 +1,24 @@
 """Bank statement renderer — Big 4 Australian banks.
 
-Renders PIL images from ground truth YAML entries using layout registry configs.
-Cherry-picked and refactored from scripts/generate_bank_statements.py.
+Per-bank renderers (CBA, Westpac, NAB, ANZ) dispatched via layout['renderer'] key.
+Each renderer encodes the bank's visual DNA: header style, column layout, row
+separators, balance formatting, and footer structure.
 """
 
+from collections.abc import Callable
 from decimal import Decimal
 
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    draw_separator_line,
     draw_text_right,
     fmt_amount,
     load_font,
 )
 
 
-def _normalize_layout(layout: dict) -> dict:
-    """Flatten nested layout YAML structure into a flat working copy.
-
-    Converts:
-      - page_dimensions.width/height  -> page_width, page_height
-      - font_sizes.header/body/subheader -> font_size_header, font_size_body, font_size_small
-      - header.background_color -> header.background
-      - columns (list) -> columns (dict keyed by column name)
-
-    Does not mutate the original layout dict.
-    """
-    flat = dict(layout)
-
-    # page dimensions
-    page_dims = layout.get("page_dimensions", {})
-    if page_dims and "page_width" not in flat:
-        flat["page_width"] = page_dims.get("width", 2480)
-        flat["page_height"] = page_dims.get("height", 3508)
-
-    # font sizes
-    font_sizes = layout.get("font_sizes", {})
-    if font_sizes:
-        flat.setdefault("font_size_header", font_sizes.get("header", 28))
-        flat.setdefault("font_size_body", font_sizes.get("body", 20))
-        flat.setdefault("font_size_small", font_sizes.get("subheader", font_sizes.get("header", 16)))
-
-    # header background_color → background
-    header = layout.get("header", {})
-    if header and "background" not in header:
-        flat["header"] = dict(header)
-        flat["header"]["background"] = header.get("background_color", "#FFFFFF")
-
-    # columns list → dict keyed by column name
-    cols = layout.get("columns", [])
-    if isinstance(cols, list):
-        flat["columns"] = {col["name"]: col for col in cols}
-
-    return flat
+# -- Shared utilities ---------------------------------------------------------
 
 
 def _parse_hex_color(hex_str: str) -> tuple[int, int, int]:
@@ -95,196 +61,218 @@ def _compute_running_balances(txns: list[dict], closing_balance: str) -> list[di
     return txns
 
 
-def _draw_header(
-    draw: ImageDraw.ImageDraw,
-    layout: dict,
-    fields: dict,
-    width: int,
-) -> int:
-    """Draw the bank header bar. Returns Y position after header."""
-    header_cfg = layout["header"]
-    bg = _parse_hex_color(header_cfg["background"])
-    fg = _parse_hex_color(header_cfg["color"])
-    h = header_cfg.get("height", 120)
-
-    draw.rectangle([(0, 0), (width, h)], fill=bg)
-
-    font = load_font(layout.get("font_size_header", 28), bold=True)
-    draw.text(
-        (layout.get("margin", 100), (h - 28) // 2),
-        header_cfg["logo_text"],
-        font=font,
-        fill=fg,
-    )
-
-    return h
+# -- CBA Renderer -------------------------------------------------------------
 
 
-def _draw_account_info(
-    draw: ImageDraw.ImageDraw,
-    y: int,
-    layout: dict,
-    fields: dict,
-) -> int:
-    """Draw account holder name and statement period. Returns Y after section."""
-    margin = layout.get("margin", 100)
-    font = load_font(layout.get("font_size_body", 20))
-    font_small = load_font(layout.get("font_size_small", 16))
-    line_h = 35
+def render_cba(entry: dict, layout: dict) -> Image.Image:
+    """Render a Commonwealth Bank statement.
 
-    payer = fields.get("PAYER_NAME", "")
-    if payer:
-        draw.text((margin, y), payer, font=font, fill="black")
-        y += line_h
-
-    date_range = fields.get("STATEMENT_DATE_RANGE", "")
-    if date_range:
-        draw.text(
-            (margin, y),
-            f"Statement Period: {date_range}",
-            font=font_small,
-            fill="black",
-        )
-        y += line_h
-
-    supplier = fields.get("SUPPLIER_NAME", "")
-    if supplier and supplier != layout.get("bank", ""):
-        draw.text((margin, y), supplier, font=font_small, fill="gray")
-        y += line_h
-
-    return y + 20
-
-
-def _draw_column_headers(
-    draw: ImageDraw.ImageDraw,
-    y: int,
-    layout: dict,
-) -> int:
-    """Draw table column headers. Returns Y after headers."""
-    columns = layout["columns"]
-    font = load_font(layout.get("font_size_small", 16), bold=True)
-
-    margin = layout.get("margin", 100)
-    page_width = layout.get("page_width", 2480)
-    draw.rectangle(
-        [(margin, y), (page_width - margin, y + 35)],
-        fill="#F0F0F0",
-    )
-
-    for col_key, col_cfg in columns.items():
-        draw.text(
-            (col_cfg["x"], y + 5),
-            col_cfg.get("header", col_key),
-            font=font,
-            fill="black",
-        )
-    return y + 40
-
-
-def _draw_transactions(
-    draw: ImageDraw.ImageDraw,
-    y: int,
-    layout: dict,
-    txns: list[dict],
-) -> int:
-    """Draw transaction rows. Returns Y after last row."""
-    columns = layout["columns"]
-    row_h = layout.get("row_height", 45)
-    font = load_font(layout.get("font_size_body", 20))
-    borders = layout.get("borders", False)
-    margin = layout.get("margin", 100)
-    page_width = layout.get("page_width", 2480)
-
-    for txn in txns:
-        if borders:
-            draw.rectangle(
-                [(margin, y), (page_width - margin, y + row_h)],
-                outline="#CCCCCC",
-            )
-
-        if "date" in columns:
-            draw.text(
-                (columns["date"]["x"], y + 8),
-                txn["date"],
-                font=font,
-                fill="black",
-            )
-        if "txn_date" in columns:
-            draw.text(
-                (columns["txn_date"]["x"], y + 8),
-                txn["date"],
-                font=font,
-                fill="black",
-            )
-
-        desc_col = columns.get("description", {})
-        if desc_col:
-            draw.text(
-                (desc_col["x"], y + 8),
-                txn["description"],
-                font=font,
-                fill="black",
-            )
-
-        if "debit" in columns and txn["debit"] != "NOT_FOUND":
-            draw_text_right(
-                draw,
-                fmt_amount(Decimal(txn["debit"])),
-                x_right=columns["debit"]["x"] + columns["debit"]["width"],
-                y=y + 8,
-                font=font,
-            )
-
-        if "credit" in columns and txn["credit"] != "NOT_FOUND":
-            draw_text_right(
-                draw,
-                fmt_amount(Decimal(txn["credit"])),
-                x_right=columns["credit"]["x"] + columns["credit"]["width"],
-                y=y + 8,
-                font=font,
-            )
-
-        if "balance" in columns and "balance" in txn:
-            balance_str = fmt_amount(txn["balance"])
-            balance_col = columns["balance"]
-            draw_text_right(
-                draw,
-                balance_str,
-                x_right=balance_col["x"] + balance_col["width"],
-                y=y + 8,
-                font=font,
-            )
-
-        y += row_h
-
-    return y
-
-
-def render_bank_statement(entry: dict, layout: dict) -> Image.Image:
-    """Render a bank statement image from ground truth entry and layout config.
+    Visual DNA: dark navy bank name, horizontal rules framing column headers,
+    'Withdrawal'/'Deposit' columns, $ amounts, footer with transaction types.
 
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
-        layout: Layout registry entry with rendering config.
+        layout: Layout config with 'page_dimensions', 'font_sizes', etc.
 
     Returns:
-        PIL Image of the rendered bank statement.
+        PIL Image of the rendered CBA bank statement.
     """
-    layout = _normalize_layout(layout)
-    width = layout.get("page_width", 2480)
-    height = layout.get("page_height", 3508)
+    dims = layout["page_dimensions"]
+    width, height = dims["width"], dims["height"]
+    margin = layout["margin"]
+    font_sizes = layout["font_sizes"]
+    row_height = layout["row_height"]
     fields = entry["fields"]
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
 
-    y = _draw_header(draw, layout, fields, width)
-    y = _draw_account_info(draw, y + 30, layout, fields)
-    y = _draw_column_headers(draw, y, layout)
+    font_header = load_font(font_sizes["header"], bold=True)
+    font_body = load_font(font_sizes["body"])
+    font_body_bold = load_font(font_sizes["body"], bold=True)
+    font_footer = load_font(font_sizes["footer"])
 
+    right_edge = width - margin
+    y = margin
+
+    # -- Bank name and legal lines --
+    bank_color = layout.get("bank_name_color", "#12107D")
+    draw.text((margin, y), "Commonwealth Bank", font=font_header, fill=bank_color)
+    y += 45
+
+    legal_lines = [
+        "Commonwealth Bank of Australia",
+        "ABN 48 123 456 789 AFSL and",
+        "Australian credit licence 234567",
+    ]
+    for line in legal_lines:
+        draw.text((margin, y), line, font=font_footer, fill="#666666")
+        y += 16
+    y += 30
+
+    # -- Account details --
+    payer = fields.get("PAYER_NAME", "")
+    date_range = fields.get("STATEMENT_DATE_RANGE", "")
+
+    draw.text((margin, y), f"Account Holder: {payer}", font=font_body, fill="black")
+    y += 30
+    if date_range:
+        parts = date_range.split(" - ")
+        if len(parts) == 2:
+            draw.text(
+                (margin, y),
+                f"Statement Period: {parts[0].strip()} to {parts[1].strip()}",
+                font=font_body,
+                fill="black",
+            )
+        y += 30
+    y += 20
+
+    # -- Column positions --
+    # Text columns left-aligned, numeric columns right-aligned
+    col_date_x = margin
+    col_desc_x = margin + 200
+    col_withdrawal_right = right_edge - 420
+    col_deposit_right = right_edge - 210
+    col_balance_right = right_edge
+
+    # -- Column header bar --
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 8
+
+    headers = layout.get("column_headers", ["Date", "Description", "Withdrawal", "Deposit", "Balance"])
+    draw.text((col_date_x, y), headers[0], font=font_body_bold, fill="black")
+    draw.text((col_desc_x, y), headers[1], font=font_body_bold, fill="black")
+    draw_text_right(draw, headers[2], x_right=col_withdrawal_right, y=y, font=font_body_bold)
+    draw_text_right(draw, headers[3], x_right=col_deposit_right, y=y, font=font_body_bold)
+    draw_text_right(draw, headers[4], x_right=col_balance_right, y=y, font=font_body_bold)
+    y += 28
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 12
+
+    # -- Transactions --
     txns = _parse_transactions(fields)
     txns = _compute_running_balances(txns, fields.get("ACCOUNT_BALANCE", "0"))
 
-    _draw_transactions(draw, y + 5, layout, txns)
+    # Opening balance row
+    if layout.get("show_opening_balance") and txns:
+        opening_balance = txns[0]["balance"]
+        # Reverse the first txn to get opening
+        first_debit = Decimal(txns[0]["debit"]) if txns[0]["debit"] != "NOT_FOUND" else Decimal("0")
+        first_credit = Decimal(txns[0]["credit"]) if txns[0]["credit"] != "NOT_FOUND" else Decimal("0")
+        opening = opening_balance - first_credit + first_debit
+        draw.text((col_desc_x, y), "Opening Balance", font=font_body, fill="black")
+        draw_text_right(draw, fmt_amount(opening), x_right=col_balance_right, y=y, font=font_body)
+        y += row_height
+
+    for txn in txns:
+        draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+
+        # Truncate description to fit column
+        desc = txn["description"]
+        max_desc_width = col_withdrawal_right - col_desc_x - 220
+        bbox = font_body.getbbox(desc)
+        while bbox[2] - bbox[0] > max_desc_width and len(desc) > 10:
+            desc = desc[:-1]
+            bbox = font_body.getbbox(desc)
+        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+
+        if txn["debit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["debit"])),
+                x_right=col_withdrawal_right,
+                y=y,
+                font=font_body,
+            )
+        if txn["credit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["credit"])),
+                x_right=col_deposit_right,
+                y=y,
+                font=font_body,
+            )
+        if "balance" in txn:
+            draw_text_right(
+                draw,
+                fmt_amount(txn["balance"]),
+                x_right=col_balance_right,
+                y=y,
+                font=font_body,
+            )
+        y += row_height
+
+    # -- Bottom rule --
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 40
+
+    # -- Footer --
+    if layout.get("show_footer_transaction_types"):
+        draw.text((margin, y), "TRANSACTION TYPES:", font=font_body_bold, fill="black")
+        y += 28
+        txn_types = [
+            "EFTPOS — Electronic Funds Transfer at Point of Sale",
+            "BPAY — Bill Payment",
+            "DD — Direct Debit",
+            "VISA DEBIT — Visa card purchase",
+            "ATM — Automated Teller Machine withdrawal",
+        ]
+        for desc in txn_types:
+            draw.text((margin, y), desc, font=font_footer, fill="#666666")
+            y += 16
+        y += 20
+        draw.text((margin, y), "CommBank.com.au  |  13 2221", font=font_footer, fill="#666666")
 
     return img
+
+
+# -- Dispatch -----------------------------------------------------------------
+
+
+# Placeholder stubs — replaced in Tasks 4-6
+def render_westpac(entry: dict, layout: dict) -> Image.Image:
+    """Westpac renderer stub — replaced in Task 4."""
+    raise NotImplementedError("Westpac renderer not yet implemented")
+
+
+def render_nab(entry: dict, layout: dict) -> Image.Image:
+    """NAB renderer stub — replaced in Task 5."""
+    raise NotImplementedError("NAB renderer not yet implemented")
+
+
+def render_anz(entry: dict, layout: dict) -> Image.Image:
+    """ANZ renderer stub — replaced in Task 6."""
+    raise NotImplementedError("ANZ renderer not yet implemented")
+
+
+_BANK_RENDERERS: dict[str, Callable[..., Image.Image]] = {
+    "cba": render_cba,
+    "westpac": render_westpac,
+    "nab": render_nab,
+    "anz": render_anz,
+}
+
+
+def render_bank_statement(entry: dict, layout: dict) -> Image.Image:
+    """Render a bank statement image from ground truth entry and layout config.
+
+    Dispatches to the per-bank renderer based on layout['renderer'].
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' dict.
+        layout: Layout registry entry with 'renderer' key.
+
+    Returns:
+        PIL Image of the rendered bank statement.
+    """
+    renderer_key = layout.get("renderer")
+    if renderer_key not in _BANK_RENDERERS:
+        valid = sorted(_BANK_RENDERERS.keys())
+        msg = (
+            f"Unknown renderer '{renderer_key}' in layout. "
+            f"Expected one of {valid}. "
+            f"Check the 'renderer' key in config/layouts/bank_statements.yml."
+        )
+        raise ValueError(msg)
+    return _BANK_RENDERERS[renderer_key](entry, layout)
