@@ -352,8 +352,164 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
 
 
 def render_nab(entry: dict, layout: dict) -> Image.Image:
-    """NAB renderer stub — replaced in Task 5."""
-    raise NotImplementedError("NAB renderer not yet implemented")
+    """Render a National Australia Bank statement.
+
+    Visual DNA: light blue header bar and date-group rows, 'Particulars' column,
+    date grouping with bold date headers, brought-forward/carried-forward rows,
+    reference numbers with dotted leaders, balance with 'Cr' suffix.
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' dict.
+        layout: Layout config with rendering parameters.
+
+    Returns:
+        PIL Image of the rendered NAB bank statement.
+    """
+    dims = layout["page_dimensions"]
+    width, height = dims["width"], dims["height"]
+    margin = layout["margin"]
+    font_sizes = layout["font_sizes"]
+    row_height = layout["row_height"]
+    fields = entry["fields"]
+
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+
+    font_header = load_font(font_sizes["header"], bold=True)
+    font_body = load_font(font_sizes["body"])
+    font_body_bold = load_font(font_sizes["body"], bold=True)
+    font_small = load_font(font_sizes.get("sub_description", 13))
+    font_footer = load_font(font_sizes["footer"])
+
+    right_edge = width - margin
+    header_color = _parse_hex_color(layout.get("header_bar_color", "#E8F0FE"))
+    balance_suffix = layout.get("balance_suffix", "Cr")
+    y = margin
+
+    # -- Bank name header --
+    draw.text((margin, y), "NAB Classic Banking", font=font_header, fill="#003366")
+    y += 50
+
+    # -- Account Details box --
+    box_top = y
+    payer = fields.get("PAYER_NAME", "")
+    draw.rectangle([(margin, y), (right_edge, y + 100)], outline="#003366", width=2)
+    y += 12
+    draw.text((margin + 15, y), "Account Details", font=font_body_bold, fill="black")
+    y += 25
+    draw.text((margin + 15, y), payer, font=font_body, fill="black")
+    draw_text_right(draw, "BSB Number", x_right=right_edge - 250, y=y, font=font_small, fill="#666666")
+    draw_text_right(draw, "082-456", x_right=right_edge - 15, y=y, font=font_body, fill="black")
+    y += 22
+    draw_text_right(draw, "Account Number", x_right=right_edge - 250, y=y, font=font_small, fill="#666666")
+    draw_text_right(draw, "98-765-4321", x_right=right_edge - 15, y=y, font=font_body, fill="black")
+    y = box_top + 120
+
+    # -- Section header --
+    draw.text((margin, y), "Transaction Details (continued)", font=font_body_bold, fill="black")
+    y += 35
+
+    # -- Column header bar (light blue background) --
+    draw.rectangle([(margin, y), (right_edge, y + 30)], fill=header_color)
+
+    col_date_x = margin + 10
+    col_desc_x = margin + 160
+    col_debit_right = right_edge - 380
+    col_credit_right = right_edge - 190
+    col_balance_right = right_edge - 10
+
+    draw.text((col_date_x, y + 5), "Date", font=font_body_bold, fill="black")
+    draw.text((col_desc_x, y + 5), "Particulars", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y + 5, font=font_body_bold)
+    draw_text_right(draw, "Credits", x_right=col_credit_right, y=y + 5, font=font_body_bold)
+    draw_text_right(draw, "Balance", x_right=col_balance_right, y=y + 5, font=font_body_bold)
+    y += 35
+
+    # -- Transactions with date grouping --
+    txns = _parse_transactions(fields)
+    txns = _compute_running_balances(txns, fields.get("ACCOUNT_BALANCE", "0"))
+
+    # Brought forward row
+    if layout.get("show_brought_forward") and txns:
+        first_debit = Decimal(txns[0]["debit"]) if txns[0]["debit"] != "NOT_FOUND" else Decimal("0")
+        first_credit = Decimal(txns[0]["credit"]) if txns[0]["credit"] != "NOT_FOUND" else Decimal("0")
+        opening = txns[0]["balance"] - first_credit + first_debit
+        draw.text((col_desc_x, y), "Brought forward", font=font_body, fill="black")
+        draw_text_right(
+            draw,
+            f"{fmt_amount(opening)} {balance_suffix}",
+            x_right=col_balance_right,
+            y=y,
+            font=font_body,
+        )
+        y += row_height
+
+    current_date_group = ""
+    for txn in txns:
+        # Date grouping: bold date header when date changes
+        if layout.get("date_grouping") and txn["date"] != current_date_group:
+            current_date_group = txn["date"]
+            # Light blue date group row
+            draw.rectangle([(margin, y), (right_edge, y + row_height - 2)], fill=header_color)
+            draw.text((col_date_x, y + 4), txn["date"], font=font_body_bold, fill="black")
+            y += row_height
+
+        # Indented transaction description
+        desc = txn["description"]
+        max_desc_w = col_debit_right - col_desc_x - 200
+        bbox = font_body.getbbox(desc)
+        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
+            desc = desc[:-1]
+            bbox = font_body.getbbox(desc)
+        draw.text((col_desc_x + 20, y + 4), desc, font=font_body, fill="black")
+
+        # Reference number with dotted leader (if enabled)
+        if layout.get("show_references"):
+            ref_num = str(hash(txn["description"]) % 10**10).zfill(10)
+            ref_text = f"Ref: {ref_num}"
+            dots = "." * 40
+            draw.text((col_desc_x + 20, y + 22), f"{ref_text}{dots}", font=font_small, fill="#999999")
+
+        if txn["debit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["debit"])),
+                x_right=col_debit_right,
+                y=y + 4,
+                font=font_body,
+            )
+        if txn["credit"] != "NOT_FOUND":
+            draw_text_right(
+                draw,
+                fmt_amount(Decimal(txn["credit"])),
+                x_right=col_credit_right,
+                y=y + 4,
+                font=font_body,
+            )
+        if "balance" in txn:
+            draw_text_right(
+                draw,
+                f"{fmt_amount(txn['balance'])} {balance_suffix}",
+                x_right=col_balance_right,
+                y=y + 4,
+                font=font_body,
+            )
+
+        ref_extra = 20 if layout.get("show_references") else 0
+        y += row_height + ref_extra
+
+    # -- Carried forward --
+    if layout.get("show_brought_forward") and txns:
+        draw.text((col_desc_x, y), "Carried forward", font=font_body_bold, fill="black")
+        draw_text_right(
+            draw,
+            f"{fmt_amount(Decimal(fields.get('ACCOUNT_BALANCE', '0')))} {balance_suffix}",
+            x_right=col_balance_right,
+            y=y,
+            font=font_body_bold,
+        )
+
+    return img
 
 
 def render_anz(entry: dict, layout: dict) -> Image.Image:
