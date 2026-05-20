@@ -513,8 +513,143 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
 
 
 def render_anz(entry: dict, layout: dict) -> Image.Image:
-    """ANZ renderer stub — replaced in Task 6."""
-    raise NotImplementedError("ANZ renderer not yet implemented")
+    """Render an ANZ bank statement.
+
+    Visual DNA: blue header bar, 'Transaction Description' column, DR/CR balance
+    suffixes, BALANCE BROUGHT FORWARD opening, totals row at bottom.
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' dict.
+        layout: Layout config with rendering parameters.
+
+    Returns:
+        PIL Image of the rendered ANZ bank statement.
+    """
+    dims = layout["page_dimensions"]
+    width, height = dims["width"], dims["height"]
+    margin = layout["margin"]
+    font_sizes = layout["font_sizes"]
+    row_height = layout["row_height"]
+    fields = entry["fields"]
+
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+
+    font_header = load_font(font_sizes["header"], bold=True)
+    font_body = load_font(font_sizes["body"])
+    font_body_bold = load_font(font_sizes["body"], bold=True)
+    font_small = load_font(font_sizes.get("sub_description", 14))
+    font_footer = load_font(font_sizes["footer"])
+
+    right_edge = width - margin
+    header_color = _parse_hex_color(layout.get("header_color", "#0061B5"))
+    suffix_dr = layout.get("balance_suffix_debit", "DR")
+    suffix_cr = layout.get("balance_suffix_credit", "CR")
+    y = margin
+
+    # -- Blue header bar --
+    draw.rectangle([(0, 0), (width, 80)], fill=header_color)
+    draw.text((margin, 20), "ANZ", font=font_header, fill="white")
+
+    # -- Account info --
+    y = 100
+    payer = fields.get("PAYER_NAME", "")
+
+    draw_text_right(
+        draw, "Account number    0000-00000", x_right=right_edge, y=y, font=font_small, fill="#666666"
+    )
+    y += 25
+    draw.text((margin, y), "Transaction Details", font=font_body_bold, fill="black")
+    y += 35
+
+    # -- Column header with underline --
+    col_date_x = margin
+    col_desc_x = margin + 200
+    col_debit_right = right_edge - 400
+    col_credit_right = right_edge - 200
+    col_balance_right = right_edge
+
+    draw.text((col_date_x, y), "Date", font=font_body_bold, fill="black")
+    draw.text((col_desc_x, y), "Transaction Description", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y, font=font_body_bold)
+    draw_text_right(draw, "Credits", x_right=col_credit_right, y=y, font=font_body_bold)
+    draw_text_right(draw, "Balance", x_right=col_balance_right, y=y, font=font_body_bold)
+    y += 28
+    draw_separator_line(draw, margin, right_edge, y, color="black")
+    y += 10
+
+    # -- Transactions --
+    txns = _parse_transactions(fields)
+    txns = _compute_running_balances(txns, fields.get("ACCOUNT_BALANCE", "0"))
+
+    def _format_balance(bal: Decimal) -> str:
+        """Format balance with DR/CR suffix."""
+        if bal >= 0:
+            return f"{fmt_amount(bal)} {suffix_cr}"
+        return f"{fmt_amount(abs(bal))} {suffix_dr}"
+
+    # BALANCE BROUGHT FORWARD
+    if layout.get("show_brought_forward") and txns:
+        first_debit = Decimal(txns[0]["debit"]) if txns[0]["debit"] != "NOT_FOUND" else Decimal("0")
+        first_credit = Decimal(txns[0]["credit"]) if txns[0]["credit"] != "NOT_FOUND" else Decimal("0")
+        opening = txns[0]["balance"] - first_credit + first_debit
+        draw.text((col_desc_x, y), "BALANCE BROUGHT FORWARD", font=font_body_bold, fill="black")
+        draw_text_right(draw, _format_balance(opening), x_right=col_balance_right, y=y, font=font_body)
+        y += row_height
+
+    total_debits = Decimal("0")
+    total_credits = Decimal("0")
+
+    for txn in txns:
+        draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+
+        desc = txn["description"]
+        max_desc_w = col_debit_right - col_desc_x - 220
+        bbox = font_body.getbbox(desc)
+        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
+            desc = desc[:-1]
+            bbox = font_body.getbbox(desc)
+        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+
+        if txn["debit"] != "NOT_FOUND":
+            debit_val = Decimal(txn["debit"])
+            total_debits += debit_val
+            draw_text_right(
+                draw,
+                fmt_amount(debit_val),
+                x_right=col_debit_right,
+                y=y,
+                font=font_body,
+            )
+        if txn["credit"] != "NOT_FOUND":
+            credit_val = Decimal(txn["credit"])
+            total_credits += credit_val
+            draw_text_right(
+                draw,
+                fmt_amount(credit_val),
+                x_right=col_credit_right,
+                y=y,
+                font=font_body,
+            )
+        if "balance" in txn:
+            draw_text_right(
+                draw,
+                _format_balance(txn["balance"]),
+                x_right=col_balance_right,
+                y=y,
+                font=font_body,
+            )
+        y += row_height
+
+    # -- Totals row --
+    if layout.get("show_totals_row"):
+        draw_separator_line(draw, margin, right_edge, y, color="black")
+        y += 8
+        draw.text((col_desc_x, y), "Totals at end of period", font=font_body_bold, fill="black")
+        draw_text_right(draw, fmt_amount(total_debits), x_right=col_debit_right, y=y, font=font_body_bold)
+        draw_text_right(draw, fmt_amount(total_credits), x_right=col_credit_right, y=y, font=font_body_bold)
+
+    return img
 
 
 _BANK_RENDERERS: dict[str, Callable[..., Image.Image]] = {
