@@ -14,6 +14,49 @@ from pathlib import Path
 
 import yaml
 
+# Bank description shorthands matching real Australian bank statement conventions.
+# Derived from existing TRANSACTION_DESCRIPTIONS in bank_statements.yml and
+# the transaction_patterns section of config/data_pools.yml.
+_RECEIPT_SHORTHANDS: dict[str, str] = {
+    "Bunnings Warehouse": "BUNNINGS W/HOUSE",
+    "Woolworths": "WOOLWORTHS",
+    "Coles": "COLES",
+    "Officeworks": "OFFICEWORKS",
+    "JB Hi-Fi": "JB HI-FI",
+    "Harvey Norman": "HARVEY NORMAN",
+    "Kmart Australia": "KMART",
+    "Big W": "Big W",
+    "Chemist Warehouse": "CHEMIST WHSE",
+    "Dan Murphy's": "DAN MURPHYS",
+    "BP Australia": "BP",
+    "Shell Australia": "SHELL",
+    "Ampol Limited": "AMPOL",
+    "7-Eleven Australia": "7-Eleven Aus",
+    "Myer": "Myer",
+    "David Jones": "David Jones",
+    "Target Australia": "TARGET",
+    "Spotlight": "SPOTLIGHT",
+    "Supercheap Auto": "SUPERCHEAP AUTO",
+    "Repco": "REPCO",
+}
+
+_INVOICE_SHORTHANDS: dict[str, str] = {
+    "Smith & Associates Accounting": "SMITH ASSOCIATES",
+    "Johnson Legal": "JOHNSON LEGAL",
+    "Brisbane IT Solutions": "BRISBANE IT SOLUTIONS",
+    "Adelaide Business Consulting": "ADELAIDE BUS CONSULTING",
+    "Perth Marketing Group": "PERTH MARKETING GROUP",
+}
+
+# EFTPOS vs VISA DEBIT prefixes for retail transactions.
+_RETAIL_PREFIXES = [
+    ("EFTPOS", "AUS"),
+    ("VISA DEBIT PURCHASE", "AU"),
+]
+
+# Payment prefixes for professional service invoices.
+_INVOICE_PREFIXES = ["BPAY", "DIRECT DEBIT", "EFT PAYMENT"]
+
 
 def _load_gt(name: str) -> dict:
     path = Path(f"ground_truth/{name}.yml")
@@ -25,6 +68,59 @@ def _parse_date(date_str: str) -> datetime | None:
         return datetime.strptime(date_str.strip(), "%d/%m/%Y")
     except (ValueError, AttributeError):
         return None
+
+
+def _extract_suburb(bank_entry: dict) -> str:
+    """Extract the suburb used in a bank statement's transaction descriptions.
+
+    All transactions for a given bank statement use the same suburb (the
+    account holder's local area). We find it by looking at EFTPOS descriptions
+    and extracting the title-case words between the uppercase retailer name
+    and the trailing "AUS" suffix.
+    """
+    descriptions = bank_entry["fields"].get("TRANSACTION_DESCRIPTIONS", "").split("|")
+    for desc in descriptions:
+        desc = desc.strip()
+        if not (desc.startswith("EFTPOS ") and desc.endswith(" AUS")):
+            continue
+        # Strip "EFTPOS " prefix and " AUS" suffix
+        middle = desc[7:-4]
+        words = middle.split()
+        # Walk backwards: title-case words are the suburb, uppercase words
+        # are the retailer name.
+        suburb_words: list[str] = []
+        for word in reversed(words):
+            if word[0].isupper() and not word.isupper():
+                suburb_words.insert(0, word)
+            else:
+                break
+        if suburb_words:
+            return " ".join(suburb_words)
+    return "Sydney"
+
+
+def _generate_receipt_description(
+    supplier: str,
+    suburb: str,
+    rng: random.Random,
+) -> str:
+    """Generate a bank description for a retail receipt transaction."""
+    shorthand = _RECEIPT_SHORTHANDS.get(supplier, supplier.upper())
+    prefix, suffix = rng.choice(_RETAIL_PREFIXES)
+    return f"{prefix} {shorthand} {suburb} {suffix}"
+
+
+def _generate_invoice_description(
+    supplier: str,
+    rng: random.Random,
+) -> str:
+    """Generate a bank description for an invoice / professional service."""
+    shorthand = _INVOICE_SHORTHANDS.get(supplier, supplier.upper())
+    prefix = rng.choice(_INVOICE_PREFIXES)
+    if prefix == "BPAY":
+        crn = rng.randint(100_000_000, 999_999_999)
+        return f"BPAY {shorthand} CRN {crn}"
+    return f"{prefix} {shorthand}"
 
 
 def _position_label(matched_idx: int, total_txns: int) -> str:
@@ -47,8 +143,10 @@ def _build_notes(
 
     if difficulty == "easy":
         characteristic = "exact date and amount match"
-    else:
+    elif difficulty == "medium":
         characteristic = f"{offset}-day settlement delay"
+    else:
+        characteristic = f"{offset}-day settlement delay, description mismatch"
 
     return f"{position} on {layout_label} \u2014 {characteristic}"
 
@@ -74,6 +172,7 @@ def main() -> None:
         src_total = src_fields.get("TOTAL_AMOUNT", "")
         src_date_str = src_fields.get("INVOICE_DATE", "")
         src_date = _parse_date(src_date_str)
+        supplier = src_fields.get("SUPPLIER_NAME", "")
 
         if not src_total or not src_date:
             continue
@@ -82,7 +181,7 @@ def main() -> None:
         bank_id, bank_entry = rng.choice(bank_list)
         bank_fields = bank_entry["fields"]
 
-        # Find matching amount in bank transactions
+        # Split pipe-delimited transaction fields
         bank_amounts = bank_fields.get("TRANSACTION_AMOUNTS_PAID", "").split("|")
         bank_dates = bank_fields.get("TRANSACTION_DATES", "").split("|")
         bank_descriptions = bank_fields.get("TRANSACTION_DESCRIPTIONS", "").split("|")
@@ -138,6 +237,20 @@ def main() -> None:
             else:
                 difficulty = "easy"
 
+        # For easy/medium: inject a supplier-matching description into the
+        # bank statement so the description realistically references the
+        # merchant.  For hard: leave the existing unrelated description —
+        # this makes matching genuinely harder (no description confirmation).
+        is_invoice = src_id.startswith("CASEI")
+        if difficulty in ("easy", "medium") and matched_idx < len(bank_descriptions):
+            if is_invoice:
+                new_desc = _generate_invoice_description(supplier, rng)
+            else:
+                suburb = _extract_suburb(bank_entry)
+                new_desc = _generate_receipt_description(supplier, suburb, rng)
+            bank_descriptions[matched_idx] = new_desc
+            bank_fields["TRANSACTION_DESCRIPTIONS"] = "|".join(bank_descriptions)
+
         # Build image filenames
         receipt_filename = f"{src_id}_{src_entry['layout']}.png"
         bank_filename = f"{bank_id}_{bank_entry['layout']}.png"
@@ -155,7 +268,7 @@ def main() -> None:
         links[receipt_filename] = [
             {
                 "bank_statement": bank_filename,
-                "supplier": src_fields.get("SUPPLIER_NAME", ""),
+                "supplier": supplier,
                 "receipt_date": src_date_str,
                 "receipt_total": src_total,
                 "bank_date": bank_date_val,
@@ -167,7 +280,7 @@ def main() -> None:
             }
         ]
 
-    # Write updated bank statements (with injected amounts)
+    # Write updated bank statements (with injected amounts and descriptions)
     Path("ground_truth/bank_statements.yml").write_text(
         yaml.dump(dict(bank_stmts), default_flow_style=False, sort_keys=False)
     )
