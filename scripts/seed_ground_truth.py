@@ -256,7 +256,7 @@ def _generate_bank_entries(rng: random.Random, count: int) -> dict:
     layouts = _BANK_LAYOUTS
 
     for i in range(count):
-        case_id = f"CASEB{i + 1:03d}"
+        case_id = f"CASE{i + 1:03d}"
         layout = layouts[i % len(layouts)]
 
         bank_name, bank_code, bsb_prefix = _BANKS[i % len(_BANKS)]
@@ -333,7 +333,7 @@ def _generate_receipt_entries(rng: random.Random, count: int) -> dict:
     layouts = _RECEIPT_LAYOUTS
 
     for i in range(count):
-        case_id = f"CASER{i + 1:03d}"
+        case_id = f"CASE{i + 1:03d}"
         layout = layouts[i % len(layouts)]
 
         retailer, address, _category = _RETAILERS[i % len(_RETAILERS)]
@@ -399,7 +399,7 @@ def _generate_invoice_entries(rng: random.Random, count: int) -> dict:
     layouts = _INVOICE_LAYOUTS
 
     for i in range(count):
-        case_id = f"CASEI{i + 1:03d}"
+        case_id = f"CASE{i + 1:03d}"
         layout = layouts[i % len(layouts)]
 
         svc_name, svc_address, _category = _PROFESSIONAL_SERVICES[i % len(_PROFESSIONAL_SERVICES)]
@@ -480,7 +480,7 @@ def _generate_cc_entries(rng: random.Random, count: int) -> dict:
     layouts = _CC_LAYOUTS
 
     for i in range(count):
-        case_id = f"CASECC{i + 1:03d}"
+        case_id = f"CASE{i + 1:03d}"
         layout = layouts[i % len(layouts)]
 
         bank_name, bank_code, bsb_prefix = _BANKS[i % len(_BANKS)]

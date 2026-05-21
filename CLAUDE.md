@@ -90,7 +90,7 @@ Shared rendering utilities live in `generators/common.py` (fonts, text drawing, 
 
 ## Key Data Conventions
 
-- **Case IDs**: `CASEB###` (bank), `CASER###` (receipt), `CASEI###` (invoice), `CASEC###` (cc)
+- **Case IDs**: `CASE###` — shared across all 4 document types (each case has 1 bank + 1 receipt + 1 invoice + 1 CC)
 - **Dates**: DD/MM/YYYY in ground truth (e.g., `20/09/2024`)
 - **Amounts**: Decimal string without `$` sign (e.g., `137.73`)
 - **ABNs**: `XX XXX XXX XXX` format, must pass ABN checksum (weights `[10,1,3,5,7,9,11,13,15,17,19]`)

@@ -70,7 +70,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
     """Validate a single ground truth YAML entry.
 
     Args:
-        case_id: The CASE ID key (e.g. "CASER001").
+        case_id: The CASE ID key (e.g. "CASE001").
         entry: The YAML dict with 'layout', 'degradation_seed', and 'fields'.
 
     Returns:

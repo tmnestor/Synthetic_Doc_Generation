@@ -110,7 +110,7 @@ graph TD
 YAML is the single source of truth. Each entry specifies a layout reference, degradation seed, and field values:
 
 ```yaml
-CASER001:
+CASE001:
   layout: receipt_thermal_80mm
   degradation_seed: 1001
   fields:
@@ -141,15 +141,16 @@ CASER001:
 | Hard | Amount match, date offset 3-7 days | ~28 |
 
 ```yaml
-LINK001:
-  source_type: RECEIPT
-  source_id: CASER001
-  target_type: BANK_STATEMENT
-  target_id: CASEB012
-  target_transaction_index: 3
-  match_fields:
-    date: '15/03/2024'
-    amount: '67.32'
+# Keys are image filenames; source and target share the same CASE### prefix
+CASE001_receipt_thermal_80mm.png:
+- bank_statement: CASE001_cba_standard.png
+  supplier: Bunnings Warehouse
+  receipt_date: '15/03/2024'
+  receipt_total: '67.32'
+  bank_date: '15/03/2024'
+  bank_description: EFTPOS BUNNINGS W/HOUSE Alexandria AUS
+  bank_amount: '67.32'
+  match_status: FOUND
   match_difficulty: easy
 ```
 

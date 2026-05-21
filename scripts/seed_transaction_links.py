@@ -159,126 +159,125 @@ def main() -> None:
 
     links: dict[str, list[dict]] = {}
 
-    # For each receipt/invoice, find or create a matching bank transaction
-    sources = [
-        *[(cid, entry) for cid, entry in receipts.items()],
-        *[(cid, entry) for cid, entry in invoices.items()],
-    ]
+    # Each case pairs its receipt and invoice with its bank statement
+    # (deterministic within-case pairing via shared CASE### prefix)
+    for case_num in range(1, 56):
+        case_id = f"CASE{case_num:03d}"
+        bank_entry = bank_stmts[case_id]
 
-    bank_list = list(bank_stmts.items())
+        # Process receipt then invoice for this case
+        for src_entry, is_invoice in [
+            (receipts[case_id], False),
+            (invoices[case_id], True),
+        ]:
+            src_fields = src_entry["fields"]
+            src_total = src_fields.get("TOTAL_AMOUNT", "")
+            src_date_str = src_fields.get("INVOICE_DATE", "")
+            src_date = _parse_date(src_date_str)
+            supplier = src_fields.get("SUPPLIER_NAME", "")
 
-    for src_id, src_entry in sources:
-        src_fields = src_entry["fields"]
-        src_total = src_fields.get("TOTAL_AMOUNT", "")
-        src_date_str = src_fields.get("INVOICE_DATE", "")
-        src_date = _parse_date(src_date_str)
-        supplier = src_fields.get("SUPPLIER_NAME", "")
+            if not src_total or not src_date:
+                continue
 
-        if not src_total or not src_date:
-            continue
+            bank_fields = bank_entry["fields"]
 
-        # Assign to a random bank statement
-        bank_id, bank_entry = rng.choice(bank_list)
-        bank_fields = bank_entry["fields"]
+            # Split pipe-delimited transaction fields
+            bank_amounts = bank_fields.get("TRANSACTION_AMOUNTS_PAID", "").split("|")
+            bank_dates = bank_fields.get("TRANSACTION_DATES", "").split("|")
+            bank_descriptions = bank_fields.get("TRANSACTION_DESCRIPTIONS", "").split("|")
 
-        # Split pipe-delimited transaction fields
-        bank_amounts = bank_fields.get("TRANSACTION_AMOUNTS_PAID", "").split("|")
-        bank_dates = bank_fields.get("TRANSACTION_DATES", "").split("|")
-        bank_descriptions = bank_fields.get("TRANSACTION_DESCRIPTIONS", "").split("|")
+            # Try to find exact amount match
+            matched_idx = None
+            for idx, amt in enumerate(bank_amounts):
+                if amt.strip() == src_total:
+                    matched_idx = idx
+                    break
 
-        # Try to find exact amount match
-        matched_idx = None
-        for idx, amt in enumerate(bank_amounts):
-            if amt.strip() == src_total:
-                matched_idx = idx
-                break
+            offset = 0
 
-        offset = 0
+            # If no match, inject the amount into a random position
+            if matched_idx is None:
+                matched_idx = rng.randint(0, len(bank_amounts) - 1)
+                bank_amounts[matched_idx] = src_total
+                bank_fields["TRANSACTION_AMOUNTS_PAID"] = "|".join(bank_amounts)
 
-        # If no match, inject the amount into a random position
-        if matched_idx is None:
-            matched_idx = rng.randint(0, len(bank_amounts) - 1)
-            bank_amounts[matched_idx] = src_total
-            bank_fields["TRANSACTION_AMOUNTS_PAID"] = "|".join(bank_amounts)
-
-            # Also set the date
-            if matched_idx < len(bank_dates):
-                difficulty = rng.choice(["easy", "easy", "medium", "medium", "hard"])
-                if difficulty == "easy":
-                    bank_dates[matched_idx] = src_date_str
-                elif difficulty == "medium":
-                    offset = rng.randint(1, 3)
-                    new_date = src_date + timedelta(days=offset)
-                    bank_dates[matched_idx] = new_date.strftime("%d/%m/%Y")
-                else:
-                    offset = rng.randint(3, 7)
-                    new_date = src_date + timedelta(days=offset)
-                    bank_dates[matched_idx] = new_date.strftime("%d/%m/%Y")
-            else:
-                difficulty = "easy"
-
-            bank_fields["TRANSACTION_DATES"] = "|".join(bank_dates)
-        else:
-            # Determine difficulty from date match
-            if matched_idx < len(bank_dates):
-                bank_date = _parse_date(bank_dates[matched_idx])
-                if bank_date and src_date:
-                    delta = abs((bank_date - src_date).days)
-                    if delta == 0:
-                        difficulty = "easy"
-                    elif delta <= 3:
-                        difficulty = "medium"
-                        offset = delta
+                # Also set the date
+                if matched_idx < len(bank_dates):
+                    difficulty = rng.choice(["easy", "easy", "medium", "medium", "hard"])
+                    if difficulty == "easy":
+                        bank_dates[matched_idx] = src_date_str
+                    elif difficulty == "medium":
+                        offset = rng.randint(1, 3)
+                        new_date = src_date + timedelta(days=offset)
+                        bank_dates[matched_idx] = new_date.strftime("%d/%m/%Y")
                     else:
-                        difficulty = "hard"
-                        offset = delta
+                        offset = rng.randint(3, 7)
+                        new_date = src_date + timedelta(days=offset)
+                        bank_dates[matched_idx] = new_date.strftime("%d/%m/%Y")
                 else:
                     difficulty = "easy"
+
+                bank_fields["TRANSACTION_DATES"] = "|".join(bank_dates)
             else:
-                difficulty = "easy"
+                # Determine difficulty from date match
+                if matched_idx < len(bank_dates):
+                    bank_date = _parse_date(bank_dates[matched_idx])
+                    if bank_date and src_date:
+                        delta = abs((bank_date - src_date).days)
+                        if delta == 0:
+                            difficulty = "easy"
+                        elif delta <= 3:
+                            difficulty = "medium"
+                            offset = delta
+                        else:
+                            difficulty = "hard"
+                            offset = delta
+                    else:
+                        difficulty = "easy"
+                else:
+                    difficulty = "easy"
 
-        # For easy/medium: inject a supplier-matching description into the
-        # bank statement so the description realistically references the
-        # merchant.  For hard: leave the existing unrelated description —
-        # this makes matching genuinely harder (no description confirmation).
-        is_invoice = src_id.startswith("CASEI")
-        if difficulty in ("easy", "medium") and matched_idx < len(bank_descriptions):
-            if is_invoice:
-                new_desc = _generate_invoice_description(supplier, rng)
-            else:
-                suburb = _extract_suburb(bank_entry)
-                new_desc = _generate_receipt_description(supplier, suburb, rng)
-            bank_descriptions[matched_idx] = new_desc
-            bank_fields["TRANSACTION_DESCRIPTIONS"] = "|".join(bank_descriptions)
+            # For easy/medium: inject a supplier-matching description into the
+            # bank statement so the description realistically references the
+            # merchant.  For hard: leave the existing unrelated description —
+            # this makes matching genuinely harder (no description confirmation).
+            if difficulty in ("easy", "medium") and matched_idx < len(bank_descriptions):
+                if is_invoice:
+                    new_desc = _generate_invoice_description(supplier, rng)
+                else:
+                    suburb = _extract_suburb(bank_entry)
+                    new_desc = _generate_receipt_description(supplier, suburb, rng)
+                bank_descriptions[matched_idx] = new_desc
+                bank_fields["TRANSACTION_DESCRIPTIONS"] = "|".join(bank_descriptions)
 
-        # Build image filenames
-        receipt_filename = f"{src_id}_{src_entry['layout']}.png"
-        bank_filename = f"{bank_id}_{bank_entry['layout']}.png"
+            # Build image filenames
+            src_filename = f"{case_id}_{src_entry['layout']}.png"
+            bank_filename = f"{case_id}_{bank_entry['layout']}.png"
 
-        # Extract bank transaction fields at matched index
-        bank_date_val = bank_dates[matched_idx].strip() if matched_idx < len(bank_dates) else ""
-        bank_desc_val = (
-            bank_descriptions[matched_idx].strip() if matched_idx < len(bank_descriptions) else ""
-        )
-        bank_amt_val = bank_amounts[matched_idx].strip()
+            # Extract bank transaction fields at matched index
+            bank_date_val = bank_dates[matched_idx].strip() if matched_idx < len(bank_dates) else ""
+            bank_desc_val = (
+                bank_descriptions[matched_idx].strip() if matched_idx < len(bank_descriptions) else ""
+            )
+            bank_amt_val = bank_amounts[matched_idx].strip()
 
-        total_txns = len(bank_amounts)
-        notes = _build_notes(matched_idx, total_txns, bank_entry["layout"], difficulty, offset)
+            total_txns = len(bank_amounts)
+            notes = _build_notes(matched_idx, total_txns, bank_entry["layout"], difficulty, offset)
 
-        links[receipt_filename] = [
-            {
-                "bank_statement": bank_filename,
-                "supplier": supplier,
-                "receipt_date": src_date_str,
-                "receipt_total": src_total,
-                "bank_date": bank_date_val,
-                "bank_description": bank_desc_val,
-                "bank_amount": bank_amt_val,
-                "match_status": "FOUND",
-                "match_difficulty": difficulty,
-                "notes": notes,
-            }
-        ]
+            links[src_filename] = [
+                {
+                    "bank_statement": bank_filename,
+                    "supplier": supplier,
+                    "receipt_date": src_date_str,
+                    "receipt_total": src_total,
+                    "bank_date": bank_date_val,
+                    "bank_description": bank_desc_val,
+                    "bank_amount": bank_amt_val,
+                    "match_status": "FOUND",
+                    "match_difficulty": difficulty,
+                    "notes": notes,
+                }
+            ]
 
     # Write updated bank statements (with injected amounts and descriptions)
     Path("ground_truth/bank_statements.yml").write_text(
