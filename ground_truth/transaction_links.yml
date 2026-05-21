@@ -1,1100 +1,1210 @@
-LINK001:
-  source_type: RECEIPT
-  source_id: CASER001
-  target_type: BANK_STATEMENT
-  target_id: CASEB041
-  target_transaction_index: 3
-  match_fields:
-    date: 08/04/2023
-    amount: '34.16'
+CASER001_receipt_thermal_80mm.png:
+- bank_statement: CASEB041_cba_standard.png
+  supplier: Bunnings Warehouse
+  receipt_date: 08/04/2023
+  receipt_total: '34.16'
+  bank_date: 08/04/2023
+  bank_description: VISA DEBIT PURCHASE Repco Alexandria AU
+  bank_amount: '34.16'
+  match_status: FOUND
   match_difficulty: easy
-LINK002:
-  source_type: RECEIPT
-  source_id: CASER002
-  target_type: BANK_STATEMENT
-  target_id: CASEB048
-  target_transaction_index: 17
-  match_fields:
-    date: 14/10/2024
-    amount: '279.13'
+  notes: "Early row on cba standard \u2014 exact date and amount match"
+CASER002_receipt_thermal_57mm.png:
+- bank_statement: CASEB008_anz_modern.png
+  supplier: Woolworths
+  receipt_date: 14/10/2024
+  receipt_total: '279.13'
+  bank_date: 15/10/2024
+  bank_description: Transfer To James NetBank
+  bank_amount: '279.13'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on anz modern \u2014 1-day settlement delay"
+CASER003_receipt_retail_tax.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: Coles
+  receipt_date: 28/11/2023
+  receipt_total: '284.69'
+  bank_date: 28/11/2023
+  bank_description: VISA DEBIT PURCHASE SHELL Subiaco AU
+  bank_amount: '284.69'
+  match_status: FOUND
   match_difficulty: easy
-LINK003:
-  source_type: RECEIPT
-  source_id: CASER003
-  target_type: BANK_STATEMENT
-  target_id: CASEB015
-  target_transaction_index: 8
-  match_fields:
-    date: 28/11/2023
-    amount: '284.69'
-  match_difficulty: easy
-LINK004:
-  source_type: RECEIPT
-  source_id: CASER004
-  target_type: BANK_STATEMENT
-  target_id: CASEB044
-  target_transaction_index: 5
-  match_fields:
-    date: 14/10/2024
-    amount: '288.75'
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASER004_receipt_fuel.png:
+- bank_statement: CASEB009_cba_standard.png
+  supplier: Officeworks
+  receipt_date: 14/10/2024
+  receipt_total: '288.75'
+  bank_date: 17/10/2024
+  bank_description: EFTPOS AMPOL Toowoomba AUS
+  bank_amount: '288.75'
+  match_status: FOUND
   match_difficulty: hard
-LINK005:
-  source_type: RECEIPT
-  source_id: CASER005
-  target_type: BANK_STATEMENT
-  target_id: CASEB003
-  target_transaction_index: 1
-  match_fields:
-    date: 07/07/2023
-    amount: '104.08'
+  notes: "Early row on cba standard \u2014 3-day settlement delay"
+CASER005_receipt_professional.png:
+- bank_statement: CASEB038_nab_dense.png
+  supplier: JB Hi-Fi
+  receipt_date: 07/07/2023
+  receipt_total: '104.08'
+  bank_date: 07/07/2023
+  bank_description: EFTPOS DAN MURPHYS South Yarra AUS
+  bank_amount: '104.08'
+  match_status: FOUND
   match_difficulty: easy
-LINK006:
-  source_type: RECEIPT
-  source_id: CASER006
-  target_type: BANK_STATEMENT
-  target_id: CASEB014
-  target_transaction_index: 7
-  match_fields:
-    date: 25/06/2024
-    amount: '70.28'
+  notes: "Late row on nab dense \u2014 exact date and amount match"
+CASER006_receipt_hospitality.png:
+- bank_statement: CASEB002_cba_date_grouped.png
+  supplier: Harvey Norman
+  receipt_date: 25/06/2024
+  receipt_total: '70.28'
+  bank_date: 25/06/2024
+  bank_description: VISA DEBIT PURCHASE SHELL Hawthorn East AU
+  bank_amount: '70.28'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+CASER007_receipt_thermal_80mm.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: Kmart Australia
+  receipt_date: 28/04/2024
+  receipt_total: '55.09'
+  bank_date: 01/05/2024
+  bank_description: Transfer To Ryan NetBank
+  bank_amount: '55.09'
+  match_status: FOUND
   match_difficulty: hard
-LINK007:
-  source_type: RECEIPT
-  source_id: CASER007
-  target_type: BANK_STATEMENT
-  target_id: CASEB002
-  target_transaction_index: 17
-  match_fields:
-    date: 28/04/2024
-    amount: '55.09'
-  match_difficulty: easy
-LINK008:
-  source_type: RECEIPT
-  source_id: CASER008
-  target_type: BANK_STATEMENT
-  target_id: CASEB046
-  target_transaction_index: 26
-  match_fields:
-    date: 19/07/2023
-    amount: '227.27'
-  match_difficulty: easy
-LINK009:
-  source_type: RECEIPT
-  source_id: CASER009
-  target_type: BANK_STATEMENT
-  target_id: CASEB029
-  target_transaction_index: 17
-  match_fields:
-    date: 01/06/2023
-    amount: '482.93'
-  match_difficulty: easy
-LINK010:
-  source_type: RECEIPT
-  source_id: CASER010
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 10
-  match_fields:
-    date: 08/08/2024
-    amount: '249.33'
-  match_difficulty: medium
-LINK011:
-  source_type: RECEIPT
-  source_id: CASER011
-  target_type: BANK_STATEMENT
-  target_id: CASEB018
-  target_transaction_index: 4
-  match_fields:
-    date: 03/07/2024
-    amount: '249.60'
-  match_difficulty: easy
-LINK012:
-  source_type: RECEIPT
-  source_id: CASER012
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 21
-  match_fields:
-    date: 27/07/2024
-    amount: '256.45'
-  match_difficulty: easy
-LINK013:
-  source_type: RECEIPT
-  source_id: CASER013
-  target_type: BANK_STATEMENT
-  target_id: CASEB006
-  target_transaction_index: 24
-  match_fields:
-    date: 26/04/2023
-    amount: '112.23'
-  match_difficulty: easy
-LINK014:
-  source_type: RECEIPT
-  source_id: CASER014
-  target_type: BANK_STATEMENT
-  target_id: CASEB023
-  target_transaction_index: 22
-  match_fields:
-    date: 23/08/2024
-    amount: '127.58'
+  notes: "Late row on anz standard \u2014 3-day settlement delay"
+CASER008_receipt_thermal_57mm.png:
+- bank_statement: CASEB036_westpac_premium.png
+  supplier: Big W
+  receipt_date: 19/07/2023
+  receipt_total: '227.27'
+  bank_date: 25/07/2023
+  bank_description: EFTPOS TARGET Hobart AUS
+  bank_amount: '227.27'
+  match_status: FOUND
   match_difficulty: hard
-LINK015:
-  source_type: RECEIPT
-  source_id: CASER015
-  target_type: BANK_STATEMENT
-  target_id: CASEB052
-  target_transaction_index: 2
-  match_fields:
-    date: 10/12/2024
-    amount: '166.25'
-  match_difficulty: medium
-LINK016:
-  source_type: RECEIPT
-  source_id: CASER016
-  target_type: BANK_STATEMENT
-  target_id: CASEB008
-  target_transaction_index: 29
-  match_fields:
-    date: 10/10/2023
-    amount: '88.29'
-  match_difficulty: medium
-LINK017:
-  source_type: RECEIPT
-  source_id: CASER017
-  target_type: BANK_STATEMENT
-  target_id: CASEB036
-  target_transaction_index: 18
-  match_fields:
-    date: 20/08/2024
-    amount: '139.68'
+  notes: "Mid row on westpac premium \u2014 6-day settlement delay"
+CASER009_receipt_retail_tax.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: Chemist Warehouse
+  receipt_date: 01/06/2023
+  receipt_total: '482.93'
+  bank_date: 06/06/2023
+  bank_description: EFTPOS JB HI-FI Subiaco AUS
+  bank_amount: '482.93'
+  match_status: FOUND
   match_difficulty: hard
-LINK018:
-  source_type: RECEIPT
-  source_id: CASER018
-  target_type: BANK_STATEMENT
-  target_id: CASEB037
-  target_transaction_index: 12
-  match_fields:
-    date: 21/08/2024
-    amount: '31.31'
+  notes: "Late row on anz standard \u2014 5-day settlement delay"
+CASER010_receipt_fuel.png:
+- bank_statement: CASEB052_westpac_premium.png
+  supplier: Dan Murphy's
+  receipt_date: 08/08/2024
+  receipt_total: '249.33'
+  bank_date: 08/08/2024
+  bank_description: DD AGL REF74651 MHF 1234
+  bank_amount: '249.33'
+  match_status: FOUND
   match_difficulty: easy
-LINK019:
-  source_type: RECEIPT
-  source_id: CASER019
-  target_type: BANK_STATEMENT
-  target_id: CASEB003
-  target_transaction_index: 14
-  match_fields:
-    date: 10/04/2024
-    amount: '25.87'
+  notes: "Early row on westpac premium \u2014 exact date and amount match"
+CASER011_receipt_professional.png:
+- bank_statement: CASEB045_nab_classic.png
+  supplier: BP Australia
+  receipt_date: 03/07/2024
+  receipt_total: '249.60'
+  bank_date: 05/07/2024
+  bank_description: Transfer To Emma NetBank
+  bank_amount: '249.60'
+  match_status: FOUND
   match_difficulty: medium
-LINK020:
-  source_type: RECEIPT
-  source_id: CASER020
-  target_type: BANK_STATEMENT
-  target_id: CASEB055
-  target_transaction_index: 14
-  match_fields:
-    date: 15/08/2024
-    amount: '313.37'
-  match_difficulty: easy
-LINK021:
-  source_type: RECEIPT
-  source_id: CASER021
-  target_type: BANK_STATEMENT
-  target_id: CASEB025
-  target_transaction_index: 17
-  match_fields:
-    date: 15/01/2023
-    amount: '238.30'
+  notes: "Mid row on nab classic \u2014 2-day settlement delay"
+CASER012_receipt_hospitality.png:
+- bank_statement: CASEB010_cba_date_grouped.png
+  supplier: Shell Australia
+  receipt_date: 27/07/2024
+  receipt_total: '256.45'
+  bank_date: 28/07/2024
+  bank_description: EFTPOS WOOLWORTHS Glenelg AUS
+  bank_amount: '256.45'
+  match_status: FOUND
   match_difficulty: medium
-LINK022:
-  source_type: RECEIPT
-  source_id: CASER022
-  target_type: BANK_STATEMENT
-  target_id: CASEB054
-  target_transaction_index: 11
-  match_fields:
-    date: 27/12/2023
-    amount: '10.23'
+  notes: "Early row on cba date grouped \u2014 1-day settlement delay"
+CASER013_receipt_thermal_80mm.png:
+- bank_statement: CASEB006_nab_dense.png
+  supplier: Ampol Limited
+  receipt_date: 26/04/2023
+  receipt_total: '112.23'
+  bank_date: 26/04/2023
+  bank_description: VISA DEBIT PURCHASE 7-Eleven Aus Hobart AU
+  bank_amount: '112.23'
+  match_status: FOUND
   match_difficulty: easy
-LINK023:
-  source_type: RECEIPT
-  source_id: CASER023
-  target_type: BANK_STATEMENT
-  target_id: CASEB024
-  target_transaction_index: 11
-  match_fields:
-    date: 19/04/2023
-    amount: '114.30'
-  match_difficulty: easy
-LINK024:
-  source_type: RECEIPT
-  source_id: CASER024
-  target_type: BANK_STATEMENT
-  target_id: CASEB043
-  target_transaction_index: 17
-  match_fields:
-    date: 01/10/2024
-    amount: '267.79'
-  match_difficulty: easy
-LINK025:
-  source_type: RECEIPT
-  source_id: CASER025
-  target_type: BANK_STATEMENT
-  target_id: CASEB039
-  target_transaction_index: 20
-  match_fields:
-    date: 16/09/2024
-    amount: '260.44'
-  match_difficulty: easy
-LINK026:
-  source_type: RECEIPT
-  source_id: CASER026
-  target_type: BANK_STATEMENT
-  target_id: CASEB035
-  target_transaction_index: 15
-  match_fields:
-    date: 06/08/2024
-    amount: '38.82'
-  match_difficulty: easy
-LINK027:
-  source_type: RECEIPT
-  source_id: CASER027
-  target_type: BANK_STATEMENT
-  target_id: CASEB030
-  target_transaction_index: 24
-  match_fields:
-    date: 22/11/2024
-    amount: '79.85'
+  notes: "Late row on nab dense \u2014 exact date and amount match"
+CASER014_receipt_thermal_57mm.png:
+- bank_statement: CASEB025_cba_standard.png
+  supplier: 7-Eleven Australia
+  receipt_date: 23/08/2024
+  receipt_total: '127.58'
+  bank_date: 25/08/2024
+  bank_description: EFTPOS OFFICEWORKS Subiaco AUS
+  bank_amount: '127.58'
+  match_status: FOUND
   match_difficulty: medium
-LINK028:
-  source_type: RECEIPT
-  source_id: CASER028
-  target_type: BANK_STATEMENT
-  target_id: CASEB045
-  target_transaction_index: 17
-  match_fields:
-    date: 07/03/2024
-    amount: '109.42'
+  notes: "Early row on cba standard \u2014 2-day settlement delay"
+CASER015_receipt_retail_tax.png:
+- bank_statement: CASEB039_anz_standard.png
+  supplier: Myer
+  receipt_date: 10/12/2024
+  receipt_total: '166.25'
+  bank_date: 10/12/2024
+  bank_description: ATM WITHDRAWAL Toowoomba
+  bank_amount: '166.25'
+  match_status: FOUND
   match_difficulty: easy
-LINK029:
-  source_type: RECEIPT
-  source_id: CASER029
-  target_type: BANK_STATEMENT
-  target_id: CASEB044
-  target_transaction_index: 20
-  match_fields:
-    date: 12/05/2024
-    amount: '55.89'
-  match_difficulty: easy
-LINK030:
-  source_type: RECEIPT
-  source_id: CASER030
-  target_type: BANK_STATEMENT
-  target_id: CASEB015
-  target_transaction_index: 2
-  match_fields:
-    date: 13/10/2024
-    amount: '64.28'
-  match_difficulty: medium
-LINK031:
-  source_type: RECEIPT
-  source_id: CASER031
-  target_type: BANK_STATEMENT
-  target_id: CASEB018
-  target_transaction_index: 2
-  match_fields:
-    date: 01/06/2024
-    amount: '158.41'
-  match_difficulty: easy
-LINK032:
-  source_type: RECEIPT
-  source_id: CASER032
-  target_type: BANK_STATEMENT
-  target_id: CASEB037
-  target_transaction_index: 20
-  match_fields:
-    date: 08/02/2023
-    amount: '212.12'
-  match_difficulty: easy
-LINK033:
-  source_type: RECEIPT
-  source_id: CASER033
-  target_type: BANK_STATEMENT
-  target_id: CASEB042
-  target_transaction_index: 31
-  match_fields:
-    date: 31/12/2024
-    amount: '219.05'
-  match_difficulty: medium
-LINK034:
-  source_type: RECEIPT
-  source_id: CASER034
-  target_type: BANK_STATEMENT
-  target_id: CASEB030
-  target_transaction_index: 9
-  match_fields:
-    date: 19/03/2023
-    amount: '215.43'
-  match_difficulty: medium
-LINK035:
-  source_type: RECEIPT
-  source_id: CASER035
-  target_type: BANK_STATEMENT
-  target_id: CASEB016
-  target_transaction_index: 34
-  match_fields:
-    date: 01/12/2024
-    amount: '68.47'
-  match_difficulty: medium
-LINK036:
-  source_type: RECEIPT
-  source_id: CASER036
-  target_type: BANK_STATEMENT
-  target_id: CASEB038
-  target_transaction_index: 27
-  match_fields:
-    date: 29/12/2024
-    amount: '30.02'
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASER016_receipt_fuel.png:
+- bank_statement: CASEB047_anz_standard.png
+  supplier: David Jones
+  receipt_date: 10/10/2023
+  receipt_total: '88.29'
+  bank_date: 13/10/2023
+  bank_description: EFTPOS COLES Parramatta AUS
+  bank_amount: '88.29'
+  match_status: FOUND
   match_difficulty: hard
-LINK037:
-  source_type: RECEIPT
-  source_id: CASER037
-  target_type: BANK_STATEMENT
-  target_id: CASEB024
-  target_transaction_index: 7
-  match_fields:
-    date: 24/10/2024
-    amount: '4.43'
-  match_difficulty: easy
-LINK038:
-  source_type: RECEIPT
-  source_id: CASER038
-  target_type: BANK_STATEMENT
-  target_id: CASEB033
-  target_transaction_index: 31
-  match_fields:
-    date: 26/08/2024
-    amount: '33.00'
-  match_difficulty: easy
-LINK039:
-  source_type: RECEIPT
-  source_id: CASER039
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 3
-  match_fields:
-    date: 19/01/2024
-    amount: '165.18'
-  match_difficulty: easy
-LINK040:
-  source_type: RECEIPT
-  source_id: CASER040
-  target_type: BANK_STATEMENT
-  target_id: CASEB010
-  target_transaction_index: 20
-  match_fields:
-    date: 28/09/2023
-    amount: '173.70'
-  match_difficulty: easy
-LINK041:
-  source_type: RECEIPT
-  source_id: CASER041
-  target_type: BANK_STATEMENT
-  target_id: CASEB051
-  target_transaction_index: 27
-  match_fields:
-    date: 14/11/2023
-    amount: '106.06'
+  notes: "Late row on anz standard \u2014 3-day settlement delay"
+CASER017_receipt_professional.png:
+- bank_statement: CASEB025_cba_standard.png
+  supplier: Target Australia
+  receipt_date: 20/08/2024
+  receipt_total: '139.68'
+  bank_date: 25/08/2024
+  bank_description: EFTPOS WOOLWORTHS Subiaco AUS
+  bank_amount: '139.68'
+  match_status: FOUND
   match_difficulty: hard
-LINK042:
-  source_type: RECEIPT
-  source_id: CASER042
-  target_type: BANK_STATEMENT
-  target_id: CASEB025
-  target_transaction_index: 24
-  match_fields:
-    date: 19/07/2023
-    amount: '110.13'
+  notes: "Early row on cba standard \u2014 5-day settlement delay"
+CASER018_receipt_hospitality.png:
+- bank_statement: CASEB054_nab_dense.png
+  supplier: Spotlight
+  receipt_date: 21/08/2024
+  receipt_total: '31.31'
+  bank_date: 26/08/2024
+  bank_description: EFTPOS OFFICEWORKS Norwood AUS
+  bank_amount: '31.31'
+  match_status: FOUND
   match_difficulty: hard
-LINK043:
-  source_type: RECEIPT
-  source_id: CASER043
-  target_type: BANK_STATEMENT
-  target_id: CASEB034
-  target_transaction_index: 8
-  match_fields:
-    date: 22/11/2024
-    amount: '356.46'
+  notes: "Late row on nab dense \u2014 5-day settlement delay"
+CASER019_receipt_thermal_80mm.png:
+- bank_statement: CASEB037_nab_classic.png
+  supplier: Supercheap Auto
+  receipt_date: 10/04/2024
+  receipt_total: '25.87'
+  bank_date: 10/04/2024
+  bank_description: EFTPOS TARGET Parramatta AUS
+  bank_amount: '25.87'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on nab classic \u2014 exact date and amount match"
+CASER020_receipt_thermal_57mm.png:
+- bank_statement: CASEB003_westpac_standard.png
+  supplier: Repco
+  receipt_date: 15/08/2024
+  receipt_total: '313.37'
+  bank_date: 16/08/2024
+  bank_description: VISA DEBIT PURCHASE SHELL Fortitude Valley AU
+  bank_amount: '313.37'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 1-day settlement delay"
+CASER021_receipt_retail_tax.png:
+- bank_statement: CASEB055_anz_standard.png
+  supplier: Bunnings Warehouse
+  receipt_date: 15/01/2023
+  receipt_total: '238.30'
+  bank_date: 15/01/2023
+  bank_description: EFTPOS KMART Subiaco AUS
+  bank_amount: '238.30'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on anz standard \u2014 exact date and amount match"
+CASER022_receipt_fuel.png:
+- bank_statement: CASEB025_cba_standard.png
+  supplier: Woolworths
+  receipt_date: 27/12/2023
+  receipt_total: '10.23'
+  bank_date: 30/12/2023
+  bank_description: EFTPOS JB HI-FI Subiaco AUS
+  bank_amount: '10.23'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on cba standard \u2014 3-day settlement delay"
+CASER023_receipt_professional.png:
+- bank_statement: CASEB054_nab_dense.png
+  supplier: Coles
+  receipt_date: 19/04/2023
+  receipt_total: '114.30'
+  bank_date: 19/04/2023
+  bank_description: EFTPOS COLES Norwood AUS
+  bank_amount: '114.30'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab dense \u2014 exact date and amount match"
+CASER024_receipt_hospitality.png:
+- bank_statement: CASEB024_anz_modern.png
+  supplier: Officeworks
+  receipt_date: 01/10/2024
+  receipt_total: '267.79'
+  bank_date: 01/10/2024
+  bank_description: BPAY ORIGIN ENERGY CRN 183682466
+  bank_amount: '267.79'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on anz modern \u2014 exact date and amount match"
+CASER025_receipt_thermal_80mm.png:
+- bank_statement: CASEB043_westpac_standard.png
+  supplier: JB Hi-Fi
+  receipt_date: 16/09/2024
+  receipt_total: '260.44'
+  bank_date: 16/09/2024
+  bank_description: ATM WITHDRAWAL Fortitude Valley
+  bank_amount: '260.44'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+CASER026_receipt_thermal_57mm.png:
+- bank_statement: CASEB039_anz_standard.png
+  supplier: Harvey Norman
+  receipt_date: 06/08/2024
+  receipt_total: '38.82'
+  bank_date: 06/08/2024
+  bank_description: EFTPOS OFFICEWORKS Toowoomba AUS
+  bank_amount: '38.82'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on anz standard \u2014 exact date and amount match"
+CASER027_receipt_retail_tax.png:
+- bank_statement: CASEB035_westpac_standard.png
+  supplier: Kmart Australia
+  receipt_date: 22/11/2024
+  receipt_total: '79.85'
+  bank_date: 22/11/2024
+  bank_description: EFTPOS AMPOL Subiaco AUS
+  bank_amount: '79.85'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+CASER028_receipt_fuel.png:
+- bank_statement: CASEB030_nab_dense.png
+  supplier: Big W
+  receipt_date: 07/03/2024
+  receipt_total: '109.42'
+  bank_date: 10/03/2024
+  bank_description: EFTPOS WOOLWORTHS Glenelg AUS
+  bank_amount: '109.42'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on nab dense \u2014 3-day settlement delay"
+CASER029_receipt_professional.png:
+- bank_statement: CASEB045_nab_classic.png
+  supplier: Chemist Warehouse
+  receipt_date: 12/05/2024
+  receipt_total: '55.89'
+  bank_date: 12/05/2024
+  bank_description: EFTPOS WOOLWORTHS Subiaco AUS
+  bank_amount: '55.89'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab classic \u2014 exact date and amount match"
+CASER030_receipt_hospitality.png:
+- bank_statement: CASEB044_westpac_premium.png
+  supplier: Dan Murphy's
+  receipt_date: 13/10/2024
+  receipt_total: '64.28'
+  bank_date: 13/10/2024
+  bank_description: Salary ATO PAYROLL REF20959
+  bank_amount: '64.28'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on westpac premium \u2014 exact date and amount match"
+CASER031_receipt_thermal_80mm.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: BP Australia
+  receipt_date: 01/06/2024
+  receipt_total: '158.41'
+  bank_date: 03/06/2024
+  bank_description: VISA DEBIT PURCHASE SHELL Subiaco AU
+  bank_amount: '158.41'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on anz standard \u2014 2-day settlement delay"
+CASER032_receipt_thermal_57mm.png:
+- bank_statement: CASEB018_cba_date_grouped.png
+  supplier: Shell Australia
+  receipt_date: 08/02/2023
+  receipt_total: '212.12'
+  bank_date: 08/02/2023
+  bank_description: BPAY TELSTRA CRN 960707259
+  bank_amount: '212.12'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+CASER033_receipt_retail_tax.png:
+- bank_statement: CASEB037_nab_classic.png
+  supplier: Ampol Limited
+  receipt_date: 31/12/2024
+  receipt_total: '219.05'
+  bank_date: 31/12/2024
+  bank_description: EFTPOS WOOLWORTHS Parramatta AUS
+  bank_amount: '219.05'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab classic \u2014 exact date and amount match"
+CASER034_receipt_fuel.png:
+- bank_statement: CASEB042_cba_date_grouped.png
+  supplier: 7-Eleven Australia
+  receipt_date: 19/03/2023
+  receipt_total: '215.43'
+  bank_date: 22/03/2023
+  bank_description: EFTPOS JB HI-FI Hawthorn East AUS
+  bank_amount: '215.43'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on cba date grouped \u2014 3-day settlement delay"
+CASER035_receipt_professional.png:
+- bank_statement: CASEB030_nab_dense.png
+  supplier: Myer
+  receipt_date: 01/12/2024
+  receipt_total: '68.47'
+  bank_date: 02/12/2024
+  bank_description: DD INSURANCE REF24884
+  bank_amount: '68.47'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on nab dense \u2014 1-day settlement delay"
+CASER036_receipt_hospitality.png:
+- bank_statement: CASEB016_anz_modern.png
+  supplier: David Jones
+  receipt_date: 29/12/2024
+  receipt_total: '30.02'
+  bank_date: 01/01/2025
+  bank_description: DD INSURANCE REF64627
+  bank_amount: '30.02'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on anz modern \u2014 3-day settlement delay"
+CASER037_receipt_thermal_80mm.png:
+- bank_statement: CASEB038_nab_dense.png
+  supplier: Target Australia
+  receipt_date: 24/10/2024
+  receipt_total: '4.43'
+  bank_date: 30/10/2024
+  bank_description: EFTPOS DAN MURPHYS South Yarra AUS
+  bank_amount: '4.43'
+  match_status: FOUND
   match_difficulty: hard
-LINK044:
-  source_type: RECEIPT
-  source_id: CASER044
-  target_type: BANK_STATEMENT
-  target_id: CASEB044
-  target_transaction_index: 7
-  match_fields:
-    date: 07/03/2023
-    amount: '28.53'
+  notes: "Late row on nab dense \u2014 6-day settlement delay"
+CASER038_receipt_thermal_57mm.png:
+- bank_statement: CASEB024_anz_modern.png
+  supplier: Spotlight
+  receipt_date: 26/08/2024
+  receipt_total: '33.00'
+  bank_date: 26/08/2024
+  bank_description: EFTPOS KMART Norwood AUS
+  bank_amount: '33.00'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on anz modern \u2014 exact date and amount match"
+CASER039_receipt_retail_tax.png:
+- bank_statement: CASEB033_cba_standard.png
+  supplier: Supercheap Auto
+  receipt_date: 19/01/2024
+  receipt_total: '165.18'
+  bank_date: 19/01/2024
+  bank_description: DD AGL REF36703 MHF 1234
+  bank_amount: '165.18'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on cba standard \u2014 exact date and amount match"
+CASER040_receipt_fuel.png:
+- bank_statement: CASEB049_cba_standard.png
+  supplier: Repco
+  receipt_date: 28/09/2023
+  receipt_total: '173.70'
+  bank_date: 28/09/2023
+  bank_description: VISA DEBIT PURCHASE SHELL Toowoomba AU
+  bank_amount: '173.70'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on cba standard \u2014 exact date and amount match"
+CASER041_receipt_professional.png:
+- bank_statement: CASEB010_cba_date_grouped.png
+  supplier: Bunnings Warehouse
+  receipt_date: 14/11/2023
+  receipt_total: '106.06'
+  bank_date: 14/11/2023
+  bank_description: BPAY ORIGIN ENERGY CRN 134075063
+  bank_amount: '106.06'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on cba date grouped \u2014 exact date and amount match"
+CASER042_receipt_hospitality.png:
+- bank_statement: CASEB051_westpac_standard.png
+  supplier: Woolworths
+  receipt_date: 19/07/2023
+  receipt_total: '110.13'
+  bank_date: 22/07/2023
+  bank_description: EFTPOS TARGET Alexandria AUS
+  bank_amount: '110.13'
+  match_status: FOUND
   match_difficulty: hard
-LINK045:
-  source_type: RECEIPT
-  source_id: CASER045
-  target_type: BANK_STATEMENT
-  target_id: CASEB050
-  target_transaction_index: 20
-  match_fields:
-    date: 30/06/2024
-    amount: '39.89'
-  match_difficulty: medium
-LINK046:
-  source_type: RECEIPT
-  source_id: CASER046
-  target_type: BANK_STATEMENT
-  target_id: CASEB019
-  target_transaction_index: 13
-  match_fields:
-    date: 01/06/2023
-    amount: '27.42'
-  match_difficulty: easy
-LINK047:
-  source_type: RECEIPT
-  source_id: CASER047
-  target_type: BANK_STATEMENT
-  target_id: CASEB030
-  target_transaction_index: 0
-  match_fields:
-    date: 15/01/2024
-    amount: '120.09'
-  match_difficulty: medium
-LINK048:
-  source_type: RECEIPT
-  source_id: CASER048
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 11
-  match_fields:
-    date: 24/08/2023
-    amount: '278.06'
+  notes: "Late row on westpac standard \u2014 3-day settlement delay"
+CASER043_receipt_thermal_80mm.png:
+- bank_statement: CASEB025_cba_standard.png
+  supplier: Coles
+  receipt_date: 22/11/2024
+  receipt_total: '356.46'
+  bank_date: 28/11/2024
+  bank_description: EFTPOS WOOLWORTHS Subiaco AUS
+  bank_amount: '356.46'
+  match_status: FOUND
   match_difficulty: hard
-LINK049:
-  source_type: RECEIPT
-  source_id: CASER049
-  target_type: BANK_STATEMENT
-  target_id: CASEB041
-  target_transaction_index: 9
-  match_fields:
-    date: 12/06/2023
-    amount: '216.60'
+  notes: "Mid row on cba standard \u2014 6-day settlement delay"
+CASER044_receipt_thermal_57mm.png:
+- bank_statement: CASEB034_cba_date_grouped.png
+  supplier: Officeworks
+  receipt_date: 07/03/2023
+  receipt_total: '28.53'
+  bank_date: 10/03/2023
+  bank_description: Transfer To Mia NetBank
+  bank_amount: '28.53'
+  match_status: FOUND
   match_difficulty: hard
-LINK050:
-  source_type: RECEIPT
-  source_id: CASER050
-  target_type: BANK_STATEMENT
-  target_id: CASEB013
-  target_transaction_index: 4
-  match_fields:
-    date: 24/05/2023
-    amount: '213.06'
-  match_difficulty: medium
-LINK051:
-  source_type: RECEIPT
-  source_id: CASER051
-  target_type: BANK_STATEMENT
-  target_id: CASEB035
-  target_transaction_index: 33
-  match_fields:
-    date: 06/07/2023
-    amount: '100.98'
-  match_difficulty: easy
-LINK052:
-  source_type: RECEIPT
-  source_id: CASER052
-  target_type: BANK_STATEMENT
-  target_id: CASEB039
-  target_transaction_index: 10
-  match_fields:
-    date: 16/01/2023
-    amount: '90.15'
-  match_difficulty: medium
-LINK053:
-  source_type: RECEIPT
-  source_id: CASER053
-  target_type: BANK_STATEMENT
-  target_id: CASEB008
-  target_transaction_index: 29
-  match_fields:
-    date: 01/06/2023
-    amount: '227.55'
-  match_difficulty: medium
-LINK054:
-  source_type: RECEIPT
-  source_id: CASER054
-  target_type: BANK_STATEMENT
-  target_id: CASEB016
-  target_transaction_index: 3
-  match_fields:
-    date: 03/07/2023
-    amount: '19.80'
-  match_difficulty: easy
-LINK055:
-  source_type: RECEIPT
-  source_id: CASER055
-  target_type: BANK_STATEMENT
-  target_id: CASEB037
-  target_transaction_index: 5
-  match_fields:
-    date: 28/03/2024
-    amount: '145.97'
-  match_difficulty: easy
-LINK056:
-  source_type: INVOICE
-  source_id: CASEI001
-  target_type: BANK_STATEMENT
-  target_id: CASEB047
-  target_transaction_index: 31
-  match_fields:
-    date: 17/04/2023
-    amount: '6493.84'
-  match_difficulty: easy
-LINK057:
-  source_type: INVOICE
-  source_id: CASEI002
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 34
-  match_fields:
-    date: 09/04/2023
-    amount: '8026.87'
-  match_difficulty: easy
-LINK058:
-  source_type: INVOICE
-  source_id: CASEI003
-  target_type: BANK_STATEMENT
-  target_id: CASEB009
-  target_transaction_index: 30
-  match_fields:
-    date: 02/11/2024
-    amount: '990.75'
+  notes: "Early row on cba date grouped \u2014 3-day settlement delay"
+CASER045_receipt_retail_tax.png:
+- bank_statement: CASEB044_westpac_premium.png
+  supplier: JB Hi-Fi
+  receipt_date: 30/06/2024
+  receipt_total: '39.89'
+  bank_date: 05/07/2024
+  bank_description: EFTPOS JB HI-FI Norwood AUS
+  bank_amount: '39.89'
+  match_status: FOUND
   match_difficulty: hard
-LINK059:
-  source_type: INVOICE
-  source_id: CASEI004
-  target_type: BANK_STATEMENT
-  target_id: CASEB017
-  target_transaction_index: 33
-  match_fields:
-    date: 16/10/2023
-    amount: '8639.83'
+  notes: "Early row on westpac premium \u2014 5-day settlement delay"
+CASER046_receipt_fuel.png:
+- bank_statement: CASEB050_cba_date_grouped.png
+  supplier: Harvey Norman
+  receipt_date: 01/06/2023
+  receipt_total: '27.42'
+  bank_date: 02/06/2023
+  bank_description: Transfer To James NetBank
+  bank_amount: '27.42'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on cba date grouped \u2014 1-day settlement delay"
+CASER047_receipt_professional.png:
+- bank_statement: CASEB019_westpac_standard.png
+  supplier: Kmart Australia
+  receipt_date: 15/01/2024
+  receipt_total: '120.09'
+  bank_date: 15/01/2024
+  bank_description: EFTPOS DAN MURPHYS Toowoomba AUS
+  bank_amount: '120.09'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+CASER048_receipt_hospitality.png:
+- bank_statement: CASEB030_nab_dense.png
+  supplier: Big W
+  receipt_date: 24/08/2023
+  receipt_total: '278.06'
+  bank_date: 27/08/2023
+  bank_description: EFTPOS COLES Glenelg AUS
+  bank_amount: '278.06'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on nab dense \u2014 3-day settlement delay"
+CASER049_receipt_thermal_80mm.png:
+- bank_statement: CASEB049_cba_standard.png
+  supplier: Chemist Warehouse
+  receipt_date: 12/06/2023
+  receipt_total: '216.60'
+  bank_date: 15/06/2023
+  bank_description: ATM WITHDRAWAL Toowoomba
+  bank_amount: '216.60'
+  match_status: FOUND
   match_difficulty: hard
-LINK060:
-  source_type: INVOICE
-  source_id: CASEI005
-  target_type: BANK_STATEMENT
-  target_id: CASEB014
-  target_transaction_index: 17
-  match_fields:
-    date: 25/11/2024
-    amount: '4667.21'
-  match_difficulty: easy
-LINK061:
-  source_type: INVOICE
-  source_id: CASEI006
-  target_type: BANK_STATEMENT
-  target_id: CASEB046
-  target_transaction_index: 19
-  match_fields:
-    date: 26/02/2024
-    amount: '6316.87'
-  match_difficulty: medium
-LINK062:
-  source_type: INVOICE
-  source_id: CASEI007
-  target_type: BANK_STATEMENT
-  target_id: CASEB042
-  target_transaction_index: 23
-  match_fields:
-    date: 14/08/2024
-    amount: '6977.45'
-  match_difficulty: medium
-LINK063:
-  source_type: INVOICE
-  source_id: CASEI008
-  target_type: BANK_STATEMENT
-  target_id: CASEB029
-  target_transaction_index: 7
-  match_fields:
-    date: 27/03/2023
-    amount: '7228.03'
-  match_difficulty: easy
-LINK064:
-  source_type: INVOICE
-  source_id: CASEI009
-  target_type: BANK_STATEMENT
-  target_id: CASEB015
-  target_transaction_index: 4
-  match_fields:
-    date: 12/09/2023
-    amount: '6802.27'
-  match_difficulty: medium
-LINK065:
-  source_type: INVOICE
-  source_id: CASEI010
-  target_type: BANK_STATEMENT
-  target_id: CASEB038
-  target_transaction_index: 35
-  match_fields:
-    date: 20/09/2023
-    amount: '3529.68'
-  match_difficulty: easy
-LINK066:
-  source_type: INVOICE
-  source_id: CASEI011
-  target_type: BANK_STATEMENT
-  target_id: CASEB038
-  target_transaction_index: 14
-  match_fields:
-    date: 24/03/2024
-    amount: '2268.75'
-  match_difficulty: easy
-LINK067:
-  source_type: INVOICE
-  source_id: CASEI012
-  target_type: BANK_STATEMENT
-  target_id: CASEB005
-  target_transaction_index: 3
-  match_fields:
-    date: 20/12/2023
-    amount: '1371.06'
-  match_difficulty: easy
-LINK068:
-  source_type: INVOICE
-  source_id: CASEI013
-  target_type: BANK_STATEMENT
-  target_id: CASEB005
-  target_transaction_index: 2
-  match_fields:
-    date: 13/04/2023
-    amount: '6891.21'
-  match_difficulty: medium
-LINK069:
-  source_type: INVOICE
-  source_id: CASEI014
-  target_type: BANK_STATEMENT
-  target_id: CASEB033
-  target_transaction_index: 15
-  match_fields:
-    date: 01/06/2024
-    amount: '3222.51'
-  match_difficulty: medium
-LINK070:
-  source_type: INVOICE
-  source_id: CASEI015
-  target_type: BANK_STATEMENT
-  target_id: CASEB032
-  target_transaction_index: 13
-  match_fields:
-    date: 15/11/2023
-    amount: '3688.52'
+  notes: "Early row on cba standard \u2014 3-day settlement delay"
+CASER050_receipt_thermal_57mm.png:
+- bank_statement: CASEB041_cba_standard.png
+  supplier: Dan Murphy's
+  receipt_date: 24/05/2023
+  receipt_total: '213.06'
+  bank_date: 31/05/2023
+  bank_description: EFTPOS OFFICEWORKS Alexandria AUS
+  bank_amount: '213.06'
+  match_status: FOUND
   match_difficulty: hard
-LINK071:
-  source_type: INVOICE
-  source_id: CASEI016
-  target_type: BANK_STATEMENT
-  target_id: CASEB047
-  target_transaction_index: 30
-  match_fields:
-    date: 13/01/2024
-    amount: '7023.63'
-  match_difficulty: easy
-LINK072:
-  source_type: INVOICE
-  source_id: CASEI017
-  target_type: BANK_STATEMENT
-  target_id: CASEB051
-  target_transaction_index: 30
-  match_fields:
-    date: 08/05/2024
-    amount: '1797.77'
+  notes: "Early row on cba standard \u2014 7-day settlement delay"
+CASER051_receipt_retail_tax.png:
+- bank_statement: CASEB013_nab_classic.png
+  supplier: BP Australia
+  receipt_date: 06/07/2023
+  receipt_total: '100.98'
+  bank_date: 07/07/2023
+  bank_description: ATM WITHDRAWAL Fortitude Valley
+  bank_amount: '100.98'
+  match_status: FOUND
   match_difficulty: medium
-LINK073:
-  source_type: INVOICE
-  source_id: CASEI018
-  target_type: BANK_STATEMENT
-  target_id: CASEB007
-  target_transaction_index: 3
-  match_fields:
-    date: 02/07/2024
-    amount: '17255.43'
-  match_difficulty: medium
-LINK074:
-  source_type: INVOICE
-  source_id: CASEI019
-  target_type: BANK_STATEMENT
-  target_id: CASEB028
-  target_transaction_index: 26
-  match_fields:
-    date: 17/11/2024
-    amount: '18796.38'
-  match_difficulty: medium
-LINK075:
-  source_type: INVOICE
-  source_id: CASEI020
-  target_type: BANK_STATEMENT
-  target_id: CASEB004
-  target_transaction_index: 6
-  match_fields:
-    date: 20/09/2024
-    amount: '4925.16'
+  notes: "Early row on nab classic \u2014 1-day settlement delay"
+CASER052_receipt_fuel.png:
+- bank_statement: CASEB035_westpac_standard.png
+  supplier: Shell Australia
+  receipt_date: 16/01/2023
+  receipt_total: '90.15'
+  bank_date: 16/01/2023
+  bank_description: EFTPOS DAN MURPHYS Subiaco AUS
+  bank_amount: '90.15'
+  match_status: FOUND
   match_difficulty: easy
-LINK076:
-  source_type: INVOICE
-  source_id: CASEI021
-  target_type: BANK_STATEMENT
-  target_id: CASEB026
-  target_transaction_index: 21
-  match_fields:
-    date: 24/12/2024
-    amount: '12042.03'
-  match_difficulty: easy
-LINK077:
-  source_type: INVOICE
-  source_id: CASEI022
-  target_type: BANK_STATEMENT
-  target_id: CASEB016
-  target_transaction_index: 12
-  match_fields:
-    date: 06/10/2023
-    amount: '2104.17'
-  match_difficulty: easy
-LINK078:
-  source_type: INVOICE
-  source_id: CASEI023
-  target_type: BANK_STATEMENT
-  target_id: CASEB035
-  target_transaction_index: 28
-  match_fields:
-    date: 26/08/2024
-    amount: '12802.14'
-  match_difficulty: easy
-LINK079:
-  source_type: INVOICE
-  source_id: CASEI024
-  target_type: BANK_STATEMENT
-  target_id: CASEB028
-  target_transaction_index: 11
-  match_fields:
-    date: 28/08/2023
-    amount: '3232.46'
+  notes: "Late row on westpac standard \u2014 exact date and amount match"
+CASER053_receipt_professional.png:
+- bank_statement: CASEB039_anz_standard.png
+  supplier: Ampol Limited
+  receipt_date: 01/06/2023
+  receipt_total: '227.55'
+  bank_date: 02/06/2023
+  bank_description: EFTPOS WOOLWORTHS Toowoomba AUS
+  bank_amount: '227.55'
+  match_status: FOUND
   match_difficulty: medium
-LINK080:
-  source_type: INVOICE
-  source_id: CASEI025
-  target_type: BANK_STATEMENT
-  target_id: CASEB016
-  target_transaction_index: 4
-  match_fields:
-    date: 06/11/2024
-    amount: '14912.46'
+  notes: "Mid row on anz standard \u2014 1-day settlement delay"
+CASER054_receipt_hospitality.png:
+- bank_statement: CASEB008_anz_modern.png
+  supplier: 7-Eleven Australia
+  receipt_date: 03/07/2023
+  receipt_total: '19.80'
+  bank_date: 05/07/2023
+  bank_description: BPAY TELSTRA CRN 672817675
+  bank_amount: '19.80'
+  match_status: FOUND
   match_difficulty: medium
-LINK081:
-  source_type: INVOICE
-  source_id: CASEI026
-  target_type: BANK_STATEMENT
-  target_id: CASEB007
-  target_transaction_index: 1
-  match_fields:
-    date: 23/09/2024
-    amount: '10369.62'
+  notes: "Late row on anz modern \u2014 2-day settlement delay"
+CASER055_receipt_thermal_80mm.png:
+- bank_statement: CASEB016_anz_modern.png
+  supplier: Myer
+  receipt_date: 28/03/2024
+  receipt_total: '145.97'
+  bank_date: 28/03/2024
+  bank_description: DD INSURANCE REF44761
+  bank_amount: '145.97'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on anz modern \u2014 exact date and amount match"
+CASEI001_tax_invoice_standard.png:
+- bank_statement: CASEB037_nab_classic.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 17/04/2023
+  receipt_total: '6493.84'
+  bank_date: 17/04/2023
+  bank_description: EFTPOS COLES Parramatta AUS
+  bank_amount: '6493.84'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on nab classic \u2014 exact date and amount match"
+CASEI002_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB047_anz_standard.png
+  supplier: Johnson Legal
+  receipt_date: 09/04/2023
+  receipt_total: '8026.87'
+  bank_date: 09/04/2023
+  bank_description: EFTPOS WOOLWORTHS Parramatta AUS
+  bank_amount: '8026.87'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on anz standard \u2014 exact date and amount match"
+CASEI003_tax_invoice_high_value.png:
+- bank_statement: CASEB049_cba_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 02/11/2024
+  receipt_total: '990.75'
+  bank_date: 02/11/2024
+  bank_description: EFTPOS AMPOL Toowoomba AUS
+  bank_amount: '990.75'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on cba standard \u2014 exact date and amount match"
+CASEI004_tax_invoice_mixed.png:
+- bank_statement: CASEB009_cba_standard.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 16/10/2023
+  receipt_total: '8639.83'
+  bank_date: 20/10/2023
+  bank_description: EFTPOS DAN MURPHYS Toowoomba AUS
+  bank_amount: '8639.83'
+  match_status: FOUND
   match_difficulty: hard
-LINK082:
-  source_type: INVOICE
-  source_id: CASEI027
-  target_type: BANK_STATEMENT
-  target_id: CASEB006
-  target_transaction_index: 15
-  match_fields:
-    date: 23/03/2024
-    amount: '4759.40'
-  match_difficulty: easy
-LINK083:
-  source_type: INVOICE
-  source_id: CASEI028
-  target_type: BANK_STATEMENT
-  target_id: CASEB027
-  target_transaction_index: 15
-  match_fields:
-    date: 08/01/2024
-    amount: '1478.74'
-  match_difficulty: medium
-LINK084:
-  source_type: INVOICE
-  source_id: CASEI029
-  target_type: BANK_STATEMENT
-  target_id: CASEB026
-  target_transaction_index: 3
-  match_fields:
-    date: 26/11/2024
-    amount: '3126.20'
-  match_difficulty: easy
-LINK085:
-  source_type: INVOICE
-  source_id: CASEI030
-  target_type: BANK_STATEMENT
-  target_id: CASEB025
-  target_transaction_index: 0
-  match_fields:
-    date: 06/07/2023
-    amount: '27294.75'
-  match_difficulty: medium
-LINK086:
-  source_type: INVOICE
-  source_id: CASEI031
-  target_type: BANK_STATEMENT
-  target_id: CASEB051
-  target_transaction_index: 29
-  match_fields:
-    date: 12/09/2024
-    amount: '5395.42'
-  match_difficulty: medium
-LINK087:
-  source_type: INVOICE
-  source_id: CASEI032
-  target_type: BANK_STATEMENT
-  target_id: CASEB045
-  target_transaction_index: 23
-  match_fields:
-    date: 11/09/2024
-    amount: '8162.59'
+  notes: "Late row on cba standard \u2014 4-day settlement delay"
+CASEI005_tax_invoice_standard.png:
+- bank_statement: CASEB017_cba_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 25/11/2024
+  receipt_total: '4667.21'
+  bank_date: 01/12/2024
+  bank_description: VISA DEBIT PURCHASE Ampol Limite Parramatta AU
+  bank_amount: '4667.21'
+  match_status: FOUND
   match_difficulty: hard
-LINK088:
-  source_type: INVOICE
-  source_id: CASEI033
-  target_type: BANK_STATEMENT
-  target_id: CASEB010
-  target_transaction_index: 6
-  match_fields:
-    date: 14/10/2024
-    amount: '3132.28'
+  notes: "Late row on cba standard \u2014 6-day settlement delay"
+CASEI006_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB014_nab_dense.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 26/02/2024
+  receipt_total: '6316.87'
+  bank_date: 26/02/2024
+  bank_description: EFTPOS TARGET Norwood AUS
+  bank_amount: '6316.87'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab dense \u2014 exact date and amount match"
+CASEI007_tax_invoice_high_value.png:
+- bank_statement: CASEB046_nab_dense.png
+  supplier: Johnson Legal
+  receipt_date: 14/08/2024
+  receipt_total: '6977.45'
+  bank_date: 17/08/2024
+  bank_description: VISA DEBIT PURCHASE SHELL Hobart AU
+  bank_amount: '6977.45'
+  match_status: FOUND
   match_difficulty: medium
-LINK089:
-  source_type: INVOICE
-  source_id: CASEI034
-  target_type: BANK_STATEMENT
-  target_id: CASEB004
-  target_transaction_index: 3
-  match_fields:
-    date: 22/02/2023
-    amount: '11294.03'
+  notes: "Mid row on nab dense \u2014 3-day settlement delay"
+CASEI008_tax_invoice_mixed.png:
+- bank_statement: CASEB042_cba_date_grouped.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 27/03/2023
+  receipt_total: '7228.03'
+  bank_date: 30/03/2023
+  bank_description: EFTPOS AMPOL Hawthorn East AUS
+  bank_amount: '7228.03'
+  match_status: FOUND
   match_difficulty: medium
-LINK090:
-  source_type: INVOICE
-  source_id: CASEI035
-  target_type: BANK_STATEMENT
-  target_id: CASEB004
-  target_transaction_index: 30
-  match_fields:
-    date: 23/07/2024
-    amount: '3157.76'
-  match_difficulty: hard
-LINK091:
-  source_type: INVOICE
-  source_id: CASEI036
-  target_type: BANK_STATEMENT
-  target_id: CASEB011
-  target_transaction_index: 1
-  match_fields:
-    date: 25/03/2024
-    amount: '5681.70'
-  match_difficulty: hard
-LINK092:
-  source_type: INVOICE
-  source_id: CASEI037
-  target_type: BANK_STATEMENT
-  target_id: CASEB055
-  target_transaction_index: 11
-  match_fields:
-    date: 06/12/2024
-    amount: '2196.58'
+  notes: "Late row on cba date grouped \u2014 3-day settlement delay"
+CASEI009_tax_invoice_standard.png:
+- bank_statement: CASEB029_nab_classic.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 12/09/2023
+  receipt_total: '6802.27'
+  bank_date: 12/09/2023
+  bank_description: Salary ATO PAYROLL REF85936
+  bank_amount: '6802.27'
+  match_status: FOUND
   match_difficulty: easy
-LINK093:
-  source_type: INVOICE
-  source_id: CASEI038
-  target_type: BANK_STATEMENT
-  target_id: CASEB039
-  target_transaction_index: 2
-  match_fields:
-    date: 03/06/2023
-    amount: '16985.16'
-  match_difficulty: easy
-LINK094:
-  source_type: INVOICE
-  source_id: CASEI039
-  target_type: BANK_STATEMENT
-  target_id: CASEB026
-  target_transaction_index: 7
-  match_fields:
-    date: 03/08/2024
-    amount: '7542.00'
-  match_difficulty: hard
-LINK095:
-  source_type: INVOICE
-  source_id: CASEI040
-  target_type: BANK_STATEMENT
-  target_id: CASEB038
-  target_transaction_index: 38
-  match_fields:
-    date: 02/09/2023
-    amount: '3647.18'
-  match_difficulty: easy
-LINK096:
-  source_type: INVOICE
-  source_id: CASEI041
-  target_type: BANK_STATEMENT
-  target_id: CASEB040
-  target_transaction_index: 5
-  match_fields:
-    date: 20/11/2023
-    amount: '4115.63'
+  notes: "Early row on nab classic \u2014 exact date and amount match"
+CASEI010_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 20/09/2023
+  receipt_total: '3529.68'
+  bank_date: 21/09/2023
+  bank_description: DD AGL REF41217 MHF 1234
+  bank_amount: '3529.68'
+  match_status: FOUND
   match_difficulty: medium
-LINK097:
-  source_type: INVOICE
-  source_id: CASEI042
-  target_type: BANK_STATEMENT
-  target_id: CASEB038
-  target_transaction_index: 36
-  match_fields:
-    date: 28/12/2024
-    amount: '3496.74'
+  notes: "Early row on anz standard \u2014 1-day settlement delay"
+CASEI011_tax_invoice_high_value.png:
+- bank_statement: CASEB038_nab_dense.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 24/03/2024
+  receipt_total: '2268.75'
+  bank_date: 24/03/2024
+  bank_description: Salary ATO PAYROLL REF86933
+  bank_amount: '2268.75'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab dense \u2014 exact date and amount match"
+CASEI012_tax_invoice_mixed.png:
+- bank_statement: CASEB036_westpac_premium.png
+  supplier: Johnson Legal
+  receipt_date: 20/12/2023
+  receipt_total: '1371.06'
+  bank_date: 24/12/2023
+  bank_description: EFTPOS KMART Hobart AUS
+  bank_amount: '1371.06'
+  match_status: FOUND
   match_difficulty: hard
-LINK098:
-  source_type: INVOICE
-  source_id: CASEI043
-  target_type: BANK_STATEMENT
-  target_id: CASEB017
-  target_transaction_index: 13
-  match_fields:
-    date: 04/05/2024
-    amount: '5254.16'
-  match_difficulty: medium
-LINK099:
-  source_type: INVOICE
-  source_id: CASEI044
-  target_type: BANK_STATEMENT
-  target_id: CASEB017
-  target_transaction_index: 25
-  match_fields:
-    date: 30/08/2024
-    amount: '9714.53'
+  notes: "Mid row on westpac premium \u2014 4-day settlement delay"
+CASEI013_tax_invoice_standard.png:
+- bank_statement: CASEB001_cba_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 13/04/2023
+  receipt_total: '6891.21'
+  bank_date: 13/04/2023
+  bank_description: BPAY TELSTRA CRN 349957310
+  bank_amount: '6891.21'
+  match_status: FOUND
   match_difficulty: easy
-LINK100:
-  source_type: INVOICE
-  source_id: CASEI045
-  target_type: BANK_STATEMENT
-  target_id: CASEB043
-  target_transaction_index: 19
-  match_fields:
-    date: 23/11/2024
-    amount: '5997.38'
-  match_difficulty: medium
-LINK101:
-  source_type: INVOICE
-  source_id: CASEI046
-  target_type: BANK_STATEMENT
-  target_id: CASEB049
-  target_transaction_index: 4
-  match_fields:
-    date: 21/09/2024
-    amount: '3428.56'
+  notes: "Early row on cba standard \u2014 exact date and amount match"
+CASEI014_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB015_anz_standard.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 01/06/2024
+  receipt_total: '3222.51'
+  bank_date: 01/06/2024
+  bank_description: DD AGL REF41217 MHF 1234
+  bank_amount: '3222.51'
+  match_status: FOUND
   match_difficulty: easy
-LINK102:
-  source_type: INVOICE
-  source_id: CASEI047
-  target_type: BANK_STATEMENT
-  target_id: CASEB030
-  target_transaction_index: 39
-  match_fields:
-    date: 11/02/2024
-    amount: '3034.88'
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASEI015_tax_invoice_high_value.png:
+- bank_statement: CASEB022_nab_dense.png
+  supplier: Perth Marketing Group
+  receipt_date: 15/11/2023
+  receipt_total: '3688.52'
+  bank_date: 19/11/2023
+  bank_description: DD INSURANCE REF70387
+  bank_amount: '3688.52'
+  match_status: FOUND
   match_difficulty: hard
-LINK103:
-  source_type: INVOICE
-  source_id: CASEI048
-  target_type: BANK_STATEMENT
-  target_id: CASEB005
-  target_transaction_index: 34
-  match_fields:
-    date: 11/11/2023
-    amount: '408.36'
-  match_difficulty: easy
-LINK104:
-  source_type: INVOICE
-  source_id: CASEI049
-  target_type: BANK_STATEMENT
-  target_id: CASEB033
-  target_transaction_index: 16
-  match_fields:
-    date: 12/04/2024
-    amount: '22319.53'
-  match_difficulty: easy
-LINK105:
-  source_type: INVOICE
-  source_id: CASEI050
-  target_type: BANK_STATEMENT
-  target_id: CASEB023
-  target_transaction_index: 4
-  match_fields:
-    date: 12/09/2023
-    amount: '4654.50'
-  match_difficulty: easy
-LINK106:
-  source_type: INVOICE
-  source_id: CASEI051
-  target_type: BANK_STATEMENT
-  target_id: CASEB024
-  target_transaction_index: 9
-  match_fields:
-    date: 11/12/2023
-    amount: '2689.19'
-  match_difficulty: easy
-LINK107:
-  source_type: INVOICE
-  source_id: CASEI052
-  target_type: BANK_STATEMENT
-  target_id: CASEB029
-  target_transaction_index: 34
-  match_fields:
-    date: 29/01/2024
-    amount: '4015.31'
+  notes: "Early row on nab dense \u2014 4-day settlement delay"
+CASEI016_tax_invoice_mixed.png:
+- bank_statement: CASEB018_cba_date_grouped.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 13/01/2024
+  receipt_total: '7023.63'
+  bank_date: 14/01/2024
+  bank_description: Salary ATO PAYROLL REF72014
+  bank_amount: '7023.63'
+  match_status: FOUND
   match_difficulty: medium
-LINK108:
-  source_type: INVOICE
-  source_id: CASEI053
-  target_type: BANK_STATEMENT
-  target_id: CASEB052
-  target_transaction_index: 0
-  match_fields:
-    date: 19/11/2024
-    amount: '15581.56'
+  notes: "Late row on cba date grouped \u2014 1-day settlement delay"
+CASEI017_tax_invoice_standard.png:
+- bank_statement: CASEB035_westpac_standard.png
+  supplier: Johnson Legal
+  receipt_date: 08/05/2024
+  receipt_total: '1797.77'
+  bank_date: 15/05/2024
+  bank_description: ATM WITHDRAWAL Subiaco
+  bank_amount: '1797.77'
+  match_status: FOUND
   match_difficulty: hard
-LINK109:
-  source_type: INVOICE
-  source_id: CASEI054
-  target_type: BANK_STATEMENT
-  target_id: CASEB043
-  target_transaction_index: 6
-  match_fields:
-    date: 20/05/2024
-    amount: '8396.20'
+  notes: "Early row on westpac standard \u2014 7-day settlement delay"
+CASEI018_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB031_anz_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 02/07/2024
+  receipt_total: '17255.43'
+  bank_date: 04/07/2024
+  bank_description: DD AGL REF28659 MHF 1234
+  bank_amount: '17255.43'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on anz standard \u2014 2-day settlement delay"
+CASEI019_tax_invoice_high_value.png:
+- bank_statement: CASEB013_nab_classic.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 17/11/2024
+  receipt_total: '18796.38'
+  bank_date: 17/11/2024
+  bank_description: EFTPOS KMART Fortitude Valley AUS
+  bank_amount: '18796.38'
+  match_status: FOUND
   match_difficulty: easy
-LINK110:
-  source_type: INVOICE
-  source_id: CASEI055
-  target_type: BANK_STATEMENT
-  target_id: CASEB017
-  target_transaction_index: 7
-  match_fields:
-    date: 31/03/2024
-    amount: '21202.41'
+  notes: "Early row on nab classic \u2014 exact date and amount match"
+CASEI020_tax_invoice_mixed.png:
+- bank_statement: CASEB043_westpac_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 20/09/2024
+  receipt_total: '4925.16'
+  bank_date: 22/09/2024
+  bank_description: Salary ATO PAYROLL REF15123
+  bank_amount: '4925.16'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on westpac standard \u2014 2-day settlement delay"
+CASEI021_tax_invoice_standard.png:
+- bank_statement: CASEB027_westpac_standard.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 24/12/2024
+  receipt_total: '12042.03'
+  bank_date: 24/12/2024
+  bank_description: EFTPOS KMART Parramatta AUS
+  bank_amount: '12042.03'
+  match_status: FOUND
   match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+CASEI022_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB044_westpac_premium.png
+  supplier: Johnson Legal
+  receipt_date: 06/10/2023
+  receipt_total: '2104.17'
+  bank_date: 06/10/2023
+  bank_description: EFTPOS BUNNINGS W/HOUSE Norwood AUS
+  bank_amount: '2104.17'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on westpac premium \u2014 exact date and amount match"
+CASEI023_tax_invoice_high_value.png:
+- bank_statement: CASEB026_cba_date_grouped.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 26/08/2024
+  receipt_total: '12802.14'
+  bank_date: 26/08/2024
+  bank_description: ATM WITHDRAWAL Hobart
+  bank_amount: '12802.14'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on cba date grouped \u2014 exact date and amount match"
+CASEI024_tax_invoice_mixed.png:
+- bank_statement: CASEB016_anz_modern.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 28/08/2023
+  receipt_total: '3232.46'
+  bank_date: 28/08/2023
+  bank_description: BPAY TELSTRA CRN 355065530
+  bank_amount: '3232.46'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on anz modern \u2014 exact date and amount match"
+CASEI025_tax_invoice_standard.png:
+- bank_statement: CASEB035_westpac_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 06/11/2024
+  receipt_total: '14912.46'
+  bank_date: 06/11/2024
+  bank_description: EFTPOS COLES Subiaco AUS
+  bank_amount: '14912.46'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on westpac standard \u2014 exact date and amount match"
+CASEI026_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB028_westpac_premium.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 23/09/2024
+  receipt_total: '10369.62'
+  bank_date: 25/09/2024
+  bank_description: BPAY TELSTRA CRN 188594622
+  bank_amount: '10369.62'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on westpac premium \u2014 2-day settlement delay"
+CASEI027_tax_invoice_high_value.png:
+- bank_statement: CASEB016_anz_modern.png
+  supplier: Johnson Legal
+  receipt_date: 23/03/2024
+  receipt_total: '4759.40'
+  bank_date: 26/03/2024
+  bank_description: EFTPOS JB HI-FI Hobart AUS
+  bank_amount: '4759.40'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on anz modern \u2014 3-day settlement delay"
+CASEI028_tax_invoice_mixed.png:
+- bank_statement: CASEB007_anz_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 08/01/2024
+  receipt_total: '1478.74'
+  bank_date: 11/01/2024
+  bank_description: EFTPOS AMPOL Parramatta AUS
+  bank_amount: '1478.74'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Early row on anz standard \u2014 3-day settlement delay"
+CASEI029_tax_invoice_standard.png:
+- bank_statement: CASEB006_nab_dense.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 26/11/2024
+  receipt_total: '3126.20'
+  bank_date: 26/11/2024
+  bank_description: EFTPOS COLES Hobart AUS
+  bank_amount: '3126.20'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on nab dense \u2014 exact date and amount match"
+CASEI030_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB027_westpac_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 06/07/2023
+  receipt_total: '27294.75'
+  bank_date: 07/07/2023
+  bank_description: EFTPOS DAN MURPHYS Parramatta AUS
+  bank_amount: '27294.75'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 1-day settlement delay"
+CASEI031_tax_invoice_high_value.png:
+- bank_statement: CASEB026_cba_date_grouped.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 12/09/2024
+  receipt_total: '5395.42'
+  bank_date: 12/09/2024
+  bank_description: EFTPOS BUNNINGS W/HOUSE Hobart AUS
+  bank_amount: '5395.42'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+CASEI032_tax_invoice_mixed.png:
+- bank_statement: CASEB025_cba_standard.png
+  supplier: Johnson Legal
+  receipt_date: 11/09/2024
+  receipt_total: '8162.59'
+  bank_date: 13/09/2024
+  bank_description: EFTPOS KMART Subiaco AUS
+  bank_amount: '8162.59'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on cba standard \u2014 2-day settlement delay"
+CASEI033_tax_invoice_standard.png:
+- bank_statement: CASEB051_westpac_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 14/10/2024
+  receipt_total: '3132.28'
+  bank_date: 16/10/2024
+  bank_description: EFTPOS DAN MURPHYS Alexandria AUS
+  bank_amount: '3132.28'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on westpac standard \u2014 2-day settlement delay"
+CASEI034_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB045_nab_classic.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 22/02/2023
+  receipt_total: '11294.03'
+  bank_date: 28/02/2023
+  bank_description: Salary ATO PAYROLL REF21248
+  bank_amount: '11294.03'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Late row on nab classic \u2014 6-day settlement delay"
+CASEI035_tax_invoice_high_value.png:
+- bank_statement: CASEB010_cba_date_grouped.png
+  supplier: Perth Marketing Group
+  receipt_date: 23/07/2024
+  receipt_total: '3157.76'
+  bank_date: 24/07/2024
+  bank_description: EFTPOS WOOLWORTHS Glenelg AUS
+  bank_amount: '3157.76'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on cba date grouped \u2014 1-day settlement delay"
+CASEI036_tax_invoice_mixed.png:
+- bank_statement: CASEB004_westpac_premium.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 25/03/2024
+  receipt_total: '5681.70'
+  bank_date: 26/03/2024
+  bank_description: DD AGL REF39816 MHF 1234
+  bank_amount: '5681.70'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on westpac premium \u2014 1-day settlement delay"
+CASEI037_tax_invoice_standard.png:
+- bank_statement: CASEB004_westpac_premium.png
+  supplier: Johnson Legal
+  receipt_date: 06/12/2024
+  receipt_total: '2196.58'
+  bank_date: 13/12/2024
+  bank_description: DD AGL REF94896 MHF 1234
+  bank_amount: '2196.58'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Late row on westpac premium \u2014 7-day settlement delay"
+CASEI038_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB011_westpac_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 03/06/2023
+  receipt_total: '16985.16'
+  bank_date: 06/06/2023
+  bank_description: BPAY TELSTRA CRN 808897689
+  bank_amount: '16985.16'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Early row on westpac standard \u2014 3-day settlement delay"
+CASEI039_tax_invoice_high_value.png:
+- bank_statement: CASEB055_anz_standard.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 03/08/2024
+  receipt_total: '7542.00'
+  bank_date: 03/08/2024
+  bank_description: EFTPOS BUNNINGS W/HOUSE Subiaco AUS
+  bank_amount: '7542.00'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASEI040_tax_invoice_mixed.png:
+- bank_statement: CASEB039_anz_standard.png
+  supplier: Perth Marketing Group
+  receipt_date: 02/09/2023
+  receipt_total: '3647.18'
+  bank_date: 02/09/2023
+  bank_description: EFTPOS OFFICEWORKS Toowoomba AUS
+  bank_amount: '3647.18'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASEI041_tax_invoice_standard.png:
+- bank_statement: CASEB026_cba_date_grouped.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 20/11/2023
+  receipt_total: '4115.63'
+  bank_date: 24/11/2023
+  bank_description: BPAY TELSTRA CRN 410075739
+  bank_amount: '4115.63'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Early row on cba date grouped \u2014 4-day settlement delay"
+CASEI042_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB038_nab_dense.png
+  supplier: Johnson Legal
+  receipt_date: 28/12/2024
+  receipt_total: '3496.74'
+  bank_date: 02/01/2025
+  bank_description: EFTPOS JB HI-FI South Yarra AUS
+  bank_amount: '3496.74'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Late row on nab dense \u2014 5-day settlement delay"
+CASEI043_tax_invoice_high_value.png:
+- bank_statement: CASEB039_anz_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 04/05/2024
+  receipt_total: '5254.16'
+  bank_date: 07/05/2024
+  bank_description: VISA DEBIT PURCHASE SHELL Toowoomba AU
+  bank_amount: '5254.16'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Early row on anz standard \u2014 3-day settlement delay"
+CASEI044_tax_invoice_mixed.png:
+- bank_statement: CASEB027_westpac_standard.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 30/08/2024
+  receipt_total: '9714.53'
+  bank_date: 06/09/2024
+  bank_description: VISA DEBIT PURCHASE Coles Parramatta AU
+  bank_amount: '9714.53'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Late row on westpac standard \u2014 7-day settlement delay"
+CASEI045_tax_invoice_standard.png:
+- bank_statement: CASEB034_cba_date_grouped.png
+  supplier: Perth Marketing Group
+  receipt_date: 23/11/2024
+  receipt_total: '5997.38'
+  bank_date: 24/11/2024
+  bank_description: EFTPOS DAN MURPHYS Norwood AUS
+  bank_amount: '5997.38'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Early row on cba date grouped \u2014 1-day settlement delay"
+CASEI046_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB043_westpac_standard.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 21/09/2024
+  receipt_total: '3428.56'
+  bank_date: 21/09/2024
+  bank_description: BPAY ORIGIN ENERGY CRN 549902288
+  bank_amount: '3428.56'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+CASEI047_tax_invoice_high_value.png:
+- bank_statement: CASEB017_cba_standard.png
+  supplier: Johnson Legal
+  receipt_date: 11/02/2024
+  receipt_total: '3034.88'
+  bank_date: 11/02/2024
+  bank_description: EFTPOS KMART Parramatta AUS
+  bank_amount: '3034.88'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on cba standard \u2014 exact date and amount match"
+CASEI048_tax_invoice_mixed.png:
+- bank_statement: CASEB043_westpac_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 11/11/2023
+  receipt_total: '408.36'
+  bank_date: 13/11/2023
+  bank_description: Salary ATO PAYROLL REF68783
+  bank_amount: '408.36'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 2-day settlement delay"
+CASEI049_tax_invoice_standard.png:
+- bank_statement: CASEB049_cba_standard.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 12/04/2024
+  receipt_total: '22319.53'
+  bank_date: 12/04/2024
+  bank_description: VISA DEBIT PURCHASE Officeworks Toowoomba AU
+  bank_amount: '22319.53'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on cba standard \u2014 exact date and amount match"
+CASEI050_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB030_nab_dense.png
+  supplier: Perth Marketing Group
+  receipt_date: 12/09/2023
+  receipt_total: '4654.50'
+  bank_date: 15/09/2023
+  bank_description: Transfer To David NetBank
+  bank_amount: '4654.50'
+  match_status: FOUND
+  match_difficulty: hard
+  notes: "Late row on nab dense \u2014 3-day settlement delay"
+CASEI051_tax_invoice_high_value.png:
+- bank_statement: CASEB005_nab_classic.png
+  supplier: Smith & Associates Accounting
+  receipt_date: 11/12/2023
+  receipt_total: '2689.19'
+  bank_date: 11/12/2023
+  bank_description: EFTPOS COLES Subiaco AUS
+  bank_amount: '2689.19'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Late row on nab classic \u2014 exact date and amount match"
+CASEI052_tax_invoice_mixed.png:
+- bank_statement: CASEB033_cba_standard.png
+  supplier: Johnson Legal
+  receipt_date: 29/01/2024
+  receipt_total: '4015.31'
+  bank_date: 29/01/2024
+  bank_description: EFTPOS TARGET Fortitude Valley AUS
+  bank_amount: '4015.31'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on cba standard \u2014 exact date and amount match"
+CASEI053_tax_invoice_standard.png:
+- bank_statement: CASEB023_anz_standard.png
+  supplier: Brisbane IT Solutions
+  receipt_date: 19/11/2024
+  receipt_total: '15581.56'
+  bank_date: 19/11/2024
+  bank_description: EFTPOS BUNNINGS W/HOUSE Fortitude Valley AUS
+  bank_amount: '15581.56'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Early row on anz standard \u2014 exact date and amount match"
+CASEI054_tax_invoice_gst_inclusive.png:
+- bank_statement: CASEB024_anz_modern.png
+  supplier: Adelaide Business Consulting
+  receipt_date: 20/05/2024
+  receipt_total: '8396.20'
+  bank_date: 20/05/2024
+  bank_description: EFTPOS BP Norwood AUS
+  bank_amount: '8396.20'
+  match_status: FOUND
+  match_difficulty: easy
+  notes: "Mid row on anz modern \u2014 exact date and amount match"
+CASEI055_tax_invoice_high_value.png:
+- bank_statement: CASEB029_nab_classic.png
+  supplier: Perth Marketing Group
+  receipt_date: 31/03/2024
+  receipt_total: '21202.41'
+  bank_date: 03/04/2024
+  bank_description: EFTPOS BUNNINGS W/HOUSE Toowoomba AUS
+  bank_amount: '21202.41'
+  match_status: FOUND
+  match_difficulty: medium
+  notes: "Late row on nab classic \u2014 3-day settlement delay"

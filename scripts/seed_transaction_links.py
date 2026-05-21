@@ -1,14 +1,12 @@
 """Generate transaction linking ground truth from existing ground truth entries.
 
 Reads receipts.yml, invoices.yml, and bank_statements.yml, then creates
-matching pairs in transaction_links.yml. Assigns difficulty levels based
-on date proximity and description similarity.
+matching pairs in transaction_links.yml. Produces a denormalized format keyed
+by image filenames for direct consumption by the LMM evaluation pipeline.
 
 Usage:
     python scripts/seed_transaction_links.py
 """
-
-from __future__ import annotations
 
 import random
 from datetime import datetime, timedelta
@@ -29,24 +27,49 @@ def _parse_date(date_str: str) -> datetime | None:
         return None
 
 
+def _position_label(matched_idx: int, total_txns: int) -> str:
+    if matched_idx < total_txns / 3:
+        return "Early row"
+    if matched_idx < 2 * total_txns / 3:
+        return "Mid row"
+    return "Late row"
+
+
+def _build_notes(
+    matched_idx: int,
+    total_txns: int,
+    bank_layout: str,
+    difficulty: str,
+    offset: int,
+) -> str:
+    position = _position_label(matched_idx, total_txns)
+    layout_label = bank_layout.replace("_", " ")
+
+    if difficulty == "easy":
+        characteristic = "exact date and amount match"
+    else:
+        characteristic = f"{offset}-day settlement delay"
+
+    return f"{position} on {layout_label} \u2014 {characteristic}"
+
+
 def main() -> None:
     rng = random.Random(42)
     receipts = _load_gt("receipts")
     invoices = _load_gt("invoices")
     bank_stmts = _load_gt("bank_statements")
 
-    links: dict = {}
-    link_idx = 0
+    links: dict[str, list[dict]] = {}
 
     # For each receipt/invoice, find or create a matching bank transaction
     sources = [
-        *[(cid, entry, "RECEIPT") for cid, entry in receipts.items()],
-        *[(cid, entry, "INVOICE") for cid, entry in invoices.items()],
+        *[(cid, entry) for cid, entry in receipts.items()],
+        *[(cid, entry) for cid, entry in invoices.items()],
     ]
 
     bank_list = list(bank_stmts.items())
 
-    for src_id, src_entry, src_type in sources:
+    for src_id, src_entry in sources:
         src_fields = src_entry["fields"]
         src_total = src_fields.get("TOTAL_AMOUNT", "")
         src_date_str = src_fields.get("INVOICE_DATE", "")
@@ -62,6 +85,7 @@ def main() -> None:
         # Find matching amount in bank transactions
         bank_amounts = bank_fields.get("TRANSACTION_AMOUNTS_PAID", "").split("|")
         bank_dates = bank_fields.get("TRANSACTION_DATES", "").split("|")
+        bank_descriptions = bank_fields.get("TRANSACTION_DESCRIPTIONS", "").split("|")
 
         # Try to find exact amount match
         matched_idx = None
@@ -69,6 +93,8 @@ def main() -> None:
             if amt.strip() == src_total:
                 matched_idx = idx
                 break
+
+        offset = 0
 
         # If no match, inject the amount into a random position
         if matched_idx is None:
@@ -78,7 +104,6 @@ def main() -> None:
 
             # Also set the date
             if matched_idx < len(bank_dates):
-                # Determine difficulty
                 difficulty = rng.choice(["easy", "easy", "medium", "medium", "hard"])
                 if difficulty == "easy":
                     bank_dates[matched_idx] = src_date_str
@@ -104,27 +129,43 @@ def main() -> None:
                         difficulty = "easy"
                     elif delta <= 3:
                         difficulty = "medium"
+                        offset = delta
                     else:
                         difficulty = "hard"
+                        offset = delta
                 else:
                     difficulty = "easy"
             else:
                 difficulty = "easy"
 
-        link_idx += 1
-        link_key = f"LINK{link_idx:03d}"
-        links[link_key] = {
-            "source_type": src_type,
-            "source_id": src_id,
-            "target_type": "BANK_STATEMENT",
-            "target_id": bank_id,
-            "target_transaction_index": matched_idx,
-            "match_fields": {
-                "date": src_date_str,
-                "amount": src_total,
-            },
-            "match_difficulty": difficulty,
-        }
+        # Build image filenames
+        receipt_filename = f"{src_id}_{src_entry['layout']}.png"
+        bank_filename = f"{bank_id}_{bank_entry['layout']}.png"
+
+        # Extract bank transaction fields at matched index
+        bank_date_val = bank_dates[matched_idx].strip() if matched_idx < len(bank_dates) else ""
+        bank_desc_val = (
+            bank_descriptions[matched_idx].strip() if matched_idx < len(bank_descriptions) else ""
+        )
+        bank_amt_val = bank_amounts[matched_idx].strip()
+
+        total_txns = len(bank_amounts)
+        notes = _build_notes(matched_idx, total_txns, bank_entry["layout"], difficulty, offset)
+
+        links[receipt_filename] = [
+            {
+                "bank_statement": bank_filename,
+                "supplier": src_fields.get("SUPPLIER_NAME", ""),
+                "receipt_date": src_date_str,
+                "receipt_total": src_total,
+                "bank_date": bank_date_val,
+                "bank_description": bank_desc_val,
+                "bank_amount": bank_amt_val,
+                "match_status": "FOUND",
+                "match_difficulty": difficulty,
+                "notes": notes,
+            }
+        ]
 
     # Write updated bank statements (with injected amounts)
     Path("ground_truth/bank_statements.yml").write_text(
@@ -138,9 +179,10 @@ def main() -> None:
 
     # Stats
     difficulties: dict[str, int] = {}
-    for link in links.values():
-        d = link["match_difficulty"]
-        difficulties[d] = difficulties.get(d, 0) + 1
+    for entry_list in links.values():
+        for entry in entry_list:
+            d = entry["match_difficulty"]
+            difficulties[d] = difficulties.get(d, 0) + 1
     print(f"Generated {len(links)} transaction links: {difficulties}")
 
 

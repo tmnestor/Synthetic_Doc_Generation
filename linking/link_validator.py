@@ -1,6 +1,16 @@
 """Transaction link validator — scores predictions against ground truth.
 
 Computes precision, recall, F1 at each difficulty level.
+
+Ground truth format (transaction_links.yml):
+    receipt_filename.png:
+    - bank_statement: bank_filename.png
+      bank_amount: "34.16"
+      match_difficulty: easy
+      ...
+
+Prediction format:
+    {receipt_filename: {"bank_statement": ..., "bank_amount": ...}}
 """
 
 from dataclasses import dataclass, field
@@ -62,37 +72,40 @@ def validate_links(
     """Score linking predictions against ground truth.
 
     Args:
-        ground_truth: Dict of link entries from transaction_links.yml.
-        predictions: Dict mapping source_id -> {target_id, target_transaction_index}.
+        ground_truth: Dict keyed by receipt filename from transaction_links.yml.
+            Each value is a list of link records with 'bank_statement',
+            'bank_amount', and 'match_difficulty' fields.
+        predictions: Dict mapping receipt_filename -> {bank_statement, bank_amount}.
 
     Returns:
         LinkScore with overall and per-difficulty metrics.
     """
     score = LinkScore()
 
-    gt_lookup: dict[str, tuple[str, int, str]] = {}
-    for _link_id, link in ground_truth.items():
-        src = link["source_id"]
-        gt_lookup[src] = (
-            link["target_id"],
-            link["target_transaction_index"],
+    # Build lookup: receipt_filename -> (bank_statement, bank_amount, difficulty)
+    gt_lookup: dict[str, tuple[str, str, str]] = {}
+    for receipt_filename, link_list in ground_truth.items():
+        link = link_list[0]
+        gt_lookup[receipt_filename] = (
+            link["bank_statement"],
+            str(link["bank_amount"]),
             link.get("match_difficulty", "unknown"),
         )
 
-    for src, (gt_target, gt_idx, difficulty) in gt_lookup.items():
+    for receipt_filename, (gt_bank, gt_amount, difficulty) in gt_lookup.items():
         if difficulty not in score.by_difficulty:
             score.by_difficulty[difficulty] = DifficultyScore()
 
-        pred = predictions.get(src)
-        if pred and pred["target_id"] == gt_target and pred["target_transaction_index"] == gt_idx:
+        pred = predictions.get(receipt_filename)
+        if pred and pred["bank_statement"] == gt_bank and str(pred["bank_amount"]) == gt_amount:
             score.true_positives += 1
             score.by_difficulty[difficulty].true_positives += 1
         else:
             score.false_negatives += 1
             score.by_difficulty[difficulty].false_negatives += 1
 
-    for src in predictions:
-        if src not in gt_lookup:
+    for receipt_filename in predictions:
+        if receipt_filename not in gt_lookup:
             score.false_positives += 1
 
     return score
