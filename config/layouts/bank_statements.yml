@@ -75,6 +75,7 @@ layouts:
     row_height: 40
     logo_color: "#C41E3A"
     show_rewards_section: true
+    date_grouping: true
     date_format: "DD MMM YY"
 
   nab_classic:

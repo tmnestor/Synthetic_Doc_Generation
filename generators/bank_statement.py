@@ -61,6 +61,11 @@ def _compute_running_balances(txns: list[dict], closing_balance: str) -> list[di
     return txns
 
 
+def _fmt_amount_plain(amount: Decimal | float | int) -> str:
+    """Format amount without $ prefix (Westpac style: 1,234.56)."""
+    return fmt_amount(amount).lstrip("$")
+
+
 # -- CBA Renderer -------------------------------------------------------------
 
 
@@ -165,8 +170,20 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
         draw_text_right(draw, fmt_amount(opening), x_right=col_balance_right, y=y, font=font_body)
         y += row_height
 
+    date_grouping = layout.get("date_grouping", False)
+    current_date_group = ""
     for txn in txns:
-        draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+        if date_grouping:
+            # Date-grouped: date on its own row when date changes
+            if txn["date"] != current_date_group:
+                if current_date_group:
+                    y += 10  # Gap between date groups
+                current_date_group = txn["date"]
+                draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+                y += row_height
+        else:
+            # Flat: date on every transaction row
+            draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
 
         # Truncate description to fit column
         desc = txn["description"]
@@ -233,8 +250,9 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 def render_westpac(entry: dict, layout: dict) -> Image.Image:
     """Render a Westpac bank statement.
 
-    Visual DNA: red 'Westpac' logo top-right, 'Date of Transaction' column,
-    dense multi-line layout, 'Debits'/'Credits ()' headers, page numbers.
+    Visual DNA: red 'Westpac' logo top-left, bordered table with cell borders,
+    'Date of Transaction' / 'Debits' / 'Credits (-)' headers, date grouping
+    (premium), no $ prefix on amounts, page numbers.
 
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
@@ -262,91 +280,158 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     right_edge = width - margin
     y = margin
 
-    # -- Westpac logo (top-right, red) --
+    # -- Westpac logo (top-left, red) --
     logo_color = layout.get("logo_color", "#C41E3A")
-    draw_text_right(draw, "Westpac", x_right=right_edge, y=y, font=font_header, fill=logo_color)
-    y += 50
+    draw.text((margin, y), "Westpac", font=font_header, fill=logo_color)
 
     # -- Page number (top-right) --
     draw_text_right(draw, "Page 1 of 1", x_right=right_edge, y=y, font=font_footer, fill="#666666")
-    y += 30
+    y += 50
 
-    # -- Account info --
+    # -- Rewards section (premium variant) --
     payer = fields.get("PAYER_NAME", "")
     date_range = fields.get("STATEMENT_DATE_RANGE", "")
-    supplier = fields.get("SUPPLIER_NAME", "Westpac")
 
     if layout.get("show_rewards_section"):
-        draw.text((margin, y), "Rewards Points Balance Summary", font=font_body_bold, fill="black")
-        y += 30
-        draw.text((margin, y), "Available Points: 12,456", font=font_small, fill="#666666")
-        y += 25
-        draw_separator_line(draw, margin, right_edge, y, color="#CCCCCC")
-        y += 20
+        y += 10
+        rewards_top = y
+        rewards_height = 170
+        rewards_mid_x = margin + (right_edge - margin) // 2
 
-    draw.text((margin, y), f"{supplier}: Premium CardII transactions", font=font_body_bold, fill="black")
+        # Outer border
+        draw.rectangle([(margin, rewards_top), (right_edge, rewards_top + rewards_height)], outline="black")
+        # Vertical divider
+        draw.line(
+            [(rewards_mid_x, rewards_top), (rewards_mid_x, rewards_top + rewards_height)], fill="black"
+        )
+
+        # Left: Points summary
+        ry = rewards_top + 8
+        draw.text((margin + 10, ry), "Rewards Points Balance Summary", font=font_body_bold, fill="black")
+        ry += 26
+        for label, val in [
+            ("Opening Balance", "345,678"),
+            ("Points Earned", "12,456"),
+            ("Bonus Points Earned", "0"),
+            ("Points Redeemed", "0"),
+            ("Closing Balance", "358,134"),
+            ("Points Status", "Available"),
+        ]:
+            draw.text((margin + 10, ry), label, font=font_small, fill="black")
+            draw_text_right(draw, val, x_right=rewards_mid_x - 15, y=ry, font=font_small)
+            ry += 20
+            draw.line([(margin, ry - 2), (rewards_mid_x, ry - 2)], fill="#CCCCCC")
+
+        # Right: Message
+        draw.text(
+            (rewards_mid_x + 10, rewards_top + 8),
+            "A message from Rewards",
+            font=font_body_bold,
+            fill="black",
+        )
+
+        y = rewards_top + rewards_height + 8
+        draw.text(
+            (margin, y),
+            "To find out more about how Rewards Points are earned, go to the Rewards website.",
+            font=font_small,
+            fill="#666666",
+        )
+        y += 30
+
+    y += 20
+
+    # -- Section header --
+    section_title = (
+        "Westpac Premium Card\u00ae transactions"
+        if layout.get("show_rewards_section")
+        else "Transaction Details"
+    )
+    draw.text((margin, y), section_title, font=font_body_bold, fill="black")
     y += 30
     draw.text((margin, y), payer, font=font_body, fill="black")
-    y += 25
+    y += 22
     if date_range:
         draw.text((margin, y), f"Statement Period: {date_range}", font=font_small, fill="#666666")
-        y += 25
-    y += 15
+        y += 22
+    y += 10
 
-    # -- Column positions --
-    col_date_x = margin
-    col_desc_x = margin + 220
-    col_debit_right = right_edge - 260
-    col_credit_right = right_edge
+    # -- Column positions for bordered table --
+    col_date_right = margin + 200
+    col_desc_right = right_edge - 320
+    col_debit_right = right_edge - 160
+    col_borders = [col_date_right, col_desc_right, col_debit_right]
 
-    # -- Column headers --
-    draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 6
-    draw.text((col_date_x, y), "Date of", font=font_body_bold, fill="black")
-    y_sub = y + 20
-    draw.text((col_date_x, y_sub), "Transaction", font=font_body_bold, fill="black")
-    draw.text((col_desc_x, y), "Description", font=font_body_bold, fill="black")
-    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y, font=font_body_bold)
-    draw_text_right(draw, "Credits ()", x_right=col_credit_right, y=y, font=font_body_bold)
-    y = y_sub + 22
-    draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 8
+    # -- Column header row (bordered) --
+    header_h = 48
+    draw.rectangle([(margin, y), (right_edge, y + header_h)], outline="black")
+    for col_x in col_borders:
+        draw.line([(col_x, y), (col_x, y + header_h)], fill="black")
 
-    # -- Transactions (dense) --
+    draw.text((margin + 8, y + 6), "Date of", font=font_body_bold, fill="black")
+    draw.text((margin + 8, y + 24), "Transaction", font=font_body_bold, fill="black")
+    draw.text((col_date_right + 8, y + 14), "Description", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right - 8, y=y + 14, font=font_body_bold)
+    draw_text_right(draw, "Credits (-)", x_right=right_edge - 8, y=y + 14, font=font_body_bold)
+    y += header_h
+
+    # -- Transactions (bordered table body) --
     txns = _parse_transactions(fields)
+    table_body_start = y
+    date_grouping = layout.get("date_grouping", False)
+    current_date_group = ""
 
     for txn in txns:
-        draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
+        is_new_date = txn["date"] != current_date_group
 
-        # Truncate description to fit
+        if date_grouping:
+            if is_new_date:
+                if current_date_group:
+                    # Horizontal border between date groups
+                    draw.line([(margin, y), (right_edge, y)], fill="black")
+                current_date_group = txn["date"]
+                draw.text((margin + 8, y + 6), txn["date"], font=font_body, fill="black")
+        else:
+            # Flat: border between every row, date on each
+            if txn != txns[0]:
+                draw.line([(margin, y), (right_edge, y)], fill="black")
+            draw.text((margin + 8, y + 6), txn["date"], font=font_body, fill="black")
+
+        # Description
         desc = txn["description"]
-        max_desc_w = col_debit_right - col_desc_x - 180
+        max_desc_w = col_desc_right - col_date_right - 16
         bbox = font_body.getbbox(desc)
         while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
             desc = desc[:-1]
             bbox = font_body.getbbox(desc)
-        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+        draw.text((col_date_right + 8, y + 6), desc, font=font_body, fill="black")
 
+        # Amounts (no $ prefix — Westpac style)
         if txn["debit"] != "NOT_FOUND":
             draw_text_right(
                 draw,
-                fmt_amount(Decimal(txn["debit"])),
-                x_right=col_debit_right,
-                y=y,
+                _fmt_amount_plain(Decimal(txn["debit"])),
+                x_right=col_debit_right - 8,
+                y=y + 6,
                 font=font_body,
             )
         if txn["credit"] != "NOT_FOUND":
             draw_text_right(
                 draw,
-                fmt_amount(Decimal(txn["credit"])),
-                x_right=col_credit_right,
-                y=y,
+                _fmt_amount_plain(Decimal(txn["credit"])),
+                x_right=right_edge - 8,
+                y=y + 6,
                 font=font_body,
             )
+
         y += row_height
 
-    # -- Bottom rule --
-    draw_separator_line(draw, margin, right_edge, y, color="black")
+    # -- Table outer borders and vertical column lines --
+    draw.line([(margin, y), (right_edge, y)], fill="black")
+    draw.line([(margin, table_body_start), (margin, y)], fill="black")
+    draw.line([(right_edge, table_body_start), (right_edge, y)], fill="black")
+    for col_x in col_borders:
+        draw.line([(col_x, table_body_start), (col_x, y)], fill="black")
 
     return img
 
@@ -429,22 +514,15 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
     txns = _parse_transactions(fields)
     txns = _compute_running_balances(txns, fields.get("ACCOUNT_BALANCE", "0"))
 
-    # Brought forward row
+    # Pre-compute opening balance for "Brought forward"
+    opening = Decimal("0")
     if layout.get("show_brought_forward") and txns:
         first_debit = Decimal(txns[0]["debit"]) if txns[0]["debit"] != "NOT_FOUND" else Decimal("0")
         first_credit = Decimal(txns[0]["credit"]) if txns[0]["credit"] != "NOT_FOUND" else Decimal("0")
         opening = txns[0]["balance"] - first_credit + first_debit
-        draw.text((col_desc_x, y), "Brought forward", font=font_body, fill="black")
-        draw_text_right(
-            draw,
-            f"{fmt_amount(opening)} {balance_suffix}",
-            x_right=col_balance_right,
-            y=y,
-            font=font_body,
-        )
-        y += row_height
 
     current_date_group = ""
+    brought_forward_rendered = False
     for txn in txns:
         # Date grouping: bold date header when date changes
         if layout.get("date_grouping") and txn["date"] != current_date_group:
@@ -453,6 +531,19 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
             draw.rectangle([(margin, y), (right_edge, y + row_height - 2)], fill=header_color)
             draw.text((col_date_x, y + 4), txn["date"], font=font_body_bold, fill="black")
             y += row_height
+
+            # "Brought forward" appears under the first date group header
+            if not brought_forward_rendered and layout.get("show_brought_forward"):
+                brought_forward_rendered = True
+                draw.text((col_desc_x + 20, y + 4), "Brought forward", font=font_body, fill="black")
+                draw_text_right(
+                    draw,
+                    f"{fmt_amount(opening)} {balance_suffix}",
+                    x_right=col_balance_right,
+                    y=y + 4,
+                    font=font_body,
+                )
+                y += row_height
 
         # Indented transaction description
         desc = txn["description"]
