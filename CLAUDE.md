@@ -69,7 +69,7 @@ Python reads YAML — it does not shadow or merge with hardcoded defaults. Missi
 One PIL renderer per document type in `generators/`, each with signature `render_*(entry, layout) → PIL.Image`:
 - `bank_statement.py` — 12 layouts (CBA, Westpac, NAB, ANZ variants)
 - `receipt.py` — 6 layouts (thermal 80mm/57mm, retail, fuel, professional, hospitality)
-- `invoice.py` — 4 ATO-compliant layouts (standard, GST-inclusive, high-value, mixed)
+- `invoice.py` — 4 tax-compliant layouts (standard, GST-inclusive, high-value, mixed)
 - `cc_statement.py` — 8 layouts (2 per Big 4 bank)
 
 Shared rendering utilities live in `generators/common.py` (fonts, text drawing, ABN validation, amount formatting, degradation pipeline).
@@ -93,7 +93,7 @@ Shared rendering utilities live in `generators/common.py` (fonts, text drawing, 
 - **Case IDs**: `CASEB###` (bank), `CASER###` (receipt), `CASEI###` (invoice), `CASEC###` (cc)
 - **Dates**: DD/MM/YYYY in ground truth (e.g., `20/09/2024`)
 - **Amounts**: Decimal string without `$` sign (e.g., `137.73`)
-- **ABNs**: `XX XXX XXX XXX` format, must pass ATO checksum (weights `[10,1,3,5,7,9,11,13,15,17,19]`)
+- **ABNs**: `XX XXX XXX XXX` format, must pass ABN checksum (weights `[10,1,3,5,7,9,11,13,15,17,19]`)
 - **Pipe-delimited lists**: LINE_ITEM_DESCRIPTIONS/QUANTITIES/PRICES/TOTAL_PRICES — all must have matching counts
 - **GST**: If `IS_GST_INCLUDED=true`, GST = total / 11
 - **Missing fields**: Filled with `NOT_FOUND` in derived outputs

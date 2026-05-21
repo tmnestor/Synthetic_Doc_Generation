@@ -222,7 +222,7 @@ generators/
 ├── pipeline.py            # Typer CLI (validate, generate, derive)
 ├── bank_statement.py      # Bank statement renderer
 ├── receipt.py             # Receipt renderer (thermal/letterhead)
-├── invoice.py             # ATO-compliant invoice renderer
+├── invoice.py             # Tax-compliant invoice renderer
 └── cc_statement.py        # Credit card statement renderer
 
 linking/
