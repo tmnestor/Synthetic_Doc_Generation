@@ -7,10 +7,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     header:
       logo_text: "Commonwealth Bank"
       logo_x: 100
@@ -65,9 +65,10 @@ layouts:
         x: 1520
         width: 180
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 650
     margin: 100
+    content_width: 1600
     date_format: "DD MMM YY"
     include_statement_period: true
     include_interest_charges: false
@@ -80,10 +81,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     header:
       logo_text: "Commonwealth Bank Rewards"
       logo_x: 100
@@ -140,9 +141,10 @@ layouts:
         x: 1460
         width: 180
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 700
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_rewards_points: true
@@ -155,10 +157,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      subheader: 15
-      body: 11
-      footer: 9
+      header: 44
+      subheader: 26
+      body: 20
+      footer: 16
     header:
       logo_text: "westpac"
       logo_x: 100
@@ -208,9 +210,10 @@ layouts:
         x: 1370
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 640
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_interest_charges: true
@@ -223,10 +226,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      subheader: 15
-      body: 11
-      footer: 9
+      header: 44
+      subheader: 26
+      body: 20
+      footer: 16
     header:
       logo_text: "westpac altitude"
       logo_x: 100
@@ -283,9 +286,10 @@ layouts:
         x: 1470
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 700
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_frequent_flyer_points: true
@@ -298,10 +302,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      subheader: 15
-      body: 11
-      footer: 9
+      header: 44
+      subheader: 26
+      body: 20
+      footer: 16
     header:
       logo_text: "National Australia Bank"
       logo_x: 100
@@ -351,9 +355,10 @@ layouts:
         x: 1360
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 640
     margin: 100
+    content_width: 1600
     date_format: "DD MMM YY"
     include_statement_period: true
     include_interest_charges: true
@@ -366,10 +371,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      subheader: 15
-      body: 11
-      footer: 9
+      header: 44
+      subheader: 26
+      body: 20
+      footer: 16
     header:
       logo_text: "NAB Low Rate Card"
       logo_x: 100
@@ -421,9 +426,10 @@ layouts:
         x: 1360
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 680
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_interest_charges: true
@@ -437,10 +443,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     header:
       logo_text: "ANZ"
       logo_x: 100
@@ -490,9 +496,10 @@ layouts:
         x: 1360
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 640
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_interest_charges: false
@@ -505,10 +512,10 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     header:
       logo_text: "ANZ Platinum"
       logo_x: 100
@@ -565,9 +572,10 @@ layouts:
         x: 1460
         width: 190
         font_size: 11
-    row_height: 30
+    row_height: 50
     table_start_y: 700
     margin: 100
+    content_width: 1600
     date_format: "DD/MM/YY"
     include_statement_period: true
     include_elite_benefits: true

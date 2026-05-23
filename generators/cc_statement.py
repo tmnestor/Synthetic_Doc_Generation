@@ -43,6 +43,10 @@ def _normalize_layout(layout: dict) -> dict:
         flat.setdefault("font_size_body", font_sizes.get("body", 20))
         flat.setdefault("font_size_small", font_sizes.get("subheader", font_sizes.get("header", 16)))
 
+    # content width for constraining table/box right edge
+    margin_val = layout.get("margin", 100)
+    flat.setdefault("content_width", flat.get("page_width", 2480) - 2 * margin_val)
+
     # header background_color → background
     header = layout.get("header", {})
     if header and "background" not in header:
@@ -100,7 +104,7 @@ def _draw_header(
 
     font = load_font(layout.get("font_size_header", 28), bold=True)
     draw.text(
-        (layout.get("margin", 100), (h - 28) // 2),
+        (layout.get("margin", 100), (h - 48) // 2),
         header_cfg["logo_text"],
         font=font,
         fill=fg,
@@ -119,7 +123,7 @@ def _draw_account_info(
     margin = layout.get("margin", 100)
     font = load_font(layout.get("font_size_body", 20))
     font_small = load_font(layout.get("font_size_small", 16))
-    line_h = 35
+    line_h = 50
 
     payer = fields.get("PAYER_NAME", "")
     if payer:
@@ -163,11 +167,12 @@ def _draw_summary_box(
     font_small = load_font(layout.get("font_size_small", 16), bold=True)
     font_body = load_font(layout.get("font_size_body", 20))
 
+    content_width = layout.get("content_width", page_width - 2 * margin)
     box_x0 = margin
-    box_x1 = page_width - margin
+    box_x1 = margin + content_width
     box_y0 = y
-    line_h = 40
-    padding = 15
+    line_h = 56
+    padding = 20
 
     closing_balance_str = fields.get("ACCOUNT_BALANCE", "")
     credit_limit_str = fields.get("CREDIT_LIMIT", "")
@@ -232,20 +237,21 @@ def _draw_column_headers(
     font = load_font(layout.get("font_size_small", 16), bold=True)
 
     margin = layout.get("margin", 100)
-    page_width = layout.get("page_width", 2480)
+    content_width = layout.get("content_width", layout.get("page_width", 2480) - 2 * margin)
+    right_edge = margin + content_width
     draw.rectangle(
-        [(margin, y), (page_width - margin, y + 35)],
+        [(margin, y), (right_edge, y + 50)],
         fill="#F0F0F0",
     )
 
     for col_key, col_cfg in columns.items():
         draw.text(
-            (col_cfg["x"], y + 5),
+            (col_cfg["x"], y + 10),
             col_cfg.get("header", col_key),
             font=font,
             fill="black",
         )
-    return y + 40
+    return y + 55
 
 
 def _draw_transactions(
@@ -260,18 +266,19 @@ def _draw_transactions(
     font = load_font(layout.get("font_size_body", 20))
     borders = layout.get("borders", False)
     margin = layout.get("margin", 100)
-    page_width = layout.get("page_width", 2480)
+    content_width = layout.get("content_width", layout.get("page_width", 2480) - 2 * margin)
+    right_edge = margin + content_width
 
     for txn in txns:
         if borders:
             draw.rectangle(
-                [(margin, y), (page_width - margin, y + row_h)],
+                [(margin, y), (right_edge, y + row_h)],
                 outline="#CCCCCC",
             )
 
         if "date" in columns:
             draw.text(
-                (columns["date"]["x"], y + 8),
+                (columns["date"]["x"], y + 14),
                 txn["date"],
                 font=font,
                 fill="black",
@@ -280,7 +287,7 @@ def _draw_transactions(
         desc_col = columns.get("description", {})
         if desc_col:
             draw.text(
-                (desc_col["x"], y + 8),
+                (desc_col["x"], y + 14),
                 txn["description"],
                 font=font,
                 fill="black",
@@ -297,7 +304,7 @@ def _draw_transactions(
                 draw,
                 amount_fmt,
                 x_right=amount_col["x"] + amount_col["width"],
-                y=y + 8,
+                y=y + 14,
                 font=font,
             )
 

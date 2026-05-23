@@ -97,13 +97,14 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
     font_body_bold = load_font(font_sizes["body"], bold=True)
     font_footer = load_font(font_sizes["footer"])
 
-    right_edge = width - margin
+    content_width = layout.get("content_width", width - 2 * margin)
+    right_edge = margin + content_width
     y = margin
 
     # -- Bank name and legal lines --
     bank_color = layout.get("bank_name_color", "#12107D")
     draw.text((margin, y), "Commonwealth Bank", font=font_header, fill=bank_color)
-    y += 45
+    y += 68
 
     legal_lines = [
         "Commonwealth Bank of Australia",
@@ -112,15 +113,15 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
     ]
     for line in legal_lines:
         draw.text((margin, y), line, font=font_footer, fill="#666666")
-        y += 16
-    y += 30
+        y += 24
+    y += 40
 
     # -- Account details --
     payer = fields.get("PAYER_NAME", "")
     date_range = fields.get("STATEMENT_DATE_RANGE", "")
 
     draw.text((margin, y), f"Account Holder: {payer}", font=font_body, fill="black")
-    y += 30
+    y += 44
     if date_range:
         parts = date_range.split(" - ")
         if len(parts) == 2:
@@ -130,8 +131,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
                 font=font_body,
                 fill="black",
             )
-        y += 30
-    y += 20
+        y += 44
+    y += 28
 
     # -- Column positions --
     # Text columns left-aligned, numeric columns right-aligned
@@ -143,7 +144,7 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 
     # -- Column header bar --
     draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 8
+    y += 12
 
     headers = layout.get("column_headers", ["Date", "Description", "Withdrawal", "Deposit", "Balance"])
     draw.text((col_date_x, y), headers[0], font=font_body_bold, fill="black")
@@ -151,9 +152,9 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
     draw_text_right(draw, headers[2], x_right=col_withdrawal_right, y=y, font=font_body_bold)
     draw_text_right(draw, headers[3], x_right=col_deposit_right, y=y, font=font_body_bold)
     draw_text_right(draw, headers[4], x_right=col_balance_right, y=y, font=font_body_bold)
-    y += 28
+    y += 44
     draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 12
+    y += 16
 
     # -- Transactions --
     txns = _parse_transactions(fields)
@@ -222,12 +223,12 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 
     # -- Bottom rule --
     draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 40
+    y += 56
 
     # -- Footer --
     if layout.get("show_footer_transaction_types"):
         draw.text((margin, y), "TRANSACTION TYPES:", font=font_body_bold, fill="black")
-        y += 28
+        y += 44
         txn_types = [
             "EFTPOS — Electronic Funds Transfer at Point of Sale",
             "BPAY — Bill Payment",
@@ -237,8 +238,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
         ]
         for desc in txn_types:
             draw.text((margin, y), desc, font=font_footer, fill="#666666")
-            y += 16
-        y += 20
+            y += 24
+        y += 28
         draw.text((margin, y), "CommBank.com.au  |  13 2221", font=font_footer, fill="#666666")
 
     return img
@@ -277,7 +278,8 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     font_small = load_font(font_sizes.get("sub_description", 13))
     font_footer = load_font(font_sizes["footer"])
 
-    right_edge = width - margin
+    content_width = layout.get("content_width", width - 2 * margin)
+    right_edge = margin + content_width
     y = margin
 
     # -- Westpac logo (top-left, red) --
@@ -286,7 +288,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
 
     # -- Page number (top-right) --
     draw_text_right(draw, "Page 1 of 1", x_right=right_edge, y=y, font=font_footer, fill="#666666")
-    y += 50
+    y += 72
 
     # -- Rewards section (premium variant) --
     payer = fields.get("PAYER_NAME", "")
@@ -295,7 +297,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     if layout.get("show_rewards_section"):
         y += 10
         rewards_top = y
-        rewards_height = 170
+        rewards_height = 260
         rewards_mid_x = margin + (right_edge - margin) // 2
 
         # Outer border
@@ -308,7 +310,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
         # Left: Points summary
         ry = rewards_top + 8
         draw.text((margin + 10, ry), "Rewards Points Balance Summary", font=font_body_bold, fill="black")
-        ry += 26
+        ry += 38
         for label, val in [
             ("Opening Balance", "345,678"),
             ("Points Earned", "12,456"),
@@ -319,7 +321,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
         ]:
             draw.text((margin + 10, ry), label, font=font_small, fill="black")
             draw_text_right(draw, val, x_right=rewards_mid_x - 15, y=ry, font=font_small)
-            ry += 20
+            ry += 30
             draw.line([(margin, ry - 2), (rewards_mid_x, ry - 2)], fill="#CCCCCC")
 
         # Right: Message
@@ -337,7 +339,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
             font=font_small,
             fill="#666666",
         )
-        y += 30
+        y += 42
 
     y += 20
 
@@ -348,12 +350,12 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
         else "Transaction Details"
     )
     draw.text((margin, y), section_title, font=font_body_bold, fill="black")
-    y += 30
+    y += 42
     draw.text((margin, y), payer, font=font_body, fill="black")
-    y += 22
+    y += 38
     if date_range:
         draw.text((margin, y), f"Statement Period: {date_range}", font=font_small, fill="#666666")
-        y += 22
+        y += 32
     y += 10
 
     # -- Column positions for bordered table --
@@ -363,16 +365,16 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     col_borders = [col_date_right, col_desc_right, col_debit_right]
 
     # -- Column header row (bordered) --
-    header_h = 48
+    header_h = 72
     draw.rectangle([(margin, y), (right_edge, y + header_h)], outline="black")
     for col_x in col_borders:
         draw.line([(col_x, y), (col_x, y + header_h)], fill="black")
 
-    draw.text((margin + 8, y + 6), "Date of", font=font_body_bold, fill="black")
-    draw.text((margin + 8, y + 24), "Transaction", font=font_body_bold, fill="black")
-    draw.text((col_date_right + 8, y + 14), "Description", font=font_body_bold, fill="black")
-    draw_text_right(draw, "Debits", x_right=col_debit_right - 8, y=y + 14, font=font_body_bold)
-    draw_text_right(draw, "Credits (-)", x_right=right_edge - 8, y=y + 14, font=font_body_bold)
+    draw.text((margin + 8, y + 10), "Date of", font=font_body_bold, fill="black")
+    draw.text((margin + 8, y + 36), "Transaction", font=font_body_bold, fill="black")
+    draw.text((col_date_right + 8, y + 22), "Description", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right - 8, y=y + 22, font=font_body_bold)
+    draw_text_right(draw, "Credits (-)", x_right=right_edge - 8, y=y + 22, font=font_body_bold)
     y += header_h
 
     # -- Transactions (bordered table body) --
@@ -390,12 +392,12 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                     # Horizontal border between date groups
                     draw.line([(margin, y), (right_edge, y)], fill="black")
                 current_date_group = txn["date"]
-                draw.text((margin + 8, y + 6), txn["date"], font=font_body, fill="black")
+                draw.text((margin + 8, y + 10), txn["date"], font=font_body, fill="black")
         else:
             # Flat: border between every row, date on each
             if txn != txns[0]:
                 draw.line([(margin, y), (right_edge, y)], fill="black")
-            draw.text((margin + 8, y + 6), txn["date"], font=font_body, fill="black")
+            draw.text((margin + 8, y + 10), txn["date"], font=font_body, fill="black")
 
         # Description
         desc = txn["description"]
@@ -404,7 +406,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
         while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
             desc = desc[:-1]
             bbox = font_body.getbbox(desc)
-        draw.text((col_date_right + 8, y + 6), desc, font=font_body, fill="black")
+        draw.text((col_date_right + 8, y + 10), desc, font=font_body, fill="black")
 
         # Amounts (no $ prefix — Westpac style)
         if txn["debit"] != "NOT_FOUND":
@@ -412,7 +414,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 draw,
                 _fmt_amount_plain(Decimal(txn["debit"])),
                 x_right=col_debit_right - 8,
-                y=y + 6,
+                y=y + 10,
                 font=font_body,
             )
         if txn["credit"] != "NOT_FOUND":
@@ -420,7 +422,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 draw,
                 _fmt_amount_plain(Decimal(txn["credit"])),
                 x_right=right_edge - 8,
-                y=y + 6,
+                y=y + 10,
                 font=font_body,
             )
 
@@ -466,36 +468,37 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
     font_small = load_font(font_sizes.get("sub_description", 13))
     font_footer = load_font(font_sizes["footer"])
 
-    right_edge = width - margin
+    content_width = layout.get("content_width", width - 2 * margin)
+    right_edge = margin + content_width
     header_color = _parse_hex_color(layout.get("header_bar_color", "#E8F0FE"))
     balance_suffix = layout.get("balance_suffix", "Cr")
     y = margin
 
     # -- Bank name header --
     draw.text((margin, y), "NAB Classic Banking", font=font_header, fill="#003366")
-    y += 50
+    y += 72
 
     # -- Account Details box --
     box_top = y
     payer = fields.get("PAYER_NAME", "")
-    draw.rectangle([(margin, y), (right_edge, y + 100)], outline="#003366", width=2)
-    y += 12
+    draw.rectangle([(margin, y), (right_edge, y + 150)], outline="#003366", width=2)
+    y += 18
     draw.text((margin + 15, y), "Account Details", font=font_body_bold, fill="black")
-    y += 25
+    y += 38
     draw.text((margin + 15, y), payer, font=font_body, fill="black")
     draw_text_right(draw, "BSB Number", x_right=right_edge - 250, y=y, font=font_small, fill="#666666")
     draw_text_right(draw, "082-456", x_right=right_edge - 15, y=y, font=font_body, fill="black")
-    y += 22
+    y += 36
     draw_text_right(draw, "Account Number", x_right=right_edge - 250, y=y, font=font_small, fill="#666666")
     draw_text_right(draw, "98-765-4321", x_right=right_edge - 15, y=y, font=font_body, fill="black")
-    y = box_top + 120
+    y = box_top + 170
 
     # -- Section header --
     draw.text((margin, y), "Transaction Details (continued)", font=font_body_bold, fill="black")
-    y += 35
+    y += 52
 
     # -- Column header bar (light blue background) --
-    draw.rectangle([(margin, y), (right_edge, y + 30)], fill=header_color)
+    draw.rectangle([(margin, y), (right_edge, y + 44)], fill=header_color)
 
     col_date_x = margin + 10
     col_desc_x = margin + 160
@@ -503,12 +506,12 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
     col_credit_right = right_edge - 190
     col_balance_right = right_edge - 10
 
-    draw.text((col_date_x, y + 5), "Date", font=font_body_bold, fill="black")
-    draw.text((col_desc_x, y + 5), "Particulars", font=font_body_bold, fill="black")
-    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y + 5, font=font_body_bold)
-    draw_text_right(draw, "Credits", x_right=col_credit_right, y=y + 5, font=font_body_bold)
-    draw_text_right(draw, "Balance", x_right=col_balance_right, y=y + 5, font=font_body_bold)
-    y += 35
+    draw.text((col_date_x, y + 10), "Date", font=font_body_bold, fill="black")
+    draw.text((col_desc_x, y + 10), "Particulars", font=font_body_bold, fill="black")
+    draw_text_right(draw, "Debits", x_right=col_debit_right, y=y + 10, font=font_body_bold)
+    draw_text_right(draw, "Credits", x_right=col_credit_right, y=y + 10, font=font_body_bold)
+    draw_text_right(draw, "Balance", x_right=col_balance_right, y=y + 10, font=font_body_bold)
+    y += 50
 
     # -- Transactions with date grouping --
     txns = _parse_transactions(fields)
@@ -529,18 +532,18 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
             current_date_group = txn["date"]
             # Light blue date group row
             draw.rectangle([(margin, y), (right_edge, y + row_height - 2)], fill=header_color)
-            draw.text((col_date_x, y + 4), txn["date"], font=font_body_bold, fill="black")
+            draw.text((col_date_x, y + 8), txn["date"], font=font_body_bold, fill="black")
             y += row_height
 
             # "Brought forward" appears under the first date group header
             if not brought_forward_rendered and layout.get("show_brought_forward"):
                 brought_forward_rendered = True
-                draw.text((col_desc_x + 20, y + 4), "Brought forward", font=font_body, fill="black")
+                draw.text((col_desc_x + 20, y + 8), "Brought forward", font=font_body, fill="black")
                 draw_text_right(
                     draw,
                     f"{fmt_amount(opening)} {balance_suffix}",
                     x_right=col_balance_right,
-                    y=y + 4,
+                    y=y + 8,
                     font=font_body,
                 )
                 y += row_height
@@ -552,21 +555,21 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
         while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
             desc = desc[:-1]
             bbox = font_body.getbbox(desc)
-        draw.text((col_desc_x + 20, y + 4), desc, font=font_body, fill="black")
+        draw.text((col_desc_x + 20, y + 8), desc, font=font_body, fill="black")
 
         # Reference number with dotted leader (if enabled)
         if layout.get("show_references"):
             ref_num = str(hash(txn["description"]) % 10**10).zfill(10)
             ref_text = f"Ref: {ref_num}"
             dots = "." * 40
-            draw.text((col_desc_x + 20, y + 22), f"{ref_text}{dots}", font=font_small, fill="#999999")
+            draw.text((col_desc_x + 20, y + 34), f"{ref_text}{dots}", font=font_small, fill="#999999")
 
         if txn["debit"] != "NOT_FOUND":
             draw_text_right(
                 draw,
                 fmt_amount(Decimal(txn["debit"])),
                 x_right=col_debit_right,
-                y=y + 4,
+                y=y + 8,
                 font=font_body,
             )
         if txn["credit"] != "NOT_FOUND":
@@ -574,7 +577,7 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
                 draw,
                 fmt_amount(Decimal(txn["credit"])),
                 x_right=col_credit_right,
-                y=y + 4,
+                y=y + 8,
                 font=font_body,
             )
         if "balance" in txn:
@@ -582,11 +585,11 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
                 draw,
                 f"{fmt_amount(txn['balance'])} {balance_suffix}",
                 x_right=col_balance_right,
-                y=y + 4,
+                y=y + 8,
                 font=font_body,
             )
 
-        ref_extra = 20 if layout.get("show_references") else 0
+        ref_extra = 32 if layout.get("show_references") else 0
         y += row_height + ref_extra
 
     # -- Carried forward --
@@ -632,26 +635,27 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     font_small = load_font(font_sizes.get("sub_description", 14))
     font_footer = load_font(font_sizes["footer"])
 
-    right_edge = width - margin
+    content_width = layout.get("content_width", width - 2 * margin)
+    right_edge = margin + content_width
     header_color = _parse_hex_color(layout.get("header_color", "#0061B5"))
     suffix_dr = layout.get("balance_suffix_debit", "DR")
     suffix_cr = layout.get("balance_suffix_credit", "CR")
     y = margin
 
     # -- Blue header bar --
-    draw.rectangle([(0, 0), (width, 80)], fill=header_color)
-    draw.text((margin, 20), "ANZ", font=font_header, fill="white")
+    draw.rectangle([(0, 0), (width, 120)], fill=header_color)
+    draw.text((margin, 30), "ANZ", font=font_header, fill="white")
 
     # -- Account info --
-    y = 100
+    y = 140
     payer = fields.get("PAYER_NAME", "")
 
     draw_text_right(
         draw, "Account number    0000-00000", x_right=right_edge, y=y, font=font_small, fill="#666666"
     )
-    y += 25
+    y += 38
     draw.text((margin, y), "Transaction Details", font=font_body_bold, fill="black")
-    y += 35
+    y += 52
 
     # -- Column header with underline --
     col_date_x = margin
@@ -665,9 +669,9 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     draw_text_right(draw, "Debits", x_right=col_debit_right, y=y, font=font_body_bold)
     draw_text_right(draw, "Credits", x_right=col_credit_right, y=y, font=font_body_bold)
     draw_text_right(draw, "Balance", x_right=col_balance_right, y=y, font=font_body_bold)
-    y += 28
+    y += 44
     draw_separator_line(draw, margin, right_edge, y, color="black")
-    y += 10
+    y += 14
 
     # -- Transactions --
     txns = _parse_transactions(fields)
@@ -735,7 +739,7 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     # -- Totals row --
     if layout.get("show_totals_row"):
         draw_separator_line(draw, margin, right_edge, y, color="black")
-        y += 8
+        y += 12
         draw.text((col_desc_x, y), "Totals at end of period", font=font_body_bold, fill="black")
         draw_text_right(draw, fmt_amount(total_debits), x_right=col_debit_right, y=y, font=font_body_bold)
         draw_text_right(draw, fmt_amount(total_credits), x_right=col_credit_right, y=y, font=font_body_bold)

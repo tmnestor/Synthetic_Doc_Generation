@@ -5,12 +5,13 @@ layouts:
       width: 2480
       height: 3508
     margin: 100
+    content_width: 1700
     font_family: sans-serif
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     sections:
       - type: header
         name: invoice_title
@@ -118,12 +119,13 @@ layouts:
       width: 2480
       height: 3508
     margin: 100
+    content_width: 1700
     font_family: sans-serif
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     gst_inclusive_mode: true
     sections:
       - type: header
@@ -225,12 +227,13 @@ layouts:
       width: 2480
       height: 3508
     margin: 100
+    content_width: 1700
     font_family: sans-serif
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     minimum_amount: 10000
     sections:
       - type: header
@@ -352,12 +355,13 @@ layouts:
       width: 2480
       height: 3508
     margin: 100
+    content_width: 1700
     font_family: sans-serif
     font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+      header: 48
+      subheader: 28
+      body: 20
+      footer: 16
     mixed_tax_mode: true
     sections:
       - type: header

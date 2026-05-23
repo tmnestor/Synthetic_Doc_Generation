@@ -8,11 +8,12 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      body: 18
-      footer: 10
+      header: 48
+      body: 32
+      footer: 18
     margin: 100
-    row_height: 45
+    content_width: 1600
+    row_height: 72
     bank_name_color: "#12107D"
     column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
     show_opening_balance: true
@@ -28,11 +29,12 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      body: 18
-      footer: 10
+      header: 48
+      body: 32
+      footer: 18
     margin: 100
-    row_height: 45
+    content_width: 1600
+    row_height: 72
     bank_name_color: "#12107D"
     column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
     show_opening_balance: true
@@ -49,12 +51,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      body: 16
-      sub_description: 13
-      footer: 9
+      header: 44
+      body: 28
+      sub_description: 22
+      footer: 16
     margin: 80
-    row_height: 40
+    content_width: 1600
+    row_height: 62
     logo_color: "#C41E3A"
     date_format: "DD MMM YY"
 
@@ -67,12 +70,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      body: 16
-      sub_description: 13
-      footer: 9
+      header: 44
+      body: 28
+      sub_description: 22
+      footer: 16
     margin: 80
-    row_height: 40
+    content_width: 1600
+    row_height: 62
     logo_color: "#C41E3A"
     show_rewards_section: true
     date_grouping: true
@@ -87,12 +91,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      body: 16
-      sub_description: 13
-      footer: 9
+      header: 44
+      body: 28
+      sub_description: 22
+      footer: 16
     margin: 80
-    row_height: 42
+    content_width: 1600
+    row_height: 66
     header_bar_color: "#E8F0FE"
     balance_suffix: "Cr"
     date_grouping: true
@@ -109,12 +114,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 24
-      body: 14
-      sub_description: 11
-      footer: 8
+      header: 40
+      body: 24
+      sub_description: 20
+      footer: 14
     margin: 80
-    row_height: 32
+    content_width: 1600
+    row_height: 52
     header_bar_color: "#E8F0FE"
     balance_suffix: "Cr"
     date_grouping: true
@@ -131,12 +137,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 28
-      body: 18
-      sub_description: 14
-      footer: 10
+      header: 48
+      body: 32
+      sub_description: 24
+      footer: 18
     margin: 100
-    row_height: 45
+    content_width: 1600
+    row_height: 72
     header_color: "#0061B5"
     balance_suffix_debit: "DR"
     balance_suffix_credit: "CR"
@@ -153,12 +160,13 @@ layouts:
       width: 2480
       height: 3508
     font_sizes:
-      header: 26
-      body: 16
-      sub_description: 13
-      footer: 9
+      header: 44
+      body: 28
+      sub_description: 22
+      footer: 16
     margin: 100
-    row_height: 40
+    content_width: 1600
+    row_height: 62
     header_color: "#0061B5"
     balance_suffix_debit: "DR"
     balance_suffix_credit: "CR"

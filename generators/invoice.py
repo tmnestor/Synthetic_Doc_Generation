@@ -59,6 +59,10 @@ def _normalize_layout(layout: dict) -> dict:
         flat.setdefault("font_size_body", font_sizes.get("body", 22))
         flat.setdefault("font_size_small", font_sizes.get("subheader", font_sizes.get("body", 18)))
 
+    # content width for constraining table/box right edge
+    margin_val = layout.get("margin", 100)
+    flat.setdefault("content_width", flat.get("page_width", 2480) - 2 * margin_val)
+
     return flat
 
 
@@ -77,6 +81,8 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
     width = layout.get("page_width", 2480)
     height = layout.get("page_height", 3508)
     margin = layout.get("margin", 150)
+    content_width = layout.get("content_width", width - 2 * margin)
+    right_edge = margin + content_width
 
     font_h = load_font(layout.get("font_size_header", 32), bold=True)
     font_b = load_font(layout.get("font_size_body", 22))
@@ -92,16 +98,16 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
         if sec_type == "title":
             text = section.get("text", "Tax Invoice")
             draw.text((margin, y), text, font=font_h, fill="black")
-            y += 60
+            y += 80
 
         elif sec_type == "seller_details":
             draw.text((margin, y), fields.get("SUPPLIER_NAME", ""), font=font_b, fill="black")
-            y += 35
+            y += 48
             draw.text((margin, y), fields.get("BUSINESS_ADDRESS", ""), font=font_s, fill="black")
-            y += 30
+            y += 40
             abn = fields.get("BUSINESS_ABN", "")
             draw.text((margin, y), f"ABN: {abn}", font=font_s, fill="black")
-            y += 50
+            y += 64
 
         elif sec_type == "invoice_metadata":
             draw.text(
@@ -110,20 +116,20 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                 font=font_s,
                 fill="black",
             )
-            y += 40
+            y += 52
 
         elif sec_type == "buyer_details":
             payer = fields.get("PAYER_NAME", "")
             if payer:
                 draw.text((margin, y), "Bill To:", font=font_s, fill="gray")
-                y += 28
+                y += 40
                 draw.text((margin, y), payer, font=font_b, fill="black")
-                y += 32
+                y += 44
                 addr = fields.get("PAYER_ADDRESS", "")
                 if addr:
                     draw.text((margin, y), addr, font=font_s, fill="black")
-                    y += 32
-                y += 20
+                    y += 44
+                y += 28
 
         elif sec_type in (
             "line_items_table",
@@ -138,40 +144,40 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                 "gst": margin + 1300,
                 "total": margin + 1550,
             }
-            row_h = 40
+            row_h = 52
             use_borders = section.get("borders", False)
 
             if use_borders:
                 draw.rectangle(
-                    [(margin, y), (width - margin, y + row_h)],
+                    [(margin, y), (right_edge, y + row_h)],
                     fill="#F0F0F0",
                     outline="#CCCCCC",
                 )
-            draw.text((col_x["description"], y + 8), "Description", font=font_s, fill="black")
-            draw.text((col_x["qty"], y + 8), "Qty", font=font_s, fill="black")
-            draw.text((col_x["price"], y + 8), "Price", font=font_s, fill="black")
-            draw.text((col_x["total"], y + 8), "Total", font=font_s, fill="black")
+            draw.text((col_x["description"], y + 12), "Description", font=font_s, fill="black")
+            draw.text((col_x["qty"], y + 12), "Qty", font=font_s, fill="black")
+            draw.text((col_x["price"], y + 12), "Price", font=font_s, fill="black")
+            draw.text((col_x["total"], y + 12), "Total", font=font_s, fill="black")
             y += row_h
 
             for item in items:
                 if use_borders:
                     draw.rectangle(
-                        [(margin, y), (width - margin, y + row_h)],
+                        [(margin, y), (right_edge, y + row_h)],
                         outline="#CCCCCC",
                     )
                 draw.text(
-                    (col_x["description"], y + 8),
+                    (col_x["description"], y + 12),
                     item["description"],
                     font=font_s,
                     fill="black",
                 )
-                draw.text((col_x["qty"], y + 8), item["quantity"], font=font_s, fill="black")
+                draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
                 if item["price"]:
                     draw_text_right(
                         draw,
                         fmt_amount(Decimal(item["price"])),
                         col_x["price"] + 200,
-                        y + 8,
+                        y + 12,
                         font_s,
                     )
                 if item["total"]:
@@ -179,7 +185,7 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                         draw,
                         fmt_amount(Decimal(item["total"])),
                         col_x["total"] + 200,
-                        y + 8,
+                        y + 12,
                         font_s,
                     )
                 y += row_h
@@ -190,18 +196,18 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
             total = fields.get("TOTAL_AMOUNT", "0")
             gst = fields.get("GST_AMOUNT", "0")
 
-            totals_x = width - margin - 400
+            totals_x = right_edge - 400
             if gst_display == "separate":
                 subtotal = str(Decimal(total) - Decimal(gst))
                 draw.text((totals_x, y), "Subtotal:", font=font_s, fill="black")
-                draw_text_right(draw, fmt_amount(Decimal(subtotal)), width - margin, y, font_s)
-                y += 32
+                draw_text_right(draw, fmt_amount(Decimal(subtotal)), right_edge, y, font_s)
+                y += 44
                 draw.text((totals_x, y), "GST (10%):", font=font_s, fill="black")
-                draw_text_right(draw, fmt_amount(Decimal(gst)), width - margin, y, font_s)
-                y += 32
+                draw_text_right(draw, fmt_amount(Decimal(gst)), right_edge, y, font_s)
+                y += 44
             draw.text((totals_x, y), "Total:", font=font_h, fill="black")
-            draw_text_right(draw, fmt_amount(Decimal(total)), width - margin, y, font_h)
-            y += 50
+            draw_text_right(draw, fmt_amount(Decimal(total)), right_edge, y, font_h)
+            y += 64
 
             if gst_display == "inclusive":
                 draw.text(
@@ -210,38 +216,38 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                     font=font_s,
                     fill="gray",
                 )
-                y += 30
+                y += 40
 
         # YAML layout aliases — map native YAML section types to renderer logic
         elif sec_type == "header":
             # Invoice title header (e.g. "TAX INVOICE")
             text = section.get("text", "TAX INVOICE")
             draw.text((margin, y), text, font=font_h, fill="black")
-            y += 60
+            y += 80
 
         elif sec_type == "section":
             # Named section — dispatch by section name
             sec_name = section.get("name", "")
             if sec_name == "seller_details":
                 draw.text((margin, y), fields.get("SUPPLIER_NAME", ""), font=font_b, fill="black")
-                y += 35
+                y += 48
                 draw.text((margin, y), fields.get("BUSINESS_ADDRESS", ""), font=font_s, fill="black")
-                y += 30
+                y += 40
                 abn = fields.get("BUSINESS_ABN", "")
                 draw.text((margin, y), f"ABN: {abn}", font=font_s, fill="black")
-                y += 50
+                y += 64
             elif sec_name == "buyer_details":
                 payer = fields.get("PAYER_NAME", "")
                 if payer:
                     draw.text((margin, y), "Bill To:", font=font_s, fill="gray")
-                    y += 28
+                    y += 40
                     draw.text((margin, y), payer, font=font_b, fill="black")
-                    y += 32
+                    y += 44
                     addr = fields.get("PAYER_ADDRESS", "")
                     if addr:
                         draw.text((margin, y), addr, font=font_s, fill="black")
-                        y += 32
-                    y += 20
+                        y += 44
+                    y += 28
             elif sec_name == "invoice_metadata":
                 draw.text(
                     (margin, y),
@@ -249,13 +255,13 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                     font=font_s,
                     fill="black",
                 )
-                y += 40
+                y += 52
             # Other sections (payment_terms, delivery_details) are rendered as labels
             else:
                 label = section.get("label", "")
                 if label:
                     draw.text((margin, y), label, font=font_s, fill="gray")
-                    y += 30
+                    y += 40
 
         elif sec_type == "table":
             # Named table — dispatch by table name to line_items renderer
@@ -266,32 +272,32 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                 "price": margin + 1050,
                 "total": margin + 1550,
             }
-            row_h = 40
+            row_h = 52
             # Column header row
             draw.rectangle(
-                [(margin, y), (width - margin, y + row_h)],
+                [(margin, y), (right_edge, y + row_h)],
                 fill="#F0F0F0",
             )
-            draw.text((col_x["description"], y + 8), "Description", font=font_s, fill="black")
-            draw.text((col_x["qty"], y + 8), "Qty", font=font_s, fill="black")
-            draw.text((col_x["price"], y + 8), "Unit Price", font=font_s, fill="black")
-            draw.text((col_x["total"], y + 8), "Total", font=font_s, fill="black")
+            draw.text((col_x["description"], y + 12), "Description", font=font_s, fill="black")
+            draw.text((col_x["qty"], y + 12), "Qty", font=font_s, fill="black")
+            draw.text((col_x["price"], y + 12), "Unit Price", font=font_s, fill="black")
+            draw.text((col_x["total"], y + 12), "Total", font=font_s, fill="black")
             y += row_h
             for item in items:
                 draw.text(
-                    (col_x["description"], y + 8),
+                    (col_x["description"], y + 12),
                     item["description"],
                     font=font_s,
                     fill="black",
                 )
-                draw.text((col_x["qty"], y + 8), item["quantity"], font=font_s, fill="black")
+                draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
                 if item["price"]:
                     try:
                         draw_text_right(
                             draw,
                             fmt_amount(Decimal(item["price"])),
                             col_x["price"] + 200,
-                            y + 8,
+                            y + 12,
                             font_s,
                         )
                     except Exception:  # noqa: BLE001
@@ -302,7 +308,7 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                             draw,
                             fmt_amount(Decimal(item["total"])),
                             col_x["total"] + 200,
-                            y + 8,
+                            y + 12,
                             font_s,
                         )
                     except Exception:  # noqa: BLE001
@@ -312,7 +318,7 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
 
         elif sec_type == "separator":
             # Horizontal separator line
-            draw.line([(margin, y + 8), (width - margin, y + 8)], fill="#CCCCCC", width=1)
+            draw.line([(margin, y + 8), (right_edge, y + 8)], fill="#CCCCCC", width=1)
             y += section.get("height", 20)
 
         elif sec_type == "label":
