@@ -2,8 +2,10 @@
 
 Renders PIL images from ground truth YAML entries using layout configs.
 Supports thermal (80mm/57mm), letterhead, and hospitality formats.
+ATO-compliant: TAX INVOICE heading, per-item GST indicators, proper GST breakdown.
 """
 
+import hashlib
 from decimal import Decimal
 
 from PIL import Image, ImageDraw
@@ -12,6 +14,7 @@ from generators.common import (
     draw_line_item,
     draw_separator,
     draw_text_center,
+    draw_text_right,
     fmt_amount,
     load_font,
 )
@@ -37,6 +40,21 @@ def _parse_line_items(fields: dict) -> list[dict]:
     return items
 
 
+def _derive_receipt_number(case_id: str, invoice_date: str) -> str:
+    """Derive a deterministic receipt number from case ID and invoice date.
+
+    Args:
+        case_id: The case identifier (e.g. "CASE001").
+        invoice_date: Invoice date string (e.g. "08/04/2023").
+
+    Returns:
+        Receipt number string like "R-8A3F1D".
+    """
+    raw = f"{case_id}:{invoice_date}"
+    digest = hashlib.sha256(raw.encode()).hexdigest()[:6].upper()
+    return f"R-{digest}"
+
+
 def render_receipt(entry: dict, layout: dict) -> Image.Image:
     """Render a receipt image from ground truth entry and layout config.
 
@@ -48,6 +66,7 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
         PIL Image of the rendered receipt.
     """
     fields = entry["fields"]
+    case_id = entry.get("case_id", "")
     width = layout.get("width", 640)
     margin = layout.get("margin", 40)
     line_h = layout.get("line_height", 36)
@@ -56,6 +75,8 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
     font_size = layout.get("font_size", 20)
     font = load_font(font_size, mono=is_mono)
     font_bold = load_font(font_size, mono=is_mono, bold=True)
+
+    is_gst_included = fields.get("IS_GST_INCLUDED", "false") == "true"
 
     max_h = 4000
     img = Image.new("RGB", (width, max_h), "white")
@@ -76,7 +97,23 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
             if abn:
                 draw_text_center(draw, f"ABN: {abn}", y, width, font)
                 y += line_h
-            y += line_h // 2
+            phone = fields.get("BUSINESS_PHONE", "")
+            if phone:
+                draw_text_center(draw, f"Ph: {phone}", y, width, font)
+                y += line_h
+            y += line_h // 4
+
+        elif sec_type == "tax_invoice_label":
+            draw.text((margin, y), "TAX INVOICE", font=font_bold, fill="black")
+            y += line_h
+
+        elif sec_type == "receipt_meta":
+            inv_date = fields.get("INVOICE_DATE", "")
+            receipt_num = _derive_receipt_number(case_id, inv_date)
+            if inv_date:
+                draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+            draw_text_right(draw, f"Receipt: {receipt_num}", x_right=width - margin, y=y, font=font)
+            y += line_h
 
         elif sec_type == "separator":
             draw_separator(draw, y, width, margin, font)
@@ -97,7 +134,7 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
                 y += line_h
 
-        elif sec_type == "line_items":
+        elif sec_type in ("line_items", "itemized"):
             items = _parse_line_items(fields)
             for item in items:
                 desc = item["description"]
@@ -105,37 +142,39 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 total = item["total"]
                 if qty and qty != "1":
                     desc = f"{qty}x {desc}"
+                if is_gst_included:
+                    desc = f"{desc} *"
                 amount_str = fmt_amount(Decimal(total)) if total else ""
                 draw_line_item(draw, desc, amount_str, y, font, margin, width)
                 y += line_h
 
-        elif sec_type == "totals":
-            draw_separator(draw, y, width, margin, font)
+        elif sec_type == "gst_legend":
+            draw.text((margin, y), "* Includes GST", font=font, fill="black")
             y += line_h
+
+        elif sec_type == "totals":
             total = fields.get("TOTAL_AMOUNT", "")
             gst = fields.get("GST_AMOUNT", "")
-            is_inclusive = fields.get("IS_GST_INCLUDED", "false") == "true"
 
-            if gst:
-                if is_inclusive:
-                    subtotal = str(Decimal(total) - Decimal(gst))
-                    draw_line_item(draw, "Subtotal", fmt_amount(Decimal(subtotal)), y, font, margin, width)
-                    y += line_h
-                draw_line_item(draw, "GST", fmt_amount(Decimal(gst)), y, font, margin, width)
+            if gst and total:
+                subtotal_ex = str(Decimal(total) - Decimal(gst))
+                draw_line_item(
+                    draw, "Subtotal (ex. GST)", fmt_amount(Decimal(subtotal_ex)), y, font, margin, width
+                )
+                y += line_h
+                draw_line_item(draw, "GST (10%)", fmt_amount(Decimal(gst)), y, font, margin, width)
                 y += line_h
             draw_line_item(draw, "TOTAL", fmt_amount(Decimal(total)), y, font_bold, margin, width)
             y += line_h
-            if is_inclusive:
-                draw_text_center(draw, "Total price includes GST", y, width, font)
-                y += line_h
 
         elif sec_type == "payment":
-            draw.text((margin, y), "EFTPOS", font=font, fill="black")
+            method = fields.get("PAYMENT_METHOD", "EFTPOS")
+            draw.text((margin, y), method, font=font, fill="black")
             y += line_h
 
         elif sec_type == "footer":
             text = section.get("text", "")
-            y += line_h // 2
+            y += line_h // 4
             draw_text_center(draw, text, y, width, font)
             y += line_h
 
@@ -144,22 +183,7 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
             draw_text_center(draw, text, y, width, font)
             y += line_h
 
-        # YAML layout aliases — map to canonical renderer section types
-        elif sec_type == "itemized":
-            # Treat as line_items
-            items = _parse_line_items(fields)
-            for item in items:
-                desc = item["description"]
-                qty = item["quantity"]
-                total = item["total"]
-                if qty and qty != "1":
-                    desc = f"{qty}x {desc}"
-                amount_str = fmt_amount(Decimal(total)) if total else ""
-                draw_line_item(draw, desc, amount_str, y, font, margin, width)
-                y += line_h
-
         elif sec_type == "total":
-            # Treat single total row (label from section, value from fields)
             name = section.get("name", "")
             label = section.get("label", "")
             if name == "total" or name == "fuel_cost":

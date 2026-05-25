@@ -152,6 +152,7 @@ def generate(
                 rprint(f"[yellow]Skipping {case_id}: layout '{layout_ref}' not found.[/yellow]")
                 continue
 
+            entry["case_id"] = str(case_id)
             img = renderer(entry, layout)
             filename = f"{case_id}_{layout_ref}.png"
 

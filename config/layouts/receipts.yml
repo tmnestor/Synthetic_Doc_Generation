@@ -1,577 +1,150 @@
 layouts:
   receipt_thermal_80mm:
     format: thermal
-    width: 640
-    margin: 20
-    line_height: 24
+    width: 420
+    margin: 12
+    line_height: 20
+    font_size: 18
     font_family: monospace
-    font_sizes:
-      header: 14
-      body: 12
-      footer: 10
     sections:
       - type: header
         name: merchant_header
-        height: 80
-        font_size: 14
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: transaction_date
-        label: "Date:"
-        height: 20
-        font_size: 12
-        alignment: left
-      - type: content
-        name: transaction_time
-        label: "Time:"
-        height: 20
-        font_size: 12
-        alignment: left
-      - type: content
-        name: reference_number
-        label: "Ref #:"
-        height: 20
-        font_size: 12
-        alignment: left
       - type: separator
-        height: 8
+      - type: tax_invoice_label
+      - type: receipt_meta
+      - type: separator
       - type: itemized
         name: line_items
-        columns:
-          - name: description
-            width: 420
-            font_size: 12
-          - name: quantity
-            width: 70
-            font_size: 12
-          - name: price
-            width: 150
-            font_size: 12
-        line_height: 20
+      - type: gst_legend
       - type: separator
-        height: 8
-      - type: total
-        name: subtotal
-        label: "Subtotal:"
-        height: 20
-        font_size: 12
-      - type: total
-        name: tax
-        label: "Tax:"
-        height: 20
-        font_size: 12
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 24
-        font_size: 14
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Payment:"
-        height: 20
-        font_size: 11
+      - type: totals
+      - type: separator
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 40
-        font_size: 10
-        alignment: center
+        text: "Thank you for shopping with us"
 
   receipt_thermal_57mm:
     format: thermal
-    width: 384
-    margin: 12
-    line_height: 18
+    width: 310
+    margin: 8
+    line_height: 16
+    font_size: 14
     font_family: monospace
-    font_sizes:
-      header: 12
-      body: 10
-      footer: 8
     sections:
       - type: header
         name: merchant_header
-        height: 60
-        font_size: 12
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: transaction_date
-        label: "Date:"
-        height: 16
-        font_size: 10
-        alignment: left
-      - type: content
-        name: transaction_time
-        label: "Time:"
-        height: 16
-        font_size: 10
-        alignment: left
-      - type: content
-        name: reference_number
-        label: "Ref:"
-        height: 16
-        font_size: 10
-        alignment: left
       - type: separator
-        height: 6
+      - type: tax_invoice_label
+      - type: receipt_meta
+      - type: separator
       - type: itemized
         name: line_items
-        columns:
-          - name: description
-            width: 240
-            font_size: 10
-          - name: quantity
-            width: 50
-            font_size: 9
-          - name: price
-            width: 94
-            font_size: 10
-        line_height: 16
+      - type: gst_legend
       - type: separator
-        height: 6
-      - type: total
-        name: subtotal
-        label: "Sub:"
-        height: 16
-        font_size: 10
-      - type: total
-        name: tax
-        label: "Tax:"
-        height: 16
-        font_size: 10
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 20
-        font_size: 12
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Pay:"
-        height: 16
-        font_size: 9
+      - type: totals
+      - type: separator
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 30
-        font_size: 8
-        alignment: center
+        text: "Thank you"
 
   receipt_retail_tax:
-    format: letterhead
-    width: 2480
-    height: 3508
-    margin: 100
-    line_height: 32
-    font_family: sans-serif
-    font_sizes:
-      header: 24
-      subheader: 14
-      body: 11
-      footer: 9
+    format: thermal
+    width: 420
+    margin: 12
+    line_height: 20
+    font_size: 16
+    font_family: monospace
     sections:
       - type: header
         name: merchant_header
-        height: 80
-        font_size: 24
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: merchant_address
-        height: 40
-        font_size: 11
-        alignment: center
       - type: separator
-        height: 16
-      - type: content
-        name: transaction_date
-        label: "Transaction Date:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: transaction_time
-        label: "Time:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: store_number
-        label: "Store #:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: register_number
-        label: "Register:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: cashier_id
-        label: "Cashier:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: transaction_number
-        label: "Transaction #:"
-        height: 24
-        font_size: 11
+      - type: tax_invoice_label
+      - type: receipt_meta
       - type: separator
-        height: 16
       - type: itemized
         name: line_items
-        columns:
-          - name: description
-            width: 1200
-            font_size: 11
-          - name: quantity
-            width: 200
-            font_size: 11
-          - name: unit_price
-            width: 300
-            font_size: 11
-          - name: tax_code
-            width: 200
-            font_size: 10
-          - name: total_price
-            width: 280
-            font_size: 11
-        line_height: 28
+      - type: gst_legend
       - type: separator
-        height: 16
-      - type: total
-        name: subtotal_taxable
-        label: "Subtotal (Taxable):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: subtotal_tax_free
-        label: "Subtotal (Tax Free):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: gst
-        label: "GST (10%):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 32
-        font_size: 14
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Payment Method:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: change_due
-        label: "Change:"
-        height: 24
-        font_size: 11
+      - type: totals
+      - type: separator
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
+        text: "Thank you for shopping with us"
 
   receipt_fuel:
     format: thermal
-    width: 640
-    margin: 20
-    line_height: 22
+    width: 420
+    margin: 12
+    line_height: 20
+    font_size: 16
     font_family: monospace
-    font_sizes:
-      header: 13
-      body: 11
-      footer: 9
     sections:
       - type: header
         name: fuel_station_header
-        height: 70
-        font_size: 13
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: station_location
-        height: 18
-        font_size: 11
-        alignment: center
-      - type: content
-        name: transaction_date
-        label: "Date/Time:"
-        height: 18
-        font_size: 11
-      - type: content
-        name: pump_number
-        label: "Pump:"
-        height: 18
-        font_size: 11
       - type: separator
-        height: 8
-      - type: content
-        name: product_type
-        label: "Fuel:"
-        height: 18
-        font_size: 11
-      - type: content
-        name: litres_dispensed
-        label: "Litres:"
-        height: 18
-        font_size: 11
-      - type: content
-        name: unit_price
-        label: "Price/L:"
-        height: 18
-        font_size: 11
+      - type: tax_invoice_label
+      - type: receipt_meta
       - type: separator
-        height: 8
-      - type: total
-        name: fuel_cost
-        label: "Fuel Cost:"
-        height: 20
-        font_size: 11
-      - type: total
-        name: discount
-        label: "Discount:"
-        height: 20
-        font_size: 10
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 24
-        font_size: 13
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Payment:"
-        height: 18
-        font_size: 11
-      - type: content
-        name: transaction_number
-        label: "Ref #:"
-        height: 18
-        font_size: 10
+      - type: itemized
+        name: line_items
+      - type: gst_legend
+      - type: separator
+      - type: totals
+      - type: separator
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 30
-        font_size: 9
-        alignment: center
+        text: "Drive safely"
 
   receipt_professional:
-    format: letterhead
-    width: 2480
-    height: 3508
-    margin: 120
-    line_height: 28
-    font_family: sans-serif
-    font_sizes:
-      header: 28
-      subheader: 16
-      body: 11
-      footer: 9
+    format: thermal
+    width: 440
+    margin: 12
+    line_height: 20
+    font_size: 16
+    font_family: monospace
     sections:
       - type: header
         name: business_header
-        height: 100
-        font_size: 28
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: business_details
-        height: 50
-        font_size: 11
-        alignment: center
-      - type: content
-        name: receipt_title
-        height: 40
-        font_size: 24
-        font_weight: bold
-        alignment: center
       - type: separator
-        height: 20
-      - type: content
-        name: receipt_number
-        label: "Receipt #:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: transaction_date
-        label: "Date:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: transaction_time
-        label: "Time:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: customer_name
-        label: "Received from:"
-        height: 24
-        font_size: 11
+      - type: tax_invoice_label
+      - type: receipt_meta
       - type: separator
-        height: 20
       - type: itemized
         name: line_items
-        columns:
-          - name: description
-            width: 1200
-            font_size: 11
-          - name: quantity
-            width: 150
-            font_size: 11
-          - name: unit_price
-            width: 250
-            font_size: 11
-          - name: total_price
-            width: 280
-            font_size: 11
-        line_height: 28
+      - type: gst_legend
       - type: separator
-        height: 20
-      - type: total
-        name: subtotal
-        label: "Subtotal:"
-        height: 24
-        font_size: 11
-      - type: total
-        name: tax
-        label: "Tax (10%):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 32
-        font_size: 14
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Payment Method:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: payment_reference
-        label: "Payment Ref:"
-        height: 24
-        font_size: 11
+      - type: totals
       - type: separator
-        height: 20
-      - type: content
-        name: notes
-        label: "Notes:"
-        height: 50
-        font_size: 10
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
+        text: "Thank you for your business"
 
   receipt_hospitality:
-    format: letterhead
-    width: 2480
-    height: 3508
-    margin: 100
-    line_height: 30
-    font_family: serif
-    font_sizes:
-      header: 26
-      subheader: 14
-      body: 11
-      footer: 9
+    format: thermal
+    width: 440
+    margin: 12
+    line_height: 20
+    font_size: 16
+    font_family: monospace
     sections:
       - type: header
         name: restaurant_header
-        height: 90
-        font_size: 26
-        font_weight: bold
-        alignment: center
-      - type: content
-        name: restaurant_details
-        height: 45
-        font_size: 11
-        alignment: center
       - type: separator
-        height: 18
-      - type: content
-        name: transaction_date
-        label: "Date:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: table_number
-        label: "Table:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: covers
-        label: "Covers:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: server_name
-        label: "Server:"
-        height: 24
-        font_size: 11
+      - type: tax_invoice_label
+      - type: receipt_meta
       - type: separator
-        height: 18
       - type: itemized
         name: line_items
-        columns:
-          - name: item_name
-            width: 1200
-            font_size: 11
-          - name: quantity
-            width: 150
-            font_size: 11
-          - name: unit_price
-            width: 250
-            font_size: 11
-          - name: total_price
-            width: 280
-            font_size: 11
-        line_height: 28
+      - type: gst_legend
       - type: separator
-        height: 18
-      - type: total
-        name: subtotal
-        label: "Subtotal:"
-        height: 24
-        font_size: 11
-      - type: total
-        name: service_charge
-        label: "Service (10%):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: gst
-        label: "GST (10%):"
-        height: 24
-        font_size: 11
-      - type: total
-        name: total
-        label: "TOTAL:"
-        height: 32
-        font_size: 14
-        font_weight: bold
-      - type: content
-        name: payment_method
-        label: "Payment:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: tip_amount
-        label: "Tip:"
-        height: 24
-        font_size: 11
-      - type: content
-        name: final_total
-        label: "FINAL TOTAL:"
-        height: 28
-        font_size: 13
-        font_weight: bold
+      - type: totals
+      - type: separator
+      - type: payment
+      - type: separator
       - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
+        text: "Thank you, enjoy your day"
