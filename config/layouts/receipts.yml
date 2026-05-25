@@ -10,12 +10,10 @@ layouts:
       - type: header
         name: merchant_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
@@ -35,12 +33,10 @@ layouts:
       - type: header
         name: merchant_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
@@ -60,12 +56,10 @@ layouts:
       - type: header
         name: merchant_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
@@ -85,12 +79,10 @@ layouts:
       - type: header
         name: fuel_station_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
@@ -110,12 +102,10 @@ layouts:
       - type: header
         name: business_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
@@ -135,12 +125,10 @@ layouts:
       - type: header
         name: restaurant_header
       - type: separator
-      - type: tax_invoice_label
       - type: receipt_meta
       - type: separator
       - type: itemized
         name: line_items
-      - type: gst_legend
       - type: separator
       - type: totals
       - type: separator
