@@ -15,23 +15,30 @@ Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
 _FONT_CACHE: dict[tuple[int, bool, bool, bool], Font] = {}
 
-# Platform font paths — tried in order
+# Bundled fonts directory (committed to repo for cross-platform consistency)
+_BUNDLED_FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
+
+# Font search paths — bundled first, then platform-specific fallbacks
 _SANS_PATHS = [
-    "/System/Library/Fonts/Helvetica.ttc",  # macOS
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+    _BUNDLED_FONTS_DIR / "DejaVuSans.ttf",
+    Path("/System/Library/Fonts/Helvetica.ttc"),  # macOS
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),  # Linux
 ]
 _SANS_BOLD_PATHS = [
-    "/System/Library/Fonts/Helvetica.ttc",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    _BUNDLED_FONTS_DIR / "DejaVuSans-Bold.ttf",
+    Path("/System/Library/Fonts/Helvetica.ttc"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
 ]
 _MONO_PATHS = [
-    "/System/Library/Fonts/Menlo.ttc",  # macOS
-    "/System/Library/Fonts/SFMono-Regular.otf",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    _BUNDLED_FONTS_DIR / "DejaVuSansMono.ttf",
+    Path("/System/Library/Fonts/Menlo.ttc"),  # macOS
+    Path("/System/Library/Fonts/SFMono-Regular.otf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"),
 ]
 _MONO_BOLD_PATHS = [
-    "/System/Library/Fonts/Menlo.ttc",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    _BUNDLED_FONTS_DIR / "DejaVuSansMono-Bold.ttf",
+    Path("/System/Library/Fonts/Menlo.ttc"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"),
 ]
 
 
@@ -42,7 +49,10 @@ def load_font(
     bold: bool = False,
     italic: bool = False,
 ) -> Font:
-    """Load a font with platform-specific fallbacks and caching.
+    """Load a font with bundled-first fallbacks and caching.
+
+    Searches bundled fonts/ directory first for cross-platform consistency,
+    then falls back to platform-specific system fonts.
 
     Args:
         size: Font size in points.
@@ -52,6 +62,9 @@ def load_font(
 
     Returns:
         Loaded PIL font object.
+
+    Raises:
+        FileNotFoundError: No usable font found in bundled or system paths.
     """
     key = (size, mono, bold, italic)
     if key in _FONT_CACHE:
@@ -64,15 +77,21 @@ def load_font(
 
     font: Font | None = None
     for p in paths:
-        if Path(p).exists():
+        if p.exists():
             try:
-                font = ImageFont.truetype(p, size)
+                font = ImageFont.truetype(str(p), size)
                 break
             except OSError:
                 continue
 
     if font is None:
-        font = ImageFont.load_default()
+        searched = "\n  ".join(str(p) for p in paths)
+        raise FileNotFoundError(
+            f"No usable font found (mono={mono}, bold={bold}).\n"
+            f"Searched paths:\n  {searched}\n"
+            f"Fix: ensure the fonts/ directory exists at {_BUNDLED_FONTS_DIR} "
+            f"with DejaVuSans*.ttf files."
+        ) from None
 
     _FONT_CACHE[key] = font
     return font
