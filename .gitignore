@@ -2,9 +2,10 @@ __pycache__/
 *.pyc
 .coverage
 .pytest_cache/
-output/
+# output/
 derived/
 tests/
 .DS_Store
 .claude/
 CLAUDE.md
+.gitignore
