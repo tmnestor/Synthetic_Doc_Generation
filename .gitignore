@@ -2,10 +2,19 @@ __pycache__/
 *.pyc
 .coverage
 .pytest_cache/
-# output/
-derived/
-tests/
+.mypy_cache/
+.ruff_cache/
 .DS_Store
+
+# Generated images — regenerate with: python -m generators.pipeline generate
+output/
+
+# Derived exports — regenerate with: python -m generators.pipeline derive
+derived/
+
+# Tests are local-only
+tests/
+
+# Claude Code config
 .claude/
 CLAUDE.md
-.gitignore
