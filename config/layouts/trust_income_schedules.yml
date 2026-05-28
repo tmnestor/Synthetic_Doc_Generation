@@ -2,7 +2,7 @@ layouts:
   trust_income_schedule_standard:
     format: trust_income_schedule
     page_dimensions:
-      width: 2480
+      width: 1600
       height: 3508
     margin: 120
     font_sizes:
@@ -50,11 +50,11 @@ layouts:
         title: "Distribution details"
         columns:
           - header: "Label"
-            width: 120
+            width: 100
           - header: "Description"
-            width: 1200
+            width: 800
           - header: "Amount $"
-            width: 500
+            width: 460
         rows:
           - label_code: "U"
             description: "Share of net income"
