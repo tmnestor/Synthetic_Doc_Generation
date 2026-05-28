@@ -5,7 +5,7 @@ layouts:
     renderer: cba
     variant: standard
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -26,7 +26,7 @@ layouts:
     renderer: cba
     variant: date_grouped
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -48,7 +48,7 @@ layouts:
     renderer: westpac
     variant: standard
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -67,7 +67,7 @@ layouts:
     renderer: westpac
     variant: premium
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -88,7 +88,7 @@ layouts:
     renderer: nab
     variant: classic
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -111,7 +111,7 @@ layouts:
     renderer: nab
     variant: dense
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 40
@@ -134,7 +134,7 @@ layouts:
     renderer: anz
     variant: standard
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -157,7 +157,7 @@ layouts:
     renderer: anz
     variant: modern
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44

@@ -4,7 +4,7 @@ layouts:
     bank_code: CBA
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -78,7 +78,7 @@ layouts:
     bank_code: CBA
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -154,7 +154,7 @@ layouts:
     bank_code: WBC
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -223,7 +223,7 @@ layouts:
     bank_code: WBC
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -299,7 +299,7 @@ layouts:
     bank_code: NAB
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -368,7 +368,7 @@ layouts:
     bank_code: NAB
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 44
@@ -440,7 +440,7 @@ layouts:
     bank_code: ANZ
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48
@@ -509,7 +509,7 @@ layouts:
     bank_code: ANZ
     card_type: credit_card
     page_dimensions:
-      width: 2480
+      width: 1800
       height: 3508
     font_sizes:
       header: 48

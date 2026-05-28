@@ -2,7 +2,7 @@ layouts:
   trust_return_standard:
     format: trust_return
     page_dimensions:
-      width: 2480
+      width: 1600
       height: 3508
     margin: 120
     font_sizes:

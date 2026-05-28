@@ -2,7 +2,7 @@ layouts:
   tax_invoice_standard:
     format: tax_invoice
     page_dimensions:
-      width: 2480
+      width: 1900
       height: 3508
     margin: 100
     content_width: 1700
@@ -116,7 +116,7 @@ layouts:
   tax_invoice_gst_inclusive:
     format: tax_invoice
     page_dimensions:
-      width: 2480
+      width: 1900
       height: 3508
     margin: 100
     content_width: 1700
@@ -224,7 +224,7 @@ layouts:
   tax_invoice_high_value:
     format: tax_invoice
     page_dimensions:
-      width: 2480
+      width: 1900
       height: 3508
     margin: 100
     content_width: 1700
@@ -352,7 +352,7 @@ layouts:
   tax_invoice_mixed:
     format: tax_invoice
     page_dimensions:
-      width: 2480
+      width: 1900
       height: 3508
     margin: 100
     content_width: 1700
