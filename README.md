@@ -1,6 +1,6 @@
 # Synthetic Business Document Generator
 
-YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 440 benchmark images (220 clean + 220 degraded) across 4 document types with transaction linking ground truth.
+YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 840 benchmark images (420 clean + 420 degraded) across 8 document types with transaction linking and trust distribution compliance ground truth.
 
 ---
 
@@ -10,7 +10,7 @@ YAML-driven pipeline for generating synthetic Australian business documents with
 # Validate ground truth against schema and layout registries
 python -m generators.pipeline validate
 
-# Generate all 440 images (220 clean + 220 degraded)
+# Generate all 840 images (420 clean + 420 degraded)
 python -m generators.pipeline generate
 
 # Generate only one document type
@@ -39,21 +39,43 @@ rich      # Coloured console output
 
 | Output | Count | Description |
 |--------|-------|-------------|
-| Clean PNGs | 220 | Pixel-perfect rendered documents (55 per type) |
-| Degraded PNGs | 220 | Simulated phone photos with noise, blur, rotation, JPEG artifacts |
-| Ground truth YAML | 4 files | Field-level truth for all 220 documents |
+| Clean PNGs | 420 | Pixel-perfect rendered documents |
+| Degraded PNGs | 420 | Simulated phone photos with noise, blur, rotation, JPEG artifacts |
+| Ground truth YAML | 8 files | Field-level truth for all 420 documents |
 | Transaction links YAML | 1 file | 110 receipt/invoice-to-bank-statement links at 3 difficulty levels |
-| Derived CSV | 1 file | Flat CSV with all 23 columns (NOT_FOUND for inapplicable fields) |
+| Trust distribution links YAML | 1 file | 50 four-document quads with compliance ground truth |
+| Derived CSV | 1 file | Flat CSV with all 39 columns (NOT_FOUND for inapplicable fields) |
 | Derived JSONL | 1 file | One JSON object per document with all field values |
 
 ## Document Types
 
-| Type | Layouts | Fields | Example Layouts |
-|------|---------|--------|-----------------|
-| Bank Statement | 12 | 9 | CBA classic/modern/minimal, Westpac, NAB, ANZ |
-| Receipt | 6 | 12 | Thermal 80mm/57mm, retail tax, fuel, professional, hospitality |
-| Invoice | 4 | 14 | Standard, GST-inclusive, high-value, mixed |
-| CC Statement | 8 | 11 | 2 per bank (CBA, Westpac, NAB, ANZ) |
+### Business Documents (220 entries)
+
+| Type | Count | Layouts | Fields | Example Layouts |
+|------|-------|---------|--------|-----------------|
+| Bank Statement | 55 | 12 | 9 | CBA classic/modern/minimal, Westpac, NAB, ANZ |
+| Receipt | 55 | 6 | 12 | Thermal 80mm/57mm, retail tax, fuel, professional, hospitality |
+| Invoice | 55 | 4 | 14 | Standard, GST-inclusive, high-value, mixed |
+| CC Statement | 55 | 8 | 11 | 2 per bank (CBA, Westpac, NAB, ANZ) |
+
+### Trust Distribution Documents (200 entries)
+
+| Type | Count | Layouts | Fields | Description |
+|------|-------|---------|--------|-------------|
+| Trust Tax Return | 50 | 1 | 14 | ATO NAT 0660-inspired, Items 55/57/58 |
+| Distribution Statement | 50 | 1 | 15 | Custom letterhead with distribution components |
+| Trust Income Schedule | 50 | 1 | 9 | ATO-style grid with label codes (U, Q, M, C) |
+| Beneficiary ITR | 50 | 1 | 7 | ATO NAT 2541-inspired, Item 13 |
+
+Each trust distribution case generates a **quad** of 4 linked documents that share 5 scalar linking fields:
+
+| Linking Field | Trust Return | Distribution Statement | Trust Income Schedule | Beneficiary ITR |
+|---------------|-------------|----------------------|----------------------|-----------------|
+| Trust ABN | TRUST_ABN | TRUST_ABN | TRUST_ABN | -- |
+| Beneficiary TFN | BENEFICIARY_TFN | BENEFICIARY_TFN | BENEFICIARY_TFN | INDIVIDUAL_TFN |
+| Share of Net Income | SHARE_OF_NET_INCOME | SHARE_OF_NET_INCOME | SHARE_OF_NET_INCOME | TOTAL_TRUST_INCOME |
+| Franking Credit | FRANKING_CREDIT | FRANKING_CREDIT | FRANKING_CREDIT | TRUST_FRANKING_CREDIT |
+| Capital Gain Component | CAPITAL_GAIN_COMPONENT | CAPITAL_GAIN_COMPONENT | CAPITAL_GAIN_COMPONENT | -- |
 
 ---
 
@@ -81,10 +103,10 @@ python -m generators.pipeline <command> [OPTIONS]
 
 ```mermaid
 graph TD
-    GT["ground_truth/*.yml<br/>Field values (220 entries)"]
-    LR["config/layouts/*.yml<br/>Visual rendering specs (30 layouts)"]
+    GT["ground_truth/*.yml<br/>Field values (420 entries)"]
+    LR["config/layouts/*.yml<br/>Visual rendering specs (34 layouts)"]
     GC["config/generation_config.yml<br/>Pipeline configuration"]
-    FD["config/field_definitions.yml<br/>23-column schema"]
+    FD["config/field_definitions.yml<br/>39-column schema"]
 
     GT --> V["validate<br/>Schema + layout checks"]
     LR --> V
@@ -94,8 +116,8 @@ graph TD
     LR --> G
     GC --> G
 
-    G --> CLEAN["output/clean/<br/>220 PNGs"]
-    G --> DEG["output/degraded/<br/>220 PNGs"]
+    G --> CLEAN["output/clean/<br/>420 PNGs"]
+    G --> DEG["output/degraded/<br/>420 PNGs"]
 
     GT --> D["derive<br/>YAML → CSV/JSONL"]
     FD --> D
@@ -156,7 +178,50 @@ CASE001_receipt_thermal_80mm.png:
 
 ---
 
+## Trust Distribution Links
+
+`ground_truth/trust_distribution_links.yml` maps each distribution statement to its corresponding trust return, trust income schedule, and beneficiary ITR, forming a 4-document quad with compliance ground truth.
+
+### Compliance Split
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| Compliant | 35 | All 5 linking fields reconcile across all 4 documents |
+| Non-compliant | 15 | Deliberate amount discrepancies between documents |
+
+### Non-Compliance Types
+
+| Discrepancy Type | Count | Description |
+|------------------|-------|-------------|
+| `under_reported_income` | 5 | Beneficiary ITR reports 60-90% of actual share of net income |
+| `over_claimed_franking` | 4 | Beneficiary ITR claims 110-150% of actual franking credit |
+| `missing_cgt` | 3 | Trust Income Schedule shows $0 CGT despite Distribution Statement having a non-zero amount |
+| `trust_return_mismatch` | 3 | Trust Return share of income differs from Distribution Statement by 5-20% |
+
+### Link Format
+
+```yaml
+CASE201_distribution_statement_standard.png:
+  trust_return: CASE201_trust_return_standard.png
+  trust_income_schedule: CASE201_trust_income_schedule_standard.png
+  beneficiary_itr: CASE201_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: '51 196 744 081'
+    beneficiary_tfn: '425 478 019'
+    share_of_net_income: '88412.31'
+    franking_credit: '5846.90'
+    capital_gain_component: '29467.88'
+  compliance_status: compliant    # or "non_compliant"
+  discrepancy_type: null          # or one of the 4 types above
+  discrepancy_details: null       # human-readable description
+  match_status: FOUND
+```
+
+---
+
 ## Linking Validation API
+
+### Transaction Linking (2-document pairs)
 
 ```python
 from linking.transaction_matcher import parse_amount, normalize_date, description_score
@@ -176,13 +241,35 @@ result: LinkScore = validate_links(ground_truth_dict, predictions_dict)
 print(f"F1: {result.f1:.2f}, by difficulty: {result.by_difficulty}")
 ```
 
+### Trust Distribution Linking (4-document quads)
+
+```python
+from linking.link_validator import (
+    validate_trust_distribution_links,
+    TrustDistributionScore,
+)
+
+# Score quad linking + compliance detection
+result: TrustDistributionScore = validate_trust_distribution_links(
+    ground_truth_dict, predictions_dict
+)
+
+# Linking accuracy: fraction of quads where all 5 fields match across all 4 docs
+print(f"Link accuracy: {result.link_accuracy:.2f} ({result.correct_quads}/{result.total_quads})")
+
+# Compliance detection metrics
+print(f"Detection rate: {result.compliance.detection_rate:.2f}")
+print(f"False positive rate: {result.compliance.false_positive_rate:.2f}")
+print(f"Classification accuracy: {result.compliance.classification_accuracy:.2f}")
+```
+
 ---
 
 ## Degradation Pipeline
 
 Simulates phone photos of printed documents with a deterministic 7-stage pipeline:
 
-1. **Paper tint** — off-white/yellowed overlay
+1. **Paper tint** -- off-white/yellowed overlay
 2. **Contrast reduction**
 3. **Brightness variation**
 4. **Gaussian blur**
@@ -196,17 +283,127 @@ All parameters are configurable in `generation_config.yml` under `degradation:`.
 
 ## Regenerating the Dataset
 
+### Business Documents (CASE001-CASE220)
+
 ```bash
 # Re-seed ground truth (220 entries, deterministic with seed=42)
 python scripts/seed_ground_truth.py
 
 # Re-seed transaction links (110 links across 3 difficulty levels)
 python scripts/seed_transaction_links.py
+```
 
-# Validate, generate images, derive CSV/JSONL
+### Trust Distribution Documents (CASE201-CASE250)
+
+```bash
+# Re-seed trust distribution ground truth (50 quads = 200 entries, seed=42)
+python scripts/seed_trust_distributions.py
+
+# Re-seed trust distribution links (50 quad links with compliance labels)
+python scripts/seed_trust_distribution_links.py
+```
+
+### Generate and Validate
+
+```bash
+# Validate all ground truth against schema
 python -m generators.pipeline validate
+
+# Generate all 840 images
 python -m generators.pipeline generate
+
+# Generate only trust distribution images
+python -m generators.pipeline generate --type trust_returns
+python -m generators.pipeline generate --type distribution_statements
+python -m generators.pipeline generate --type trust_income_schedules
+python -m generators.pipeline generate --type beneficiary_itrs
+
+# Regenerate derived CSV/JSONL
 python -m generators.pipeline derive
+```
+
+---
+
+## Remote Image Generation
+
+The image generation pipeline runs on any machine with the `du` conda environment. To generate the trust distribution linking images on a remote GPU server (where LMM inference will run):
+
+### 1. Sync the repo to the remote server
+
+```bash
+rsync -avz --exclude='output/' --exclude='.git/' \
+    . remote_host:/path/to/Synthetic_Doc_Generation/
+```
+
+### 2. Generate images on the remote server
+
+```bash
+ssh remote_host
+
+cd /path/to/Synthetic_Doc_Generation
+
+# Install dependencies (first time only)
+conda env create -f environment.yml
+# or update existing environment
+conda env update -f environment.yml --prune
+
+# Validate ground truth
+conda run -n du python -m generators.pipeline validate
+
+# Generate clean images only (recommended for LMM evaluation)
+conda run -n du python -m generators.pipeline generate --clean-only
+
+# Or generate only the trust distribution types
+conda run -n du python -m generators.pipeline generate --type trust_returns --clean-only
+conda run -n du python -m generators.pipeline generate --type distribution_statements --clean-only
+conda run -n du python -m generators.pipeline generate --type trust_income_schedules --clean-only
+conda run -n du python -m generators.pipeline generate --type beneficiary_itrs --clean-only
+```
+
+### 3. Verify the generated images
+
+After generation, the output directory contains:
+
+```
+output/
+├── clean/
+│   ├── trust_returns/           # 50 PNGs (CASE201-CASE250)
+│   ├── distribution_statements/ # 50 PNGs
+│   ├── trust_income_schedules/  # 50 PNGs
+│   └── beneficiary_itrs/       # 50 PNGs
+└── degraded/                    # Same structure (if not using --clean-only)
+```
+
+The linking ground truth at `ground_truth/trust_distribution_links.yml` references these filenames directly. Each entry keys on the distribution statement filename and maps to the other 3 documents in the quad, with the 5 linking field values and compliance labels needed for evaluation.
+
+### 4. Run LMM evaluation
+
+Use the linking ground truth to evaluate an LMM's ability to:
+
+1. **Cross-document linking** -- given 4 documents, identify the 5 shared linking fields
+2. **Compliance detection** -- flag cases where amounts don't reconcile across documents
+3. **Discrepancy classification** -- identify the specific type of non-compliance
+
+```python
+import yaml
+from linking.link_validator import validate_trust_distribution_links
+
+# Load ground truth
+with open("ground_truth/trust_distribution_links.yml") as f:
+    ground_truth = yaml.safe_load(f)
+
+# predictions: dict mapping distribution_statement filename -> {
+#     trust_return, trust_income_schedule, beneficiary_itr,
+#     linking_fields: {trust_abn, beneficiary_tfn, share_of_net_income,
+#                      franking_credit, capital_gain_component},
+#     compliance_status, discrepancy_type
+# }
+predictions = your_lmm_extraction_function(ground_truth)
+
+result = validate_trust_distribution_links(ground_truth, predictions)
+print(f"Link accuracy: {result.link_accuracy:.2%}")
+print(f"Compliance detection rate: {result.compliance.detection_rate:.2%}")
+print(f"False positive rate: {result.compliance.false_positive_rate:.2%}")
 ```
 
 ---
@@ -216,39 +413,54 @@ python -m generators.pipeline derive
 ```
 generators/
 ├── __init__.py
-├── common.py              # Fonts, text helpers, ABN validation, GST, degradation
-├── schema.py              # Ground truth schema validation
-├── loader.py              # YAML loaders with fail-fast diagnostics
-├── derive_outputs.py      # YAML → CSV/JSONL derivation
-├── pipeline.py            # Typer CLI (validate, generate, derive)
-├── bank_statement.py      # Bank statement renderer
-├── receipt.py             # Receipt renderer (thermal/letterhead)
-├── invoice.py             # Tax-compliant invoice renderer
-└── cc_statement.py        # Credit card statement renderer
+├── common.py                  # Fonts, text helpers, ABN/TFN validation, GST, degradation
+├── schema.py                  # Ground truth schema validation
+├── loader.py                  # YAML loaders with fail-fast diagnostics
+├── derive_outputs.py          # YAML → CSV/JSONL derivation
+├── pipeline.py                # Typer CLI (validate, generate, derive)
+├── bank_statement.py          # Bank statement renderer
+├── receipt.py                 # Receipt renderer (thermal/letterhead)
+├── invoice.py                 # Tax-compliant invoice renderer
+├── cc_statement.py            # Credit card statement renderer
+├── trust_return.py            # Trust tax return renderer (NAT 0660-inspired)
+├── distribution_statement.py  # Distribution statement renderer
+├── trust_income_schedule.py   # Trust income schedule renderer
+└── beneficiary_itr.py         # Beneficiary ITR renderer (NAT 2541-inspired)
 
 linking/
 ├── __init__.py
-├── transaction_matcher.py # parse_amount, normalize_date, description_score
-└── link_validator.py      # validate_links with per-difficulty scoring
+├── transaction_matcher.py     # parse_amount, normalize_date, normalize_tfn
+└── link_validator.py          # validate_links, validate_trust_distribution_links
 
 scripts/
-├── seed_ground_truth.py       # Generate 220 ground truth entries (seed=42)
-└── seed_transaction_links.py  # Generate 110 transaction links
+├── seed_ground_truth.py              # Generate 220 business document entries (seed=42)
+├── seed_transaction_links.py         # Generate 110 transaction links
+├── seed_trust_distributions.py       # Generate 200 trust distribution entries (seed=42)
+└── seed_trust_distribution_links.py  # Generate 50 quad links with compliance labels
 
 ground_truth/
-├── bank_statements.yml    # 55 entries
-├── receipts.yml           # 55 entries
-├── invoices.yml           # 55 entries
-├── cc_statements.yml      # 55 entries
-└── transaction_links.yml  # 110 links
+├── bank_statements.yml               # 55 entries
+├── receipts.yml                       # 55 entries
+├── invoices.yml                       # 55 entries
+├── cc_statements.yml                  # 55 entries
+├── trust_returns.yml                  # 50 entries
+├── distribution_statements.yml        # 50 entries
+├── trust_income_schedules.yml         # 50 entries
+├── beneficiary_itrs.yml               # 50 entries
+├── transaction_links.yml              # 110 receipt/invoice-to-bank links
+└── trust_distribution_links.yml       # 50 quad links with compliance ground truth
 
 config/
-├── generation_config.yml  # Pipeline configuration
-├── field_definitions.yml  # 23-column schema for 4 document types
-├── data_pools.yml         # Australian business data (retailers, services, banks)
+├── generation_config.yml      # Pipeline configuration (8 document types)
+├── field_definitions.yml      # 39-column schema for 8 document types
+├── data_pools.yml             # Australian business data, trust names, trustee names
 └── layouts/
-    ├── bank_statements.yml  # 12 layouts
-    ├── receipts.yml         # 6 layouts
-    ├── invoices.yml         # 4 layouts
-    └── cc_statements.yml    # 8 layouts
+    ├── bank_statements.yml          # 12 layouts
+    ├── receipts.yml                 # 6 layouts
+    ├── invoices.yml                 # 4 layouts
+    ├── cc_statements.yml            # 8 layouts
+    ├── trust_returns.yml            # 1 layout
+    ├── distribution_statements.yml  # 1 layout
+    ├── trust_income_schedules.yml   # 1 layout
+    └── beneficiary_itrs.yml         # 1 layout
 ```
