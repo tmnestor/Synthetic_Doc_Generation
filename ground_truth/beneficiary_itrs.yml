@@ -1,0 +1,550 @@
+CASE201:
+  layout: beneficiary_itr_standard
+  degradation_seed: 6577
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Sarah Smith
+    INDIVIDUAL_TFN: 425 478 019
+    DATE_OF_BIRTH: 18/01/1992
+    INDIVIDUAL_ADDRESS: 60 Elizabeth St, Norwood SA 5067
+    TOTAL_TRUST_INCOME: '88412.31'
+    TRUST_FRANKING_CREDIT: '5846.90'
+CASE202:
+  layout: beneficiary_itr_standard
+  degradation_seed: 6928
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Michael Johnson
+    INDIVIDUAL_TFN: 953 228 711
+    DATE_OF_BIRTH: 12/02/1978
+    INDIVIDUAL_ADDRESS: 27 George St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '101373.21'
+    TRUST_FRANKING_CREDIT: '16307.75'
+CASE203:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9754
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Emma Williams
+    INDIVIDUAL_TFN: 342 477 919
+    DATE_OF_BIRTH: 03/05/1968
+    INDIVIDUAL_ADDRESS: 12 Adelaide St, Hawthorn East VIC 3123
+    TOTAL_TRUST_INCOME: '48735.69'
+    TRUST_FRANKING_CREDIT: '2378.12'
+CASE204:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9182
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: David Chen
+    INDIVIDUAL_TFN: 930 627 619
+    DATE_OF_BIRTH: 08/09/1998
+    INDIVIDUAL_ADDRESS: 70 Adelaide St, Parramatta NSW 2150
+    TOTAL_TRUST_INCOME: '137561.09'
+    TRUST_FRANKING_CREDIT: '16555.40'
+CASE205:
+  layout: beneficiary_itr_standard
+  degradation_seed: 3507
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Jessica Brown
+    INDIVIDUAL_TFN: 646 708 917
+    DATE_OF_BIRTH: 18/12/1969
+    INDIVIDUAL_ADDRESS: 68 Collins St, Fortitude Valley QLD 4006
+    TOTAL_TRUST_INCOME: '54983.15'
+    TRUST_FRANKING_CREDIT: '5971.11'
+CASE206:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8436
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: James Taylor
+    INDIVIDUAL_TFN: 499 638 517
+    DATE_OF_BIRTH: 15/10/1978
+    INDIVIDUAL_ADDRESS: 17 Queen St, Glenelg SA 5045
+    TOTAL_TRUST_INCOME: '471791.12'
+    TRUST_FRANKING_CREDIT: '96487.47'
+CASE207:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9008
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Olivia Anderson
+    INDIVIDUAL_TFN: 363 450 028
+    DATE_OF_BIRTH: 28/02/1986
+    INDIVIDUAL_ADDRESS: 129 Collins St, Subiaco WA 6008
+    TOTAL_TRUST_INCOME: '154197.70'
+    TRUST_FRANKING_CREDIT: '17297.00'
+CASE208:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9648
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Daniel Wilson
+    INDIVIDUAL_TFN: 141 867 016
+    DATE_OF_BIRTH: 31/10/1969
+    INDIVIDUAL_ADDRESS: 62 Main St, Subiaco WA 6008
+    TOTAL_TRUST_INCOME: '248135.33'
+    TRUST_FRANKING_CREDIT: '72801.75'
+CASE209:
+  layout: beneficiary_itr_standard
+  degradation_seed: 1120
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Sophie Martin
+    INDIVIDUAL_TFN: 540 109 517
+    DATE_OF_BIRTH: 23/04/1998
+    INDIVIDUAL_ADDRESS: 194 Victoria Ave, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '82110.06'
+    TRUST_FRANKING_CREDIT: '22160.21'
+CASE210:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2548
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Ryan Thompson
+    INDIVIDUAL_TFN: 634 515 410
+    DATE_OF_BIRTH: 03/06/1956
+    INDIVIDUAL_ADDRESS: 59 George St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '123926.55'
+    TRUST_FRANKING_CREDIT: '26892.78'
+CASE211:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5095
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Hannah Robinson
+    INDIVIDUAL_TFN: 468 227 611
+    DATE_OF_BIRTH: 02/12/1983
+    INDIVIDUAL_ADDRESS: 109 Queen St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '366824.66'
+    TRUST_FRANKING_CREDIT: '27363.98'
+CASE212:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8457
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Thomas Harris
+    INDIVIDUAL_TFN: 160 573 628
+    DATE_OF_BIRTH: 03/01/1988
+    INDIVIDUAL_ADDRESS: 13 Adelaide St, Hawthorn East VIC 3123
+    TOTAL_TRUST_INCOME: '123982.08'
+    TRUST_FRANKING_CREDIT: '32160.35'
+CASE213:
+  layout: beneficiary_itr_standard
+  degradation_seed: 3582
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Mia Clark
+    INDIVIDUAL_TFN: 071 431 616
+    DATE_OF_BIRTH: 07/03/1985
+    INDIVIDUAL_ADDRESS: 170 Victoria Ave, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '293798.34'
+    TRUST_FRANKING_CREDIT: '65926.19'
+CASE214:
+  layout: beneficiary_itr_standard
+  degradation_seed: 6186
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: William Lee
+    INDIVIDUAL_TFN: 280 640 619
+    DATE_OF_BIRTH: 28/11/1958
+    INDIVIDUAL_ADDRESS: 18 Murray St, Fortitude Valley QLD 4006
+    TOTAL_TRUST_INCOME: '235691.05'
+    TRUST_FRANKING_CREDIT: '40933.81'
+CASE215:
+  layout: beneficiary_itr_standard
+  degradation_seed: 3173
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Charlotte White
+    INDIVIDUAL_TFN: 377 658 713
+    DATE_OF_BIRTH: 22/03/1979
+    INDIVIDUAL_ADDRESS: 62 Bourke St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '465218.98'
+    TRUST_FRANKING_CREDIT: '1300.12'
+CASE216:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2756
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Alexander Nguyen
+    INDIVIDUAL_TFN: 112 157 315
+    DATE_OF_BIRTH: 23/09/1982
+    INDIVIDUAL_ADDRESS: 73 Collins St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '330448.40'
+    TRUST_FRANKING_CREDIT: '66208.30'
+CASE217:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5294
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Grace Mitchell
+    INDIVIDUAL_TFN: 821 852 818
+    DATE_OF_BIRTH: 07/06/1999
+    INDIVIDUAL_ADDRESS: 155 King William St, Subiaco WA 6008
+    TOTAL_TRUST_INCOME: '133049.41'
+    TRUST_FRANKING_CREDIT: '3684.08'
+CASE218:
+  layout: beneficiary_itr_standard
+  degradation_seed: 1656
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Benjamin Campbell
+    INDIVIDUAL_TFN: 249 185 611
+    DATE_OF_BIRTH: 04/01/1989
+    INDIVIDUAL_ADDRESS: 181 Queen St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '83036.60'
+    TRUST_FRANKING_CREDIT: '20790.58'
+CASE219:
+  layout: beneficiary_itr_standard
+  degradation_seed: 7748
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Chloe Stewart
+    INDIVIDUAL_TFN: 007 402 610
+    DATE_OF_BIRTH: 29/09/1976
+    INDIVIDUAL_ADDRESS: 171 George St, Norwood SA 5067
+    TOTAL_TRUST_INCOME: '42865.57'
+    TRUST_FRANKING_CREDIT: '11118.54'
+CASE220:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9349
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Ethan Cooper
+    INDIVIDUAL_TFN: 721 577 411
+    DATE_OF_BIRTH: 07/04/1984
+    INDIVIDUAL_ADDRESS: 98 Main St, Hawthorn East VIC 3123
+    TOTAL_TRUST_INCOME: '206031.42'
+    TRUST_FRANKING_CREDIT: '13778.78'
+CASE221:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5176
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Isabella Murray
+    INDIVIDUAL_TFN: 568 374 715
+    DATE_OF_BIRTH: 19/03/1970
+    INDIVIDUAL_ADDRESS: 8 George St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '100773.30'
+    TRUST_FRANKING_CREDIT: '22025.37'
+CASE222:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5847
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Noah Kelly
+    INDIVIDUAL_TFN: 042 052 217
+    DATE_OF_BIRTH: 31/12/1997
+    INDIVIDUAL_ADDRESS: 134 Elizabeth St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '14762.39'
+    TRUST_FRANKING_CREDIT: '2759.78'
+CASE223:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8241
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Amelia Parker
+    INDIVIDUAL_TFN: 360 012 816
+    DATE_OF_BIRTH: 29/12/1997
+    INDIVIDUAL_ADDRESS: 171 Queen St, Parramatta NSW 2150
+    TOTAL_TRUST_INCOME: '157465.44'
+    TRUST_FRANKING_CREDIT: '14354.94'
+CASE224:
+  layout: beneficiary_itr_standard
+  degradation_seed: 1760
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Liam Hughes
+    INDIVIDUAL_TFN: 639 543 212
+    DATE_OF_BIRTH: 03/11/1964
+    INDIVIDUAL_ADDRESS: 122 Victoria Ave, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '106713.67'
+    TRUST_FRANKING_CREDIT: '2989.71'
+CASE225:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9489
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Emily Morgan
+    INDIVIDUAL_TFN: 985 301 619
+    DATE_OF_BIRTH: 07/10/1994
+    INDIVIDUAL_ADDRESS: 117 Queen St, Hawthorn East VIC 3123
+    TOTAL_TRUST_INCOME: '129552.38'
+    TRUST_FRANKING_CREDIT: '34693.86'
+CASE226:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5053
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Sarah Smith
+    INDIVIDUAL_TFN: 964 018 911
+    DATE_OF_BIRTH: 22/08/1962
+    INDIVIDUAL_ADDRESS: 32 Flinders St, Norwood SA 5067
+    TOTAL_TRUST_INCOME: '102338.30'
+    TRUST_FRANKING_CREDIT: '25499.71'
+CASE227:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9893
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Michael Johnson
+    INDIVIDUAL_TFN: 046 853 015
+    DATE_OF_BIRTH: 03/08/1971
+    INDIVIDUAL_ADDRESS: 161 King William St, South Yarra VIC 3141
+    TOTAL_TRUST_INCOME: '174565.29'
+    TRUST_FRANKING_CREDIT: '7246.59'
+CASE228:
+  layout: beneficiary_itr_standard
+  degradation_seed: 4616
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Emma Williams
+    INDIVIDUAL_TFN: 150 915 312
+    DATE_OF_BIRTH: 01/12/1991
+    INDIVIDUAL_ADDRESS: 108 Queen St, Norwood SA 5067
+    TOTAL_TRUST_INCOME: '157314.47'
+    TRUST_FRANKING_CREDIT: '35559.76'
+CASE229:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8025
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: David Chen
+    INDIVIDUAL_TFN: 947 020 718
+    DATE_OF_BIRTH: 22/06/1978
+    INDIVIDUAL_ADDRESS: 125 Main St, Parramatta NSW 2150
+    TOTAL_TRUST_INCOME: '210923.89'
+    TRUST_FRANKING_CREDIT: '62057.31'
+CASE230:
+  layout: beneficiary_itr_standard
+  degradation_seed: 6736
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Jessica Brown
+    INDIVIDUAL_TFN: 245 397 612
+    DATE_OF_BIRTH: 15/04/1974
+    INDIVIDUAL_ADDRESS: 67 Queen St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '147007.86'
+    TRUST_FRANKING_CREDIT: '33165.41'
+CASE231:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2879
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: James Taylor
+    INDIVIDUAL_TFN: 416 950 012
+    DATE_OF_BIRTH: 27/04/1969
+    INDIVIDUAL_ADDRESS: 194 Main St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '31721.76'
+    TRUST_FRANKING_CREDIT: '6370.92'
+CASE232:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2986
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Olivia Anderson
+    INDIVIDUAL_TFN: 136 547 113
+    DATE_OF_BIRTH: 30/11/1990
+    INDIVIDUAL_ADDRESS: 7 Bourke St, Glenelg SA 5045
+    TOTAL_TRUST_INCOME: '360357.21'
+    TRUST_FRANKING_CREDIT: '64010.02'
+CASE233:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5428
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Daniel Wilson
+    INDIVIDUAL_TFN: 669 840 115
+    DATE_OF_BIRTH: 17/02/1977
+    INDIVIDUAL_ADDRESS: 110 Adelaide St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '53957.20'
+    TRUST_FRANKING_CREDIT: '1708.37'
+CASE234:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8991
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Sophie Martin
+    INDIVIDUAL_TFN: 248 090 314
+    DATE_OF_BIRTH: 11/05/1991
+    INDIVIDUAL_ADDRESS: 112 Victoria Ave, South Yarra VIC 3141
+    TOTAL_TRUST_INCOME: '220999.64'
+    TRUST_FRANKING_CREDIT: '49756.50'
+CASE235:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2527
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Ryan Thompson
+    INDIVIDUAL_TFN: 317 914 015
+    DATE_OF_BIRTH: 18/05/1998
+    INDIVIDUAL_ADDRESS: 72 Murray St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '12987.59'
+    TRUST_FRANKING_CREDIT: '1903.63'
+CASE236:
+  layout: beneficiary_itr_standard
+  degradation_seed: 4036
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Hannah Robinson
+    INDIVIDUAL_TFN: 110 955 316
+    DATE_OF_BIRTH: 16/06/1991
+    INDIVIDUAL_ADDRESS: 79 Adelaide St, Norwood SA 5067
+    TOTAL_TRUST_INCOME: '93230.12'
+    TRUST_FRANKING_CREDIT: '25837.64'
+CASE237:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2683
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Thomas Harris
+    INDIVIDUAL_TFN: 053 549 613
+    DATE_OF_BIRTH: 20/09/1991
+    INDIVIDUAL_ADDRESS: 71 Victoria Ave, South Yarra VIC 3141
+    TOTAL_TRUST_INCOME: '52558.81'
+    TRUST_FRANKING_CREDIT: '5690.24'
+CASE238:
+  layout: beneficiary_itr_standard
+  degradation_seed: 5069
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Mia Clark
+    INDIVIDUAL_TFN: 983 059 911
+    DATE_OF_BIRTH: 31/03/1975
+    INDIVIDUAL_ADDRESS: 123 Flinders St, South Yarra VIC 3141
+    TOTAL_TRUST_INCOME: '432244.25'
+    TRUST_FRANKING_CREDIT: '130223.40'
+CASE239:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2333
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: William Lee
+    INDIVIDUAL_TFN: 813 511 519
+    DATE_OF_BIRTH: 13/09/1968
+    INDIVIDUAL_ADDRESS: 153 Murray St, Glenelg SA 5045
+    TOTAL_TRUST_INCOME: '107870.42'
+    TRUST_FRANKING_CREDIT: '11704.87'
+CASE240:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2883
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Charlotte White
+    INDIVIDUAL_TFN: 395 049 614
+    DATE_OF_BIRTH: 15/07/1954
+    INDIVIDUAL_ADDRESS: 20 Collins St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '41141.12'
+    TRUST_FRANKING_CREDIT: '8676.51'
+CASE241:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8081
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Alexander Nguyen
+    INDIVIDUAL_TFN: 042 428 011
+    DATE_OF_BIRTH: 06/01/1958
+    INDIVIDUAL_ADDRESS: 69 Collins St, Fortitude Valley QLD 4006
+    TOTAL_TRUST_INCOME: '137959.25'
+    TRUST_FRANKING_CREDIT: '18175.58'
+CASE242:
+  layout: beneficiary_itr_standard
+  degradation_seed: 8144
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Grace Mitchell
+    INDIVIDUAL_TFN: 447 504 810
+    DATE_OF_BIRTH: 19/10/1997
+    INDIVIDUAL_ADDRESS: 24 King William St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '142060.40'
+    TRUST_FRANKING_CREDIT: '48743.67'
+CASE243:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9434
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Benjamin Campbell
+    INDIVIDUAL_TFN: 460 850 811
+    DATE_OF_BIRTH: 04/11/1974
+    INDIVIDUAL_ADDRESS: 105 Pitt St, Hobart TAS 7000
+    TOTAL_TRUST_INCOME: '97011.48'
+    TRUST_FRANKING_CREDIT: '23183.81'
+CASE244:
+  layout: beneficiary_itr_standard
+  degradation_seed: 4923
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Chloe Stewart
+    INDIVIDUAL_TFN: 844 451 112
+    DATE_OF_BIRTH: 12/09/1966
+    INDIVIDUAL_ADDRESS: 106 Main St, South Yarra VIC 3141
+    TOTAL_TRUST_INCOME: '191197.68'
+    TRUST_FRANKING_CREDIT: '15318.16'
+CASE245:
+  layout: beneficiary_itr_standard
+  degradation_seed: 3372
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Ethan Cooper
+    INDIVIDUAL_TFN: 715 494 917
+    DATE_OF_BIRTH: 27/04/1959
+    INDIVIDUAL_ADDRESS: 142 Queen St, Alexandria NSW 2015
+    TOTAL_TRUST_INCOME: '22737.44'
+    TRUST_FRANKING_CREDIT: '5050.42'
+CASE246:
+  layout: beneficiary_itr_standard
+  degradation_seed: 9827
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Isabella Murray
+    INDIVIDUAL_TFN: 181 369 510
+    DATE_OF_BIRTH: 25/05/1958
+    INDIVIDUAL_ADDRESS: 192 Collins St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '85080.41'
+    TRUST_FRANKING_CREDIT: '32492.24'
+CASE247:
+  layout: beneficiary_itr_standard
+  degradation_seed: 7328
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Noah Kelly
+    INDIVIDUAL_TFN: 558 593 917
+    DATE_OF_BIRTH: 30/08/1978
+    INDIVIDUAL_ADDRESS: 196 Elizabeth St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '31753.68'
+    TRUST_FRANKING_CREDIT: '2224.94'
+CASE248:
+  layout: beneficiary_itr_standard
+  degradation_seed: 7515
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Amelia Parker
+    INDIVIDUAL_TFN: 247 607 013
+    DATE_OF_BIRTH: 28/02/1975
+    INDIVIDUAL_ADDRESS: 129 Murray St, Fortitude Valley QLD 4006
+    TOTAL_TRUST_INCOME: '319996.85'
+    TRUST_FRANKING_CREDIT: '98855.55'
+CASE249:
+  layout: beneficiary_itr_standard
+  degradation_seed: 2649
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Liam Hughes
+    INDIVIDUAL_TFN: 439 649 028
+    DATE_OF_BIRTH: 29/12/1994
+    INDIVIDUAL_ADDRESS: 98 Pitt St, Toowoomba QLD 4350
+    TOTAL_TRUST_INCOME: '123478.71'
+    TRUST_FRANKING_CREDIT: '29590.89'
+CASE250:
+  layout: beneficiary_itr_standard
+  degradation_seed: 4948
+  fields:
+    DOCUMENT_TYPE: BENEFICIARY_ITR
+    INDIVIDUAL_NAME: Emily Morgan
+    INDIVIDUAL_TFN: 328 309 819
+    DATE_OF_BIRTH: 10/01/1974
+    INDIVIDUAL_ADDRESS: 8 Main St, Subiaco WA 6008
+    TOTAL_TRUST_INCOME: '20332.30'
+    TRUST_FRANKING_CREDIT: '3451.99'

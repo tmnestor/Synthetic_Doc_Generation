@@ -1,0 +1,87 @@
+layouts:
+  distribution_statement_standard:
+    format: distribution_statement
+    page_dimensions:
+      width: 2480
+      height: 3508
+    margin: 140
+    font_sizes:
+      header: 44
+      subheader: 28
+      body: 22
+      small: 18
+    colors:
+      header_color: "#1A1A2E"
+      accent_color: "#16213E"
+      line_color: "#CCCCCC"
+    sections:
+      - type: letterhead
+        title: "Statement of Distribution"
+        subtitle: "Trust Distribution Advice"
+        height: 120
+      - type: spacer
+        height: 30
+      - type: section
+        name: trust_details
+        title: "Trust Details"
+        fields:
+          - label: "Trust name"
+            field: TRUST_NAME
+          - label: "ABN"
+            field: TRUST_ABN
+          - label: "Address"
+            field: TRUST_ADDRESS
+      - type: separator
+        height: 20
+      - type: section
+        name: beneficiary_details
+        title: "Beneficiary Details"
+        fields:
+          - label: "Beneficiary name"
+            field: BENEFICIARY_NAME
+          - label: "TFN"
+            field: BENEFICIARY_TFN
+          - label: "Address"
+            field: BENEFICIARY_ADDRESS
+      - type: separator
+        height: 20
+      - type: section
+        name: income_year_section
+        title: "Distribution Period"
+        fields:
+          - label: "Income year"
+            field: INCOME_YEAR
+          - label: "Date of distribution"
+            field: DATE_OF_DISTRIBUTION
+      - type: separator
+        height: 20
+      - type: section
+        name: distribution_components
+        title: "Distribution Components"
+        fields:
+          - label: "Share of net income"
+            field: SHARE_OF_NET_INCOME
+            format: amount
+          - label: "Franking credit"
+            field: FRANKING_CREDIT
+            format: amount
+          - label: "Capital gain component"
+            field: CAPITAL_GAIN_COMPONENT
+            format: amount
+          - label: "Foreign income"
+            field: FOREIGN_INCOME
+            format: amount
+          - label: "Tax-free amount"
+            field: TAX_FREE_AMOUNT
+            format: amount
+          - label: "Tax-deferred amount"
+            field: TAX_DEFERRED_AMOUNT
+            format: amount
+      - type: separator
+        height: 30
+      - type: declaration
+        text: "This statement has been prepared by the trustee of the above trust and is provided to the beneficiary for inclusion in their individual income tax return."
+        height: 80
+      - type: footer
+        text: "This is not a tax invoice"
+        height: 40

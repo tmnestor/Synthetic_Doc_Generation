@@ -1,0 +1,715 @@
+CASE201_distribution_statement_standard.png:
+  trust_return: CASE201_trust_return_standard.png
+  trust_income_schedule: CASE201_trust_income_schedule_standard.png
+  beneficiary_itr: CASE201_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 51 196 744 081
+    beneficiary_tfn: 425 478 019
+    share_of_net_income: '88412.31'
+    franking_credit: '5846.90'
+    capital_gain_component: '29467.88'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE202_distribution_statement_standard.png:
+  trust_return: CASE202_trust_return_standard.png
+  trust_income_schedule: CASE202_trust_income_schedule_standard.png
+  beneficiary_itr: CASE202_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 89 422 264 764
+    beneficiary_tfn: 953 228 711
+    share_of_net_income: '101373.21'
+    franking_credit: '16307.75'
+    capital_gain_component: '18499.30'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE203_distribution_statement_standard.png:
+  trust_return: CASE203_trust_return_standard.png
+  trust_income_schedule: CASE203_trust_income_schedule_standard.png
+  beneficiary_itr: CASE203_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 81 508 770 207
+    beneficiary_tfn: 342 477 919
+    share_of_net_income: '48735.69'
+    franking_credit: '2378.12'
+    capital_gain_component: '13868.29'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE204_distribution_statement_standard.png:
+  trust_return: CASE204_trust_return_standard.png
+  trust_income_schedule: CASE204_trust_income_schedule_standard.png
+  beneficiary_itr: CASE204_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 71 831 889 017
+    beneficiary_tfn: 930 627 619
+    share_of_net_income: '137561.09'
+    franking_credit: '16555.40'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE205_distribution_statement_standard.png:
+  trust_return: CASE205_trust_return_standard.png
+  trust_income_schedule: CASE205_trust_income_schedule_standard.png
+  beneficiary_itr: CASE205_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 16 075 891 443
+    beneficiary_tfn: 646 708 917
+    share_of_net_income: '54983.15'
+    franking_credit: '5971.11'
+    capital_gain_component: '5411.23'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE206_distribution_statement_standard.png:
+  trust_return: CASE206_trust_return_standard.png
+  trust_income_schedule: CASE206_trust_income_schedule_standard.png
+  beneficiary_itr: CASE206_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 73 251 695 675
+    beneficiary_tfn: 499 638 517
+    share_of_net_income: '471791.12'
+    franking_credit: '96487.47'
+    capital_gain_component: '67649.57'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE207_distribution_statement_standard.png:
+  trust_return: CASE207_trust_return_standard.png
+  trust_income_schedule: CASE207_trust_income_schedule_standard.png
+  beneficiary_itr: CASE207_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 12 564 697 594
+    beneficiary_tfn: 363 450 028
+    share_of_net_income: '154197.70'
+    franking_credit: '17297.00'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE208_distribution_statement_standard.png:
+  trust_return: CASE208_trust_return_standard.png
+  trust_income_schedule: CASE208_trust_income_schedule_standard.png
+  beneficiary_itr: CASE208_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 62 990 480 001
+    beneficiary_tfn: 141 867 016
+    share_of_net_income: '248135.33'
+    franking_credit: '72801.75'
+    capital_gain_component: '23328.74'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE209_distribution_statement_standard.png:
+  trust_return: CASE209_trust_return_standard.png
+  trust_income_schedule: CASE209_trust_income_schedule_standard.png
+  beneficiary_itr: CASE209_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 21 328 915 809
+    beneficiary_tfn: 540 109 517
+    share_of_net_income: '82110.06'
+    franking_credit: '22160.21'
+    capital_gain_component: '11229.94'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE210_distribution_statement_standard.png:
+  trust_return: CASE210_trust_return_standard.png
+  trust_income_schedule: CASE210_trust_income_schedule_standard.png
+  beneficiary_itr: CASE210_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 91 560 787 523
+    beneficiary_tfn: 634 515 410
+    share_of_net_income: '123926.55'
+    franking_credit: '26892.78'
+    capital_gain_component: '31189.10'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE211_distribution_statement_standard.png:
+  trust_return: CASE211_trust_return_standard.png
+  trust_income_schedule: CASE211_trust_income_schedule_standard.png
+  beneficiary_itr: CASE211_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 82 231 740 626
+    beneficiary_tfn: 468 227 611
+    share_of_net_income: '366824.66'
+    franking_credit: '27363.98'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE212_distribution_statement_standard.png:
+  trust_return: CASE212_trust_return_standard.png
+  trust_income_schedule: CASE212_trust_income_schedule_standard.png
+  beneficiary_itr: CASE212_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 44 533 554 232
+    beneficiary_tfn: 160 573 628
+    share_of_net_income: '123982.08'
+    franking_credit: '32160.35'
+    capital_gain_component: '13343.32'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE213_distribution_statement_standard.png:
+  trust_return: CASE213_trust_return_standard.png
+  trust_income_schedule: CASE213_trust_income_schedule_standard.png
+  beneficiary_itr: CASE213_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 82 317 410 438
+    beneficiary_tfn: 071 431 616
+    share_of_net_income: '293798.34'
+    franking_credit: '65926.19'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE214_distribution_statement_standard.png:
+  trust_return: CASE214_trust_return_standard.png
+  trust_income_schedule: CASE214_trust_income_schedule_standard.png
+  beneficiary_itr: CASE214_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 93 599 915 943
+    beneficiary_tfn: 280 640 619
+    share_of_net_income: '235691.05'
+    franking_credit: '40933.81'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE215_distribution_statement_standard.png:
+  trust_return: CASE215_trust_return_standard.png
+  trust_income_schedule: CASE215_trust_income_schedule_standard.png
+  beneficiary_itr: CASE215_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 81 740 484 347
+    beneficiary_tfn: 377 658 713
+    share_of_net_income: '465218.98'
+    franking_credit: '1300.12'
+    capital_gain_component: '114931.31'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE216_distribution_statement_standard.png:
+  trust_return: CASE216_trust_return_standard.png
+  trust_income_schedule: CASE216_trust_income_schedule_standard.png
+  beneficiary_itr: CASE216_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 93 027 019 763
+    beneficiary_tfn: 112 157 315
+    share_of_net_income: '330448.40'
+    franking_credit: '66208.30'
+    capital_gain_component: '124286.47'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE217_distribution_statement_standard.png:
+  trust_return: CASE217_trust_return_standard.png
+  trust_income_schedule: CASE217_trust_income_schedule_standard.png
+  beneficiary_itr: CASE217_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 30 918 833 132
+    beneficiary_tfn: 821 852 818
+    share_of_net_income: '133049.41'
+    franking_credit: '3684.08'
+    capital_gain_component: '19536.72'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE218_distribution_statement_standard.png:
+  trust_return: CASE218_trust_return_standard.png
+  trust_income_schedule: CASE218_trust_income_schedule_standard.png
+  beneficiary_itr: CASE218_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 34 739 892 156
+    beneficiary_tfn: 249 185 611
+    share_of_net_income: '83036.60'
+    franking_credit: '20790.58'
+    capital_gain_component: '8455.85'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE219_distribution_statement_standard.png:
+  trust_return: CASE219_trust_return_standard.png
+  trust_income_schedule: CASE219_trust_income_schedule_standard.png
+  beneficiary_itr: CASE219_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 16 072 039 293
+    beneficiary_tfn: 007 402 610
+    share_of_net_income: '42865.57'
+    franking_credit: '11118.54'
+    capital_gain_component: '14307.25'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE220_distribution_statement_standard.png:
+  trust_return: CASE220_trust_return_standard.png
+  trust_income_schedule: CASE220_trust_income_schedule_standard.png
+  beneficiary_itr: CASE220_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 54 109 824 376
+    beneficiary_tfn: 721 577 411
+    share_of_net_income: '206031.42'
+    franking_credit: '13778.78'
+    capital_gain_component: '39035.35'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE221_distribution_statement_standard.png:
+  trust_return: CASE221_trust_return_standard.png
+  trust_income_schedule: CASE221_trust_income_schedule_standard.png
+  beneficiary_itr: CASE221_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 77 091 300 061
+    beneficiary_tfn: 568 374 715
+    share_of_net_income: '100773.30'
+    franking_credit: '22025.37'
+    capital_gain_component: '26420.05'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE222_distribution_statement_standard.png:
+  trust_return: CASE222_trust_return_standard.png
+  trust_income_schedule: CASE222_trust_income_schedule_standard.png
+  beneficiary_itr: CASE222_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 71 273 286 120
+    beneficiary_tfn: 042 052 217
+    share_of_net_income: '14762.39'
+    franking_credit: '2759.78'
+    capital_gain_component: '1382.04'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE223_distribution_statement_standard.png:
+  trust_return: CASE223_trust_return_standard.png
+  trust_income_schedule: CASE223_trust_income_schedule_standard.png
+  beneficiary_itr: CASE223_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 87 916 040 086
+    beneficiary_tfn: 360 012 816
+    share_of_net_income: '157465.44'
+    franking_credit: '14354.94'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE224_distribution_statement_standard.png:
+  trust_return: CASE224_trust_return_standard.png
+  trust_income_schedule: CASE224_trust_income_schedule_standard.png
+  beneficiary_itr: CASE224_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 53 526 177 640
+    beneficiary_tfn: 639 543 212
+    share_of_net_income: '106713.67'
+    franking_credit: '2989.71'
+    capital_gain_component: '14107.98'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE225_distribution_statement_standard.png:
+  trust_return: CASE225_trust_return_standard.png
+  trust_income_schedule: CASE225_trust_income_schedule_standard.png
+  beneficiary_itr: CASE225_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 34 732 476 087
+    beneficiary_tfn: 985 301 619
+    share_of_net_income: '129552.38'
+    franking_credit: '34693.86'
+    capital_gain_component: '46627.56'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE226_distribution_statement_standard.png:
+  trust_return: CASE226_trust_return_standard.png
+  trust_income_schedule: CASE226_trust_income_schedule_standard.png
+  beneficiary_itr: CASE226_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 66 916 791 369
+    beneficiary_tfn: 964 018 911
+    share_of_net_income: '102338.30'
+    franking_credit: '25499.71'
+    capital_gain_component: '37253.48'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE227_distribution_statement_standard.png:
+  trust_return: CASE227_trust_return_standard.png
+  trust_income_schedule: CASE227_trust_income_schedule_standard.png
+  beneficiary_itr: CASE227_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 69 953 727 923
+    beneficiary_tfn: 046 853 015
+    share_of_net_income: '174565.29'
+    franking_credit: '7246.59'
+    capital_gain_component: '0.00'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE228_distribution_statement_standard.png:
+  trust_return: CASE228_trust_return_standard.png
+  trust_income_schedule: CASE228_trust_income_schedule_standard.png
+  beneficiary_itr: CASE228_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 97 138 138 120
+    beneficiary_tfn: 150 915 312
+    share_of_net_income: '157314.47'
+    franking_credit: '35559.76'
+    capital_gain_component: '60361.66'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE229_distribution_statement_standard.png:
+  trust_return: CASE229_trust_return_standard.png
+  trust_income_schedule: CASE229_trust_income_schedule_standard.png
+  beneficiary_itr: CASE229_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 12 111 641 897
+    beneficiary_tfn: 947 020 718
+    share_of_net_income: '210923.89'
+    franking_credit: '62057.31'
+    capital_gain_component: '77498.73'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE230_distribution_statement_standard.png:
+  trust_return: CASE230_trust_return_standard.png
+  trust_income_schedule: CASE230_trust_income_schedule_standard.png
+  beneficiary_itr: CASE230_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 24 449 357 158
+    beneficiary_tfn: 245 397 612
+    share_of_net_income: '147007.86'
+    franking_credit: '33165.41'
+    capital_gain_component: '20330.46'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE231_distribution_statement_standard.png:
+  trust_return: CASE231_trust_return_standard.png
+  trust_income_schedule: CASE231_trust_income_schedule_standard.png
+  beneficiary_itr: CASE231_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 89 870 953 292
+    beneficiary_tfn: 416 950 012
+    share_of_net_income: '31721.76'
+    franking_credit: '6370.92'
+    capital_gain_component: '4006.06'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE232_distribution_statement_standard.png:
+  trust_return: CASE232_trust_return_standard.png
+  trust_income_schedule: CASE232_trust_income_schedule_standard.png
+  beneficiary_itr: CASE232_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 38 107 304 001
+    beneficiary_tfn: 136 547 113
+    share_of_net_income: '360357.21'
+    franking_credit: '64010.02'
+    capital_gain_component: '48647.24'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE233_distribution_statement_standard.png:
+  trust_return: CASE233_trust_return_standard.png
+  trust_income_schedule: CASE233_trust_income_schedule_standard.png
+  beneficiary_itr: CASE233_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 70 515 380 643
+    beneficiary_tfn: 669 840 115
+    share_of_net_income: '53957.20'
+    franking_credit: '1708.37'
+    capital_gain_component: '14700.90'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE234_distribution_statement_standard.png:
+  trust_return: CASE234_trust_return_standard.png
+  trust_income_schedule: CASE234_trust_income_schedule_standard.png
+  beneficiary_itr: CASE234_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 50 501 908 908
+    beneficiary_tfn: 248 090 314
+    share_of_net_income: '220999.64'
+    franking_credit: '49756.50'
+    capital_gain_component: '62734.28'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE235_distribution_statement_standard.png:
+  trust_return: CASE235_trust_return_standard.png
+  trust_income_schedule: CASE235_trust_income_schedule_standard.png
+  beneficiary_itr: CASE235_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 87 603 614 101
+    beneficiary_tfn: 317 914 015
+    share_of_net_income: '12987.59'
+    franking_credit: '1903.63'
+    capital_gain_component: '3788.65'
+  compliance_status: compliant
+  discrepancy_type: null
+  discrepancy_details: null
+  match_status: FOUND
+CASE236_distribution_statement_standard.png:
+  trust_return: CASE236_trust_return_standard.png
+  trust_income_schedule: CASE236_trust_income_schedule_standard.png
+  beneficiary_itr: CASE236_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 61 978 885 337
+    beneficiary_tfn: 110 955 316
+    share_of_net_income: '93230.12'
+    franking_credit: '19658.18'
+    capital_gain_component: '12864.94'
+  compliance_status: non_compliant
+  discrepancy_type: over_claimed_franking
+  discrepancy_details: ITR claims $25837.64 franking credit but Distribution Statement
+    shows $19658.18
+  match_status: FOUND
+CASE237_distribution_statement_standard.png:
+  trust_return: CASE237_trust_return_standard.png
+  trust_income_schedule: CASE237_trust_income_schedule_standard.png
+  beneficiary_itr: CASE237_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 52 596 821 813
+    beneficiary_tfn: 053 549 613
+    share_of_net_income: '52558.81'
+    franking_credit: '5690.24'
+    capital_gain_component: '15652.35'
+  compliance_status: non_compliant
+  discrepancy_type: trust_return_mismatch
+  discrepancy_details: Trust Return Item 57 shows $42487.84 but Distribution Statement
+    shows $52558.81
+  match_status: FOUND
+CASE238_distribution_statement_standard.png:
+  trust_return: CASE238_trust_return_standard.png
+  trust_income_schedule: CASE238_trust_income_schedule_standard.png
+  beneficiary_itr: CASE238_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 39 368 289 709
+    beneficiary_tfn: 983 059 911
+    share_of_net_income: '432244.25'
+    franking_credit: '106606.43'
+    capital_gain_component: '32819.77'
+  compliance_status: non_compliant
+  discrepancy_type: over_claimed_franking
+  discrepancy_details: ITR claims $130223.40 franking credit but Distribution Statement
+    shows $106606.43
+  match_status: FOUND
+CASE239_distribution_statement_standard.png:
+  trust_return: CASE239_trust_return_standard.png
+  trust_income_schedule: CASE239_trust_income_schedule_standard.png
+  beneficiary_itr: CASE239_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 72 423 132 420
+    beneficiary_tfn: 813 511 519
+    share_of_net_income: '107870.42'
+    franking_credit: '9882.45'
+    capital_gain_component: '28409.92'
+  compliance_status: non_compliant
+  discrepancy_type: over_claimed_franking
+  discrepancy_details: ITR claims $11704.87 franking credit but Distribution Statement
+    shows $9882.45
+  match_status: FOUND
+CASE240_distribution_statement_standard.png:
+  trust_return: CASE240_trust_return_standard.png
+  trust_income_schedule: CASE240_trust_income_schedule_standard.png
+  beneficiary_itr: CASE240_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 97 690 360 291
+    beneficiary_tfn: 395 049 614
+    share_of_net_income: '41141.12'
+    franking_credit: '8676.51'
+    capital_gain_component: '11954.98'
+  compliance_status: non_compliant
+  discrepancy_type: trust_return_mismatch
+  discrepancy_details: Trust Return Item 57 shows $33322.24 but Distribution Statement
+    shows $41141.12
+  match_status: FOUND
+CASE241_distribution_statement_standard.png:
+  trust_return: CASE241_trust_return_standard.png
+  trust_income_schedule: CASE241_trust_income_schedule_standard.png
+  beneficiary_itr: CASE241_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 62 616 423 166
+    beneficiary_tfn: 042 428 011
+    share_of_net_income: '137959.25'
+    franking_credit: '18175.58'
+    capital_gain_component: '21581.23'
+  compliance_status: non_compliant
+  discrepancy_type: trust_return_mismatch
+  discrepancy_details: Trust Return Item 57 shows $153916.15 but Distribution Statement
+    shows $137959.25
+  match_status: FOUND
+CASE242_distribution_statement_standard.png:
+  trust_return: CASE242_trust_return_standard.png
+  trust_income_schedule: CASE242_trust_income_schedule_standard.png
+  beneficiary_itr: CASE242_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 94 071 953 319
+    beneficiary_tfn: 447 504 810
+    share_of_net_income: '142060.40'
+    franking_credit: '32522.27'
+    capital_gain_component: '0.00'
+  compliance_status: non_compliant
+  discrepancy_type: over_claimed_franking
+  discrepancy_details: ITR claims $48743.67 franking credit but Distribution Statement
+    shows $32522.27
+  match_status: FOUND
+CASE243_distribution_statement_standard.png:
+  trust_return: CASE243_trust_return_standard.png
+  trust_income_schedule: CASE243_trust_income_schedule_standard.png
+  beneficiary_itr: CASE243_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 38 811 040 031
+    beneficiary_tfn: 460 850 811
+    share_of_net_income: '116633.37'
+    franking_credit: '23183.81'
+    capital_gain_component: '36876.55'
+  compliance_status: non_compliant
+  discrepancy_type: under_reported_income
+  discrepancy_details: ITR reports $97011.48 trust income but Distribution Statement
+    shows $116633.37
+  match_status: FOUND
+CASE244_distribution_statement_standard.png:
+  trust_return: CASE244_trust_return_standard.png
+  trust_income_schedule: CASE244_trust_income_schedule_standard.png
+  beneficiary_itr: CASE244_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 84 122 448 857
+    beneficiary_tfn: 844 451 112
+    share_of_net_income: '191197.68'
+    franking_credit: '15318.16'
+    capital_gain_component: '2519.65'
+  compliance_status: non_compliant
+  discrepancy_type: missing_cgt
+  discrepancy_details: Distribution Statement shows $2519.65 CGT but Trust Income
+    Schedule reports $0.00
+  match_status: FOUND
+CASE245_distribution_statement_standard.png:
+  trust_return: CASE245_trust_return_standard.png
+  trust_income_schedule: CASE245_trust_income_schedule_standard.png
+  beneficiary_itr: CASE245_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 12 555 705 568
+    beneficiary_tfn: 715 494 917
+    share_of_net_income: '33779.21'
+    franking_credit: '5050.42'
+    capital_gain_component: '7705.21'
+  compliance_status: non_compliant
+  discrepancy_type: under_reported_income
+  discrepancy_details: ITR reports $22737.44 trust income but Distribution Statement
+    shows $33779.21
+  match_status: FOUND
+CASE246_distribution_statement_standard.png:
+  trust_return: CASE246_trust_return_standard.png
+  trust_income_schedule: CASE246_trust_income_schedule_standard.png
+  beneficiary_itr: CASE246_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 62 653 725 470
+    beneficiary_tfn: 181 369 510
+    share_of_net_income: '131993.84'
+    franking_credit: '32492.24'
+    capital_gain_component: '20392.33'
+  compliance_status: non_compliant
+  discrepancy_type: under_reported_income
+  discrepancy_details: ITR reports $85080.41 trust income but Distribution Statement
+    shows $131993.84
+  match_status: FOUND
+CASE247_distribution_statement_standard.png:
+  trust_return: CASE247_trust_return_standard.png
+  trust_income_schedule: CASE247_trust_income_schedule_standard.png
+  beneficiary_itr: CASE247_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 89 930 546 040
+    beneficiary_tfn: 558 593 917
+    share_of_net_income: '31753.68'
+    franking_credit: '2224.94'
+    capital_gain_component: '2072.77'
+  compliance_status: non_compliant
+  discrepancy_type: missing_cgt
+  discrepancy_details: Distribution Statement shows $2072.77 CGT but Trust Income
+    Schedule reports $0.00
+  match_status: FOUND
+CASE248_distribution_statement_standard.png:
+  trust_return: CASE248_trust_return_standard.png
+  trust_income_schedule: CASE248_trust_income_schedule_standard.png
+  beneficiary_itr: CASE248_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 59 850 585 626
+    beneficiary_tfn: 247 607 013
+    share_of_net_income: '456116.42'
+    franking_credit: '98855.55'
+    capital_gain_component: '127335.60'
+  compliance_status: non_compliant
+  discrepancy_type: under_reported_income
+  discrepancy_details: ITR reports $319996.85 trust income but Distribution Statement
+    shows $456116.42
+  match_status: FOUND
+CASE249_distribution_statement_standard.png:
+  trust_return: CASE249_trust_return_standard.png
+  trust_income_schedule: CASE249_trust_income_schedule_standard.png
+  beneficiary_itr: CASE249_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 82 439 611 995
+    beneficiary_tfn: 439 649 028
+    share_of_net_income: '156277.57'
+    franking_credit: '29590.89'
+    capital_gain_component: '62370.23'
+  compliance_status: non_compliant
+  discrepancy_type: under_reported_income
+  discrepancy_details: ITR reports $123478.71 trust income but Distribution Statement
+    shows $156277.57
+  match_status: FOUND
+CASE250_distribution_statement_standard.png:
+  trust_return: CASE250_trust_return_standard.png
+  trust_income_schedule: CASE250_trust_income_schedule_standard.png
+  beneficiary_itr: CASE250_beneficiary_itr_standard.png
+  linking_fields:
+    trust_abn: 71 371 802 116
+    beneficiary_tfn: 328 309 819
+    share_of_net_income: '20332.30'
+    franking_credit: '3451.99'
+    capital_gain_component: '2226.27'
+  compliance_status: non_compliant
+  discrepancy_type: missing_cgt
+  discrepancy_details: Distribution Statement shows $2226.27 CGT but Trust Income
+    Schedule reports $0.00
+  match_status: FOUND

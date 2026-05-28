@@ -227,6 +227,46 @@ def generate_abn() -> str:
     raise RuntimeError(msg)
 
 
+# --- TFN Validation (ATO algorithm) ---
+
+_TFN_WEIGHTS = [1, 4, 3, 7, 5, 8, 6, 9, 10]
+
+
+def validate_tfn(tfn: str) -> bool:
+    """Validate an Australian Tax File Number using the ATO checksum algorithm.
+
+    Args:
+        tfn: TFN string, with or without spaces (e.g. "123 456 789" or "123456789").
+
+    Returns:
+        True if checksum is valid.
+    """
+    digits_str = tfn.replace(" ", "")
+    if len(digits_str) != 9 or not digits_str.isdigit():
+        return False
+    digits = [int(d) for d in digits_str]
+    total = sum(d * w for d, w in zip(digits, _TFN_WEIGHTS, strict=True))
+    return total % 11 == 0
+
+
+def generate_tfn() -> str:
+    """Generate a valid 9-digit TFN with correct checksum.
+
+    Returns:
+        TFN formatted as "XXX XXX XXX".
+    """
+    base = [random.randint(0, 9) for _ in range(7)]
+    for d0 in range(1, 10):
+        for d1 in range(0, 10):
+            digits = [*base, d0, d1]
+            total = sum(d * w for d, w in zip(digits, _TFN_WEIGHTS, strict=True))
+            if total % 11 == 0:
+                s = "".join(str(d) for d in digits)
+                return f"{s[:3]} {s[3:6]} {s[6:9]}"
+    msg = "Failed to generate valid TFN"
+    raise RuntimeError(msg)
+
+
 # --- GST Calculation ---
 
 

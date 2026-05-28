@@ -1,0 +1,650 @@
+CASE201:
+  layout: trust_income_schedule_standard
+  degradation_seed: 6576
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Smith Family Trust
+    TRUST_ABN: 51 196 744 081
+    BENEFICIARY_NAME: Sarah Smith
+    BENEFICIARY_TFN: 425 478 019
+    SHARE_OF_NET_INCOME: '88412.31'
+    FRANKING_CREDIT: '5846.90'
+    CAPITAL_GAIN_COMPONENT: '29467.88'
+    FOREIGN_INCOME: '0.00'
+CASE202:
+  layout: trust_income_schedule_standard
+  degradation_seed: 6927
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Johnson Discretionary Trust
+    TRUST_ABN: 89 422 264 764
+    BENEFICIARY_NAME: Michael Johnson
+    BENEFICIARY_TFN: 953 228 711
+    SHARE_OF_NET_INCOME: '101373.21'
+    FRANKING_CREDIT: '16307.75'
+    CAPITAL_GAIN_COMPONENT: '18499.30'
+    FOREIGN_INCOME: '0.00'
+CASE203:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9753
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Williams Family Trust
+    TRUST_ABN: 81 508 770 207
+    BENEFICIARY_NAME: Emma Williams
+    BENEFICIARY_TFN: 342 477 919
+    SHARE_OF_NET_INCOME: '48735.69'
+    FRANKING_CREDIT: '2378.12'
+    CAPITAL_GAIN_COMPONENT: '13868.29'
+    FOREIGN_INCOME: '0.00'
+CASE204:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9181
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Chen Investment Trust
+    TRUST_ABN: 71 831 889 017
+    BENEFICIARY_NAME: David Chen
+    BENEFICIARY_TFN: 930 627 619
+    SHARE_OF_NET_INCOME: '137561.09'
+    FRANKING_CREDIT: '16555.40'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '2879.18'
+CASE205:
+  layout: trust_income_schedule_standard
+  degradation_seed: 3506
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Brown Family Trust
+    TRUST_ABN: 16 075 891 443
+    BENEFICIARY_NAME: Jessica Brown
+    BENEFICIARY_TFN: 646 708 917
+    SHARE_OF_NET_INCOME: '54983.15'
+    FRANKING_CREDIT: '5971.11'
+    CAPITAL_GAIN_COMPONENT: '5411.23'
+    FOREIGN_INCOME: '0.00'
+CASE206:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8435
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Taylor Discretionary Trust
+    TRUST_ABN: 73 251 695 675
+    BENEFICIARY_NAME: James Taylor
+    BENEFICIARY_TFN: 499 638 517
+    SHARE_OF_NET_INCOME: '471791.12'
+    FRANKING_CREDIT: '96487.47'
+    CAPITAL_GAIN_COMPONENT: '67649.57'
+    FOREIGN_INCOME: '0.00'
+CASE207:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9007
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Anderson Family Trust
+    TRUST_ABN: 12 564 697 594
+    BENEFICIARY_NAME: Olivia Anderson
+    BENEFICIARY_TFN: 363 450 028
+    SHARE_OF_NET_INCOME: '154197.70'
+    FRANKING_CREDIT: '17297.00'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '4619.93'
+CASE208:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9647
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Wilson Investment Trust
+    TRUST_ABN: 62 990 480 001
+    BENEFICIARY_NAME: Daniel Wilson
+    BENEFICIARY_TFN: 141 867 016
+    SHARE_OF_NET_INCOME: '248135.33'
+    FRANKING_CREDIT: '72801.75'
+    CAPITAL_GAIN_COMPONENT: '23328.74'
+    FOREIGN_INCOME: '0.00'
+CASE209:
+  layout: trust_income_schedule_standard
+  degradation_seed: 1119
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Martin Family Trust
+    TRUST_ABN: 21 328 915 809
+    BENEFICIARY_NAME: Sophie Martin
+    BENEFICIARY_TFN: 540 109 517
+    SHARE_OF_NET_INCOME: '82110.06'
+    FRANKING_CREDIT: '22160.21'
+    CAPITAL_GAIN_COMPONENT: '11229.94'
+    FOREIGN_INCOME: '0.00'
+CASE210:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2547
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Thompson Discretionary Trust
+    TRUST_ABN: 91 560 787 523
+    BENEFICIARY_NAME: Ryan Thompson
+    BENEFICIARY_TFN: 634 515 410
+    SHARE_OF_NET_INCOME: '123926.55'
+    FRANKING_CREDIT: '26892.78'
+    CAPITAL_GAIN_COMPONENT: '31189.10'
+    FOREIGN_INCOME: '0.00'
+CASE211:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5094
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Robinson Family Trust
+    TRUST_ABN: 82 231 740 626
+    BENEFICIARY_NAME: Hannah Robinson
+    BENEFICIARY_TFN: 468 227 611
+    SHARE_OF_NET_INCOME: '366824.66'
+    FRANKING_CREDIT: '27363.98'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE212:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8456
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Harris Investment Trust
+    TRUST_ABN: 44 533 554 232
+    BENEFICIARY_NAME: Thomas Harris
+    BENEFICIARY_TFN: 160 573 628
+    SHARE_OF_NET_INCOME: '123982.08'
+    FRANKING_CREDIT: '32160.35'
+    CAPITAL_GAIN_COMPONENT: '13343.32'
+    FOREIGN_INCOME: '0.00'
+CASE213:
+  layout: trust_income_schedule_standard
+  degradation_seed: 3581
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Clark Family Trust
+    TRUST_ABN: 82 317 410 438
+    BENEFICIARY_NAME: Mia Clark
+    BENEFICIARY_TFN: 071 431 616
+    SHARE_OF_NET_INCOME: '293798.34'
+    FRANKING_CREDIT: '65926.19'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE214:
+  layout: trust_income_schedule_standard
+  degradation_seed: 6185
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Lee Discretionary Trust
+    TRUST_ABN: 93 599 915 943
+    BENEFICIARY_NAME: William Lee
+    BENEFICIARY_TFN: 280 640 619
+    SHARE_OF_NET_INCOME: '235691.05'
+    FRANKING_CREDIT: '40933.81'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE215:
+  layout: trust_income_schedule_standard
+  degradation_seed: 3172
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: White Family Trust
+    TRUST_ABN: 81 740 484 347
+    BENEFICIARY_NAME: Charlotte White
+    BENEFICIARY_TFN: 377 658 713
+    SHARE_OF_NET_INCOME: '465218.98'
+    FRANKING_CREDIT: '1300.12'
+    CAPITAL_GAIN_COMPONENT: '114931.31'
+    FOREIGN_INCOME: '0.00'
+CASE216:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2755
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Nguyen Investment Trust
+    TRUST_ABN: 93 027 019 763
+    BENEFICIARY_NAME: Alexander Nguyen
+    BENEFICIARY_TFN: 112 157 315
+    SHARE_OF_NET_INCOME: '330448.40'
+    FRANKING_CREDIT: '66208.30'
+    CAPITAL_GAIN_COMPONENT: '124286.47'
+    FOREIGN_INCOME: '0.00'
+CASE217:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5293
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Mitchell Family Trust
+    TRUST_ABN: 30 918 833 132
+    BENEFICIARY_NAME: Grace Mitchell
+    BENEFICIARY_TFN: 821 852 818
+    SHARE_OF_NET_INCOME: '133049.41'
+    FRANKING_CREDIT: '3684.08'
+    CAPITAL_GAIN_COMPONENT: '19536.72'
+    FOREIGN_INCOME: '0.00'
+CASE218:
+  layout: trust_income_schedule_standard
+  degradation_seed: 1655
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Campbell Discretionary Trust
+    TRUST_ABN: 34 739 892 156
+    BENEFICIARY_NAME: Benjamin Campbell
+    BENEFICIARY_TFN: 249 185 611
+    SHARE_OF_NET_INCOME: '83036.60'
+    FRANKING_CREDIT: '20790.58'
+    CAPITAL_GAIN_COMPONENT: '8455.85'
+    FOREIGN_INCOME: '0.00'
+CASE219:
+  layout: trust_income_schedule_standard
+  degradation_seed: 7747
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Stewart Family Trust
+    TRUST_ABN: 16 072 039 293
+    BENEFICIARY_NAME: Chloe Stewart
+    BENEFICIARY_TFN: 007 402 610
+    SHARE_OF_NET_INCOME: '42865.57'
+    FRANKING_CREDIT: '11118.54'
+    CAPITAL_GAIN_COMPONENT: '14307.25'
+    FOREIGN_INCOME: '221.45'
+CASE220:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9348
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Cooper Investment Trust
+    TRUST_ABN: 54 109 824 376
+    BENEFICIARY_NAME: Ethan Cooper
+    BENEFICIARY_TFN: 721 577 411
+    SHARE_OF_NET_INCOME: '206031.42'
+    FRANKING_CREDIT: '13778.78'
+    CAPITAL_GAIN_COMPONENT: '39035.35'
+    FOREIGN_INCOME: '0.00'
+CASE221:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5175
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Murray Family Trust
+    TRUST_ABN: 77 091 300 061
+    BENEFICIARY_NAME: Isabella Murray
+    BENEFICIARY_TFN: 568 374 715
+    SHARE_OF_NET_INCOME: '100773.30'
+    FRANKING_CREDIT: '22025.37'
+    CAPITAL_GAIN_COMPONENT: '26420.05'
+    FOREIGN_INCOME: '0.00'
+CASE222:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5846
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Kelly Discretionary Trust
+    TRUST_ABN: 71 273 286 120
+    BENEFICIARY_NAME: Noah Kelly
+    BENEFICIARY_TFN: 042 052 217
+    SHARE_OF_NET_INCOME: '14762.39'
+    FRANKING_CREDIT: '2759.78'
+    CAPITAL_GAIN_COMPONENT: '1382.04'
+    FOREIGN_INCOME: '2584.90'
+CASE223:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8240
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Parker Family Trust
+    TRUST_ABN: 87 916 040 086
+    BENEFICIARY_NAME: Amelia Parker
+    BENEFICIARY_TFN: 360 012 816
+    SHARE_OF_NET_INCOME: '157465.44'
+    FRANKING_CREDIT: '14354.94'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE224:
+  layout: trust_income_schedule_standard
+  degradation_seed: 1759
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Hughes Investment Trust
+    TRUST_ABN: 53 526 177 640
+    BENEFICIARY_NAME: Liam Hughes
+    BENEFICIARY_TFN: 639 543 212
+    SHARE_OF_NET_INCOME: '106713.67'
+    FRANKING_CREDIT: '2989.71'
+    CAPITAL_GAIN_COMPONENT: '14107.98'
+    FOREIGN_INCOME: '0.00'
+CASE225:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9488
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Morgan Family Trust
+    TRUST_ABN: 34 732 476 087
+    BENEFICIARY_NAME: Emily Morgan
+    BENEFICIARY_TFN: 985 301 619
+    SHARE_OF_NET_INCOME: '129552.38'
+    FRANKING_CREDIT: '34693.86'
+    CAPITAL_GAIN_COMPONENT: '46627.56'
+    FOREIGN_INCOME: '0.00'
+CASE226:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5052
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Smith Family Trust
+    TRUST_ABN: 66 916 791 369
+    BENEFICIARY_NAME: Sarah Smith
+    BENEFICIARY_TFN: 964 018 911
+    SHARE_OF_NET_INCOME: '102338.30'
+    FRANKING_CREDIT: '25499.71'
+    CAPITAL_GAIN_COMPONENT: '37253.48'
+    FOREIGN_INCOME: '0.00'
+CASE227:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9892
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Johnson Discretionary Trust
+    TRUST_ABN: 69 953 727 923
+    BENEFICIARY_NAME: Michael Johnson
+    BENEFICIARY_TFN: 046 853 015
+    SHARE_OF_NET_INCOME: '174565.29'
+    FRANKING_CREDIT: '7246.59'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE228:
+  layout: trust_income_schedule_standard
+  degradation_seed: 4615
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Williams Family Trust
+    TRUST_ABN: 97 138 138 120
+    BENEFICIARY_NAME: Emma Williams
+    BENEFICIARY_TFN: 150 915 312
+    SHARE_OF_NET_INCOME: '157314.47'
+    FRANKING_CREDIT: '35559.76'
+    CAPITAL_GAIN_COMPONENT: '60361.66'
+    FOREIGN_INCOME: '0.00'
+CASE229:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8024
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Chen Investment Trust
+    TRUST_ABN: 12 111 641 897
+    BENEFICIARY_NAME: David Chen
+    BENEFICIARY_TFN: 947 020 718
+    SHARE_OF_NET_INCOME: '210923.89'
+    FRANKING_CREDIT: '62057.31'
+    CAPITAL_GAIN_COMPONENT: '77498.73'
+    FOREIGN_INCOME: '0.00'
+CASE230:
+  layout: trust_income_schedule_standard
+  degradation_seed: 6735
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Brown Family Trust
+    TRUST_ABN: 24 449 357 158
+    BENEFICIARY_NAME: Jessica Brown
+    BENEFICIARY_TFN: 245 397 612
+    SHARE_OF_NET_INCOME: '147007.86'
+    FRANKING_CREDIT: '33165.41'
+    CAPITAL_GAIN_COMPONENT: '20330.46'
+    FOREIGN_INCOME: '0.00'
+CASE231:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2878
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Taylor Discretionary Trust
+    TRUST_ABN: 89 870 953 292
+    BENEFICIARY_NAME: James Taylor
+    BENEFICIARY_TFN: 416 950 012
+    SHARE_OF_NET_INCOME: '31721.76'
+    FRANKING_CREDIT: '6370.92'
+    CAPITAL_GAIN_COMPONENT: '4006.06'
+    FOREIGN_INCOME: '0.00'
+CASE232:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2985
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Anderson Family Trust
+    TRUST_ABN: 38 107 304 001
+    BENEFICIARY_NAME: Olivia Anderson
+    BENEFICIARY_TFN: 136 547 113
+    SHARE_OF_NET_INCOME: '360357.21'
+    FRANKING_CREDIT: '64010.02'
+    CAPITAL_GAIN_COMPONENT: '48647.24'
+    FOREIGN_INCOME: '0.00'
+CASE233:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5427
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Wilson Investment Trust
+    TRUST_ABN: 70 515 380 643
+    BENEFICIARY_NAME: Daniel Wilson
+    BENEFICIARY_TFN: 669 840 115
+    SHARE_OF_NET_INCOME: '53957.20'
+    FRANKING_CREDIT: '1708.37'
+    CAPITAL_GAIN_COMPONENT: '14700.90'
+    FOREIGN_INCOME: '3565.81'
+CASE234:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8990
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Martin Family Trust
+    TRUST_ABN: 50 501 908 908
+    BENEFICIARY_NAME: Sophie Martin
+    BENEFICIARY_TFN: 248 090 314
+    SHARE_OF_NET_INCOME: '220999.64'
+    FRANKING_CREDIT: '49756.50'
+    CAPITAL_GAIN_COMPONENT: '62734.28'
+    FOREIGN_INCOME: '0.00'
+CASE235:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2526
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Thompson Discretionary Trust
+    TRUST_ABN: 87 603 614 101
+    BENEFICIARY_NAME: Ryan Thompson
+    BENEFICIARY_TFN: 317 914 015
+    SHARE_OF_NET_INCOME: '12987.59'
+    FRANKING_CREDIT: '1903.63'
+    CAPITAL_GAIN_COMPONENT: '3788.65'
+    FOREIGN_INCOME: '0.00'
+CASE236:
+  layout: trust_income_schedule_standard
+  degradation_seed: 4035
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Robinson Family Trust
+    TRUST_ABN: 61 978 885 337
+    BENEFICIARY_NAME: Hannah Robinson
+    BENEFICIARY_TFN: 110 955 316
+    SHARE_OF_NET_INCOME: '93230.12'
+    FRANKING_CREDIT: '19658.18'
+    CAPITAL_GAIN_COMPONENT: '12864.94'
+    FOREIGN_INCOME: '0.00'
+CASE237:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2682
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Harris Investment Trust
+    TRUST_ABN: 52 596 821 813
+    BENEFICIARY_NAME: Thomas Harris
+    BENEFICIARY_TFN: 053 549 613
+    SHARE_OF_NET_INCOME: '52558.81'
+    FRANKING_CREDIT: '5690.24'
+    CAPITAL_GAIN_COMPONENT: '15652.35'
+    FOREIGN_INCOME: '0.00'
+CASE238:
+  layout: trust_income_schedule_standard
+  degradation_seed: 5068
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Clark Family Trust
+    TRUST_ABN: 39 368 289 709
+    BENEFICIARY_NAME: Mia Clark
+    BENEFICIARY_TFN: 983 059 911
+    SHARE_OF_NET_INCOME: '432244.25'
+    FRANKING_CREDIT: '106606.43'
+    CAPITAL_GAIN_COMPONENT: '32819.77'
+    FOREIGN_INCOME: '0.00'
+CASE239:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2332
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Lee Discretionary Trust
+    TRUST_ABN: 72 423 132 420
+    BENEFICIARY_NAME: William Lee
+    BENEFICIARY_TFN: 813 511 519
+    SHARE_OF_NET_INCOME: '107870.42'
+    FRANKING_CREDIT: '9882.45'
+    CAPITAL_GAIN_COMPONENT: '28409.92'
+    FOREIGN_INCOME: '0.00'
+CASE240:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2882
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: White Family Trust
+    TRUST_ABN: 97 690 360 291
+    BENEFICIARY_NAME: Charlotte White
+    BENEFICIARY_TFN: 395 049 614
+    SHARE_OF_NET_INCOME: '41141.12'
+    FRANKING_CREDIT: '8676.51'
+    CAPITAL_GAIN_COMPONENT: '11954.98'
+    FOREIGN_INCOME: '3960.36'
+CASE241:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8080
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Nguyen Investment Trust
+    TRUST_ABN: 62 616 423 166
+    BENEFICIARY_NAME: Alexander Nguyen
+    BENEFICIARY_TFN: 042 428 011
+    SHARE_OF_NET_INCOME: '137959.25'
+    FRANKING_CREDIT: '18175.58'
+    CAPITAL_GAIN_COMPONENT: '21581.23'
+    FOREIGN_INCOME: '0.00'
+CASE242:
+  layout: trust_income_schedule_standard
+  degradation_seed: 8143
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Mitchell Family Trust
+    TRUST_ABN: 94 071 953 319
+    BENEFICIARY_NAME: Grace Mitchell
+    BENEFICIARY_TFN: 447 504 810
+    SHARE_OF_NET_INCOME: '142060.40'
+    FRANKING_CREDIT: '32522.27'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE243:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9433
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Campbell Discretionary Trust
+    TRUST_ABN: 38 811 040 031
+    BENEFICIARY_NAME: Benjamin Campbell
+    BENEFICIARY_TFN: 460 850 811
+    SHARE_OF_NET_INCOME: '116633.37'
+    FRANKING_CREDIT: '23183.81'
+    CAPITAL_GAIN_COMPONENT: '36876.55'
+    FOREIGN_INCOME: '0.00'
+CASE244:
+  layout: trust_income_schedule_standard
+  degradation_seed: 4922
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Stewart Family Trust
+    TRUST_ABN: 84 122 448 857
+    BENEFICIARY_NAME: Chloe Stewart
+    BENEFICIARY_TFN: 844 451 112
+    SHARE_OF_NET_INCOME: '191197.68'
+    FRANKING_CREDIT: '15318.16'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE245:
+  layout: trust_income_schedule_standard
+  degradation_seed: 3371
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Cooper Investment Trust
+    TRUST_ABN: 12 555 705 568
+    BENEFICIARY_NAME: Ethan Cooper
+    BENEFICIARY_TFN: 715 494 917
+    SHARE_OF_NET_INCOME: '33779.21'
+    FRANKING_CREDIT: '5050.42'
+    CAPITAL_GAIN_COMPONENT: '7705.21'
+    FOREIGN_INCOME: '0.00'
+CASE246:
+  layout: trust_income_schedule_standard
+  degradation_seed: 9826
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Murray Family Trust
+    TRUST_ABN: 62 653 725 470
+    BENEFICIARY_NAME: Isabella Murray
+    BENEFICIARY_TFN: 181 369 510
+    SHARE_OF_NET_INCOME: '131993.84'
+    FRANKING_CREDIT: '32492.24'
+    CAPITAL_GAIN_COMPONENT: '20392.33'
+    FOREIGN_INCOME: '0.00'
+CASE247:
+  layout: trust_income_schedule_standard
+  degradation_seed: 7327
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Kelly Discretionary Trust
+    TRUST_ABN: 89 930 546 040
+    BENEFICIARY_NAME: Noah Kelly
+    BENEFICIARY_TFN: 558 593 917
+    SHARE_OF_NET_INCOME: '31753.68'
+    FRANKING_CREDIT: '2224.94'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE248:
+  layout: trust_income_schedule_standard
+  degradation_seed: 7514
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Parker Family Trust
+    TRUST_ABN: 59 850 585 626
+    BENEFICIARY_NAME: Amelia Parker
+    BENEFICIARY_TFN: 247 607 013
+    SHARE_OF_NET_INCOME: '456116.42'
+    FRANKING_CREDIT: '98855.55'
+    CAPITAL_GAIN_COMPONENT: '127335.60'
+    FOREIGN_INCOME: '0.00'
+CASE249:
+  layout: trust_income_schedule_standard
+  degradation_seed: 2648
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Hughes Investment Trust
+    TRUST_ABN: 82 439 611 995
+    BENEFICIARY_NAME: Liam Hughes
+    BENEFICIARY_TFN: 439 649 028
+    SHARE_OF_NET_INCOME: '156277.57'
+    FRANKING_CREDIT: '29590.89'
+    CAPITAL_GAIN_COMPONENT: '62370.23'
+    FOREIGN_INCOME: '0.00'
+CASE250:
+  layout: trust_income_schedule_standard
+  degradation_seed: 4947
+  fields:
+    DOCUMENT_TYPE: TRUST_INCOME_SCHEDULE
+    TRUST_NAME: Morgan Family Trust
+    TRUST_ABN: 71 371 802 116
+    BENEFICIARY_NAME: Emily Morgan
+    BENEFICIARY_TFN: 328 309 819
+    SHARE_OF_NET_INCOME: '20332.30'
+    FRANKING_CREDIT: '3451.99'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'

@@ -12,9 +12,11 @@ import typer
 from rich import print as rprint
 
 from generators.bank_statement import render_bank_statement
+from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
 from generators.common import degrade_image
 from generators.derive_outputs import derive_csv, derive_jsonl
+from generators.distribution_statement import render_distribution_statement
 from generators.invoice import render_invoice
 from generators.loader import (
     load_generation_config,
@@ -23,6 +25,8 @@ from generators.loader import (
 )
 from generators.receipt import render_receipt
 from generators.schema import validate_entry
+from generators.trust_income_schedule import render_trust_income_schedule
+from generators.trust_return import render_trust_return
 
 app = typer.Typer(help="Synthetic Australian business document generator.")
 
@@ -31,6 +35,10 @@ _RENDERERS = {
     "receipts": render_receipt,
     "invoices": render_invoice,
     "cc_statements": render_cc_statement,
+    "trust_returns": render_trust_return,
+    "distribution_statements": render_distribution_statement,
+    "trust_income_schedules": render_trust_income_schedule,
+    "beneficiary_itrs": render_beneficiary_itr,
 }
 
 _DEFAULT_CONFIG = Path("config/generation_config.yml")
