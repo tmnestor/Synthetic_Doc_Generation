@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw
 
 from generators.common import (
     draw_separator_line,
+    draw_table,
     draw_text_center,
     draw_text_right,
     fmt_amount,
@@ -118,57 +119,50 @@ def render_trust_income_schedule(entry: dict, layout: dict) -> Image.Image:
             y += 10
 
         elif sec_type == "grid_section":
-            title = section.get("title", "")
-            if title:
-                sec_bg = colors.get("section_bg", "#F0F0F0")
-                draw.rectangle([(margin, y), (right_edge, y + 44)], fill=sec_bg)
-                draw.text((margin + 12, y + 8), title, font=font_sub, fill="black")
-                y += 56
-
-            # Column headers
             cols = section.get("columns", [])
-            col_x = margin
-            row_h = 52
-            header_y = y
-            draw.rectangle([(margin, y), (right_edge, y + row_h)], fill="#E8E8E8")
-            for col in cols:
-                draw.text((col_x + 8, y + 12), col.get("header", ""), font=font_s, fill="black")
-                col_x += col.get("width", 400)
-            y += row_h
+            kinded: list[dict] = []
+            for i, col in enumerate(cols):
+                if i == 0:
+                    kind = "label_code"
+                elif i == len(cols) - 1:
+                    kind = "amount"
+                else:
+                    kind = "description"
+                kinded.append({**col, "kind": kind})
 
-            # Data rows
+            table_rows: list[dict] = []
             for row in section.get("rows", []):
-                # Grid lines
-                draw_separator_line(draw, margin, right_edge, y, color=grid_line_color, width=1)
-
-                col_x = margin
-                label_code = row.get("label_code", "")
-                description = row.get("description", "")
-                field_key = row.get("field", "")
-                value = str(fields.get(field_key, ""))
-
-                # Label code column
-                if label_code:
-                    draw.text((col_x + 30, y + 12), label_code, font=font_lc, fill=label_code_color)
-                col_x += cols[0].get("width", 120) if cols else 120
-
-                # Description column
-                draw.text((col_x + 8, y + 14), description, font=font_b, fill="black")
-                col_x += cols[1].get("width", 1200) if len(cols) > 1 else 1200
-
-                # Amount column
+                raw = str(fields.get(row.get("field", ""), ""))
                 try:
-                    formatted = fmt_amount(Decimal(value))
+                    value = fmt_amount(Decimal(raw))
                 except Exception:  # noqa: BLE001
-                    formatted = f"${value}"
-                amount_right = right_edge - 20
-                draw_text_right(draw, formatted, amount_right, y + 14, font_b)
+                    value = f"${raw}"
+                table_rows.append(
+                    {
+                        "label_code": row.get("label_code", ""),
+                        "description": row.get("description", ""),
+                        "value": value,
+                    }
+                )
 
-                y += row_h
-
-            # Bottom grid line
-            draw_separator_line(draw, margin, right_edge, y, color=grid_line_color, width=1)
-            y += 20
+            y = draw_table(
+                draw,
+                x_left=margin,
+                x_right=right_edge,
+                y=y,
+                title=section.get("title", ""),
+                columns=kinded,
+                rows=table_rows,
+                total=None,
+                font_sub=font_sub,
+                font_body=font_b,
+                font_small=font_s,
+                font_label_code=font_lc,
+                section_bg=colors.get("section_bg", "#F0F0F0"),
+                header_row_bg="#E8E8E8",
+                grid_line=grid_line_color,
+                label_code_color=label_code_color,
+            )
 
         elif sec_type == "separator":
             draw_separator_line(draw, margin, right_edge, y + 8, color=grid_line_color, width=1)
