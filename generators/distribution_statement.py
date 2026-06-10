@@ -104,14 +104,14 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
     margin = layout.get("margin", 140)
     right_edge = width - margin
 
-    fs = layout.get("font_sizes", {})
+    font_sizes = layout.get("font_sizes", {})
     colors = layout.get("colors", {})
 
-    font_h = load_font(fs.get("header", 44), bold=True)
-    font_sub = load_font(fs.get("subheader", 28), bold=True)
-    font_b = load_font(fs.get("body", 22))
-    font_s = load_font(fs.get("small", 18))
-    font_lc = load_font(fs.get("label_code", 26), bold=True)
+    font_h = load_font(font_sizes.get("header", 44), bold=True)
+    font_sub = load_font(font_sizes.get("subheader", 28), bold=True)
+    font_b = load_font(font_sizes.get("body", 22))
+    font_s = load_font(font_sizes.get("small", 18))
+    font_lc = load_font(font_sizes.get("label_code", 26), bold=True)
 
     header_color = colors.get("header_color", "#1A1A2E")
     accent_color = colors.get("accent_color", "#16213E")
@@ -122,9 +122,9 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
     y = margin
 
     for section in layout.get("sections", []):
-        st = section.get("type")
+        sec_type = section.get("type")
 
-        if st == "letterhead":
+        if sec_type == "letterhead":
             draw.text((margin, y), section.get("title", ""), font=font_h, fill=header_color)
             y += 60
             subtitle = section.get("subtitle", "")
@@ -134,7 +134,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
             draw_separator_line(draw, margin, right_edge, y, color=header_color, width=3)
             y += section.get("height", 120) - 100
 
-        elif st == "header_bar":
+        elif sec_type == "header_bar":
             bar_h = section.get("height", 100)
             bg = colors.get("header_bg", "#0B6E6E")
             fg = colors.get("header_text", "#FFFFFF")
@@ -142,13 +142,13 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
             draw.text((margin, y + 15), section.get("text", ""), font=font_h, fill=fg)
             subtext = section.get("subtext", "")
             if subtext:
-                draw_text_right(draw, subtext, right_edge, y + 22, font_sub, fill=fg)
-            y += bar_h + 20
+                draw_text_right(draw, subtext, right_edge, y + 20, font_sub, fill=fg)
+            y += bar_h
 
-        elif st == "spacer":
+        elif sec_type == "spacer":
             y += section.get("height", 30)
 
-        elif st == "section":
+        elif sec_type == "section":
             title = section.get("title", "")
             if title:
                 draw.text((margin, y), title, font=font_sub, fill=accent_color)
@@ -168,7 +168,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                     y += 38
             y += 16
 
-        elif st == "two_column":
+        elif sec_type == "two_column":
             mid = (margin + right_edge) // 2
             start_y = y
             y_left = _draw_column_block(
@@ -195,7 +195,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
             )
             y = max(y_left, y_right) + 16
 
-        elif st == "table":
+        elif sec_type == "table":
             rows = [
                 {
                     "label_code": r.get("label_code", ""),
@@ -230,7 +230,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 label_code_color=colors.get("label_code_color", "#0066CC"),
             )
 
-        elif st == "letter_meta":
+        elif sec_type == "letter_meta":
             date_field = section.get("date_field", "")
             if date_field:
                 draw_text_right(draw, str(fields.get(date_field, "")), right_edge, y, font_b)
@@ -244,28 +244,28 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 draw.text((margin, y), _subst(salutation, fields), font=font_b, fill="black")
                 y += 44
 
-        elif st == "letter_body":
+        elif sec_type == "letter_body":
             for para in section.get("paragraphs", []):
                 y = _draw_paragraph(draw, _subst(para, fields), y, margin, right_edge, font_b)
                 y += 18
 
-        elif st == "separator":
+        elif sec_type == "separator":
             draw_separator_line(draw, margin, right_edge, y + 8, color=line_color, width=1)
             y += section.get("height", 20)
 
-        elif st == "declaration":
+        elif sec_type == "declaration":
             text = section.get("text", "")
             if text:
                 y = _draw_paragraph(draw, text, y, margin + 20, right_edge - 20, font_s, fill="#555555")
                 y += 20
 
-        elif st == "signature_block":
+        elif sec_type == "signature_block":
             y += section.get("gap", 30)
             for line in section.get("lines", []):
                 draw.text((margin, y), _subst(line, fields), font=font_b, fill="black")
                 y += 40
 
-        elif st == "footer":
+        elif sec_type == "footer":
             draw_text_center(draw, section.get("text", ""), height - 60, width, font_s, fill="gray")
 
     return img
