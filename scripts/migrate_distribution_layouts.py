@@ -17,6 +17,7 @@ import yaml
 
 _GT = Path(__file__).parent.parent / "ground_truth" / "distribution_statements.yml"
 
+# Public: imported by tests/test_layout_assignment.py
 DISTRIBUTION_LAYOUTS = [
     "dist_software_navy",
     "dist_software_teal",
@@ -40,6 +41,7 @@ def migrate(path: Path = _GT) -> dict[str, str]:
 
     Raises:
         SystemExit: if any field value would change (nothing is written).
+        SystemExit: if any assigned case has no ``layout:`` line (nothing is written).
     """
     original_text = path.read_text()
     before = yaml.safe_load(original_text)
@@ -60,7 +62,8 @@ def migrate(path: Path = _GT) -> dict[str, str]:
             continue
         m = _LAYOUT_RE.match(line)
         if m and current_case is not None and current_case not in replaced:
-            out.append(f"{m.group(1)}{assignments[current_case]}\n")
+            eol = "\r\n" if line.endswith("\r\n") else "\n"
+            out.append(f"{m.group(1)}{assignments[current_case]}{eol}")
             replaced.add(current_case)
             continue
         out.append(line)
