@@ -37,7 +37,14 @@ _CASE_ID_START = 201
 # ── Layout IDs ──────────────────────────────────────────────────────────────
 
 _TRUST_RETURN_LAYOUTS = ["trust_return_standard"]
-_DISTRIBUTION_STATEMENT_LAYOUTS = ["distribution_statement_standard"]
+_DISTRIBUTION_STATEMENT_LAYOUTS = [
+    "dist_software_navy",
+    "dist_software_teal",
+    "dist_table_plain",
+    "dist_table_ruled",
+    "dist_letter_formal",
+    "dist_letter_compact",
+]
 _TRUST_INCOME_SCHEDULE_LAYOUTS = ["trust_income_schedule_standard"]
 _BENEFICIARY_ITR_LAYOUTS = ["beneficiary_itr_standard"]
 
