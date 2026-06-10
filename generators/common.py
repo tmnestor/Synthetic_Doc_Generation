@@ -317,6 +317,80 @@ DEFAULT_DEGRADATION_PARAMS: dict[str, list[float]] = {
 }
 
 
+def draw_table(
+    draw: ImageDraw.ImageDraw,
+    *,
+    x_left: int,
+    x_right: int,
+    y: int,
+    title: str,
+    columns: list[dict],
+    rows: list[dict],
+    total: dict | None,
+    font_sub: Font,
+    font_body: Font,
+    font_small: Font,
+    font_label_code: Font,
+    section_bg: str,
+    header_row_bg: str,
+    grid_line: str,
+    label_code_color: str,
+    row_h: int = 52,
+) -> int:
+    """Draw a bordered component table and return the new y coordinate.
+
+    Presentation-only: callers pass pre-formatted string values.
+
+    Args:
+        columns: each {"header", "width", "kind"} where kind is one of
+            "label_code" | "description" | "amount".
+        rows: each {"label_code", "description", "value"} (value pre-formatted).
+        total: optional {"description", "value"} drawn as a final row.
+
+    Returns:
+        The y coordinate below the table.
+    """
+    if title:
+        draw.rectangle([(x_left, y), (x_right, y + 44)], fill=section_bg)
+        draw.text((x_left + 12, y + 8), title, font=font_sub, fill="black")
+        y += 56
+
+    offsets: list[int] = []
+    cx = x_left
+    for col in columns:
+        offsets.append(cx)
+        cx += col.get("width", 400)
+
+    draw.rectangle([(x_left, y), (x_right, y + row_h)], fill=header_row_bg)
+    for col, ox in zip(columns, offsets, strict=True):
+        draw.text((ox + 8, y + 12), col.get("header", ""), font=font_small, fill="black")
+    y += row_h
+
+    all_rows = list(rows)
+    if total is not None:
+        all_rows.append(
+            {"label_code": "", "description": total.get("description", ""), "value": total.get("value", "")}
+        )
+
+    for row in all_rows:
+        draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
+        for col, ox in zip(columns, offsets, strict=True):
+            kind = col.get("kind", "description")
+            if kind == "label_code":
+                code = row.get("label_code", "")
+                if code:
+                    draw.text((ox + 30, y + 12), code, font=font_label_code, fill=label_code_color)
+            elif kind == "amount":
+                # amount text is right-anchored to x_right - 20, regardless of this column's offset
+                draw_text_right(draw, row.get("value", ""), x_right - 20, y + 14, font_body)
+            else:
+                draw.text((ox + 8, y + 14), row.get("description", ""), font=font_body, fill="black")
+        y += row_h
+
+    draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
+    return y + 20
+
+
 def degrade_image(
     img: Image.Image,
     seed: int,
