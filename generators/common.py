@@ -368,7 +368,9 @@ def draw_table(
 
     all_rows = list(rows)
     if total is not None:
-        all_rows.append({"label_code": "", "description": total["description"], "value": total["value"]})
+        all_rows.append(
+            {"label_code": "", "description": total.get("description", ""), "value": total.get("value", "")}
+        )
 
     for row in all_rows:
         draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
@@ -379,6 +381,7 @@ def draw_table(
                 if code:
                     draw.text((ox + 30, y + 12), code, font=font_label_code, fill=label_code_color)
             elif kind == "amount":
+                # amount text is right-anchored to x_right - 20, regardless of this column's offset
                 draw_text_right(draw, row.get("value", ""), x_right - 20, y + 14, font_body)
             else:
                 draw.text((ox + 8, y + 14), row.get("description", ""), font=font_body, fill="black")
