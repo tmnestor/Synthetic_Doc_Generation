@@ -1,5 +1,5 @@
 CASE201:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 6575
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -18,7 +18,7 @@ CASE201:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE202:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 6926
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -37,7 +37,7 @@ CASE202:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE203:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 9752
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -56,7 +56,7 @@ CASE203:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '988.97'
 CASE204:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 9180
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -75,7 +75,7 @@ CASE204:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE205:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 3505
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -94,7 +94,7 @@ CASE205:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE206:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 8434
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -113,7 +113,7 @@ CASE206:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE207:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 9006
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -132,7 +132,7 @@ CASE207:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE208:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 9646
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -151,7 +151,7 @@ CASE208:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE209:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 1118
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -170,7 +170,7 @@ CASE209:
     TAX_FREE_AMOUNT: '1152.45'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE210:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 2546
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -189,7 +189,7 @@ CASE210:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE211:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 5093
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -208,7 +208,7 @@ CASE211:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE212:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 8455
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -227,7 +227,7 @@ CASE212:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE213:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 3580
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -246,7 +246,7 @@ CASE213:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE214:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 6184
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -265,7 +265,7 @@ CASE214:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE215:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 3171
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -284,7 +284,7 @@ CASE215:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE216:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 2754
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -303,7 +303,7 @@ CASE216:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE217:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 5292
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -322,7 +322,7 @@ CASE217:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE218:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 1654
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -341,7 +341,7 @@ CASE218:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE219:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 7746
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -360,7 +360,7 @@ CASE219:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE220:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 9347
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -379,7 +379,7 @@ CASE220:
     TAX_FREE_AMOUNT: '1569.32'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE221:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 5174
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -398,7 +398,7 @@ CASE221:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE222:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 5845
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -417,7 +417,7 @@ CASE222:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE223:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 8239
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -436,7 +436,7 @@ CASE223:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE224:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 1758
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -455,7 +455,7 @@ CASE224:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE225:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 9487
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -474,7 +474,7 @@ CASE225:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE226:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 5051
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -493,7 +493,7 @@ CASE226:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE227:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 9891
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -512,7 +512,7 @@ CASE227:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '670.64'
 CASE228:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 4614
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -531,7 +531,7 @@ CASE228:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE229:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 8023
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -550,7 +550,7 @@ CASE229:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE230:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 6734
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -569,7 +569,7 @@ CASE230:
     TAX_FREE_AMOUNT: '1124.90'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE231:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 2877
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -588,7 +588,7 @@ CASE231:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE232:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 2984
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -607,7 +607,7 @@ CASE232:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE233:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 5426
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -626,7 +626,7 @@ CASE233:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE234:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 8989
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -645,7 +645,7 @@ CASE234:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE235:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 2525
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -664,7 +664,7 @@ CASE235:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE236:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 4034
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -683,7 +683,7 @@ CASE236:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE237:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 2681
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -702,7 +702,7 @@ CASE237:
     TAX_FREE_AMOUNT: '203.60'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE238:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 5067
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -721,7 +721,7 @@ CASE238:
     TAX_FREE_AMOUNT: '383.48'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE239:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 2331
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -740,7 +740,7 @@ CASE239:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE240:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 2881
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -759,7 +759,7 @@ CASE240:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE241:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 8079
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -778,7 +778,7 @@ CASE241:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE242:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 8142
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -797,7 +797,7 @@ CASE242:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE243:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 9432
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -816,7 +816,7 @@ CASE243:
     TAX_FREE_AMOUNT: '579.56'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE244:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 4921
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -835,7 +835,7 @@ CASE244:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE245:
-  layout: distribution_statement_standard
+  layout: dist_table_plain
   degradation_seed: 3370
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -854,7 +854,7 @@ CASE245:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE246:
-  layout: distribution_statement_standard
+  layout: dist_table_ruled
   degradation_seed: 9825
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -873,7 +873,7 @@ CASE246:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE247:
-  layout: distribution_statement_standard
+  layout: dist_letter_formal
   degradation_seed: 7326
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -892,7 +892,7 @@ CASE247:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE248:
-  layout: distribution_statement_standard
+  layout: dist_letter_compact
   degradation_seed: 7513
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -911,7 +911,7 @@ CASE248:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE249:
-  layout: distribution_statement_standard
+  layout: dist_software_navy
   degradation_seed: 2647
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
@@ -930,7 +930,7 @@ CASE249:
     TAX_FREE_AMOUNT: '0.00'
     TAX_DEFERRED_AMOUNT: '0.00'
 CASE250:
-  layout: distribution_statement_standard
+  layout: dist_software_teal
   degradation_seed: 4946
   fields:
     DOCUMENT_TYPE: DISTRIBUTION_STATEMENT
