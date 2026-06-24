@@ -279,6 +279,48 @@ Simulates phone photos of printed documents with a deterministic 7-stage pipelin
 
 All parameters are configurable in `generation_config.yml` under `degradation:`. Each entry's `degradation_seed` ensures reproducible results.
 
+### Camera-scan degradation (receipts)
+
+The 7-stage pipeline above models a flatbed-style scan: a frame-filling page with only a slight in-plane skew. Production receipts, however, are **phone photos of a receipt lying on a flat surface** — the receipt occupies a *sub-region* of the frame and is **perspective-distorted (trapezoid) and rotated**, surrounded by background. `degrade_camera_scan.py` regenerates `output/degraded/receipts/` to model this real case.
+
+It assumes a **cooperative capture** (the user is trying to take a good photo), so the distortion is realistic, not worst-case:
+
+- receipt fills ~75–88% of the frame (modest background margin)
+- mild rotation (±8°) and slight perspective foreshorten (2–8%)
+- soft drop shadow, lighting gradient, mild blur, sensor noise, JPEG compression
+
+The perspective warp uses **OpenCV** (`cv2.getPerspectiveTransform` / `cv2.warpPerspective`) — the same homography a rectification preprocessor inverts, so degrade and rectify are exact numerical inverses (clean round-trip validation). Compositing and photometrics stay in PIL/NumPy, all in RGB order (no BGR swap). Output keeps the existing `CASE*_receipt_*_degraded.png` names and is deterministic (seed = CASE number).
+
+```bash
+# Regenerate all 55 degraded receipts (overwrites output/degraded/receipts/)
+python degrade_camera_scan.py --batch output
+
+# Single receipt (clean -> degraded), explicit seed
+python degrade_camera_scan.py \
+    output/clean/receipts/CASE001_receipt_thermal_80mm.png /tmp/CASE001.png 1
+```
+
+**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. Install into the `du` env, e.g. `uv pip install opencv-python-headless`, or add it to `environment.yml`.
+
+Tunable knobs in `degrade()`: `pad_*` (frame coverage), `deg` (rotation range), `f` (perspective strength), and the blur/noise/JPEG ranges.
+
+### Rectification — undoing the camera scan (offline preprocessing)
+
+`rectify_camera_scan.py` is the **inverse** of the camera-scan degradation: it detects the receipt quadrilateral on the flat background and applies a 4-point perspective transform to recover an upright, cropped, frontal receipt. It runs **offline** as a preprocessing pass, so the downstream VLM consumes already-rectified images and the inference environment needs no OpenCV.
+
+Pipeline: grayscale → blur → Canny edges → dilate → largest external contour → 4-point polygon → `cv2.getPerspectiveTransform` / `cv2.warpPerspective`. It uses the **same** homography library `degrade_camera_scan.py` warps with, so degrade and rectify are exact numerical inverses (clean round-trip). **Fail-open:** if no convincing quad is found (no 4-gon, too small, or too large), the image passes through unchanged — a missed rectification is cheap; a wrong crop that drops a row is a regression.
+
+```bash
+# Rectify all degraded receipts: output/degraded/receipts/ -> output/rectified/receipts/
+python rectify_camera_scan.py --batch output
+
+# Single image
+python rectify_camera_scan.py \
+    output/degraded/receipts/CASE001_receipt_thermal_80mm_degraded.png /tmp/CASE001.png
+```
+
+On the 55 camera-scan receipts the quad is detected 55/55 (100%), recovering close to the original clean dimensions (e.g. CASE001 clean 420×354 → degraded → rectified 427×359). **Dependency:** `opencv-python-headless` (cv2), same as the degrader. Tunable knobs in `detect_document_quad()`: `min_area_frac` / `max_area_frac` (reject spurious tiny / full-frame quads).
+
 ---
 
 ## Regenerating the Dataset
@@ -411,6 +453,9 @@ print(f"False positive rate: {result.compliance.false_positive_rate:.2%}")
 ## File Structure
 
 ```
+degrade_camera_scan.py         # Camera-scan degradation for receipts (cv2 perspective warp)
+rectify_camera_scan.py         # Offline rectification: detect quad + 4-point transform (inverse)
+
 generators/
 ├── __init__.py
 ├── common.py                  # Fonts, text helpers, ABN/TFN validation, GST, degradation
