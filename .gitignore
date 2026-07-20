@@ -18,3 +18,6 @@ tests/
 # Claude Code config
 .claude/
 CLAUDE.md
+
+# Superpowers plans/specs — local workflow docs, not for the tracked repo
+docs/superpowers/
