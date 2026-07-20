@@ -1,10 +1,10 @@
 # ruff: noqa: B008 - typer.Option in defaults is the standard Typer pattern
 """Generate the trust classification ground-truth YAML from ground truth.
 
-Derives a flat ``{image_filename: DOCUMENT_TYPE}`` mapping that the
-``stages.evaluate_trust`` step in LMM_POC consumes to score document-type
-classification accuracy (``pipeline.trust.classification_ground_truth`` in
-LMM_POC ``run_config.yml``).
+Derives a flat ``{image_filename: DOCUMENT_TYPE}`` mapping that a downstream
+model-evaluation pipeline consumes to score document-type classification
+accuracy. The consuming pipeline points its ``classification_ground_truth``
+config key at the YAML this script writes.
 
 The image filename is reconstructed with the SAME rule the renderer uses
 (``generators/pipeline.py``): ``f"{case_id}_{layout}.png"``. This is why the
@@ -14,7 +14,8 @@ keys went stale and no longer matched the rendered images
 (e.g. ``CASE223_dist_letter_formal.png``).
 
 Document type is determined by the source ground-truth file; the four canonical
-types match LMM_POC ``stages/trust_classify.py``'s ``_TYPE_TO_COLUMN``.
+type labels form a fixed vocabulary that must stay in sync with the downstream
+classification evaluator.
 
 Usage:
     python scripts/generate_trust_classification_gt.py
@@ -33,7 +34,7 @@ app = typer.Typer()
 _REPO = Path(__file__).parent.parent
 
 # Source ground-truth file (stem) -> canonical document type.
-# Types MUST match LMM_POC stages/trust_classify.py:_TYPE_TO_COLUMN.
+# Types MUST match the document-type labels expected by the downstream evaluator.
 _SOURCE_TYPE_MAP: dict[str, str] = {
     "trust_returns": "TRUST_RETURN",
     "distribution_statements": "DISTRIBUTION_STMT",
