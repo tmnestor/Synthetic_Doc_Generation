@@ -1,27 +1,28 @@
 name: synthetic
-channels:
-  - conda-forge
+# No `channels:` key by design. Channel selection comes from the host's conda
+# config (~/.condarc), so this file is portable across environments:
+#   - dev machines resolve packages from public conda-forge/defaults;
+#   - the locked-down PROD remote must point conda at the internal Artifactory
+#     conda mirror, because the public repos are unreachable there.
+# Keeping the internal mirror URL in ~/.condarc (not here) also keeps it out of
+# the committed repo.
 dependencies:
-  # Python 3.12 is the only hard version requirement; other packages float.
+  # Python 3.12 is the only hard version requirement; the rest float.
   - python=3.12
-  # Document generation runtime (see generators/ and the camera-scan scripts).
+  # Document generation runtime (the generators/ pipeline).
   - pillow
   - numpy
   - pyyaml
   - typer
   - rich
-  - pip
-  - pip:
-      # cv2 — used by degrade_camera_scan.py / rectify_camera_scan.py.
-      - opencv-python-headless
 
-# =============================================================================
-# CONDA ENVIRONMENT — QUICK REFERENCE
-# =============================================================================
+# NOTE: opencv (cv2) is intentionally NOT a dependency here. It is used only by
+# the standalone camera-scan scripts (degrade_camera_scan.py /
+# rectify_camera_scan.py), not the core generators pipeline. Where the
+# camera-scan feature is needed, install opencv-python-headless separately.
 #
+# =============================================================================
 # CREATE:   conda env create -f environment.yml
 # UPDATE:   conda env update -f environment.yml --prune
 # ACTIVATE: conda activate synthetic
-# REMOVE:   conda env remove -n synthetic
-# EXPORT:   conda env export -n synthetic --no-builds | grep -v '^prefix:' > environment.yml
 # =============================================================================
