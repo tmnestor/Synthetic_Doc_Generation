@@ -300,7 +300,7 @@ python degrade_camera_scan.py \
     output/clean/receipts/CASE001_receipt_thermal_80mm.png /tmp/CASE001.png 1
 ```
 
-**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. Install into the `du` env, e.g. `uv pip install opencv-python-headless`, or add it to `environment.yml`.
+**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. Install into the `synthetic` env, e.g. `uv pip install opencv-python-headless`, or add it to `environment.yml`.
 
 Tunable knobs in `degrade()`: `pad_*` (frame coverage), `deg` (rotation range), `f` (perspective strength), and the blur/noise/JPEG ranges.
 
@@ -368,7 +368,7 @@ python -m generators.pipeline derive
 
 ## Remote Image Generation
 
-The image generation pipeline runs on any machine with the `du` conda environment. To generate the trust distribution linking images on a remote GPU server (where LMM inference will run):
+The image generation pipeline runs on any machine with the `synthetic` conda environment. To generate the trust distribution linking images on a remote GPU server (where LMM inference will run):
 
 ### 1. Sync the repo to the remote server
 
@@ -390,16 +390,16 @@ conda env create -f environment.yml
 conda env update -f environment.yml --prune
 
 # Validate ground truth
-conda run -n du python -m generators.pipeline validate
+conda run -n synthetic python -m generators.pipeline validate
 
 # Generate clean images only (recommended for LMM evaluation)
-conda run -n du python -m generators.pipeline generate --clean-only
+conda run -n synthetic python -m generators.pipeline generate --clean-only
 
 # Or generate only the trust distribution types
-conda run -n du python -m generators.pipeline generate --type trust_returns --clean-only
-conda run -n du python -m generators.pipeline generate --type distribution_statements --clean-only
-conda run -n du python -m generators.pipeline generate --type trust_income_schedules --clean-only
-conda run -n du python -m generators.pipeline generate --type beneficiary_itrs --clean-only
+conda run -n synthetic python -m generators.pipeline generate --type trust_returns --clean-only
+conda run -n synthetic python -m generators.pipeline generate --type distribution_statements --clean-only
+conda run -n synthetic python -m generators.pipeline generate --type trust_income_schedules --clean-only
+conda run -n synthetic python -m generators.pipeline generate --type beneficiary_itrs --clean-only
 ```
 
 ### 3. Verify the generated images

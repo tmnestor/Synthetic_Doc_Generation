@@ -1,0 +1,256 @@
+name: synthetic
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - _openmp_mutex=4.5=7_kmp_llvm
+  - _python_abi3_support=1.0=hd8ed1ab_2
+  - annotated-doc=0.0.4=pyhcf101f3_0
+  - appnope=0.1.4=pyhd8ed1ab_1
+  - asttokens=3.0.0=pyhd8ed1ab_1
+  - attrs=25.4.0=pyhcf101f3_1
+  - brotli=1.2.0=h7d5ae5b_1
+  - brotli-bin=1.2.0=hc919400_1
+  - bzip2=1.0.8=hd037594_8
+  - ca-certificates=2026.4.22=hbd8a1cb_0
+  - certifi=2026.4.22=pyhd8ed1ab_0
+  - click=8.3.1=pyh8f84b5b_1
+  - comm=0.2.2=pyhd8ed1ab_1
+  - contourpy=1.3.3=py312h3093aea_4
+  - cpython=3.12.12=py312hd8ed1ab_2
+  - cycler=0.12.1=pyhcf101f3_2
+  - debugpy=1.8.20=py312h6510ced_0
+  - decorator=5.2.1=pyhd8ed1ab_0
+  - exceptiongroup=1.3.0=pyhd8ed1ab_0
+  - executing=2.2.0=pyhd8ed1ab_0
+  - freetype=2.14.1=hce30654_0
+  - giflib=5.2.2=h93a5062_0
+  - icu=78.2=h38cb7af_0
+  - importlib-metadata=8.7.0=pyhe01879c_1
+  - ipykernel=6.29.5=pyh57ce528_0
+  - ipython=9.2.0=pyhfb0248b_0
+  - ipython_pygments_lexers=1.1.1=pyhd8ed1ab_0
+  - jedi=0.19.2=pyhd8ed1ab_1
+  - jinja2=3.1.6=pyhcf101f3_1
+  - joblib=1.5.3=pyhd8ed1ab_0
+  - jsonschema=4.26.0=pyhcf101f3_0
+  - jsonschema-specifications=2025.9.1=pyhcf101f3_0
+  - jupyter_client=8.6.3=pyhd8ed1ab_1
+  - jupyter_core=5.7.2=pyh31011fe_1
+  - krb5=1.21.3=h237132a_0
+  - lcms2=2.18=hdfa7624_0
+  - lerc=4.0.0=hd64df32_1
+  - libblas=3.11.0=5_h51639a9_openblas
+  - libbrotlicommon=1.2.0=hc919400_1
+  - libbrotlidec=1.2.0=hc919400_1
+  - libbrotlienc=1.2.0=hc919400_1
+  - libcblas=3.11.0=5_hb0561ab_openblas
+  - libcxx=21.1.8=h55c6f16_2
+  - libdeflate=1.25=hc11a715_0
+  - libedit=3.1.20250104=pl5321hafb1f1b_0
+  - libexpat=2.7.3=haf25636_0
+  - libffi=3.5.2=hcf2aa1b_0
+  - libfreetype=2.14.1=hce30654_0
+  - libfreetype6=2.14.1=h6da58f4_0
+  - libgcc=15.2.0=hcbb3090_17
+  - libgfortran=15.2.0=h07b0088_17
+  - libgfortran5=15.2.0=hdae7583_17
+  - libjpeg-turbo=3.1.2=hc919400_0
+  - liblapack=3.11.0=5_hd9741b5_openblas
+  - liblzma=5.8.2=h8088a28_0
+  - libopenblas=0.3.30=openmp_ha158390_4
+  - libpng=1.6.55=h132b30e_0
+  - libsodium=1.0.20=h99b78c6_0
+  - libsqlite=3.51.2=h1ae2325_0
+  - libtiff=4.7.1=h4030677_1
+  - libwebp=1.6.0=hc0253d1_0
+  - libwebp-base=1.6.0=h07db88b_0
+  - libxcb=1.17.0=hdb1d25a_0
+  - libzlib=1.3.1=h8359307_2
+  - llvm-openmp=21.1.8=h4a912ad_0
+  - markdown-it-py=4.0.0=pyhd8ed1ab_0
+  - markupsafe=3.0.3=py312h5748b74_0
+  - matplotlib-base=3.10.8=py312h605b88b_0
+  - matplotlib-inline=0.1.7=pyhd8ed1ab_1
+  - mdurl=0.1.2=pyhd8ed1ab_1
+  - mizani=0.14.4=pyhd8ed1ab_0
+  - munkres=1.1.4=pyhd8ed1ab_1
+  - mypy=1.19.1=py312hefc2c51_0
+  - mypy_extensions=1.1.0=pyha770c72_0
+  - nbformat=5.10.4=pyhd8ed1ab_1
+  - nbstripout=0.9.1=pyhd8ed1ab_0
+  - ncurses=6.5=h5e97a16_3
+  - nest-asyncio=1.6.0=pyhd8ed1ab_1
+  - numpy=2.4.2=py312he281c53_1
+  - openjpeg=2.5.4=hbfb3c88_0
+  - openssl=3.6.2=hd24854e_0
+  - orjson=3.10.3=py312h552d48e_0
+  - packaging=25.0=pyh29332c3_1
+  - pandas=3.0.0=py312hae6be28_0
+  - pandoc=3.8.2.1=hce30654_0
+  - parso=0.8.4=pyhd8ed1ab_1
+  - pathspec=1.0.4=pyhd8ed1ab_0
+  - patsy=1.0.2=pyhcf101f3_0
+  - pexpect=4.9.0=pyhd8ed1ab_1
+  - pickleshare=0.7.5=pyhd8ed1ab_1004
+  - pillow=12.1.1=py312h4e908a4_0
+  - pip=26.0.1=pyh8b19718_0
+  - platformdirs=4.3.8=pyhe01879c_0
+  - plotnine=0.15.3=pyhd8ed1ab_0
+  - prompt-toolkit=3.0.51=pyha770c72_0
+  - psutil=7.2.2=py312hb3ab3e3_0
+  - pthread-stubs=0.4=hd74edd7_1002
+  - ptyprocess=0.7.0=pyhd8ed1ab_1
+  - pure_eval=0.2.3=pyhd8ed1ab_1
+  - pygments=2.19.1=pyhd8ed1ab_0
+  - pyparsing=3.3.2=pyhcf101f3_0
+  - python=3.12.12=h18782d2_2_cpython
+  - python-dateutil=2.9.0.post0=pyhff2d567_1
+  - python-fastjsonschema=2.21.2=pyhe01879c_0
+  - python-gil=3.12.12=hd8ed1ab_2
+  - python-librt=0.8.1=py312hb3ab3e3_0
+  - python-tzdata=2025.2=pyhd8ed1ab_0
+  - python_abi=3.12=8_cp312
+  - pytz=2025.2=pyhd8ed1ab_0
+  - pyyaml=6.0.3=py312h04c11ed_1
+  - pyzmq=27.1.0=py312hd65ceae_0
+  - qhull=2020.2=h420ef59_5
+  - readline=8.3=h46df422_0
+  - referencing=0.37.0=pyhcf101f3_0
+  - rich=14.3.2=pyhcf101f3_0
+  - rpds-py=0.30.0=py312h6ef9ec0_0
+  - scikit-learn=1.8.0=np2py312he5ca3e3_1
+  - scipy=1.17.1=py312h0f234b1_0
+  - setuptools=82.0.0=pyh332efcf_0
+  - shellingham=1.5.4=pyhd8ed1ab_2
+  - six=1.17.0=pyhd8ed1ab_0
+  - stack_data=0.6.3=pyhd8ed1ab_1
+  - statsmodels=0.14.6=py312ha11c99a_0
+  - tabulate=0.9.0=pyhd8ed1ab_2
+  - threadpoolctl=3.6.0=pyhecae5ae_0
+  - tk=8.6.13=h010d191_3
+  - tornado=6.5.4=py312h4409184_0
+  - traitlets=5.14.3=pyhd8ed1ab_1
+  - typer=0.23.1=pyhcf101f3_0
+  - typing_extensions=4.15.0=pyhcf101f3_0
+  - tzdata=2025c=hc9c84f9_1
+  - unicodedata2=17.0.1=py312h2bbb03f_0
+  - wcwidth=0.2.13=pyhd8ed1ab_1
+  - wheel=0.46.3=pyhd8ed1ab_0
+  - xlsxwriter=3.2.3=pyhd8ed1ab_0
+  - xorg-libxau=1.0.12=hc919400_1
+  - xorg-libxdmcp=1.1.5=hc919400_1
+  - yaml=0.2.5=h925e9cb_3
+  - zeromq=4.3.5=hc1bb282_7
+  - zipp=3.21.0=pyhd8ed1ab_1
+  - zlib-ng=2.3.3=hed4e4f5_1
+  - zstd=1.5.7=hbf9d68e_6
+  - pip:
+      - accelerate==1.12.0
+      - aiohappyeyeballs==2.6.1
+      - aiohttp==3.13.5
+      - aiosignal==1.4.0
+      - anyio==4.12.1
+      - bleach==6.3.0
+      - cfgv==3.5.0
+      - charset-normalizer==3.4.4
+      - codecov==2.1.13
+      - coverage==7.13.4
+      - cssselect==1.4.0
+      - cssutils==2.11.1
+      - distlib==0.4.0
+      - einops==0.8.2
+      - filelock==3.24.3
+      - fonttools==4.61.1
+      - frozenlist==1.8.0
+      - fsspec==2026.2.0
+      - git-filter-repo==2.47.0
+      - h11==0.16.0
+      - hf-xet==1.2.0
+      - httpcore==1.0.9
+      - httpx==0.28.1
+      - huggingface-hub==1.4.1
+      - identify==2.6.16
+      - idna==3.11
+      - iniconfig==2.3.0
+      - jupytext==1.19.3
+      - kaggle==2.1.2
+      - kagglesdk==0.1.23
+      - kiwisolver==1.4.9
+      - lxml==6.0.2
+      - mdit-py-plugins==0.6.1
+      - mermaid-py==0.8.3
+      - more-itertools==10.8.0
+      - mpmath==1.3.0
+      - multidict==6.7.1
+      - networkx==3.6.1
+      - nodeenv==1.10.0
+      - oauthlib==3.3.1
+      - opencv-python-headless==4.13.0.92
+      - pluggy==1.6.0
+      - pre-commit==4.5.1
+      - propcache==0.4.1
+      - protobuf==7.35.0
+      - pytest==9.0.2
+      - pytest-cov==7.0.0
+      - python-docx==1.2.0
+      - python-slugify==8.0.4
+      - regex==2026.1.15
+      - requests==2.32.5
+      - ruff==0.15.2
+      - safetensors==0.7.0
+      - seaborn==0.13.2
+      - sympy==1.14.0
+      - text-unidecode==1.3
+      - timm==1.0.24
+      - tokenizers==0.22.2
+      - torch==2.10.0
+      - torchvision==0.25.0
+      - tqdm==4.67.3
+      - transformers==5.1.0
+      - typer-slim==0.23.1
+      - types-pyyaml==6.0.12.20250915
+      - urllib3==2.6.3
+      - virtualenv==20.39.0
+      - webencodings==0.5.1
+      - wolframclient==1.4.0
+      - yarl==1.23.0
+
+# =============================================================================
+# PINNED LOCK FILE (build strings included) — exact osx-arm64 reproduction
+# =============================================================================
+#
+# Fully-pinned snapshot of the `synthetic` env, including platform-specific
+# build hashes. Use for byte-for-byte reproduction on the SAME platform (macOS
+# osx-arm64). For cross-platform setup (macOS + remote Linux GPU), use the
+# canonical, build-agnostic environment.yml instead.
+#
+# Environment Location (macOS):
+# /opt/homebrew/Caskroom/miniforge/base/envs/synthetic
+#
+# CREATE: Create environment from this lock file
+# conda env create -f environment.lock.yml
+#
+# READ: List all environments
+# conda env list
+# conda list  # Show packages in active environment
+#
+# UPDATE: Update existing environment from this lock file
+# conda env update -f environment.lock.yml --prune
+#
+# DELETE: Remove environment
+# conda env remove -n synthetic
+#
+# ACTIVATE: Activate environment
+# conda activate synthetic
+# conda activate /opt/homebrew/Caskroom/miniforge/base/envs/synthetic
+#
+# DEACTIVATE: Deactivate environment
+# conda deactivate
+#
+# EXPORT: Regenerate this pinned lock file
+# conda env export -n synthetic | grep -v '^prefix:' > environment.lock.yml
+#
+# CLONE: Create copy of environment
+# conda create --name new_env --clone synthetic
+# =============================================================================
