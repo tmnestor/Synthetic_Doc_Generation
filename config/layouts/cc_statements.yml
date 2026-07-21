@@ -1,5 +1,11 @@
 layouts:
   cba_cc_standard:
+    # Per-field pixel budgets: name fields use the content box (1600px); the
+    # transaction description uses its column width (see columns in cc_statement.py).
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 890, fit: wrap, min_font: 10, max_lines: 2}
     bank: Commonwealth Bank of Australia
     bank_code: CBA
     card_type: credit_card
@@ -74,6 +80,10 @@ layouts:
     include_interest_charges: false
 
   cba_cc_rewards:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 840, fit: wrap, min_font: 10, max_lines: 2}
     bank: Commonwealth Bank of Australia
     bank_code: CBA
     card_type: credit_card
@@ -150,6 +160,10 @@ layouts:
     include_rewards_points: true
 
   westpac_cc_standard:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 910, fit: wrap, min_font: 10, max_lines: 2}
     bank: Westpac Banking Corporation
     bank_code: WBC
     card_type: credit_card
@@ -219,6 +233,10 @@ layouts:
     include_interest_charges: true
 
   westpac_cc_altitude:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
     bank: Westpac Banking Corporation
     bank_code: WBC
     card_type: credit_card
@@ -295,6 +313,10 @@ layouts:
     include_frequent_flyer_points: true
 
   nab_cc_standard:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 890, fit: wrap, min_font: 10, max_lines: 2}
     bank: National Australia Bank
     bank_code: NAB
     card_type: credit_card
@@ -364,6 +386,10 @@ layouts:
     include_interest_charges: true
 
   nab_cc_low_rate:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 890, fit: wrap, min_font: 10, max_lines: 2}
     bank: National Australia Bank
     bank_code: NAB
     card_type: credit_card
@@ -436,6 +462,10 @@ layouts:
     include_interest_rate: true
 
   anz_cc_standard:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 890, fit: wrap, min_font: 10, max_lines: 2}
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
     card_type: credit_card
@@ -505,6 +535,10 @@ layouts:
     include_interest_charges: false
 
   anz_cc_platinum:
+    field_budgets:
+      PAYER_NAME: {width: 1600, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+      TRANSACTION_DESC: {width: 840, fit: wrap, min_font: 10, max_lines: 2}
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
     card_type: credit_card

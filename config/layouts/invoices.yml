@@ -7,6 +7,15 @@ layouts:
     margin: 100
     content_width: 1700
     font_family: sans-serif
+    # Per-field pixel budgets: header/bill-to fields use the content box (1700px);
+    # the line-item description column is 900px wide (see col_x in invoice.py).
+    field_budgets:
+      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
+      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 48
       subheader: 28
@@ -121,6 +130,13 @@ layouts:
     margin: 100
     content_width: 1700
     font_family: sans-serif
+    field_budgets:
+      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
+      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 48
       subheader: 28
@@ -229,6 +245,13 @@ layouts:
     margin: 100
     content_width: 1700
     font_family: sans-serif
+    field_budgets:
+      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
+      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 48
       subheader: 28
@@ -357,6 +380,13 @@ layouts:
     margin: 100
     content_width: 1700
     font_family: sans-serif
+    field_budgets:
+      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
+      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 48
       subheader: 28
