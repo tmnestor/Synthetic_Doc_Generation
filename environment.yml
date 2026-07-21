@@ -1,14 +1,19 @@
-name: synthetic
-# Portable by design — no channel/index URLs live in this file, so the repo
-# carries no internal infrastructure details. Package sources come from the
-# host's config:
-#   - Python interpreter -> conda, from the channel in ~/.condarc (or a `-c`
-#     flag). Dev machines use public conda-forge/defaults; the locked-down PROD
-#     remote points conda at the internal Artifactory conda channel.
-#   - Libraries          -> pip, from the index in the host pip.conf (or
-#     PIP_INDEX_URL). PROD points pip at the internal Artifactory PyPI mirror.
-# Public repos are unreachable on the PROD remote, so both configs must be set
-# there. See the README "Remote Image Generation" section.
+# Shared conda environment for the synthetic document generator.
+#
+# TEAM MEMBERS: you only LOAD this env — activate it by path, nothing to build:
+#     conda activate /efs/shared/.conda/envs/synthetic
+#
+# The spec below is the build recipe, used only by the env's maintainer to
+# create/refresh it at that shared prefix. There is no `name:`/`prefix:` key:
+# `conda env create` ignores a `prefix:` key, and a `name:` key is mutually
+# exclusive with the `--prefix` flag the maintainer uses to install into the
+# shared location.
+#
+# Package sources come from the host's config (kept OUT of this repo):
+#   - Python interpreter -> conda, from the channel in ~/.condarc
+#   - Libraries          -> pip, from the index in ~/.pip/pip.conf
+# On the locked-down PROD remote these point at the internal Artifactory conda
+# and PyPI mirrors; the public repos are unreachable there.
 dependencies:
   # Python 3.12 is the only hard version requirement.
   - python=3.12
@@ -25,13 +30,3 @@ dependencies:
 # standalone camera-scan scripts (degrade_camera_scan.py /
 # rectify_camera_scan.py), not the core generators pipeline. Install
 # opencv-python-headless separately where the camera-scan feature is needed.
-#
-# =============================================================================
-# CREATE:     conda env create -f environment.yml [-c <conda-channel-url>]
-# UPDATE:     conda env update -f environment.yml --prune
-# ACTIVATE:   conda activate synthetic
-# DEACTIVATE: conda deactivate
-# DELETE:     conda env remove -n synthetic        (deactivate first if active)
-# RECREATE:   conda deactivate && conda env remove -n synthetic && \
-#             conda env create -f environment.yml -c <conda-channel-url>
-# =============================================================================
