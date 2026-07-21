@@ -300,7 +300,7 @@ python degrade_camera_scan.py \
     output/clean/receipts/CASE001_receipt_thermal_80mm.png /tmp/CASE001.png 1
 ```
 
-**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. It is **not** part of `environment.yml` — only the camera-scan scripts need it — so install it separately into the `synthetic` env where required, e.g. `pip install opencv-python-headless`.
+**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy — used by the camera-scan scripts. It is included in `environment.yml` (resolved from your configured PyPI index, e.g. an internal mirror on locked-down hosts).
 
 Tunable knobs in `degrade()`: `pad_*` (frame coverage), `deg` (rotation range), `f` (perspective strength), and the blur/noise/JPEG ranges.
 
