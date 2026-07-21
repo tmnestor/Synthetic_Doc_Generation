@@ -15,6 +15,15 @@ Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
 _FONT_CACHE: dict[tuple[int, bool, bool, bool], Font] = {}
 
+# Maps id(font) -> Path it was loaded from, so fit measurement can assert it is
+# using the bundled DejaVu face rather than a silent system fallback.
+_FONT_SOURCE: dict[int, Path] = {}
+
+
+class FontSourceError(RuntimeError):
+    """Raised when a font used for measurement is not the bundled DejaVu face."""
+
+
 # Bundled fonts directory (committed to repo for cross-platform consistency)
 _BUNDLED_FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
 
@@ -80,6 +89,7 @@ def load_font(
         if p.exists():
             try:
                 font = ImageFont.truetype(str(p), size)
+                _FONT_SOURCE[id(font)] = p
                 break
             except OSError:
                 continue
@@ -95,6 +105,34 @@ def load_font(
 
     _FONT_CACHE[key] = font
     return font
+
+
+def font_source_path(font: Font) -> Path | None:
+    """Return the file a font was loaded from, or None if unknown."""
+    return _FONT_SOURCE.get(id(font))
+
+
+def assert_bundled_font(font: Font) -> None:
+    """Fail loud if `font` was not loaded from the bundled fonts/ directory.
+
+    load_font() silently falls back to system fonts when a bundled file is
+    missing; measuring against a system font would diverge Mac<->PROD and
+    silently corrupt fit decisions. This enforces the bundled-first guarantee.
+
+    Raises:
+        FontSourceError: the font is not a bundled DejaVu face.
+    """
+    src = font_source_path(font)
+    if src is not None and _BUNDLED_FONTS_DIR in src.parents:
+        return
+    raise FontSourceError(
+        "Font used for measurement is not a bundled font.\n"
+        f"  What:     fit measurement requires a bundled DejaVu face; got {src}.\n"
+        f"  Where:    bundled fonts directory {_BUNDLED_FONTS_DIR}\n"
+        "  Expected: fonts/DejaVuSans.ttf (and -Bold / Mono variants) present so\n"
+        "            load_font() resolves bundled-first, not a system fallback.\n"
+        "  Recover:  restore/reinstall the fonts/ directory from the repo, then rerun."
+    )
 
 
 def draw_text_right(
