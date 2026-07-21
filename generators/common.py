@@ -258,8 +258,18 @@ def fit_text(
             )
         return FitResult(lines=lines, size=nominal_size, line_height=line_height(nominal_size))
 
-    # shrink_then_wrap added in a later task.
-    raise NotImplementedError(fit)
+    if fit == "shrink_then_wrap":
+        for size in range(nominal_size, min_font - 1, -1):
+            if _text_width(text, size, mono=mono, bold=bold) <= width:
+                return FitResult(lines=[text], size=size, line_height=line_height(size))
+            wrapped = _wrap_to_width(text, width=width, size=size, mono=mono, bold=bold)
+            if wrapped is not None and len(wrapped) <= max_lines:
+                return FitResult(lines=wrapped, size=size, line_height=line_height(size))
+        raise FitError(
+            _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+        )
+
+    raise ValueError(f"unhandled fit strategy {fit!r}")
 
 
 def draw_text_right(
