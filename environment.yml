@@ -26,7 +26,9 @@ dependencies:
       - typer
       - rich
       # Synthetic content generation for reseeding (scripts/seed_*.py).
-      - faker
+      # Pinned: faker's version determines generated content, so pinning keeps
+      # reseeded ground truth reproducible across rebuilds.
+      - faker==40.8.0
 
 # NOTE: opencv (cv2) is intentionally omitted — it is used only by the
 # standalone camera-scan scripts (degrade_camera_scan.py /
