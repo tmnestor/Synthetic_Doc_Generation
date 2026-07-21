@@ -11,7 +11,10 @@ across all 220 documents the same names, merchants, suburbs and products recur.
 The fix is to **widen the content space** — through bigger pools, procedural
 composition, semantic edge cases, and/or a data library like Faker — and then
 **reseed** the ground truth. Recommended path: combine pool expansion +
-procedural composition + edge-case injection, phased.
+procedural composition + edge-case injection, phased. **Critical prerequisite:**
+ship *fit safety* first (per-field budgets + overflow validation, see §3a) — or
+richer content will overflow the fixed layouts and silently break the
+pixel-perfect ground truth.
 
 ---
 
@@ -167,6 +170,53 @@ emits real people/businesses. Best used to *seed the pools*, not at render time.
 
 ---
 
+## 3a. Fit safety — generated content must not overflow the layout ⚠️
+
+This is a **hard constraint on every option above**, not a nice-to-have. Richer
+content means longer, variable-length strings (business names like
+"Nguyen & Associates Chartered Accountants", long street addresses, multi-word
+product descriptions). The renderers place text into fixed positions, so longer
+strings overflow.
+
+### What the code does today
+The text helpers in `generators/common.py` (`draw_text_center`,
+`draw_text_right`, `draw_line_item`) use `font.getbbox()` **only for alignment** —
+there is **no wrapping, truncation, or fit-to-width check**. Layouts define a
+canvas `width` / `content_width` (receipts ~420px ≈ 57mm; bank statements
+1800px) but **no per-field width or character budgets**.
+
+### Failure modes (all silent — no error today)
+1. **Horizontal clipping** — the receipt canvas is fixed-width and cropped, so a
+   long name/address drawn past the edge is cut off; centered text wider than the
+   canvas gets a negative start-x and is clipped on *both* ends.
+2. **Column collision** — in `draw_line_item`, description (left) and amount
+   (right) are drawn independently with no enforced gap, so a long description
+   **overlaps the amount**.
+3. **Broken alignment** — right/center math assumes the string fits; when it
+   doesn't, text lands off-canvas.
+
+### Why it's critical
+It breaks the **pixel-perfect image ↔ ground-truth contract**. The ground-truth
+YAML stores the *full* string, but the image shows a *clipped/overlapping* one.
+An LLM reading the image is then scored against text it cannot see → false
+errors, silently corrupted evaluation. **The variety work and the fit-safety
+work must land together**, or richer content degrades the benchmark.
+
+### Approach (defence in depth)
+1. **Bound at generation (preferred).** Each variable field gets a width/char
+   budget (in the layout YAML — single source of truth); the generator measures
+   Faker/pool output with the *actual font* and regenerates/shortens until it
+   fits. Result: **ground truth == what is rendered == fits**.
+2. **Fail-fast overflow validation.** `pipeline validate` measures every field
+   against its box and **errors** if any would overflow — caught at validate
+   time, never shipped.
+3. **Lossless renderer fit as a safety net.** Auto-shrink font or wrap to
+   multiple lines (both preserve the full string).
+4. **The one rule:** **never silently truncate/ellipsize the display.** Either
+   bound the content to fit, or wrap/shrink losslessly, or (if truncating) update
+   the ground truth to match exactly what is drawn. Silent truncation is the only
+   outcome that corrupts the benchmark.
+
 ## 4. Cross-cutting constraints (apply to every option)
 
 - **Reseeding is destructive.** More variety means regenerating all 220
@@ -188,6 +238,10 @@ emits real people/businesses. Best used to *seed the pools*, not at render time.
 ---
 
 ## 5. Recommended roadmap (phased)
+
+**Phase 0 (prerequisite) — Fit safety.** Add per-field width/char budgets +
+generation-time fitting + fail-fast overflow validation (see §3a) **before**
+widening content, so no later phase can ship overflowing / clipped images.
 
 1. **Phase 1 — Pools + names (Option 1 + part of 2).** Combinatorial name
    generator; expand merchants, suburbs (open postcode list), products, trusts.
@@ -218,6 +272,9 @@ Each phase is a self-contained reseed with a validation pass
   the corpus size?
 - Any **eval-driven priorities** — e.g. is the criticism mainly about entity
   repetition (Phase 1) or about the dataset being "too easy" (Phase 3)?
+- **Fit-safety strategy** (see §3a): bound-at-generation as the primary approach,
+  with lossless wrap/shrink as a fallback? And where do per-field width/char
+  budgets live — per field in each `config/layouts/*.yml`?
 
 ---
 
