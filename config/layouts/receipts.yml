@@ -6,6 +6,16 @@ layouts:
     line_height: 20
     font_size: 18
     font_family: monospace
+    # Per-field pixel budgets (width = content box = width - 2*margin for centered
+    # header fields; line-item desc/amount derived from geometry). fit_text keeps
+    # content within these losslessly; see docs/fit_safety_design.md.
+    field_budgets:
+      SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 318, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 70, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -29,6 +39,13 @@ layouts:
     line_height: 16
     font_size: 14
     font_family: monospace
+    field_budgets:
+      SUPPLIER_NAME: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 294, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 294, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 234, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 52, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -52,6 +69,13 @@ layouts:
     line_height: 20
     font_size: 16
     font_family: monospace
+    field_budgets:
+      SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -75,6 +99,13 @@ layouts:
     line_height: 20
     font_size: 16
     font_family: monospace
+    field_budgets:
+      SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: fuel_station_header
@@ -98,6 +129,13 @@ layouts:
     line_height: 20
     font_size: 16
     font_family: monospace
+    field_budgets:
+      SUPPLIER_NAME: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: business_header
@@ -121,6 +159,13 @@ layouts:
     line_height: 20
     font_size: 16
     font_family: monospace
+    field_budgets:
+      SUPPLIER_NAME: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      BUSINESS_ADDRESS: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
+      ABN_LINE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
+      PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
+      LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
     sections:
       - type: header
         name: restaurant_header
