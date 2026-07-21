@@ -5,6 +5,7 @@ Font loading, text drawing helpers, ABN/GST validation, and image degradation.
 
 import io
 import random
+from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
@@ -133,6 +134,101 @@ def assert_bundled_font(font: Font) -> None:
         "            load_font() resolves bundled-first, not a system fallback.\n"
         "  Recover:  restore/reinstall the fonts/ directory from the repo, then rerun."
     )
+
+
+FitStrategy = str  # one of: "shrink", "wrap", "shrink_then_wrap"
+_FIT_STRATEGIES = ("shrink", "wrap", "shrink_then_wrap")
+
+
+@dataclass(frozen=True)
+class FitResult:
+    """Lossless render plan for a field: the full string laid out to fit its box."""
+
+    lines: list[str]
+    size: int
+    line_height: int
+
+
+class FitError(RuntimeError):
+    """Raised when a string cannot fit its box even at the font floor / max lines."""
+
+
+def _text_width(text: str, size: int, *, mono: bool, bold: bool) -> int:
+    """Pixel width of `text` at `size`, measured against the bundled font."""
+    font = load_font(size, mono=mono, bold=bold)
+    assert_bundled_font(font)
+    bbox = font.getbbox(text)
+    return int(bbox[2] - bbox[0])
+
+
+def _fit_error_message(text: str, *, width: int, min_font: int, max_lines: int, fit: str) -> str:
+    """Four-element diagnostic body (caller prepends entry/field context)."""
+    return (
+        "string cannot fit its box losslessly.\n"
+        f"  What:     {text!r} exceeds width {width}px at min_font {min_font} "
+        f"across max_lines {max_lines} (fit={fit}).\n"
+        "  Where:    the field's `field_budgets` entry in its config/layouts/*.yml.\n"
+        "  Expected: width >= measured, or larger max_lines, or lower min_font; "
+        "fit one of shrink|wrap|shrink_then_wrap.\n"
+        "  Recover:  raise `width` (or `max_lines`) for this field in the layout YAML; "
+        "never truncate the string."
+    )
+
+
+def fit_text(
+    text: str,
+    *,
+    width: int,
+    fit: FitStrategy,
+    min_font: int,
+    max_lines: int,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+) -> FitResult:
+    """Compute a lossless layout of `text` fitting within `width` px.
+
+    Never truncates. Applies the field's `fit` strategy and raises FitError if
+    the full string cannot fit even at the font floor across max_lines.
+
+    Args:
+        text: The full string to lay out (rendered verbatim).
+        width: Horizontal box in pixels the string must fit within.
+        fit: Strategy — "shrink", "wrap", or "shrink_then_wrap".
+        min_font: Smallest font size shrinking may reach.
+        max_lines: Lines the field may occupy.
+        nominal_size: The field's default font size.
+        mono: Measure with the monospace family.
+        bold: Measure with the bold weight.
+
+    Returns:
+        FitResult with the laid-out lines, chosen size, and line height.
+
+    Raises:
+        FitError: the string cannot fit losslessly.
+        ValueError: unknown fit strategy.
+    """
+    if fit not in _FIT_STRATEGIES:
+        raise ValueError(f"unknown fit strategy {fit!r}; allowed: {_FIT_STRATEGIES}")
+
+    def line_height(size: int) -> int:
+        fnt = load_font(size, mono=mono, bold=bold)
+        return int(fnt.size) if isinstance(fnt, ImageFont.FreeTypeFont) else size
+
+    # Fits as-is at nominal size on one line -> unchanged (day-one path).
+    if _text_width(text, nominal_size, mono=mono, bold=bold) <= width:
+        return FitResult(lines=[text], size=nominal_size, line_height=line_height(nominal_size))
+
+    if fit == "shrink":
+        for size in range(nominal_size - 1, min_font - 1, -1):
+            if _text_width(text, size, mono=mono, bold=bold) <= width:
+                return FitResult(lines=[text], size=size, line_height=line_height(size))
+        raise FitError(
+            _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+        )
+
+    # wrap / shrink_then_wrap added in later tasks.
+    raise NotImplementedError(fit)
 
 
 def draw_text_right(
