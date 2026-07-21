@@ -29,8 +29,6 @@ dependencies:
       # Pinned: faker's version determines generated content, so pinning keeps
       # reseeded ground truth reproducible across rebuilds.
       - faker==40.8.0
-
-# NOTE: opencv (cv2) is intentionally omitted — it is used only by the
-# standalone camera-scan scripts (degrade_camera_scan.py /
-# rectify_camera_scan.py), not the core generators pipeline. Install
-# opencv-python-headless separately where the camera-scan feature is needed.
+      # Camera-scan degradation / rectification (cv2) — degrade_camera_scan.py,
+      # rectify_camera_scan.py. Not used by the core generators pipeline.
+      - opencv-python-headless
