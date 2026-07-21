@@ -27,7 +27,11 @@ dependencies:
 # opencv-python-headless separately where the camera-scan feature is needed.
 #
 # =============================================================================
-# CREATE:   conda env create -f environment.yml [-c <conda-channel-url>]
-# UPDATE:   conda env update -f environment.yml --prune
-# ACTIVATE: conda activate synthetic
+# CREATE:     conda env create -f environment.yml [-c <conda-channel-url>]
+# UPDATE:     conda env update -f environment.yml --prune
+# ACTIVATE:   conda activate synthetic
+# DEACTIVATE: conda deactivate
+# DELETE:     conda env remove -n synthetic        (deactivate first if active)
+# RECREATE:   conda deactivate && conda env remove -n synthetic && \
+#             conda env create -f environment.yml -c <conda-channel-url>
 # =============================================================================
