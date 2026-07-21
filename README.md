@@ -300,7 +300,7 @@ python degrade_camera_scan.py \
     output/clean/receipts/CASE001_receipt_thermal_80mm.png /tmp/CASE001.png 1
 ```
 
-**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. Install into the `synthetic` env, e.g. `uv pip install opencv-python-headless`, or add it to `environment.yml`.
+**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy. It is **not** part of `environment.yml` — only the camera-scan scripts need it — so install it separately into the `synthetic` env where required, e.g. `pip install opencv-python-headless`.
 
 Tunable knobs in `degrade()`: `pad_*` (frame coverage), `deg` (rotation range), `f` (perspective strength), and the blur/noise/JPEG ranges.
 
@@ -384,10 +384,13 @@ ssh remote_host
 
 cd /path/to/Synthetic_Doc_Generation
 
-# Install dependencies (first time only)
-conda env create -f environment.yml
-# or update existing environment
-conda env update -f environment.yml --prune
+# Build the `synthetic` env from environment.yml (first time only).
+# On hosts without public conda/PyPI access, point conda and pip at your
+# internal mirrors first (channel in ~/.condarc, index in pip.conf);
+# environment.yml itself carries no channel/index URLs.
+conda env create -n synthetic -f environment.yml
+# or update an existing environment
+conda env update -n synthetic -f environment.yml --prune
 
 # Validate ground truth
 conda run -n synthetic python -m generators.pipeline validate
