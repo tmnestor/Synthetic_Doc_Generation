@@ -297,13 +297,21 @@ def draw_fitted_left(
     mono: bool = False,
     bold: bool = False,
     fill: str = "black",
+    line_spacing: int | None = None,
 ) -> int:
-    """Left-align `text` at x, fitting it to its budget. Returns the advanced y."""
+    """Left-align `text` at x, fitting it to its budget. Returns the advanced y.
+
+    `line_spacing` overrides the per-line vertical advance (e.g. the layout's
+    line_height); when None the font's own height is used. Advancing by a
+    caller-supplied line_spacing keeps the single-line case pixel-identical to
+    the pre-fit renderer while multi-line wrap pushes following content down.
+    """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
     for line in r.lines:
         draw.text((x, y), line, font=font, fill=fill)
-        y += r.line_height
+        y += spacing
     return y
 
 
@@ -318,15 +326,20 @@ def draw_fitted_center(
     mono: bool = False,
     bold: bool = False,
     fill: str = "black",
+    line_spacing: int | None = None,
 ) -> int:
-    """Center `text` within canvas_width, fitting it to its budget. Returns advanced y."""
+    """Center `text` within canvas_width, fitting it to its budget. Returns advanced y.
+
+    See draw_fitted_left for `line_spacing` semantics.
+    """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
     for line in r.lines:
         bbox = font.getbbox(line)
         w = bbox[2] - bbox[0]
         draw.text(((canvas_width - w) // 2, y), line, font=font, fill=fill)
-        y += r.line_height
+        y += spacing
     return y
 
 
@@ -341,15 +354,20 @@ def draw_fitted_right(
     mono: bool = False,
     bold: bool = False,
     fill: str = "black",
+    line_spacing: int | None = None,
 ) -> int:
-    """Right-align `text` to x_right, fitting it to its budget. Returns advanced y."""
+    """Right-align `text` to x_right, fitting it to its budget. Returns advanced y.
+
+    See draw_fitted_left for `line_spacing` semantics.
+    """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
     for line in r.lines:
         bbox = font.getbbox(line)
         w = bbox[2] - bbox[0]
         draw.text((x_right - w, y), line, font=font, fill=fill)
-        y += r.line_height
+        y += spacing
     return y
 
 
