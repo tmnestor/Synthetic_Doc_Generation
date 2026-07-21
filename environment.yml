@@ -25,6 +25,8 @@ dependencies:
       - pyyaml
       - typer
       - rich
+      # Synthetic content generation for reseeding (scripts/seed_*.py).
+      - faker
 
 # NOTE: opencv (cv2) is intentionally omitted — it is used only by the
 # standalone camera-scan scripts (degrade_camera_scan.py /
