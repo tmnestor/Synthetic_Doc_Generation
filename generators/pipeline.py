@@ -14,7 +14,7 @@ from rich import print as rprint
 from generators.bank_statement import render_bank_statement
 from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
-from generators.common import degrade_image
+from generators.common import FitError, degrade_image
 from generators.derive_outputs import derive_csv, derive_jsonl
 from generators.distribution_statement import render_distribution_statement
 from generators.invoice import render_invoice
@@ -23,6 +23,7 @@ from generators.loader import (
     load_ground_truth,
     load_layout_registry,
 )
+from generators.overflow_check import build_overflow_error, check_overflow
 from generators.receipt import render_receipt
 from generators.schema import validate_entry
 from generators.trust_income_schedule import render_trust_income_schedule
@@ -77,6 +78,12 @@ def validate(
                     f"{doc_cfg.get('layouts')}. "
                     f"Available layouts: {sorted(layouts.keys())}"
                 )
+
+        # Overflow backstop: render each entry and surface any content that
+        # cannot fit its box even after lossless wrap/shrink (a real design error).
+        renderer = _RENDERERS.get(doc_type)
+        if renderer and layouts:
+            all_errors.extend(check_overflow(gt_data, layouts, renderer))
 
     if all_errors:
         rprint(f"[red]Validation failed with {len(all_errors)} error(s):[/red]")
@@ -161,7 +168,12 @@ def generate(
                 continue
 
             entry["case_id"] = str(case_id)
-            img = renderer(entry, layout)
+            try:
+                img = renderer(entry, layout)
+            except FitError as exc:
+                raise build_overflow_error(
+                    [f"{case_id} / {layout_ref}: {str(exc).splitlines()[0]}"]
+                ) from None
             filename = f"{case_id}_{layout_ref}.png"
 
             if generate_clean:
