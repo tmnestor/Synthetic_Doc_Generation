@@ -1,28 +1,33 @@
 name: synthetic
-# No `channels:` key by design. Channel selection comes from the host's conda
-# config (~/.condarc), so this file is portable across environments:
-#   - dev machines resolve packages from public conda-forge/defaults;
-#   - the locked-down PROD remote must point conda at the internal Artifactory
-#     conda mirror, because the public repos are unreachable there.
-# Keeping the internal mirror URL in ~/.condarc (not here) also keeps it out of
-# the committed repo.
+# Portable by design — no channel/index URLs live in this file, so the repo
+# carries no internal infrastructure details. Package sources come from the
+# host's config:
+#   - Python interpreter -> conda, from the channel in ~/.condarc (or a `-c`
+#     flag). Dev machines use public conda-forge/defaults; the locked-down PROD
+#     remote points conda at the internal Artifactory conda channel.
+#   - Libraries          -> pip, from the index in the host pip.conf (or
+#     PIP_INDEX_URL). PROD points pip at the internal Artifactory PyPI mirror.
+# Public repos are unreachable on the PROD remote, so both configs must be set
+# there. See the README "Remote Image Generation" section.
 dependencies:
-  # Python 3.12 is the only hard version requirement; the rest float.
+  # Python 3.12 is the only hard version requirement.
   - python=3.12
-  # Document generation runtime (the generators/ pipeline).
-  - pillow
-  - numpy
-  - pyyaml
-  - typer
-  - rich
+  - pip
+  - pip:
+      # Document generation runtime (the generators/ pipeline).
+      - pillow
+      - numpy
+      - pyyaml
+      - typer
+      - rich
 
-# NOTE: opencv (cv2) is intentionally NOT a dependency here. It is used only by
-# the standalone camera-scan scripts (degrade_camera_scan.py /
-# rectify_camera_scan.py), not the core generators pipeline. Where the
-# camera-scan feature is needed, install opencv-python-headless separately.
+# NOTE: opencv (cv2) is intentionally omitted — it is used only by the
+# standalone camera-scan scripts (degrade_camera_scan.py /
+# rectify_camera_scan.py), not the core generators pipeline. Install
+# opencv-python-headless separately where the camera-scan feature is needed.
 #
 # =============================================================================
-# CREATE:   conda env create -f environment.yml
+# CREATE:   conda env create -f environment.yml [-c <conda-channel-url>]
 # UPDATE:   conda env update -f environment.yml --prune
 # ACTIVATE: conda activate synthetic
 # =============================================================================
