@@ -272,6 +272,87 @@ def fit_text(
     raise ValueError(f"unhandled fit strategy {fit!r}")
 
 
+def _fit_from_budget(text: str, budget: dict, nominal_size: int, *, mono: bool, bold: bool) -> FitResult:
+    """Run fit_text using a field's budget dict (width/fit/min_font/max_lines)."""
+    return fit_text(
+        text,
+        width=budget["width"],
+        fit=budget["fit"],
+        min_font=budget["min_font"],
+        max_lines=budget["max_lines"],
+        nominal_size=nominal_size,
+        mono=mono,
+        bold=bold,
+    )
+
+
+def draw_fitted_left(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+) -> int:
+    """Left-align `text` at x, fitting it to its budget. Returns the advanced y."""
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    for line in r.lines:
+        draw.text((x, y), line, font=font, fill=fill)
+        y += r.line_height
+    return y
+
+
+def draw_fitted_center(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    y: int,
+    canvas_width: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+) -> int:
+    """Center `text` within canvas_width, fitting it to its budget. Returns advanced y."""
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    for line in r.lines:
+        bbox = font.getbbox(line)
+        w = bbox[2] - bbox[0]
+        draw.text(((canvas_width - w) // 2, y), line, font=font, fill=fill)
+        y += r.line_height
+    return y
+
+
+def draw_fitted_right(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x_right: int,
+    y: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+) -> int:
+    """Right-align `text` to x_right, fitting it to its budget. Returns advanced y."""
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    for line in r.lines:
+        bbox = font.getbbox(line)
+        w = bbox[2] - bbox[0]
+        draw.text((x_right - w, y), line, font=font, fill=fill)
+        y += r.line_height
+    return y
+
+
 def draw_text_right(
     draw: ImageDraw.ImageDraw,
     text: str,
