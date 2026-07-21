@@ -175,6 +175,29 @@ def _fit_error_message(text: str, *, width: int, min_font: int, max_lines: int, 
     )
 
 
+def _wrap_to_width(text: str, *, width: int, size: int, mono: bool, bold: bool) -> list[str] | None:
+    """Greedy word-wrap at `size`.
+
+    Returns lines each within `width`, or None if a single word cannot fit
+    (caller treats None as unfittable — never splits a word / truncates).
+    """
+    words = text.split(" ")
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        if _text_width(word, size, mono=mono, bold=bold) > width:
+            return None  # unbreakable word wider than the box
+        candidate = word if not current else f"{current} {word}"
+        if _text_width(candidate, size, mono=mono, bold=bold) <= width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
+
+
 def fit_text(
     text: str,
     *,
@@ -227,7 +250,15 @@ def fit_text(
             _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
         )
 
-    # wrap / shrink_then_wrap added in later tasks.
+    if fit == "wrap":
+        lines = _wrap_to_width(text, width=width, size=nominal_size, mono=mono, bold=bold)
+        if lines is None or len(lines) > max_lines:
+            raise FitError(
+                _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+            )
+        return FitResult(lines=lines, size=nominal_size, line_height=line_height(nominal_size))
+
+    # shrink_then_wrap added in a later task.
     raise NotImplementedError(fit)
 
 
