@@ -11,10 +11,20 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    draw_fitted_left,
     draw_text_right,
+    fit_text,
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/cc_statements.yml"
+
+
+def _cc_budget(layout: dict, field: str) -> dict:
+    """Look up a field budget using the layout id stashed at render time."""
+    return field_budget(layout, layout.get("layout_id", ""), field, layout_path=_LAYOUT_PATH)
 
 
 def _normalize_layout(layout: dict) -> dict:
@@ -121,14 +131,22 @@ def _draw_account_info(
 ) -> int:
     """Draw payer name and statement period. Returns Y after section."""
     margin = layout.get("margin", 100)
-    font = load_font(layout.get("font_size_body", 20))
-    font_small = load_font(layout.get("font_size_small", 16))
+    size_body = layout.get("font_size_body", 20)
+    size_small = layout.get("font_size_small", 16)
+    font_small = load_font(size_small)
     line_h = 50
 
     payer = fields.get("PAYER_NAME", "")
     if payer:
-        draw.text((margin, y), payer, font=font, fill="black")
-        y += line_h
+        y = draw_fitted_left(
+            draw,
+            payer,
+            margin,
+            y,
+            budget=_cc_budget(layout, "PAYER_NAME"),
+            nominal_size=size_body,
+            line_spacing=line_h,
+        )
 
     date_range = fields.get("STATEMENT_DATE_RANGE", "")
     if date_range:
@@ -142,8 +160,16 @@ def _draw_account_info(
 
     supplier = fields.get("SUPPLIER_NAME", "")
     if supplier and supplier != layout.get("bank", ""):
-        draw.text((margin, y), supplier, font=font_small, fill="gray")
-        y += line_h
+        y = draw_fitted_left(
+            draw,
+            supplier,
+            margin,
+            y,
+            budget=_cc_budget(layout, "SUPPLIER_NAME"),
+            nominal_size=size_small,
+            line_spacing=line_h,
+            fill="gray",
+        )
 
     return y + 20
 
@@ -263,16 +289,30 @@ def _draw_transactions(
     """Draw CC transaction rows with a single Amount column. Returns Y after last row."""
     columns = layout["columns"]
     row_h = layout.get("row_height", 45)
-    font = load_font(layout.get("font_size_body", 20))
+    size_body = layout.get("font_size_body", 20)
+    font = load_font(size_body)
     borders = layout.get("borders", False)
     margin = layout.get("margin", 100)
     content_width = layout.get("content_width", layout.get("page_width", 2480) - 2 * margin)
     right_edge = margin + content_width
+    desc_budget = _cc_budget(layout, "TRANSACTION_DESC")
 
     for txn in txns:
+        # Fit the description first so a wrapped description grows the row height,
+        # keeping the amount/date on the first line and never colliding downward.
+        desc_fit = fit_text(
+            txn["description"],
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=size_body,
+        )
+        this_row_h = row_h * len(desc_fit.lines)
+
         if borders:
             draw.rectangle(
-                [(margin, y), (right_edge, y + row_h)],
+                [(margin, y), (right_edge, y + this_row_h)],
                 outline="#CCCCCC",
             )
 
@@ -286,11 +326,14 @@ def _draw_transactions(
 
         desc_col = columns.get("description", {})
         if desc_col:
-            draw.text(
-                (desc_col["x"], y + 14),
+            draw_fitted_left(
+                draw,
                 txn["description"],
-                font=font,
-                fill="black",
+                desc_col["x"],
+                y + 14,
+                budget=desc_budget,
+                nominal_size=size_body,
+                line_spacing=row_h,
             )
 
         amount = txn.get("amount", "NOT_FOUND")
@@ -308,7 +351,7 @@ def _draw_transactions(
                 font=font,
             )
 
-        y += row_h
+        y += this_row_h
 
     return y
 
@@ -324,6 +367,7 @@ def render_cc_statement(entry: dict, layout: dict) -> Image.Image:
         PIL Image of the rendered credit card statement.
     """
     layout = _normalize_layout(layout)
+    layout["layout_id"] = entry.get("layout", "")
     width = layout.get("page_width", 2480)
     height = layout.get("page_height", 3508)
     fields = entry["fields"]

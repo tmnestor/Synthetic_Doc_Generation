@@ -1,5 +1,9 @@
 layouts:
   cba_standard:
+    # Per-field pixel budget: transaction description column (= content_width-840).
+    # Wrap (not shrink) to keep row font uniform; replaces the old silent char-truncation.
+    field_budgets:
+      TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
     bank: Commonwealth Bank of Australia
     bank_code: CBA
     renderer: cba
@@ -21,6 +25,8 @@ layouts:
     date_format: "DD/MM/YYYY"
 
   cba_date_grouped:
+    field_budgets:
+      TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
     bank: Commonwealth Bank of Australia
     bank_code: CBA
     renderer: cba
@@ -43,6 +49,8 @@ layouts:
     date_format: "DD MMM YYYY"
 
   westpac_standard:
+    field_budgets:
+      TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
     bank: Westpac Banking Corporation
     bank_code: WBC
     renderer: westpac
@@ -62,6 +70,8 @@ layouts:
     date_format: "DD MMM YY"
 
   westpac_premium:
+    field_budgets:
+      TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
     bank: Westpac Banking Corporation
     bank_code: WBC
     renderer: westpac
@@ -83,6 +93,8 @@ layouts:
     date_format: "DD MMM YY"
 
   nab_classic:
+    field_budgets:
+      TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
     bank: National Australia Bank
     bank_code: NAB
     renderer: nab
@@ -106,6 +118,8 @@ layouts:
     date_format: "DD MMM YYYY"
 
   nab_dense:
+    field_budgets:
+      TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
     bank: National Australia Bank
     bank_code: NAB
     renderer: nab
@@ -129,6 +143,8 @@ layouts:
     date_format: "DD MMM YY"
 
   anz_standard:
+    field_budgets:
+      TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
     renderer: anz
@@ -152,6 +168,8 @@ layouts:
     date_format: "DD/MM/YY"
 
   anz_modern:
+    field_budgets:
+      TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
     bank: Australia and New Zealand Banking Group
     bank_code: ANZ
     renderer: anz

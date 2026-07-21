@@ -5,17 +5,28 @@ Each renderer encodes the bank's visual DNA: header style, column layout, row
 separators, balance formatting, and footer structure.
 """
 
+import hashlib
 from collections.abc import Callable
 from decimal import Decimal
 
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    draw_fitted_left,
     draw_separator_line,
     draw_text_right,
+    fit_text,
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/bank_statements.yml"
+
+
+def _bank_budget(layout: dict, layout_id: str, field: str) -> dict:
+    """Look up a field budget for a bank layout."""
+    return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
 
 
 # -- Shared utilities ---------------------------------------------------------
@@ -186,14 +197,26 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
             # Flat: date on every transaction row
             draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
 
-        # Truncate description to fit column
-        desc = txn["description"]
-        max_desc_width = col_withdrawal_right - col_desc_x - 220
-        bbox = font_body.getbbox(desc)
-        while bbox[2] - bbox[0] > max_desc_width and len(desc) > 10:
-            desc = desc[:-1]
-            bbox = font_body.getbbox(desc)
-        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+        # Fit description losslessly (wrap) — never silently truncate. The ground
+        # truth stores the full string, so the rendered image must show it in full.
+        desc_budget = _bank_budget(layout, entry.get("layout", ""), "TRANSACTION_DESC")
+        desc_fit = fit_text(
+            txn["description"],
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=font_sizes["body"],
+        )
+        draw_fitted_left(
+            draw,
+            txn["description"],
+            col_desc_x,
+            y,
+            budget=desc_budget,
+            nominal_size=font_sizes["body"],
+            line_spacing=row_height,
+        )
 
         if txn["debit"] != "NOT_FOUND":
             draw_text_right(
@@ -219,7 +242,7 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
                 y=y,
                 font=font_body,
             )
-        y += row_height
+        y += row_height * len(desc_fit.lines)
 
     # -- Bottom rule --
     draw_separator_line(draw, margin, right_edge, y, color="black")
@@ -399,14 +422,25 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 draw.line([(margin, y), (right_edge, y)], fill="black")
             draw.text((margin + 8, y + 10), txn["date"], font=font_body, fill="black")
 
-        # Description
-        desc = txn["description"]
-        max_desc_w = col_desc_right - col_date_right - 16
-        bbox = font_body.getbbox(desc)
-        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
-            desc = desc[:-1]
-            bbox = font_body.getbbox(desc)
-        draw.text((col_date_right + 8, y + 10), desc, font=font_body, fill="black")
+        # Fit description losslessly (wrap) — never silently truncate.
+        desc_budget = _bank_budget(layout, entry.get("layout", ""), "TRANSACTION_DESC")
+        desc_fit = fit_text(
+            txn["description"],
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=font_sizes["body"],
+        )
+        draw_fitted_left(
+            draw,
+            txn["description"],
+            col_date_right + 8,
+            y + 10,
+            budget=desc_budget,
+            nominal_size=font_sizes["body"],
+            line_spacing=row_height,
+        )
 
         # Amounts (no $ prefix — Westpac style)
         if txn["debit"] != "NOT_FOUND":
@@ -426,7 +460,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 font=font_body,
             )
 
-        y += row_height
+        y += row_height * len(desc_fit.lines)
 
     # -- Table outer borders and vertical column lines --
     draw.line([(margin, y), (right_edge, y)], fill="black")
@@ -548,18 +582,30 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
                 )
                 y += row_height
 
-        # Indented transaction description
-        desc = txn["description"]
-        max_desc_w = col_debit_right - col_desc_x - 200
-        bbox = font_body.getbbox(desc)
-        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
-            desc = desc[:-1]
-            bbox = font_body.getbbox(desc)
-        draw.text((col_desc_x + 20, y + 8), desc, font=font_body, fill="black")
+        # Fit description losslessly (wrap) — never silently truncate.
+        desc_budget = _bank_budget(layout, entry.get("layout", ""), "TRANSACTION_DESC")
+        desc_fit = fit_text(
+            txn["description"],
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=font_sizes["body"],
+        )
+        draw_fitted_left(
+            draw,
+            txn["description"],
+            col_desc_x + 20,
+            y + 8,
+            budget=desc_budget,
+            nominal_size=font_sizes["body"],
+            line_spacing=row_height,
+        )
 
         # Reference number with dotted leader (if enabled)
         if layout.get("show_references"):
-            ref_num = str(hash(txn["description"]) % 10**10).zfill(10)
+            ref_digest = hashlib.sha256(txn["description"].encode()).hexdigest()
+            ref_num = str(int(ref_digest, 16) % 10**10).zfill(10)
             ref_text = f"Ref: {ref_num}"
             dots = "." * 40
             draw.text((col_desc_x + 20, y + 34), f"{ref_text}{dots}", font=font_small, fill="#999999")
@@ -590,7 +636,7 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
             )
 
         ref_extra = 32 if layout.get("show_references") else 0
-        y += row_height + ref_extra
+        y += row_height * len(desc_fit.lines) + ref_extra
 
     # -- Carried forward --
     if layout.get("show_brought_forward") and txns:
@@ -698,13 +744,25 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     for txn in txns:
         draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
 
-        desc = txn["description"]
-        max_desc_w = col_debit_right - col_desc_x - 220
-        bbox = font_body.getbbox(desc)
-        while bbox[2] - bbox[0] > max_desc_w and len(desc) > 10:
-            desc = desc[:-1]
-            bbox = font_body.getbbox(desc)
-        draw.text((col_desc_x, y), desc, font=font_body, fill="black")
+        # Fit description losslessly (wrap) — never silently truncate.
+        desc_budget = _bank_budget(layout, entry.get("layout", ""), "TRANSACTION_DESC")
+        desc_fit = fit_text(
+            txn["description"],
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=font_sizes["body"],
+        )
+        draw_fitted_left(
+            draw,
+            txn["description"],
+            col_desc_x,
+            y,
+            budget=desc_budget,
+            nominal_size=font_sizes["body"],
+            line_spacing=row_height,
+        )
 
         if txn["debit"] != "NOT_FOUND":
             debit_val = Decimal(txn["debit"])
@@ -734,7 +792,7 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
                 y=y,
                 font=font_body,
             )
-        y += row_height
+        y += row_height * len(desc_fit.lines)
 
     # -- Totals row --
     if layout.get("show_totals_row"):

@@ -11,10 +11,14 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    draw_fitted_left,
     draw_text_right,
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/invoices.yml"
 
 
 def _parse_line_items(fields: dict) -> list[dict]:
@@ -78,15 +82,21 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
     """
     layout = _normalize_layout(layout)
     fields = entry["fields"]
+    layout_id = entry.get("layout", "")
     width = layout.get("page_width", 2480)
     height = layout.get("page_height", 3508)
     margin = layout.get("margin", 150)
     content_width = layout.get("content_width", width - 2 * margin)
     right_edge = margin + content_width
 
+    size_body = layout.get("font_size_body", 22)
+    size_small = layout.get("font_size_small", 18)
     font_h = load_font(layout.get("font_size_header", 32), bold=True)
-    font_b = load_font(layout.get("font_size_body", 22))
-    font_s = load_font(layout.get("font_size_small", 18))
+    font_b = load_font(size_body)
+    font_s = load_font(size_small)
+
+    def _b(field: str) -> dict:
+        return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
@@ -165,11 +175,13 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
                         [(margin, y), (right_edge, y + row_h)],
                         outline="#CCCCCC",
                     )
-                draw.text(
-                    (col_x["description"], y + 12),
+                draw_fitted_left(
+                    draw,
                     item["description"],
-                    font=font_s,
-                    fill="black",
+                    col_x["description"],
+                    y + 12,
+                    budget=_b("LINE_ITEM_DESC"),
+                    nominal_size=size_small,
                 )
                 draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
                 if item["price"]:
@@ -229,24 +241,59 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
             # Named section — dispatch by section name
             sec_name = section.get("name", "")
             if sec_name == "seller_details":
-                draw.text((margin, y), fields.get("SUPPLIER_NAME", ""), font=font_b, fill="black")
-                y += 48
-                draw.text((margin, y), fields.get("BUSINESS_ADDRESS", ""), font=font_s, fill="black")
-                y += 40
+                y = draw_fitted_left(
+                    draw,
+                    fields.get("SUPPLIER_NAME", ""),
+                    margin,
+                    y,
+                    budget=_b("SUPPLIER_NAME"),
+                    nominal_size=size_body,
+                    line_spacing=48,
+                )
+                y = draw_fitted_left(
+                    draw,
+                    fields.get("BUSINESS_ADDRESS", ""),
+                    margin,
+                    y,
+                    budget=_b("BUSINESS_ADDRESS"),
+                    nominal_size=size_small,
+                    line_spacing=40,
+                )
                 abn = fields.get("BUSINESS_ABN", "")
-                draw.text((margin, y), f"ABN: {abn}", font=font_s, fill="black")
-                y += 64
+                y = draw_fitted_left(
+                    draw,
+                    f"ABN: {abn}",
+                    margin,
+                    y,
+                    budget=_b("ABN_LINE"),
+                    nominal_size=size_small,
+                    line_spacing=64,
+                )
             elif sec_name == "buyer_details":
                 payer = fields.get("PAYER_NAME", "")
                 if payer:
                     draw.text((margin, y), "Bill To:", font=font_s, fill="gray")
                     y += 40
-                    draw.text((margin, y), payer, font=font_b, fill="black")
-                    y += 44
+                    y = draw_fitted_left(
+                        draw,
+                        payer,
+                        margin,
+                        y,
+                        budget=_b("PAYER_NAME"),
+                        nominal_size=size_body,
+                        line_spacing=44,
+                    )
                     addr = fields.get("PAYER_ADDRESS", "")
                     if addr:
-                        draw.text((margin, y), addr, font=font_s, fill="black")
-                        y += 44
+                        y = draw_fitted_left(
+                            draw,
+                            addr,
+                            margin,
+                            y,
+                            budget=_b("PAYER_ADDRESS"),
+                            nominal_size=size_small,
+                            line_spacing=44,
+                        )
                     y += 28
             elif sec_name == "invoice_metadata":
                 draw.text(
@@ -284,11 +331,13 @@ def render_invoice(entry: dict, layout: dict) -> Image.Image:
             draw.text((col_x["total"], y + 12), "Total", font=font_s, fill="black")
             y += row_h
             for item in items:
-                draw.text(
-                    (col_x["description"], y + 12),
+                draw_fitted_left(
+                    draw,
                     item["description"],
-                    font=font_s,
-                    fill="black",
+                    col_x["description"],
+                    y + 12,
+                    budget=_b("LINE_ITEM_DESC"),
+                    nominal_size=size_small,
                 )
                 draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
                 if item["price"]:

@@ -5,6 +5,7 @@ Font loading, text drawing helpers, ABN/GST validation, and image degradation.
 
 import io
 import random
+from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
@@ -14,6 +15,15 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
 _FONT_CACHE: dict[tuple[int, bool, bool, bool], Font] = {}
+
+# Maps id(font) -> Path it was loaded from, so fit measurement can assert it is
+# using the bundled DejaVu face rather than a silent system fallback.
+_FONT_SOURCE: dict[int, Path] = {}
+
+
+class FontSourceError(RuntimeError):
+    """Raised when a font used for measurement is not the bundled DejaVu face."""
+
 
 # Bundled fonts directory (committed to repo for cross-platform consistency)
 _BUNDLED_FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
@@ -80,6 +90,7 @@ def load_font(
         if p.exists():
             try:
                 font = ImageFont.truetype(str(p), size)
+                _FONT_SOURCE[id(font)] = p
                 break
             except OSError:
                 continue
@@ -95,6 +106,269 @@ def load_font(
 
     _FONT_CACHE[key] = font
     return font
+
+
+def font_source_path(font: Font) -> Path | None:
+    """Return the file a font was loaded from, or None if unknown."""
+    return _FONT_SOURCE.get(id(font))
+
+
+def assert_bundled_font(font: Font) -> None:
+    """Fail loud if `font` was not loaded from the bundled fonts/ directory.
+
+    load_font() silently falls back to system fonts when a bundled file is
+    missing; measuring against a system font would diverge Mac<->PROD and
+    silently corrupt fit decisions. This enforces the bundled-first guarantee.
+
+    Raises:
+        FontSourceError: the font is not a bundled DejaVu face.
+    """
+    src = font_source_path(font)
+    if src is not None and _BUNDLED_FONTS_DIR in src.parents:
+        return
+    raise FontSourceError(
+        "Font used for measurement is not a bundled font.\n"
+        f"  What:     fit measurement requires a bundled DejaVu face; got {src}.\n"
+        f"  Where:    bundled fonts directory {_BUNDLED_FONTS_DIR}\n"
+        "  Expected: fonts/DejaVuSans.ttf (and -Bold / Mono variants) present so\n"
+        "            load_font() resolves bundled-first, not a system fallback.\n"
+        "  Recover:  restore/reinstall the fonts/ directory from the repo, then rerun."
+    )
+
+
+FitStrategy = str  # one of: "shrink", "wrap", "shrink_then_wrap"
+_FIT_STRATEGIES = ("shrink", "wrap", "shrink_then_wrap")
+
+
+@dataclass(frozen=True)
+class FitResult:
+    """Lossless render plan for a field: the full string laid out to fit its box."""
+
+    lines: list[str]
+    size: int
+    line_height: int
+
+
+class FitError(RuntimeError):
+    """Raised when a string cannot fit its box even at the font floor / max lines."""
+
+
+def _text_width(text: str, size: int, *, mono: bool, bold: bool) -> int:
+    """Pixel width of `text` at `size`, measured against the bundled font."""
+    font = load_font(size, mono=mono, bold=bold)
+    assert_bundled_font(font)
+    bbox = font.getbbox(text)
+    return int(bbox[2] - bbox[0])
+
+
+def _fit_error_message(text: str, *, width: int, min_font: int, max_lines: int, fit: str) -> str:
+    """Four-element diagnostic body (caller prepends entry/field context)."""
+    return (
+        "string cannot fit its box losslessly.\n"
+        f"  What:     {text!r} exceeds width {width}px at min_font {min_font} "
+        f"across max_lines {max_lines} (fit={fit}).\n"
+        "  Where:    the field's `field_budgets` entry in its config/layouts/*.yml.\n"
+        "  Expected: width >= measured, or larger max_lines, or lower min_font; "
+        "fit one of shrink|wrap|shrink_then_wrap.\n"
+        "  Recover:  raise `width` (or `max_lines`) for this field in the layout YAML; "
+        "never truncate the string."
+    )
+
+
+def _wrap_to_width(text: str, *, width: int, size: int, mono: bool, bold: bool) -> list[str] | None:
+    """Greedy word-wrap at `size`.
+
+    Returns lines each within `width`, or None if a single word cannot fit
+    (caller treats None as unfittable — never splits a word / truncates).
+    """
+    words = text.split(" ")
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        if _text_width(word, size, mono=mono, bold=bold) > width:
+            return None  # unbreakable word wider than the box
+        candidate = word if not current else f"{current} {word}"
+        if _text_width(candidate, size, mono=mono, bold=bold) <= width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
+
+
+def fit_text(
+    text: str,
+    *,
+    width: int,
+    fit: FitStrategy,
+    min_font: int,
+    max_lines: int,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+) -> FitResult:
+    """Compute a lossless layout of `text` fitting within `width` px.
+
+    Never truncates. Applies the field's `fit` strategy and raises FitError if
+    the full string cannot fit even at the font floor across max_lines.
+
+    Args:
+        text: The full string to lay out (rendered verbatim).
+        width: Horizontal box in pixels the string must fit within.
+        fit: Strategy — "shrink", "wrap", or "shrink_then_wrap".
+        min_font: Smallest font size shrinking may reach.
+        max_lines: Lines the field may occupy.
+        nominal_size: The field's default font size.
+        mono: Measure with the monospace family.
+        bold: Measure with the bold weight.
+
+    Returns:
+        FitResult with the laid-out lines, chosen size, and line height.
+
+    Raises:
+        FitError: the string cannot fit losslessly.
+        ValueError: unknown fit strategy.
+    """
+    if fit not in _FIT_STRATEGIES:
+        raise ValueError(f"unknown fit strategy {fit!r}; allowed: {_FIT_STRATEGIES}")
+
+    def line_height(size: int) -> int:
+        fnt = load_font(size, mono=mono, bold=bold)
+        return int(fnt.size) if isinstance(fnt, ImageFont.FreeTypeFont) else size
+
+    # Fits as-is at nominal size on one line -> unchanged (day-one path).
+    if _text_width(text, nominal_size, mono=mono, bold=bold) <= width:
+        return FitResult(lines=[text], size=nominal_size, line_height=line_height(nominal_size))
+
+    if fit == "shrink":
+        for size in range(nominal_size - 1, min_font - 1, -1):
+            if _text_width(text, size, mono=mono, bold=bold) <= width:
+                return FitResult(lines=[text], size=size, line_height=line_height(size))
+        raise FitError(
+            _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+        )
+
+    if fit == "wrap":
+        lines = _wrap_to_width(text, width=width, size=nominal_size, mono=mono, bold=bold)
+        if lines is None or len(lines) > max_lines:
+            raise FitError(
+                _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+            )
+        return FitResult(lines=lines, size=nominal_size, line_height=line_height(nominal_size))
+
+    if fit == "shrink_then_wrap":
+        for size in range(nominal_size, min_font - 1, -1):
+            if _text_width(text, size, mono=mono, bold=bold) <= width:
+                return FitResult(lines=[text], size=size, line_height=line_height(size))
+            wrapped = _wrap_to_width(text, width=width, size=size, mono=mono, bold=bold)
+            if wrapped is not None and len(wrapped) <= max_lines:
+                return FitResult(lines=wrapped, size=size, line_height=line_height(size))
+        raise FitError(
+            _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
+        )
+
+    raise ValueError(f"unhandled fit strategy {fit!r}")
+
+
+def _fit_from_budget(text: str, budget: dict, nominal_size: int, *, mono: bool, bold: bool) -> FitResult:
+    """Run fit_text using a field's budget dict (width/fit/min_font/max_lines)."""
+    return fit_text(
+        text,
+        width=budget["width"],
+        fit=budget["fit"],
+        min_font=budget["min_font"],
+        max_lines=budget["max_lines"],
+        nominal_size=nominal_size,
+        mono=mono,
+        bold=bold,
+    )
+
+
+def draw_fitted_left(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+    line_spacing: int | None = None,
+) -> int:
+    """Left-align `text` at x, fitting it to its budget. Returns the advanced y.
+
+    `line_spacing` overrides the per-line vertical advance (e.g. the layout's
+    line_height); when None the font's own height is used. Advancing by a
+    caller-supplied line_spacing keeps the single-line case pixel-identical to
+    the pre-fit renderer while multi-line wrap pushes following content down.
+    """
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
+    for line in r.lines:
+        draw.text((x, y), line, font=font, fill=fill)
+        y += spacing
+    return y
+
+
+def draw_fitted_center(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    y: int,
+    canvas_width: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+    line_spacing: int | None = None,
+) -> int:
+    """Center `text` within canvas_width, fitting it to its budget. Returns advanced y.
+
+    See draw_fitted_left for `line_spacing` semantics.
+    """
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
+    for line in r.lines:
+        bbox = font.getbbox(line)
+        w = bbox[2] - bbox[0]
+        draw.text(((canvas_width - w) // 2, y), line, font=font, fill=fill)
+        y += spacing
+    return y
+
+
+def draw_fitted_right(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x_right: int,
+    y: int,
+    *,
+    budget: dict,
+    nominal_size: int,
+    mono: bool = False,
+    bold: bool = False,
+    fill: str = "black",
+    line_spacing: int | None = None,
+) -> int:
+    """Right-align `text` to x_right, fitting it to its budget. Returns advanced y.
+
+    See draw_fitted_left for `line_spacing` semantics.
+    """
+    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
+    font = load_font(r.size, mono=mono, bold=bold)
+    spacing = line_spacing if line_spacing is not None else r.line_height
+    for line in r.lines:
+        bbox = font.getbbox(line)
+        w = bbox[2] - bbox[0]
+        draw.text((x_right - w, y), line, font=font, fill=fill)
+        y += spacing
+    return y
 
 
 def draw_text_right(

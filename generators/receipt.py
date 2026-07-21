@@ -10,6 +10,9 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    draw_fitted_center,
+    draw_fitted_left,
+    draw_fitted_right,
     draw_line_item,
     draw_separator,
     draw_text_center,
@@ -17,6 +20,9 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/receipts.yml"
 
 _STAFF_NAMES = [
     "Sarah",
@@ -128,6 +134,7 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
     """
     fields = entry["fields"]
     case_id = entry.get("case_id", "")
+    layout_id = entry.get("layout", "")
     width = layout.get("width", 640)
     margin = layout.get("margin", 40)
     line_h = layout.get("line_height", 36)
@@ -149,20 +156,53 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
         sec_type = section.get("type")
 
         if sec_type == "header":
-            draw_text_center(draw, fields.get("SUPPLIER_NAME", ""), y, width, font_bold)
-            y += line_h
+            y = draw_fitted_center(
+                draw,
+                fields.get("SUPPLIER_NAME", ""),
+                y,
+                width,
+                budget=field_budget(layout, layout_id, "SUPPLIER_NAME", layout_path=_LAYOUT_PATH),
+                nominal_size=font_size,
+                mono=is_mono,
+                bold=True,
+                line_spacing=line_h,
+            )
             addr = fields.get("BUSINESS_ADDRESS", "")
             if addr:
-                draw_text_center(draw, addr, y, width, font)
-                y += line_h
+                y = draw_fitted_center(
+                    draw,
+                    addr,
+                    y,
+                    width,
+                    budget=field_budget(layout, layout_id, "BUSINESS_ADDRESS", layout_path=_LAYOUT_PATH),
+                    nominal_size=font_size,
+                    mono=is_mono,
+                    line_spacing=line_h,
+                )
             abn = fields.get("BUSINESS_ABN", "")
             if abn:
-                draw_text_center(draw, f"ABN: {abn}", y, width, font)
-                y += line_h
+                y = draw_fitted_center(
+                    draw,
+                    f"ABN: {abn}",
+                    y,
+                    width,
+                    budget=field_budget(layout, layout_id, "ABN_LINE", layout_path=_LAYOUT_PATH),
+                    nominal_size=font_size,
+                    mono=is_mono,
+                    line_spacing=line_h,
+                )
             phone = fields.get("BUSINESS_PHONE", "")
             if phone:
-                draw_text_center(draw, f"Ph: {phone}", y, width, font)
-                y += line_h
+                y = draw_fitted_center(
+                    draw,
+                    f"Ph: {phone}",
+                    y,
+                    width,
+                    budget=field_budget(layout, layout_id, "PHONE", layout_path=_LAYOUT_PATH),
+                    nominal_size=font_size,
+                    mono=is_mono,
+                    line_spacing=line_h,
+                )
             y += line_h // 4
 
         elif sec_type == "receipt_meta":
@@ -208,7 +248,26 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 if qty and qty != "1":
                     desc = f"{qty}x {desc}"
                 amount_str = f"{Decimal(total):,.2f}" if total else ""
-                draw_line_item(draw, desc, amount_str, y, font, margin, width)
+                draw_fitted_left(
+                    draw,
+                    desc,
+                    margin,
+                    y,
+                    budget=field_budget(layout, layout_id, "LINE_ITEM_DESC", layout_path=_LAYOUT_PATH),
+                    nominal_size=font_size,
+                    mono=is_mono,
+                    line_spacing=line_h,
+                )
+                draw_fitted_right(
+                    draw,
+                    amount_str,
+                    width - margin,
+                    y,
+                    budget=field_budget(layout, layout_id, "LINE_ITEM_AMOUNT", layout_path=_LAYOUT_PATH),
+                    nominal_size=font_size,
+                    mono=is_mono,
+                    line_spacing=line_h,
+                )
                 y += line_h
 
         elif sec_type == "totals":
