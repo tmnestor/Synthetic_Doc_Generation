@@ -31,4 +31,5 @@ dependencies:
       - faker==40.8.0
       # Camera-scan degradation / rectification (cv2) — degrade_camera_scan.py,
       # rectify_camera_scan.py. Not used by the core generators pipeline.
-      - opencv-python-headless
+      # Pinned so camera-scan output stays byte-stable across rebuilds.
+      - opencv-python-headless==4.13.0.92
