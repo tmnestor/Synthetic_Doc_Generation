@@ -23,7 +23,7 @@ dependencies:
       # Pinned: Pillow's FreeType version drives font getbbox() metrics, which
       # drive every fit_text() shrink/wrap decision and the rendered pixels.
       # Pinning keeps images and fit results byte-stable across rebuilds / Mac<->PROD.
-      - pillow==12.3.0
+      - pillow==12.2.0
       - numpy
       - pyyaml
       - typer
