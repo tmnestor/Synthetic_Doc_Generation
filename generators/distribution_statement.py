@@ -12,6 +12,8 @@ from PIL import Image, ImageDraw
 
 from generators.common import (
     Font,
+    draw_fitted_left,
+    draw_fitted_right,
     draw_separator_line,
     draw_table,
     draw_text_center,
@@ -19,6 +21,14 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/distribution_statements.yml"
+
+
+def _budget(layout: dict, layout_id: str, field: str) -> dict:
+    """Look up a field budget for a distribution statement layout."""
+    return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
 
 
 def _subst(text: str, fields: dict) -> str:
@@ -70,9 +80,10 @@ def _draw_column_block(
     y: int,
     x: int,
     font_sub: Font,
-    font_b: Font,
     font_s: Font,
     accent: str,
+    budget: dict,
+    nominal_size: int,
 ) -> int:
     """Draw one column of a two_column section; return its bottom y."""
     title = block.get("title", "")
@@ -82,8 +93,15 @@ def _draw_column_block(
     for fd in block.get("fields", []):
         draw.text((x, y), f"{fd.get('label', '')}:", font=font_s, fill="gray")
         y += 26
-        draw.text((x + 20, y), str(fields.get(fd.get("field", ""), "")), font=font_b, fill="black")
-        y += 38
+        y = draw_fitted_left(
+            draw,
+            str(fields.get(fd.get("field", ""), "")),
+            x + 20,
+            y,
+            budget=budget,
+            nominal_size=nominal_size,
+            line_spacing=38,
+        )
     return y
 
 
@@ -103,6 +121,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
     height = page_dims.get("height", 3508)
     margin = layout.get("margin", 140)
     right_edge = width - margin
+    layout_id = entry.get("layout", "")
 
     font_sizes = layout.get("font_sizes", {})
     colors = layout.get("colors", {})
@@ -158,19 +177,34 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 value = str(fields.get(fd.get("field", ""), ""))
                 if fd.get("format") == "amount":
                     draw.text((margin + 20, y), label, font=font_b, fill="black")
-                    draw_text_right(draw, _fmt(value), right_edge, y, font_b)
+                    draw_fitted_right(
+                        draw,
+                        _fmt(value),
+                        right_edge,
+                        y,
+                        budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
+                        nominal_size=font_sizes.get("body", 22),
+                    )
                     draw_separator_line(draw, margin + 20, right_edge, y + 34, color=line_color, width=1)
                     y += 52
                 else:
                     draw.text((margin + 20, y), f"{label}:", font=font_s, fill="gray")
                     y += 26
-                    draw.text((margin + 40, y), value, font=font_b, fill="black")
-                    y += 38
+                    y = draw_fitted_left(
+                        draw,
+                        value,
+                        margin + 40,
+                        y,
+                        budget=_budget(layout, layout_id, "TEXT_VALUE"),
+                        nominal_size=font_sizes.get("body", 22),
+                        line_spacing=38,
+                    )
             y += 16
 
         elif sec_type == "two_column":
             mid = (margin + right_edge) // 2
             start_y = y
+            body_size = font_sizes.get("body", 22)
             y_left = _draw_column_block(
                 draw,
                 section.get("left", {}),
@@ -178,9 +212,10 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 start_y,
                 margin,
                 font_sub,
-                font_b,
                 font_s,
                 accent_color,
+                _budget(layout, layout_id, "COLUMN_TEXT_LEFT"),
+                body_size,
             )
             y_right = _draw_column_block(
                 draw,
@@ -189,9 +224,10 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 start_y,
                 mid + 20,
                 font_sub,
-                font_b,
                 font_s,
                 accent_color,
+                _budget(layout, layout_id, "COLUMN_TEXT_RIGHT"),
+                body_size,
             )
             y = max(y_left, y_right) + 16
 
@@ -233,16 +269,37 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
         elif sec_type == "letter_meta":
             date_field = section.get("date_field", "")
             if date_field:
-                draw_text_right(draw, str(fields.get(date_field, "")), right_edge, y, font_b)
+                draw_fitted_right(
+                    draw,
+                    str(fields.get(date_field, "")),
+                    right_edge,
+                    y,
+                    budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
+                    nominal_size=font_sizes.get("body", 22),
+                )
                 y += 44
             for fkey in section.get("addressee_fields", []):
-                draw.text((margin, y), str(fields.get(fkey, "")), font=font_b, fill="black")
-                y += 34
+                y = draw_fitted_left(
+                    draw,
+                    str(fields.get(fkey, "")),
+                    margin,
+                    y,
+                    budget=_budget(layout, layout_id, "ADDRESSEE_VALUE"),
+                    nominal_size=font_sizes.get("body", 22),
+                    line_spacing=34,
+                )
             y += 16
             salutation = section.get("salutation", "")
             if salutation:
-                draw.text((margin, y), _subst(salutation, fields), font=font_b, fill="black")
-                y += 44
+                y = draw_fitted_left(
+                    draw,
+                    _subst(salutation, fields),
+                    margin,
+                    y,
+                    budget=_budget(layout, layout_id, "ADDRESSEE_VALUE"),
+                    nominal_size=font_sizes.get("body", 22),
+                    line_spacing=44,
+                )
 
         elif sec_type == "letter_body":
             for para in section.get("paragraphs", []):
@@ -262,8 +319,15 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
         elif sec_type == "signature_block":
             y += section.get("gap", 30)
             for line in section.get("lines", []):
-                draw.text((margin, y), _subst(line, fields), font=font_b, fill="black")
-                y += 40
+                y = draw_fitted_left(
+                    draw,
+                    _subst(line, fields),
+                    margin,
+                    y,
+                    budget=_budget(layout, layout_id, "ADDRESSEE_VALUE"),
+                    nominal_size=font_sizes.get("body", 22),
+                    line_spacing=40,
+                )
 
         elif sec_type == "footer":
             draw_text_center(draw, section.get("text", ""), height - 60, width, font_s, fill="gray")
