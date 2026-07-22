@@ -10,6 +10,7 @@ screened against a real-name blocklist), and sample / NonRepeatingSampler
 `random.Random`, so a reseed is reproducible and diffable run-to-run.
 """
 
+import random
 from pathlib import Path
 
 import yaml
@@ -82,3 +83,50 @@ def load_pools(path: Path = _DATA_POOLS_PATH) -> dict:
                     raise ValueError(_missing_key_error(path, f"{key}.{sub}", []))
 
     return data
+
+
+def sample(rng: random.Random, pool: list):
+    """Seeded single draw from a non-empty pool."""
+    if not pool:
+        raise ValueError(
+            "content_engine.sample: pool is empty; cannot draw.\n"
+            "  What:     sample() was called with an empty pool.\n"
+            "  Where:    caller of generators.content_engine.sample.\n"
+            "  Expected: a non-empty list.\n"
+            "  Recover:  widen the source pool in config/data_pools.yml before sampling from it."
+        )
+    return rng.choice(pool)
+
+
+class NonRepeatingSampler:
+    """Cycles a shuffled copy of `pool`, reshuffling on exhaustion.
+
+    Replaces `pool[i % len(pool)]`: draws are a random permutation of the
+    pool each pass (not the same fixed order every cycle), so entity
+    selection varies and de-correlates across doc types even when two
+    samplers share the same underlying pool.
+    """
+
+    def __init__(self, rng: random.Random, pool: list) -> None:
+        if not pool:
+            raise ValueError(
+                "content_engine.NonRepeatingSampler: pool is empty; cannot draw.\n"
+                "  What:     NonRepeatingSampler was constructed with an empty pool.\n"
+                "  Where:    caller of generators.content_engine.NonRepeatingSampler.\n"
+                "  Expected: a non-empty list.\n"
+                "  Recover:  widen the source pool in config/data_pools.yml before sampling from it."
+            )
+        self._rng = rng
+        self._pool = list(pool)
+        self._order: list = []
+        self._i = 0
+
+    def draw(self):
+        """Return the next item; reshuffles a fresh permutation on exhaustion."""
+        if self._i >= len(self._order):
+            self._order = list(self._pool)
+            self._rng.shuffle(self._order)
+            self._i = 0
+        item = self._order[self._i]
+        self._i += 1
+        return item
