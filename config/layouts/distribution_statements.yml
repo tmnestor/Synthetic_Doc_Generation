@@ -192,6 +192,10 @@ layouts:
       COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
       COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
       ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
+      # Table column geometry: Component col 1000px (desc width 1000-8=992);
+      # Amount col 320px right-anchored at x_right-20 (usable 320-20=300).
+      DESC_COL: {width: 992, fit: wrap, min_font: 12, max_lines: 2}
+      TABLE_AMOUNT: {width: 300, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 42
       subheader: 26
@@ -270,6 +274,10 @@ layouts:
       COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
       COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
       ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
+      # Table column geometry: Code col 140px + Description col 860px (desc width
+      # 860-8=852); Amount col 320px right-anchored at x_right-20 (usable 320-20=300).
+      DESC_COL: {width: 852, fit: wrap, min_font: 12, max_lines: 2}
+      TABLE_AMOUNT: {width: 300, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 40
       subheader: 26

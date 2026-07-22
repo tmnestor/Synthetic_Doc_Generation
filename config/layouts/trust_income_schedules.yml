@@ -18,7 +18,7 @@ layouts:
       grid_line: "#CCCCCC"
       label_code_color: "#0066CC"
     field_budgets:
-      TEXT_VALUE: {width: 1340, fit: wrap, min_font: 12, max_lines: 2}
+      TEXT_VALUE: {width: 1332, fit: wrap, min_font: 12, max_lines: 2}
       DESC_COL: {width: 792, fit: wrap, min_font: 12, max_lines: 2}
       AMOUNT_VALUE: {width: 452, fit: shrink, min_font: 12, max_lines: 1}
     sections:
