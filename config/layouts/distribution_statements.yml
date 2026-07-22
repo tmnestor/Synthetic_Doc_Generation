@@ -369,6 +369,7 @@ layouts:
       COLUMN_TEXT_LEFT: {width: 632, fit: wrap, min_font: 12, max_lines: 2}
       COLUMN_TEXT_RIGHT: {width: 592, fit: wrap, min_font: 12, max_lines: 2}
       ADDRESSEE_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      PARAGRAPH: {width: 1280, fit: wrap, min_font: 12, max_lines: 1}
     font_sizes:
       header: 38
       subheader: 26
@@ -448,6 +449,7 @@ layouts:
       COLUMN_TEXT_LEFT: {width: 632, fit: wrap, min_font: 12, max_lines: 2}
       COLUMN_TEXT_RIGHT: {width: 592, fit: wrap, min_font: 12, max_lines: 2}
       ADDRESSEE_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      PARAGRAPH: {width: 1280, fit: wrap, min_font: 12, max_lines: 1}
     font_sizes:
       header: 34
       subheader: 24

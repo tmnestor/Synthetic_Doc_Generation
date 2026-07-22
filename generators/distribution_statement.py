@@ -18,6 +18,7 @@ from generators.common import (
     draw_table,
     draw_text_center,
     draw_text_right,
+    fit_text,
     fmt_amount,
     load_font,
 )
@@ -304,8 +305,20 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 )
 
         elif sec_type == "letter_body":
+            para_budget = _budget(layout, layout_id, "PARAGRAPH")
+            body_size = font_sizes.get("body", 22)
             for para in section.get("paragraphs", []):
-                y = _draw_paragraph(draw, _subst(para, fields), y, margin, right_edge, font_b)
+                text = _subst(para, fields)
+                for word in text.split():
+                    fit_text(
+                        word,
+                        width=para_budget["width"],
+                        fit=para_budget["fit"],
+                        min_font=para_budget["min_font"],
+                        max_lines=para_budget["max_lines"],
+                        nominal_size=body_size,
+                    )  # raises FitError if a word can't fit the column -> backstop catches it
+                y = _draw_paragraph(draw, text, y, margin, right_edge, font_b)
                 y += 18
 
         elif sec_type == "separator":
