@@ -5,6 +5,9 @@ layouts:
       width: 1600
       height: 3508
     margin: 120
+    field_budgets:
+      TEXT_VALUE: {width: 1332, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
     font_sizes:
       header: 40
       subheader: 28
