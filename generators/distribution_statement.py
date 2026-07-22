@@ -257,13 +257,15 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 rows=rows,
                 total=total,
                 font_sub=font_sub,
-                font_body=font_b,
+                body_size=font_sizes.get("body", 22),
                 font_small=font_s,
                 font_label_code=font_lc,
                 section_bg=colors.get("section_bg", "#F0F0F0"),
                 header_row_bg=colors.get("header_row", "#E8E8E8"),
                 grid_line=line_color,
                 label_code_color=colors.get("label_code_color", "#0066CC"),
+                desc_budget=_budget(layout, layout_id, "DESC_COL"),
+                amount_budget=_budget(layout, layout_id, "TABLE_AMOUNT"),
             )
 
         elif sec_type == "letter_meta":

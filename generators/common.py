@@ -602,24 +602,34 @@ def draw_table(
     rows: list[dict],
     total: dict | None,
     font_sub: Font,
-    font_body: Font,
+    body_size: int,
     font_small: Font,
     font_label_code: Font,
     section_bg: str,
     header_row_bg: str,
     grid_line: str,
     label_code_color: str,
+    desc_budget: dict,
+    amount_budget: dict,
     row_h: int = 52,
 ) -> int:
     """Draw a bordered component table and return the new y coordinate.
 
-    Presentation-only: callers pass pre-formatted string values.
+    Fit-safe: each row's description wraps within its column and grows the row
+    height (matching cc_statement.py's `_draw_transactions` row-growth), keeping
+    the label code and amount on the first line and never colliding downward; the
+    amount cell shrinks to fit its column. Presentation-only: callers pass
+    pre-formatted string values plus the description/amount pixel budgets.
 
     Args:
         columns: each {"header", "width", "kind"} where kind is one of
             "label_code" | "description" | "amount".
         rows: each {"label_code", "description", "value"} (value pre-formatted).
-        total: optional {"description", "value"} drawn as a final row.
+        total: optional {"description", "value"} appended as a final row (flows
+            through the same fit-safe per-row loop).
+        body_size: nominal font size for description and amount cells.
+        desc_budget: fit budget (width/fit/min_font/max_lines) for descriptions.
+        amount_budget: fit budget (width/fit/min_font/max_lines) for amounts.
 
     Returns:
         The y coordinate below the table.
@@ -647,6 +657,19 @@ def draw_table(
         )
 
     for row in all_rows:
+        desc = row.get("description", "")
+        # Fit the description first so a wrapped description grows the row height,
+        # keeping the label code/amount on the first line and never colliding downward.
+        desc_fit = fit_text(
+            desc,
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=body_size,
+        )
+        this_row_h = row_h * len(desc_fit.lines)
+
         draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
         for col, ox in zip(columns, offsets, strict=True):
             kind = col.get("kind", "description")
@@ -656,10 +679,25 @@ def draw_table(
                     draw.text((ox + 30, y + 12), code, font=font_label_code, fill=label_code_color)
             elif kind == "amount":
                 # amount text is right-anchored to x_right - 20, regardless of this column's offset
-                draw_text_right(draw, row.get("value", ""), x_right - 20, y + 14, font_body)
+                draw_fitted_right(
+                    draw,
+                    row.get("value", ""),
+                    x_right - 20,
+                    y + 14,
+                    budget=amount_budget,
+                    nominal_size=body_size,
+                )
             else:
-                draw.text((ox + 8, y + 14), row.get("description", ""), font=font_body, fill="black")
-        y += row_h
+                draw_fitted_left(
+                    draw,
+                    desc,
+                    ox + 8,
+                    y + 14,
+                    budget=desc_budget,
+                    nominal_size=body_size,
+                    line_spacing=row_h,
+                )
+        y += this_row_h
 
     draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
     return y + 20
