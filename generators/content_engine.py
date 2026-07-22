@@ -14,6 +14,7 @@ import random
 from pathlib import Path
 
 import yaml
+from faker import Faker
 
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
 
@@ -85,6 +86,50 @@ def load_pools(path: Path = _DATA_POOLS_PATH) -> dict:
     return data
 
 
+class ContentEngine:
+    """Seeded generator for fictional AU business/trust/person/address content."""
+
+    def __init__(self, pools: dict) -> None:
+        self.pools = pools
+        self._faker = Faker(pools["faker_config"]["locale"])
+        # Defined baseline state before any per-call reseed in _seed_faker();
+        # keeps a freshly-constructed engine deterministic even if a caller
+        # (e.g. a future primitive) drew from self._faker before seeding rng.
+        self._faker.seed_instance(pools["faker_config"]["seed_base"])
+        self._blocklist = {
+            name.lower()
+            for name in (
+                [r["name"] for r in pools["retailers"]]
+                + [p["name"] for p in pools["professional_services"]]
+                + pools["real_name_blocklist_extra"]
+            )
+        }
+
+    def _seed_faker(self, rng: random.Random) -> None:
+        """Reseed the engine's Faker instance from the injected rng stream."""
+        self._faker.seed_instance(rng.randint(0, 2**32 - 1))
+
+    def person(self, rng: random.Random) -> dict:
+        """Return a seeded en_AU person: {first_name, last_name, full_name}."""
+        self._seed_faker(rng)
+        first = self._faker.first_name()
+        last = self._faker.last_name()
+        return {"first_name": first, "last_name": last, "full_name": f"{first} {last}"}
+
+    def location(self, rng: random.Random) -> dict:
+        """Return a seeded {suburb, postcode, state} dict from the locations pool."""
+        return sample(rng, self.pools["locations"])
+
+    def address(self, rng: random.Random) -> str:
+        """Return a seeded AU-style address: "N Street St, Suburb ST PPPP"."""
+        self._seed_faker(rng)
+        street_num = self._faker.random_int(min=1, max=400)
+        street_name = self._faker.last_name()
+        street_type = sample(rng, self.pools["street_types"])
+        loc = self.location(rng)
+        return f"{street_num} {street_name} {street_type}, {loc['suburb']} {loc['state']} {loc['postcode']}"
+
+
 def sample(rng: random.Random, pool: list):
     """Seeded single draw from a non-empty pool."""
     if not pool:
@@ -130,3 +175,8 @@ class NonRepeatingSampler:
         item = self._order[self._i]
         self._i += 1
         return item
+
+
+def build_engine(path: Path = _DATA_POOLS_PATH) -> "ContentEngine":
+    """Load pools from `path` and construct a ContentEngine."""
+    return ContentEngine(load_pools(path))
