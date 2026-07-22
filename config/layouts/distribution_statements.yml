@@ -6,6 +6,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 140
+    field_budgets:
+      TEXT_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 44
       subheader: 28
@@ -93,6 +99,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 140
+    field_budgets:
+      TEXT_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 40
       subheader: 26
@@ -174,6 +186,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 140
+    field_budgets:
+      TEXT_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 42
       subheader: 26
@@ -246,6 +264,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 140
+    field_budgets:
+      TEXT_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 652, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 612, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1312, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 40
       subheader: 26
@@ -331,6 +355,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 160
+    field_budgets:
+      TEXT_VALUE: {width: 1232, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 632, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 592, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 38
       subheader: 26
@@ -404,6 +434,12 @@ layouts:
       width: 1600
       height: 3508
     margin: 160
+    field_budgets:
+      TEXT_VALUE: {width: 1232, fit: wrap, min_font: 12, max_lines: 2}
+      AMOUNT_VALUE: {width: 500, fit: shrink, min_font: 12, max_lines: 1}
+      COLUMN_TEXT_LEFT: {width: 632, fit: wrap, min_font: 12, max_lines: 2}
+      COLUMN_TEXT_RIGHT: {width: 592, fit: wrap, min_font: 12, max_lines: 2}
+      ADDRESSEE_VALUE: {width: 1272, fit: wrap, min_font: 12, max_lines: 2}
     font_sizes:
       header: 34
       subheader: 24
