@@ -10,13 +10,122 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    Font,
+    draw_fitted_left,
+    draw_fitted_right,
     draw_separator_line,
-    draw_table,
     draw_text_center,
     draw_text_right,
+    fit_text,
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/trust_income_schedules.yml"
+
+
+def _budget(layout: dict, layout_id: str, field: str) -> dict:
+    """Look up a field budget for a trust income schedule layout."""
+    return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
+
+
+def _draw_grid_table(
+    draw: ImageDraw.ImageDraw,
+    *,
+    x_left: int,
+    x_right: int,
+    y: int,
+    title: str,
+    columns: list[dict],
+    rows: list[dict],
+    font_sub: Font,
+    font_small: Font,
+    font_label_code: Font,
+    body_size: int,
+    section_bg: str,
+    header_row_bg: str,
+    grid_line: str,
+    label_code_color: str,
+    desc_budget: dict,
+    amount_budget: dict,
+    row_h: int = 52,
+) -> int:
+    """Draw a bordered label/description/amount table and return the new y coordinate.
+
+    The description cell wraps within its column and grows the row height
+    (matching cc_statement.py's `_draw_transactions` row-growth mechanism);
+    the amount cell shrinks to fit. Presentation-only: callers pass
+    pre-formatted string values.
+
+    Args:
+        columns: each {"header", "width", "kind"} where kind is one of
+            "label_code" | "description" | "amount".
+        rows: each {"label_code", "description", "value"} (value pre-formatted).
+
+    Returns:
+        The y coordinate below the table.
+    """
+    if title:
+        draw.rectangle([(x_left, y), (x_right, y + 44)], fill=section_bg)
+        draw.text((x_left + 12, y + 8), title, font=font_sub, fill="black")
+        y += 56
+
+    offsets: list[int] = []
+    cx = x_left
+    for col in columns:
+        offsets.append(cx)
+        cx += col.get("width", 400)
+
+    draw.rectangle([(x_left, y), (x_right, y + row_h)], fill=header_row_bg)
+    for col, ox in zip(columns, offsets, strict=True):
+        draw.text((ox + 8, y + 12), col.get("header", ""), font=font_small, fill="black")
+    y += row_h
+
+    for row in rows:
+        desc = row.get("description", "")
+        # Fit the description first so a wrapped description grows the row height,
+        # keeping the label code/amount on the first line and never colliding downward.
+        desc_fit = fit_text(
+            desc,
+            width=desc_budget["width"],
+            fit=desc_budget["fit"],
+            min_font=desc_budget["min_font"],
+            max_lines=desc_budget["max_lines"],
+            nominal_size=body_size,
+        )
+        this_row_h = row_h * len(desc_fit.lines)
+
+        draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
+        for col, ox in zip(columns, offsets, strict=True):
+            kind = col.get("kind", "description")
+            if kind == "label_code":
+                code = row.get("label_code", "")
+                if code:
+                    draw.text((ox + 30, y + 12), code, font=font_label_code, fill=label_code_color)
+            elif kind == "amount":
+                draw_fitted_right(
+                    draw,
+                    row.get("value", ""),
+                    x_right - 20,
+                    y + 14,
+                    budget=amount_budget,
+                    nominal_size=body_size,
+                )
+            else:
+                draw_fitted_left(
+                    draw,
+                    desc,
+                    ox + 8,
+                    y + 14,
+                    budget=desc_budget,
+                    nominal_size=body_size,
+                    line_spacing=row_h,
+                )
+        y += this_row_h
+
+    draw_separator_line(draw, x_left, x_right, y, color=grid_line, width=1)
+    return y + 20
 
 
 def _draw_digit_boxes(
@@ -53,6 +162,7 @@ def render_trust_income_schedule(entry: dict, layout: dict) -> Image.Image:
         PIL Image of the rendered trust income schedule.
     """
     fields = entry["fields"]
+    layout_id = entry.get("layout", "")
     page_dims = layout.get("page_dimensions", {})
     width = page_dims.get("width", 2480)
     height = page_dims.get("height", 3508)
@@ -114,8 +224,15 @@ def render_trust_income_schedule(entry: dict, layout: dict) -> Image.Image:
                 else:
                     draw.text((margin, y), label, font=font_s, fill="gray")
                     y += 28
-                    draw.text((margin + 20, y), value, font=font_b, fill="black")
-                    y += 40
+                    y = draw_fitted_left(
+                        draw,
+                        value,
+                        margin + 20,
+                        y,
+                        budget=_budget(layout, layout_id, "TEXT_VALUE"),
+                        nominal_size=font_sizes.get("body", 22),
+                        line_spacing=40,
+                    )
             y += 10
 
         elif sec_type == "grid_section":
@@ -145,7 +262,7 @@ def render_trust_income_schedule(entry: dict, layout: dict) -> Image.Image:
                     }
                 )
 
-            y = draw_table(
+            y = _draw_grid_table(
                 draw,
                 x_left=margin,
                 x_right=right_edge,
@@ -153,15 +270,16 @@ def render_trust_income_schedule(entry: dict, layout: dict) -> Image.Image:
                 title=section.get("title", ""),
                 columns=kinded,
                 rows=table_rows,
-                total=None,
                 font_sub=font_sub,
-                font_body=font_b,
                 font_small=font_s,
                 font_label_code=font_lc,
+                body_size=font_sizes.get("body", 22),
                 section_bg=colors.get("section_bg", "#F0F0F0"),
                 header_row_bg="#E8E8E8",
                 grid_line=grid_line_color,
                 label_code_color=label_code_color,
+                desc_budget=_budget(layout, layout_id, "DESC_COL"),
+                amount_budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
             )
 
         elif sec_type == "separator":
