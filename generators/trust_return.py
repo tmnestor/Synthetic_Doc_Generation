@@ -10,12 +10,22 @@ from PIL import Image, ImageDraw
 
 from generators.common import (
     Font,
+    draw_fitted_left,
+    draw_fitted_right,
     draw_separator_line,
     draw_text_center,
     draw_text_right,
     fmt_amount,
     load_font,
 )
+from generators.layout_budgets import field_budget
+
+_LAYOUT_PATH = "config/layouts/trust_returns.yml"
+
+
+def _budget(layout: dict, layout_id: str, field: str) -> dict:
+    """Look up a field budget for a trust return layout."""
+    return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
 
 
 def _draw_digit_boxes(
@@ -53,7 +63,9 @@ def _draw_amount_field(
     y: int,
     right_edge: int,
     font_label: Font,
-    font_amount: Font,
+    layout: dict,
+    layout_id: str,
+    nominal_size: int,
     item_number: str | None = None,
 ) -> int:
     """Draw a labelled amount field with optional item number."""
@@ -68,7 +80,14 @@ def _draw_amount_field(
         formatted = fmt_amount(Decimal(amount_str))
     except Exception:  # noqa: BLE001
         formatted = f"${amount_str}"
-    draw_text_right(draw, formatted, right_edge, y + 2, font_amount)
+    draw_fitted_right(
+        draw,
+        formatted,
+        right_edge,
+        y + 2,
+        budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
+        nominal_size=nominal_size,
+    )
     return y + 48
 
 
@@ -88,6 +107,7 @@ def render_trust_return(entry: dict, layout: dict) -> Image.Image:
     height = page_dims.get("height", 3508)
     margin = layout.get("margin", 120)
     right_edge = width - margin
+    layout_id = entry.get("layout", "")
 
     font_sizes = layout.get("font_sizes", {})
     colors = layout.get("colors", {})
@@ -148,15 +168,24 @@ def render_trust_return(entry: dict, layout: dict) -> Image.Image:
                         y,
                         right_edge,
                         font_b,
-                        font_b,
+                        layout,
+                        layout_id,
+                        font_sizes.get("body", 22),
                         item_number=item_num,
                     )
 
                 else:
                     draw.text((margin, y), label, font=font_s, fill="gray")
                     y += 28
-                    draw.text((margin + 20, y), value, font=font_b, fill="black")
-                    y += 40
+                    y = draw_fitted_left(
+                        draw,
+                        value,
+                        margin + 20,
+                        y,
+                        budget=_budget(layout, layout_id, "TEXT_VALUE"),
+                        nominal_size=font_sizes.get("body", 22),
+                        line_spacing=40,
+                    )
 
             y += 10
 
