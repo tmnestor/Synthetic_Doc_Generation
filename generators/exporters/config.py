@@ -62,6 +62,7 @@ def load_export_config(path: Path) -> dict[str, Any]:
         msg = (
             f"Failed to parse YAML in {path.resolve()}: {exc}. "
             f"Check indentation, colons and quoting. "
+            f"Example:\n{EXAMPLES['export_targets']}\n"
             f"Remediation: fix the syntax error at the reported line."
         )
         raise ValueError(msg) from exc
