@@ -298,7 +298,7 @@ python degrade_camera_scan.py --batch output
 
 # Single receipt (clean -> degraded), explicit seed
 python degrade_camera_scan.py \
-    output/clean/receipts/CASE001_receipt_thermal_80mm.png /tmp/CASE001.png 1
+    output/clean/receipts/CASE001_receipt_fuel.png /tmp/CASE001.png 1
 ```
 
 **Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy — used by the camera-scan scripts. It is included in `environment.yml` (resolved from your configured PyPI index, e.g. an internal mirror on locked-down hosts).
@@ -317,10 +317,10 @@ python rectify_camera_scan.py --batch output
 
 # Single image
 python rectify_camera_scan.py \
-    output/degraded/receipts/CASE001_receipt_thermal_80mm_degraded.png /tmp/CASE001.png
+    output/degraded/receipts/CASE001_receipt_fuel_degraded.png /tmp/CASE001.png
 ```
 
-On the 55 camera-scan receipts the quad is detected 55/55 (100%), recovering close to the original clean dimensions (e.g. CASE001 clean 420×354 → degraded → rectified 427×359). **Dependency:** `opencv-python-headless` (cv2), same as the degrader. Tunable knobs in `detect_document_quad()`: `min_area_frac` / `max_area_frac` (reject spurious tiny / full-frame quads).
+On the 55 camera-scan receipts the quad is detected 55/55 (100%), recovering close to the original clean dimensions (e.g. CASE001 clean 420×374 → degraded 516×490 → rectified 425×380). **Dependency:** `opencv-python-headless` (cv2), same as the degrader. Tunable knobs in `detect_document_quad()`: `min_area_frac` / `max_area_frac` (reject spurious tiny / full-frame quads).
 
 ---
 
