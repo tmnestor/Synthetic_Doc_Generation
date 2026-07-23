@@ -6,6 +6,7 @@ Usage:
     python -m generators.pipeline validate --config config/generation_config.yml
 """
 
+import json
 from pathlib import Path
 
 import typer
@@ -149,6 +150,7 @@ def generate(
     cfg = load_generation_config(config)
 
     output_dir = Path(cfg["output_dir"])
+    derived_dir = Path(cfg["derived_dir"])
     degradation_params = cfg.get("degradation", None)
 
     doc_types = cfg.get("document_types", {})
@@ -157,6 +159,8 @@ def generate(
             rprint(f"[red]Unknown document type '{doc_type}'. Available: {sorted(doc_types.keys())}[/red]")
             raise typer.Exit(1) from None
         doc_types = {doc_type: doc_types[doc_type]}
+
+    geometry_records: list[dict] = []
 
     for dtype, doc_cfg in doc_types.items():
         renderer = _RENDERERS.get(dtype)
@@ -186,8 +190,9 @@ def generate(
                 continue
 
             entry["case_id"] = str(case_id)
+            geometry_out: dict = {}
             try:
-                img = renderer(entry, layout)
+                img = renderer(entry, layout, geometry_out=geometry_out)
             except FitError as exc:
                 raise build_overflow_error(
                     [f"{case_id} / {layout_ref}: {str(exc).splitlines()[0]}"]
@@ -203,9 +208,28 @@ def generate(
                 degraded_filename = f"{case_id}_{layout_ref}_degraded.png"
                 degraded.save(degraded_dir / degraded_filename)
 
+            if geometry_out:
+                geometry_records.append(
+                    {
+                        "case_id": str(case_id),
+                        "image_file": filename,
+                        "width": geometry_out["width"],
+                        "height": geometry_out["height"],
+                        "boxes": geometry_out["boxes"],
+                    }
+                )
+
             count += 1
 
         rprint(f"[green]{dtype}: generated {count} documents.[/green]")
+
+    if geometry_records:
+        derived_dir.mkdir(parents=True, exist_ok=True)
+        geometry_path = derived_dir / "geometry.jsonl"
+        with geometry_path.open("w") as f:
+            for record in geometry_records:
+                f.write(json.dumps(record) + "\n")
+        rprint(f"[green]Geometry written: {geometry_path} ({len(geometry_records)} documents)[/green]")
 
 
 if __name__ == "__main__":
