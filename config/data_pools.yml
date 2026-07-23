@@ -155,6 +155,11 @@ real_name_blocklist_extra:
   [Aldi, IGA, Telstra, Optus, "Origin Energy", AGL, Qantas, "Bank of Queensland",
    Suncorp, ING, "Bendigo Bank", "Australia Post", Medicare, "McDonald's", KFC, Subway]
 
+# Which category_nouns categories feed receipts (retail) vs invoices (services).
+# Semantic partition — not derivable from category_nouns keys alone.
+receipt_categories: [hardware, grocery, office, electronics, retail, pharmacy, liquor, fuel, automotive]
+service_categories: [accounting, legal, it_services, consulting, marketing]
+
 # Existing real businesses — never emitted; content_engine.py reads only the
 # `name` field from each to build the real-name blocklist.
 retailers:
