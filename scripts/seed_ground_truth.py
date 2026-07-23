@@ -293,7 +293,7 @@ def _generate_invoice_entries(
             due_m = 12
         payment_due_date = _fmt_date(due_day, due_m, due_y)
 
-        payer = engine.person(rng)
+        holder = case_entities[i]["holder"]
         payer_address = engine.address(rng)
 
         n_items = rng.randint(1, 4)
@@ -331,7 +331,7 @@ def _generate_invoice_entries(
                 "LINE_ITEM_QUANTITIES": "|".join(item_qtys),
                 "LINE_ITEM_PRICES": "|".join(item_prices),
                 "LINE_ITEM_TOTAL_PRICES": "|".join(item_totals),
-                "PAYER_NAME": payer["full_name"],
+                "PAYER_NAME": holder["full_name"],
                 "PAYER_ADDRESS": payer_address,
             },
         }
