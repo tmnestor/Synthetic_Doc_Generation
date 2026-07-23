@@ -10,6 +10,7 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    capture_label_prefixed_value,
     draw_fitted_center,
     draw_fitted_left,
     draw_fitted_right,
@@ -221,6 +222,9 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             # Line 1: Date + Time
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
             draw_text_right(draw, f"Time: {pos_details['time']}", x_right=width - margin, y=y, font=font)
             y += line_h
             # Line 2: Register + Staff + Receipt #
@@ -243,11 +247,17 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             y += line_h
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
                 y += line_h
 
         elif sec_type == "metadata":
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
                 y += line_h
 
         elif sec_type in ("line_items", "itemized"):
@@ -256,8 +266,10 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                 desc = item["description"]
                 qty = item["quantity"]
                 total = item["total"]
+                qty_prefix = None
                 if qty and qty != "1":
-                    desc = f"{qty}x {desc}"
+                    qty_prefix = f"{qty}x "
+                    desc = f"{qty_prefix}{desc}"
                 amount_str = f"{Decimal(total):,.2f}" if total else ""
                 draw_fitted_left(
                     draw,
@@ -270,6 +282,8 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                     line_spacing=line_h,
                     recorder=recorder,
                     field=f"LINE_ITEM_DESCRIPTIONS[{i}]",
+                    prefix=qty_prefix,
+                    prefix_field=f"LINE_ITEM_QUANTITIES[{i}]" if qty_prefix else None,
                 )
                 draw_fitted_right(
                     draw,

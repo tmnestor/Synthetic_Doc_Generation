@@ -302,6 +302,8 @@ def draw_fitted_left(
     line_spacing: int | None = None,
     recorder: "BoxRecorder | None" = None,
     field: str | None = None,
+    prefix: str | None = None,
+    prefix_field: str | None = None,
 ) -> int:
     """Left-align `text` at x, fitting it to its budget. Returns the advanced y.
 
@@ -312,6 +314,17 @@ def draw_fitted_left(
 
     `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
     when both are given, the drawn extent is recorded against `field`.
+
+    `prefix`/`prefix_field` are an additional, independent opt-in capture: when
+    `text` begins with the literal `prefix` (e.g. a "2x " quantity marker
+    concatenated onto a line-item description before fitting), the prefix's
+    own sub-box -- measured on the first rendered line, at the font size the
+    fit actually chose -- is recorded against `prefix_field`. This never draws
+    anything extra; it only measures where the already-drawn prefix landed.
+    Silently skipped (no record, no error) if the first rendered line does not
+    start with `prefix` -- this should not happen for current callers, since
+    word-wrap never splits an unspaced prefix away from its own first word,
+    but a future caller passing a prefix containing a space could hit it.
     """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
@@ -325,6 +338,12 @@ def draw_fitted_left(
         y += spacing
     if recorder is not None and field is not None:
         recorder.record(field, (x, top, x + max_width, y))
+    if recorder is not None and prefix_field is not None and prefix and r.lines:
+        if r.lines[0].startswith(prefix):
+            prefix_bbox = font.getbbox(prefix)
+            prefix_w = int(prefix_bbox[2] - prefix_bbox[0])
+            prefix_h = int(prefix_bbox[3] - prefix_bbox[1])
+            recorder.record(prefix_field, (x, top, x + prefix_w, top + prefix_h))
     return y
 
 
@@ -401,6 +420,71 @@ def draw_fitted_right(
     if recorder is not None and field is not None:
         recorder.record(field, (left, top, x_right, y))
     return y
+
+
+def draw_text_left(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    font: Font,
+    fill: str = "black",
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
+) -> None:
+    """Draw text left-aligned at (x, y).
+
+    `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
+    when both are given, the drawn extent is recorded against `field`.
+    """
+    draw.text((x, y), text, font=font, fill=fill)
+    if recorder is not None and field is not None and text:
+        bbox = font.getbbox(text)
+        text_width = int(bbox[2] - bbox[0])
+        text_height = int(bbox[3] - bbox[1])
+        recorder.record(field, (x, y, x + text_width, y + text_height))
+
+
+def capture_label_prefixed_value(
+    draw: ImageDraw.ImageDraw,
+    label: str,
+    value: str,
+    x: int,
+    y: int,
+    font: Font,
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
+) -> None:
+    """Record the box of `value` as drawn immediately after `label` at (x, y).
+
+    Draws nothing itself -- the caller must already have drawn the combined
+    `f"{label}{value}"` string as a single `draw.text` call (so glyph shaping
+    matches exactly what is on the page; this function never changes pixels).
+    It only measures where the `value` substring landed, so a label+value
+    string like "Date: 02/03/2023" can carry a ground-truth box for the value
+    alone ("02/03/2023"), excluding the label ("Date: ").
+
+    `recorder`/`field` are optional (opt-in): when both are given and `value`
+    is non-empty, the value's extent is recorded against `field`.
+
+    Args:
+        draw: PIL ImageDraw object (used only for `textlength` measurement).
+        label: The literal label text preceding `value` (e.g. "Date: ").
+        value: The value substring whose box should be recorded.
+        x: The x position the combined `f"{label}{value}"` string was drawn at.
+        y: The y position the combined string was drawn at.
+        font: The font the combined string was drawn with.
+    """
+    if recorder is None or field is None or not value:
+        return
+    label_width = draw.textlength(label, font=font)
+    bbox = font.getbbox(value)
+    value_width = int(bbox[2] - bbox[0])
+    value_height = int(bbox[3] - bbox[1])
+    left = int(x + label_width)
+    recorder.record(field, (left, y, left + value_width, y + value_height))
 
 
 def draw_text_right(

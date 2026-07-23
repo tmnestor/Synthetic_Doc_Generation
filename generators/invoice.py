@@ -11,7 +11,9 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    capture_label_prefixed_value,
     draw_fitted_left,
+    draw_text_left,
     draw_text_right,
     fmt_amount,
     load_font,
@@ -131,11 +133,15 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             y += 64
 
         elif sec_type == "invoice_metadata":
+            inv_date = fields.get("INVOICE_DATE", "")
             draw.text(
                 (margin, y),
-                f"Date: {fields.get('INVOICE_DATE', '')}",
+                f"Date: {inv_date}",
                 font=font_s,
                 fill="black",
+            )
+            capture_label_prefixed_value(
+                draw, "Date: ", inv_date, margin, y, font_s, recorder=recorder, field="INVOICE_DATE"
             )
             y += 52
 
@@ -180,7 +186,7 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             draw.text((col_x["total"], y + 12), "Total", font=font_s, fill="black")
             y += row_h
 
-            for item in items:
+            for i, item in enumerate(items):
                 if use_borders:
                     draw.rectangle(
                         [(margin, y), (right_edge, y + row_h)],
@@ -193,8 +199,18 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                     y + 12,
                     budget=_b("LINE_ITEM_DESC"),
                     nominal_size=size_small,
+                    recorder=recorder,
+                    field=f"LINE_ITEM_DESCRIPTIONS[{i}]",
                 )
-                draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
+                draw_text_left(
+                    draw,
+                    item["quantity"],
+                    col_x["qty"],
+                    y + 12,
+                    font_s,
+                    recorder=recorder,
+                    field=f"LINE_ITEM_QUANTITIES[{i}]",
+                )
                 if item["price"]:
                     draw_text_right(
                         draw,
@@ -202,6 +218,8 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                         col_x["price"] + 200,
                         y + 12,
                         font_s,
+                        recorder=recorder,
+                        field=f"LINE_ITEM_PRICES[{i}]",
                     )
                 if item["total"]:
                     draw_text_right(
@@ -210,6 +228,8 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                         col_x["total"] + 200,
                         y + 12,
                         font_s,
+                        recorder=recorder,
+                        field=f"LINE_ITEM_TOTAL_PRICES[{i}]",
                     )
                 y += row_h
             y += 20
@@ -333,11 +353,15 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                         )
                     y += 28
             elif sec_name == "invoice_metadata":
+                inv_date = fields.get("INVOICE_DATE", "")
                 draw.text(
                     (margin, y),
-                    f"Date: {fields.get('INVOICE_DATE', '')}",
+                    f"Date: {inv_date}",
                     font=font_s,
                     fill="black",
+                )
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font_s, recorder=recorder, field="INVOICE_DATE"
                 )
                 y += 52
             # Other sections (payment_terms, delivery_details) are rendered as labels
@@ -380,7 +404,15 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
                     recorder=recorder if capture_this_table else None,
                     field=f"LINE_ITEM_DESCRIPTIONS[{i}]",
                 )
-                draw.text((col_x["qty"], y + 12), item["quantity"], font=font_s, fill="black")
+                draw_text_left(
+                    draw,
+                    item["quantity"],
+                    col_x["qty"],
+                    y + 12,
+                    font_s,
+                    recorder=recorder if capture_this_table else None,
+                    field=f"LINE_ITEM_QUANTITIES[{i}]",
+                )
                 if item["price"]:
                     try:
                         draw_text_right(
