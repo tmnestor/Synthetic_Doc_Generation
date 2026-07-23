@@ -4,8 +4,6 @@ Implements section 3 of GroundTruth_Export_Spec.md. Pure functions only — no
 filesystem access, no config loading, no logging.
 """
 
-from typing import cast
-
 NOT_FOUND = "NOT_FOUND"
 
 IDENTIFIER_FORMS = ("spaced", "digits_only")
@@ -110,7 +108,7 @@ def is_present(value: str | None) -> bool:
     return value is not None and value != "" and value != NOT_FOUND
 
 
-def present_fields(fields: dict[str, str | None]) -> dict[str, str]:
+def present_fields(fields: dict[str, str]) -> dict[str, str]:
     """Drop absent fields so they are never emitted into a target schema.
 
     Args:
@@ -119,4 +117,4 @@ def present_fields(fields: dict[str, str | None]) -> dict[str, str]:
     Returns:
         Only those entries whose value is present.
     """
-    return {key: cast(str, value) for key, value in fields.items() if is_present(value)}
+    return {key: value for key, value in fields.items() if is_present(value)}
