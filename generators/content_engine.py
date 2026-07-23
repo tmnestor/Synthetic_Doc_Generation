@@ -156,11 +156,8 @@ class ContentEngine:
         loc = self.location(rng)
         return f"{street_num} {street_name} {street_type}, {loc['suburb']} {loc['state']} {loc['postcode']}"
 
-    def fictional_business(self, rng: random.Random, category: str) -> dict:
-        """Invented AU business (blocklist-screened) + generate_abn() + address.
-
-        Returns:
-            {name, address, abn, category}.
+    def fictional_business_name(self, rng: random.Random, category: str) -> str:
+        """Invented AU business NAME only (blocklist-screened); no address/ABN.
 
         Raises:
             ValueError: `category` has no entry in business_name_parts.category_nouns.
@@ -170,7 +167,7 @@ class ContentEngine:
         nouns = parts["category_nouns"].get(category)
         if not nouns:
             raise ValueError(
-                "content_engine.fictional_business: unknown category.\n"
+                "content_engine.fictional_business_name: unknown category.\n"
                 f"  What:     category {category!r} has no entry under "
                 "'business_name_parts.category_nouns'.\n"
                 f"  Where:    {_DATA_POOLS_PATH} -> "
@@ -188,14 +185,9 @@ class ContentEngine:
             else:
                 name = f"{sample(rng, parts['suburb_prefixes'])} {noun}"
             if name.lower() not in self._blocklist:
-                return {
-                    "name": name,
-                    "address": self.address(rng),
-                    "abn": generate_abn(),
-                    "category": category,
-                }
+                return name
         raise RuntimeError(
-            "content_engine.fictional_business: exhausted retry budget without a clean name.\n"
+            "content_engine.fictional_business_name: exhausted retry budget without a clean name.\n"
             f"  What:     {max_attempts} draws for category {category!r} all collided with "
             "the real-name blocklist.\n"
             f"  Where:    {_DATA_POOLS_PATH} -> 'business_name_parts' (category {category!r}) "
@@ -205,6 +197,24 @@ class ContentEngine:
             "  Recover:  widen 'business_name_parts.surnames', 'suburb_prefixes', or "
             f"'category_nouns.{category}' in {_DATA_POOLS_PATH}."
         )
+
+    def fictional_business(self, rng: random.Random, category: str) -> dict:
+        """Invented AU business (blocklist-screened) + generate_abn() + address.
+
+        Returns:
+            {name, address, abn, category}.
+
+        Raises:
+            ValueError: `category` has no entry in business_name_parts.category_nouns.
+            RuntimeError: the retry budget was exhausted without a clean name.
+        """
+        name = self.fictional_business_name(rng, category)
+        return {
+            "name": name,
+            "address": self.address(rng),
+            "abn": generate_abn(),
+            "category": category,
+        }
 
     def fictional_trust(self, rng: random.Random) -> dict:
         """Invented trust + trustee (blocklist-screened) + ABN + TFN.
