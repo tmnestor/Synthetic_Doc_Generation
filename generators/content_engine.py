@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 from faker import Faker
 
-from generators.common import generate_abn
+from generators.common import generate_abn, generate_tfn
 
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
 
@@ -179,6 +179,40 @@ class ContentEngine:
             f"blocklist within {max_attempts} attempts.\n"
             "  Recover:  widen 'business_name_parts.surnames', 'suburb_prefixes', or "
             f"'category_nouns.{category}' in {_DATA_POOLS_PATH}."
+        )
+
+    def fictional_trust(self, rng: random.Random) -> dict:
+        """Invented trust + trustee (blocklist-screened) + ABN + TFN.
+
+        Returns:
+            {trust_name, trustee_name, abn, tfn}.
+
+        Raises:
+            RuntimeError: the retry budget was exhausted without a clean name.
+        """
+        parts = self.pools["trust_name_parts"]
+        max_attempts = 20
+        for _ in range(max_attempts):
+            surname = sample(rng, parts["surnames"])
+            kind = sample(rng, parts["trust_kinds"])
+            trust_name = f"{surname} {kind}"
+            if trust_name.lower() not in self._blocklist:
+                trustee_name = (
+                    f"{surname} {sample(rng, parts['trustee_suffixes'])} Pty Ltd ATF {trust_name}"
+                )
+                return {
+                    "trust_name": trust_name,
+                    "trustee_name": trustee_name,
+                    "abn": generate_abn(),
+                    "tfn": generate_tfn(),
+                }
+        raise RuntimeError(
+            "content_engine.fictional_trust: exhausted retry budget without a clean name.\n"
+            f"  What:     {max_attempts} draws all collided with the real-name blocklist.\n"
+            f"  Where:    {_DATA_POOLS_PATH} -> 'trust_name_parts.surnames' / 'trust_kinds'.\n"
+            "  Expected: enough surname/trust_kind combinations to clear the blocklist "
+            f"within {max_attempts} attempts.\n"
+            f"  Recover:  widen 'trust_name_parts.surnames' or 'trust_kinds' in {_DATA_POOLS_PATH}."
         )
 
 
