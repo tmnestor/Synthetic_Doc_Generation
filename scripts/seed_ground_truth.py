@@ -73,21 +73,6 @@ _CC_LAYOUTS = [
     "anz_cc_platinum",
 ]
 
-# ── business categories the engine draws fictional_business() names from ───
-_RECEIPT_CATEGORIES = [
-    "hardware",
-    "grocery",
-    "office",
-    "electronics",
-    "retail",
-    "pharmacy",
-    "liquor",
-    "fuel",
-    "automotive",
-]
-_SERVICE_CATEGORIES = ["accounting", "legal", "it_services", "consulting", "marketing"]
-_ALL_CATEGORIES = _RECEIPT_CATEGORIES + _SERVICE_CATEGORIES
-
 
 def _fmt_date(day: int, month: int, year: int) -> str:
     """Format date as DD/MM/YYYY."""
@@ -136,7 +121,9 @@ def _draw_bank_description(
     templates = engine.pools["bank_descriptions"]
     template_key = sample(rng, list(templates.keys()))
     template = templates[template_key]
-    merchant = engine.fictional_business(rng, sample(rng, _ALL_CATEGORIES))["name"][:12].upper()
+    all_categories = engine.pools["receipt_categories"] + engine.pools["service_categories"]
+    category = sample(rng, all_categories)
+    merchant = engine.fictional_business(rng, category)["name"][:12].upper()
     return template.format(
         merchant=merchant,
         location=suburb,
@@ -222,7 +209,7 @@ def _generate_receipt_entries(
         case_id = f"CASE{i + 1:03d}"
         layout = layout_draw.draw()
 
-        category = sample(rng, _RECEIPT_CATEGORIES)
+        category = sample(rng, engine.pools["receipt_categories"])
         retailer = engine.fictional_business(rng, category)
 
         d, m, y = _rand_date(rng)
@@ -280,7 +267,7 @@ def _generate_invoice_entries(
         case_id = f"CASE{i + 1:03d}"
         layout = layout_draw.draw()
 
-        category = sample(rng, _SERVICE_CATEGORIES)
+        category = sample(rng, engine.pools["service_categories"])
         provider = engine.fictional_business(rng, category)
 
         d, m, y = _rand_date(rng)
@@ -450,12 +437,12 @@ def _validate_dry_run(all_entries: dict[str, dict]) -> None:
         )
 
 
-def main(
-    dry_run: bool = typer.Option(
-        False, "--dry-run", help="Validate in-memory; do not write ground_truth/*.yml"
-    ),
-) -> None:
-    """Generate all ground truth YAML files with deterministic seed=42."""
+def build_all_entries() -> dict[str, dict]:
+    """Generate all document-type entries in-memory, keyed by doc type (no I/O).
+
+    Both `main()` (which appends `.yml` for the write/dry-run paths) and tests
+    that need the generated entries without touching the filesystem call this.
+    """
     rng = random.Random(_SEED)
     # generate_abn()/generate_tfn() draw from the module-global RNG; seed it too
     # so ABN/TFN digit fields are reproducible run-to-run, not just content selection.
@@ -464,24 +451,34 @@ def main(
     case_entities = _generate_case_entities(engine, rng, _COUNT)
 
     generators = [
-        ("bank_statements.yml", _generate_bank_entries),
-        ("receipts.yml", _generate_receipt_entries),
-        ("invoices.yml", _generate_invoice_entries),
-        ("cc_statements.yml", _generate_cc_entries),
+        ("bank_statements", _generate_bank_entries),
+        ("receipts", _generate_receipt_entries),
+        ("invoices", _generate_invoice_entries),
+        ("cc_statements", _generate_cc_entries),
     ]
 
     all_entries: dict[str, dict] = {}
-    for filename, gen_fn in generators:
-        all_entries[filename] = gen_fn(engine, rng, case_entities, _COUNT)
+    for doc_type, gen_fn in generators:
+        all_entries[doc_type] = gen_fn(engine, rng, case_entities, _COUNT)
+    return all_entries
+
+
+def main(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Validate in-memory; do not write ground_truth/*.yml"
+    ),
+) -> None:
+    """Generate all ground truth YAML files with deterministic seed=42."""
+    all_entries = build_all_entries()
 
     if dry_run:
-        _validate_dry_run(all_entries)
+        _validate_dry_run({f"{doc_type}.yml": entries for doc_type, entries in all_entries.items()})
         print("Dry run: all entries validated in-memory; ground_truth/*.yml NOT written.")
         return
 
     _GT_DIR.mkdir(parents=True, exist_ok=True)
-    for filename, entries in all_entries.items():
-        out_path = _GT_DIR / filename
+    for doc_type, entries in all_entries.items():
+        out_path = _GT_DIR / f"{doc_type}.yml"
         with out_path.open("w", encoding="utf-8") as fh:
             yaml.dump(entries, fh, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(f"Wrote {len(entries)} entries to {out_path}")

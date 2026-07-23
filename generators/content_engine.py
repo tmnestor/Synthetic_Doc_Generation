@@ -37,6 +37,8 @@ _REQUIRED_KEYS: dict[str, list[str]] = {
     "retailers": [],
     "professional_services": [],
     "real_name_blocklist_extra": [],
+    "receipt_categories": [],
+    "service_categories": [],
 }
 
 
