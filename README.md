@@ -222,16 +222,16 @@ CASE001_receipt_fuel.png:
 ### Link Format
 
 ```yaml
-CASE201_distribution_statement_standard.png:
+CASE201_dist_table_plain.png:
   trust_return: CASE201_trust_return_standard.png
   trust_income_schedule: CASE201_trust_income_schedule_standard.png
   beneficiary_itr: CASE201_beneficiary_itr_standard.png
   linking_fields:
-    trust_abn: '51 196 744 081'
-    beneficiary_tfn: '425 478 019'
-    share_of_net_income: '88412.31'
-    franking_credit: '5846.90'
-    capital_gain_component: '29467.88'
+    trust_abn: '79 104 332 181'
+    beneficiary_tfn: '890 838 614'
+    share_of_net_income: '73078.48'
+    franking_credit: '20985.50'
+    capital_gain_component: '6026.13'
   compliance_status: compliant    # or "non_compliant"
   discrepancy_type: null          # or one of the 4 types above
   discrepancy_details: null       # human-readable description
