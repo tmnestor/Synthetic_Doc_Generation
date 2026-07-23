@@ -36,3 +36,10 @@ dependencies:
       # rectify_camera_scan.py. Not used by the core generators pipeline.
       # Pinned so camera-scan output stays byte-stable across rebuilds.
       - opencv-python-headless==4.13.0.92
+      # Tree-edit-distance backend for the vendored CORD evaluator
+      # (generators/exporters/cord_eval.py). MIT-licensed; used in place of
+      # zss (non-SPDX/historically GPL) per GroundTruth_Export_Spec.md.
+      - apted
+      # Fuzzy string-edit-distance for leaf-node rename cost in cord_eval.py
+      # (replaces donut's nltk.edit_distance). MIT-licensed.
+      - rapidfuzz
