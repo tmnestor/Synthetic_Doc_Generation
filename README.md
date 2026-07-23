@@ -152,6 +152,26 @@ CASE001:
 
 ---
 
+## Content Generation & Guarantees
+
+All ground-truth content is generated from `config/data_pools.yml` through a shared engine (`generators/content_engine.py`), driven by the four seed scripts. The corpus carries three guarantees **by construction**:
+
+### Fully fictional — no real entities
+
+People and addresses come from Faker (`en_AU`); businesses and trusts are invented from curated name-parts and paired with generated ABNs/TFNs (valid checksums, never real). Every generated name is screened against a **real-name blocklist** — the real retailers/professional services listed in `data_pools.yml` plus a curated list — so no real business, person, ABN, or TFN is ever emitted (the real names exist only to seed the blocklist). Entity selection uses seeded non-repeating sampling, so entities vary and de-correlate across documents instead of repeating in lockstep.
+
+### Deterministic & reproducible
+
+The seed scripts run at `seed=42`, seeding the local RNG, Faker, and the module-global RNG behind `generate_abn`/`generate_tfn`, so re-running them reproduces a **byte-identical** corpus. The dataset is fully regenerable and any change is diffable run-to-run.
+
+### Fit-safe — no silent clipping
+
+Every variable field is drawn through `fit_text` against per-layout pixel budgets (`config/layouts/*.yml` `field_budgets:`, loaded by `generators/layout_budgets.py`): text that doesn't fit **wraps or shrinks losslessly**, and a genuinely impossible fit raises `FitError`. The `validate` command runs an overflow backstop (`generators/overflow_check.py`) across all 8 document types, so no rendered field can silently truncate — a benchmark-corrupting failure fails loudly instead.
+
+`config/data_pools.yml` is the single source of content (fictional business/trust name-parts, Faker config, product/service catalogs, bank-description grammar, street types, income years, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
+
+---
+
 ## Transaction Links
 
 `ground_truth/transaction_links.yml` maps receipts and invoices to bank statement debit transactions at three difficulty levels:
