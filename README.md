@@ -53,7 +53,7 @@ rich      # Coloured console output
 
 | Type | Count | Layouts | Fields | Example Layouts |
 |------|-------|---------|--------|-----------------|
-| Bank Statement | 55 | 12 | 9 | CBA classic/modern/minimal, Westpac, NAB, ANZ |
+| Bank Statement | 55 | 8 | 9 | 2 per bank (CBA, Westpac, NAB, ANZ) |
 | Receipt | 55 | 6 | 12 | Thermal 80mm/57mm, retail tax, fuel, professional, hospitality |
 | Invoice | 55 | 4 | 14 | Standard, GST-inclusive, high-value, mixed |
 | CC Statement | 55 | 8 | 11 | 2 per bank (CBA, Westpac, NAB, ANZ) |
@@ -63,7 +63,7 @@ rich      # Coloured console output
 | Type | Count | Layouts | Fields | Description |
 |------|-------|---------|--------|-------------|
 | Trust Tax Return | 50 | 1 | 14 | ATO NAT 0660-inspired, Items 55/57/58 |
-| Distribution Statement | 50 | 1 | 15 | Custom letterhead with distribution components |
+| Distribution Statement | 50 | 6 | 15 | Software navy/teal, table plain/ruled, letter formal/compact |
 | Trust Income Schedule | 50 | 1 | 9 | ATO-style grid with label codes (U, Q, M, C) |
 | Beneficiary ITR | 50 | 1 | 7 | ATO NAT 2541-inspired, Item 13 |
 
@@ -133,21 +133,21 @@ YAML is the single source of truth. Each entry specifies a layout reference, deg
 
 ```yaml
 CASE001:
-  layout: receipt_thermal_80mm
-  degradation_seed: 1001
+  layout: receipt_fuel
+  degradation_seed: 8967
   fields:
     DOCUMENT_TYPE: RECEIPT
-    SUPPLIER_NAME: Bunnings Warehouse
-    BUSINESS_ABN: '53 004 085 616'
-    BUSINESS_ADDRESS: '123 Main St, Alexandria NSW 2015'
-    INVOICE_DATE: '15/03/2024'
+    SUPPLIER_NAME: Ravensdale Health Store   # fully fictional; screened against a real-name blocklist
+    BUSINESS_ABN: '79 104 332 181'           # generated, valid checksum (never a real ABN)
+    BUSINESS_ADDRESS: '400 Stewart Rd, South Yarra VIC 3141'
+    INVOICE_DATE: '02/03/2023'
     IS_GST_INCLUDED: 'true'
-    GST_AMOUNT: '6.12'
-    TOTAL_AMOUNT: '67.32'
-    LINE_ITEM_DESCRIPTIONS: Drill Bit|Glue|Glasses
-    LINE_ITEM_QUANTITIES: '1|2|1'
-    LINE_ITEM_PRICES: '12.50|8.95|15.42'
-    LINE_ITEM_TOTAL_PRICES: '12.50|17.90|15.42'
+    GST_AMOUNT: '1.24'
+    TOTAL_AMOUNT: '13.60'
+    LINE_ITEM_DESCRIPTIONS: Dishwashing Liquid|Bandaids 40pk
+    LINE_ITEM_QUANTITIES: '1|1'
+    LINE_ITEM_PRICES: '4.73|8.87'
+    LINE_ITEM_TOTAL_PRICES: '4.73|8.87'
 ```
 
 ---
@@ -158,22 +158,23 @@ CASE001:
 
 | Difficulty | Criteria | Count |
 |------------|----------|-------|
-| Easy | Exact date and amount match | 48 |
-| Medium | Amount match, date offset 1-3 days | 41 |
-| Hard | Amount match, date offset 3-7 days | 21 |
+| Easy | Exact date and amount match | 52 |
+| Medium | Amount match, date offset 1-3 days | 36 |
+| Hard | Amount match, date offset 3-7 days | 22 |
 
 ```yaml
 # Keys are image filenames; source and target share the same CASE### prefix
-CASE001_receipt_thermal_80mm.png:
+CASE001_receipt_fuel.png:
 - bank_statement: CASE001_cba_standard.png
-  supplier: Bunnings Warehouse
-  receipt_date: '15/03/2024'
-  receipt_total: '67.32'
-  bank_date: '15/03/2024'
-  bank_description: EFTPOS BUNNINGS W/HOUSE Alexandria AUS
-  bank_amount: '67.32'
+  supplier: Ravensdale Health Store
+  receipt_date: '02/03/2023'
+  receipt_total: '13.60'
+  bank_date: '02/03/2023'
+  bank_description: VISA DEBIT PURCHASE RAVENSDALE HEALTH STORE Alexandria AU
+  bank_amount: '13.60'
   match_status: FOUND
   match_difficulty: easy
+  notes: Early row on cba standard — exact date and amount match
 ```
 
 ---
@@ -234,7 +235,7 @@ amount = parse_amount("$1,234.56")  # 1234.56
 d = normalize_date("15/03/2024")  # date(2024, 3, 15)
 
 # Fuzzy description matching (SequenceMatcher)
-score = description_score("BUNNINGS WAREHOUSE", "Bunnings Whse")  # ~0.6
+score = description_score("RAVENSDALE HEALTH STORE", "Ravensdale Hlth Store")  # ~0.95
 
 # Score predictions against ground truth
 result: LinkScore = validate_links(ground_truth_dict, predictions_dict)
@@ -461,7 +462,10 @@ rectify_camera_scan.py         # Offline rectification: detect quad + 4-point tr
 
 generators/
 ├── __init__.py
-├── common.py                  # Fonts, text helpers, ABN/TFN validation, GST, degradation
+├── common.py                  # Fonts, text helpers, ABN/TFN validation, GST, degradation, fit_text
+├── content_engine.py          # Shared content generator (Faker en_AU, fictional business/trust, blocklist, seeded sampling)
+├── layout_budgets.py          # Per-field pixel-budget loader (fit-safety)
+├── overflow_check.py          # Fail-fast overflow backstop — catches text that cannot fit its box (fit-safety)
 ├── schema.py                  # Ground truth schema validation
 ├── loader.py                  # YAML loaders with fail-fast diagnostics
 ├── derive_outputs.py          # YAML → CSV/JSONL derivation
@@ -501,7 +505,7 @@ ground_truth/
 config/
 ├── generation_config.yml      # Pipeline configuration (8 document types)
 ├── field_definitions.yml      # 46-column schema for 8 document types
-├── data_pools.yml             # Australian business data, trust names, trustee names
+├── data_pools.yml             # Content pools: fictional business/trust name-parts, Faker config, product/service catalogs, real-name blocklist
 └── layouts/
     ├── bank_statements.yml          # 8 layouts
     ├── receipts.yml                 # 6 layouts
