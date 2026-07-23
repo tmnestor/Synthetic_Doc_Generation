@@ -4,7 +4,7 @@ Implements Mapping C of GroundTruth_Export_Spec.md (section 6). No public
 standard exists for cross-document links; this convention is defined by the spec.
 """
 
-from generators.exporters.normalise import canonical_identifier
+from generators.exporters.normalise import canonical_identifier, validate_identifier_form
 
 QUAD_REF_KEYS: tuple[str, ...] = (
     "trust_return",
@@ -21,11 +21,19 @@ def transaction_links_to_doc_refs(data: dict, identifier_form: str) -> list[dict
     Args:
         data: The parsed transaction_links.yml mapping. Each key is a source
             document image name; each value is a list of link dicts.
-        identifier_form: 'spaced' or 'digits_only'.
+        identifier_form: 'spaced' or 'digits_only'. Transaction links carry no
+            ABN or TFN, so this is never applied to any field here — but it is
+            still validated unconditionally so a config typo fails fast on
+            this path exactly as it already does on the trust-quad path,
+            instead of being silently accepted.
 
     Returns:
         One record per link, flattened across sources.
+
+    Raises:
+        ValueError: If identifier_form is not a recognised identifier form.
     """
+    validate_identifier_form(identifier_form)
     records = []
     for source_doc, links in data.items():
         for link in links:
