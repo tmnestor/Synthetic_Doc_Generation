@@ -82,15 +82,6 @@ def _rand_amount(rng: random.Random, lo: float, hi: float) -> Decimal:
     return Decimal(str(raw)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
-def _rand_date(rng: random.Random, year_start: int = 2023, year_end: int = 2024) -> str:
-    """Generate a random date as DD/MM/YYYY."""
-    year = rng.randint(year_start, year_end)
-    month = rng.randint(1, 12)
-    max_day = 28 if month == 2 else 30 if month in (4, 6, 9, 11) else 31
-    day = rng.randint(1, max_day)
-    return f"{day:02d}/{month:02d}/{year}"
-
-
 def _distribution_date(rng: random.Random, income_year: str) -> str:
     """DD/MM/YYYY date in the 12 months after the income year ends.
 
