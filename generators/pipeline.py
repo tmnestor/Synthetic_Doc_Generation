@@ -16,7 +16,7 @@ from generators.bank_statement import render_bank_statement
 from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
 from generators.common import FitError, degrade_image
-from generators.derive_outputs import derive_cord, derive_csv, derive_jsonl, derive_links
+from generators.derive_outputs import derive_cord, derive_csv, derive_docile, derive_jsonl, derive_links
 from generators.distribution_statement import render_distribution_statement
 from generators.exporters.config import load_export_config
 from generators.invoice import render_invoice
@@ -138,6 +138,15 @@ def derive(
             derived_dir / "doc_refs.jsonl",
         )
         rprint(f"[green]doc_refs JSONL written: {links_path}[/green]")
+
+    if "docile" in export_cfg["export_targets"]:
+        docile_path = derive_docile(
+            gt_files,
+            derived_dir / "geometry.jsonl",
+            export_cfg,
+            derived_dir / "docile.jsonl",
+        )
+        rprint(f"[green]DocILE JSONL written: {docile_path}[/green]")
 
 
 @app.command()

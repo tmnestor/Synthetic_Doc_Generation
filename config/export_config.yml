@@ -19,6 +19,7 @@ cord_extension_scoring: excluded_scored_separately
 export_targets:
   - cord
   - doc_refs
+  - docile
 
 # Confirmed byte-exact against rossumai/docile in Task 2.
 docile_fieldtypes:
