@@ -457,6 +457,9 @@ def main(
 ) -> None:
     """Generate all ground truth YAML files with deterministic seed=42."""
     rng = random.Random(_SEED)
+    # generate_abn()/generate_tfn() draw from the module-global RNG; seed it too
+    # so ABN/TFN digit fields are reproducible run-to-run, not just content selection.
+    random.seed(_SEED)
     engine = build_engine()
     case_entities = _generate_case_entities(engine, rng, _COUNT)
 
