@@ -43,3 +43,8 @@ dependencies:
       # Fuzzy string-edit-distance for leaf-node rename cost in cord_eval.py
       # (replaces donut's nltk.edit_distance). MIT-licensed.
       - rapidfuzz
+      # Published DocILE KILE/LIR scorer (generators/exporters/docile.py self-score
+      # tests). Resolved cleanly with a plain `pip install` dry run: no ancient
+      # datasets/pyarrow/numpy pulled in (unlike donut-python's backtrack to
+      # numpy 1.19.4), and every dependency ships a py3.12/arm64 wheel. Apache-2.0.
+      - docile-benchmark
