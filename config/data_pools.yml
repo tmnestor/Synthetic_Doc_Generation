@@ -185,3 +185,17 @@ professional_services:
   - {name: "Brisbane IT Solutions", address: "42 Creek St, Brisbane QLD 4000", category: it_services}
   - {name: "Adelaide Business Consulting", address: "Level 3, 77 King William St, Adelaide SA 5000", category: consulting}
   - {name: "Perth Marketing Group", address: "Level 8, 140 St Georges Tce, Perth WA 6000", category: marketing}
+
+# Trust distribution pools (scripts/seed_trust_distributions.py)
+trust_name_parts:
+  surnames:
+    [Whitfield, Hollingsworth, Faircloth, Ashworth, Broadbent, Cathcart, Drummond,
+     Everleigh, Fairweather, Gainsborough, Hazelwood, Kingsley, Lancaster, Mortlake,
+     Newbold, Oakleigh, Pemberton, Ridgeway, Sedgwick, Thackeray, Ulverston,
+     Vandermeer, Wetherby, Xanthos, Yeoman]
+  trust_kinds:
+    ["Family Trust", "Discretionary Trust", "Investment Trust", "Nominees Trust",
+     "Unit Trust", "Property Trust"]
+  trustee_suffixes: [Holdings, Capital, Group, Enterprises, Investments, Corp, Partners]
+
+income_years: ["2022-23", "2023-24", "2024-25"]
