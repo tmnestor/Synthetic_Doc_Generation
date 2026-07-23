@@ -1,6 +1,6 @@
 CASE201:
   layout: trust_return_standard
-  degradation_seed: 6925
+  degradation_seed: 5803
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Hollingsworth Family Trust
@@ -9,892 +9,892 @@ CASE201:
     TRUSTEE_NAME: Hollingsworth Holdings Pty Ltd ATF Hollingsworth Family Trust
     TRUST_ADDRESS: 336 Mckee Way, Prospect SA 5082
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '115503.74'
+    TOTAL_NET_INCOME: '146156.96'
     BENEFICIARY_NAME: Jennifer Hopkins
     BENEFICIARY_TFN: 890 838 614
-    SHARE_OF_NET_INCOME: '38501.25'
-    FRANKING_CREDIT: '1180.57'
-    CAPITAL_GAIN_COMPONENT: '6762.47'
+    SHARE_OF_NET_INCOME: '73078.48'
+    FRANKING_CREDIT: '20985.50'
+    CAPITAL_GAIN_COMPONENT: '6026.13'
     FOREIGN_INCOME: '0.00'
 CASE202:
   layout: trust_return_standard
-  degradation_seed: 8573
+  degradation_seed: 3803
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Sedgwick Discretionary Trust
+    TRUST_NAME: Ulverston Unit Trust
     TRUST_TFN: 235 116 115
     TRUST_ABN: 35 379 402 654
-    TRUSTEE_NAME: Sedgwick Corp Pty Ltd ATF Sedgwick Discretionary Trust
+    TRUSTEE_NAME: Ulverston Partners Pty Ltd ATF Ulverston Unit Trust
     TRUST_ADDRESS: 81 Stewart Gr, South Yarra VIC 3141
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '184082.64'
+    TOTAL_NET_INCOME: '418714.11'
     BENEFICIARY_NAME: Cheryl Jackson
     BENEFICIARY_TFN: 559 407 816
-    SHARE_OF_NET_INCOME: '61360.88'
-    FRANKING_CREDIT: '12919.29'
-    CAPITAL_GAIN_COMPONENT: '4601.51'
+    SHARE_OF_NET_INCOME: '209357.06'
+    FRANKING_CREDIT: '23250.00'
+    CAPITAL_GAIN_COMPONENT: '0.00'
     FOREIGN_INCOME: '0.00'
 CASE203:
   layout: trust_return_standard
-  degradation_seed: 8019
+  degradation_seed: 8517
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Lancaster Investment Trust
+    TRUST_NAME: Ridgeway Property Trust
     TRUST_TFN: 103 413 115
     TRUST_ABN: 75 161 849 593
-    TRUSTEE_NAME: Lancaster Corp Pty Ltd ATF Lancaster Investment Trust
-    TRUST_ADDRESS: 157 Dixon Pde, Hawthorn East VIC 3123
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '458128.32'
-    BENEFICIARY_NAME: Jon Santiago
+    TRUSTEE_NAME: Ridgeway Capital Pty Ltd ATF Ridgeway Property Trust
+    TRUST_ADDRESS: 295 Foley Ct, Toowoomba QLD 4350
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '141193.03'
+    BENEFICIARY_NAME: Christopher Gonzalez
     BENEFICIARY_TFN: 647 525 512
-    SHARE_OF_NET_INCOME: '114532.08'
-    FRANKING_CREDIT: '4909.01'
-    CAPITAL_GAIN_COMPONENT: '0.00'
+    SHARE_OF_NET_INCOME: '70596.52'
+    FRANKING_CREDIT: '19339.27'
+    CAPITAL_GAIN_COMPONENT: '21268.61'
     FOREIGN_INCOME: '0.00'
 CASE204:
   layout: trust_return_standard
-  degradation_seed: 5808
+  degradation_seed: 2876
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Sedgwick Nominees Trust
+    TRUST_NAME: Broadbent Investment Trust
     TRUST_TFN: 648 350 319
     TRUST_ABN: 89 341 928 327
-    TRUSTEE_NAME: Sedgwick Group Pty Ltd ATF Sedgwick Nominees Trust
-    TRUST_ADDRESS: 60 Ingram Way, Battery Point TAS 7004
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '269266.03'
-    BENEFICIARY_NAME: Jason Ramirez
+    TRUSTEE_NAME: Broadbent Capital Pty Ltd ATF Broadbent Investment Trust
+    TRUST_ADDRESS: 271 Alvarez Ln, New Farm QLD 4005
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '216858.38'
+    BENEFICIARY_NAME: David Dean
     BENEFICIARY_TFN: 056 413 914
-    SHARE_OF_NET_INCOME: '269266.03'
-    FRANKING_CREDIT: '54953.16'
-    CAPITAL_GAIN_COMPONENT: '0.00'
-    FOREIGN_INCOME: '3779.30'
+    SHARE_OF_NET_INCOME: '216858.38'
+    FRANKING_CREDIT: '25032.00'
+    CAPITAL_GAIN_COMPONENT: '46368.11'
+    FOREIGN_INCOME: '0.00'
 CASE205:
   layout: trust_return_standard
-  degradation_seed: 2403
+  degradation_seed: 9689
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Discretionary Trust
+    TRUST_NAME: Vandermeer Unit Trust
     TRUST_TFN: 884 969 619
     TRUST_ABN: 68 537 672 423
-    TRUSTEE_NAME: Mortlake Enterprises Pty Ltd ATF Mortlake Discretionary Trust
-    TRUST_ADDRESS: 54 Cannon Way, Hobart TAS 7000
+    TRUSTEE_NAME: Vandermeer Partners Pty Ltd ATF Vandermeer Unit Trust
+    TRUST_ADDRESS: 306 Estrada Ave, Glenelg SA 5045
     INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '64815.19'
-    BENEFICIARY_NAME: Nicholas Moran
+    TOTAL_NET_INCOME: '457187.64'
+    BENEFICIARY_NAME: Tonya Wall
     BENEFICIARY_TFN: 532 871 028
-    SHARE_OF_NET_INCOME: '21605.06'
-    FRANKING_CREDIT: '5695.45'
-    CAPITAL_GAIN_COMPONENT: '3405.60'
+    SHARE_OF_NET_INCOME: '152395.88'
+    FRANKING_CREDIT: '38480.08'
+    CAPITAL_GAIN_COMPONENT: '18229.43'
     FOREIGN_INCOME: '0.00'
 CASE206:
   layout: trust_return_standard
-  degradation_seed: 1514
+  degradation_seed: 9835
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Xanthos Nominees Trust
+    TRUST_NAME: Whitfield Unit Trust
     TRUST_TFN: 784 801 817
     TRUST_ABN: 77 122 691 669
-    TRUSTEE_NAME: Xanthos Partners Pty Ltd ATF Xanthos Nominees Trust
-    TRUST_ADDRESS: 178 Bowers Rd, Manuka ACT 2603
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '120101.70'
-    BENEFICIARY_NAME: Dana Mccarty
+    TRUSTEE_NAME: Whitfield Group Pty Ltd ATF Whitfield Unit Trust
+    TRUST_ADDRESS: 80 Ramsey Ave, Richmond VIC 3121
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '385258.87'
+    BENEFICIARY_NAME: David Downs
     BENEFICIARY_TFN: 451 462 719
-    SHARE_OF_NET_INCOME: '40033.90'
-    FRANKING_CREDIT: '252.63'
-    CAPITAL_GAIN_COMPONENT: '10246.84'
+    SHARE_OF_NET_INCOME: '192629.44'
+    FRANKING_CREDIT: '38126.23'
+    CAPITAL_GAIN_COMPONENT: '20764.38'
     FOREIGN_INCOME: '0.00'
 CASE207:
   layout: trust_return_standard
-  degradation_seed: 3296
+  degradation_seed: 8744
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Hazelwood Family Trust
+    TRUST_NAME: Yeoman Property Trust
     TRUST_TFN: 325 288 028
     TRUST_ABN: 71 048 281 489
-    TRUSTEE_NAME: Hazelwood Investments Pty Ltd ATF Hazelwood Family Trust
-    TRUST_ADDRESS: 392 Wilkins Gr, Battery Point TAS 7004
+    TRUSTEE_NAME: Yeoman Corp Pty Ltd ATF Yeoman Property Trust
+    TRUST_ADDRESS: 11 Davis Gr, Leederville WA 6007
     INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '211440.12'
-    BENEFICIARY_NAME: April Walls
+    TOTAL_NET_INCOME: '122756.22'
+    BENEFICIARY_NAME: Diana Hamilton
     BENEFICIARY_TFN: 957 015 417
-    SHARE_OF_NET_INCOME: '211440.12'
-    FRANKING_CREDIT: '42712.88'
-    CAPITAL_GAIN_COMPONENT: '17855.33'
+    SHARE_OF_NET_INCOME: '61378.11'
+    FRANKING_CREDIT: '132.41'
+    CAPITAL_GAIN_COMPONENT: '4333.65'
     FOREIGN_INCOME: '0.00'
 CASE208:
+  layout: trust_return_standard
+  degradation_seed: 4006
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Everleigh Nominees Trust
+    TRUST_TFN: 227 824 828
+    TRUST_ABN: 46 303 911 718
+    TRUSTEE_NAME: Everleigh Partners Pty Ltd ATF Everleigh Nominees Trust
+    TRUST_ADDRESS: 105 Holmes Ave, Norwood SA 5067
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '39700.21'
+    BENEFICIARY_NAME: Lindsay Rivera
+    BENEFICIARY_TFN: 963 834 613
+    SHARE_OF_NET_INCOME: '13233.40'
+    FRANKING_CREDIT: '3178.37'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE209:
   layout: trust_return_standard
   degradation_seed: 8973
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Discretionary Trust
-    TRUST_TFN: 227 824 828
-    TRUST_ABN: 46 303 911 718
-    TRUSTEE_NAME: Mortlake Group Pty Ltd ATF Mortlake Discretionary Trust
-    TRUST_ADDRESS: 398 Nolan Pde, Fortitude Valley QLD 4006
+    TRUST_NAME: Fairweather Nominees Trust
+    TRUST_TFN: 098 393 015
+    TRUST_ABN: 79 578 713 315
+    TRUSTEE_NAME: Fairweather Capital Pty Ltd ATF Fairweather Nominees Trust
+    TRUST_ADDRESS: 243 Hunt Cl, St Kilda VIC 3182
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '38731.35'
-    BENEFICIARY_NAME: Barbara Jones
-    BENEFICIARY_TFN: 963 834 613
-    SHARE_OF_NET_INCOME: '9682.84'
-    FRANKING_CREDIT: '6.26'
-    CAPITAL_GAIN_COMPONENT: '3624.11'
+    TOTAL_NET_INCOME: '90672.19'
+    BENEFICIARY_NAME: Jody Woodward
+    BENEFICIARY_TFN: 103 105 116
+    SHARE_OF_NET_INCOME: '90672.19'
+    FRANKING_CREDIT: '26802.03'
+    CAPITAL_GAIN_COMPONENT: '29416.30'
     FOREIGN_INCOME: '0.00'
-CASE209:
+CASE210:
   layout: trust_return_standard
   degradation_seed: 6183
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Broadbent Discretionary Trust
-    TRUST_TFN: 098 393 015
-    TRUST_ABN: 79 578 713 315
+    TRUST_TFN: 737 631 128
+    TRUST_ABN: 12 834 738 299
     TRUSTEE_NAME: Broadbent Group Pty Ltd ATF Broadbent Discretionary Trust
     TRUST_ADDRESS: 274 Elliott St, Paddington QLD 4064
     INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '471382.10'
+    TOTAL_NET_INCOME: '207850.02'
     BENEFICIARY_NAME: Justin Jones
-    BENEFICIARY_TFN: 103 105 116
-    SHARE_OF_NET_INCOME: '235691.05'
-    FRANKING_CREDIT: '40933.81'
-    CAPITAL_GAIN_COMPONENT: '0.00'
-    FOREIGN_INCOME: '0.00'
-CASE210:
-  layout: trust_return_standard
-  degradation_seed: 9900
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Fairweather Discretionary Trust
-    TRUST_TFN: 737 631 128
-    TRUST_ABN: 12 834 738 299
-    TRUSTEE_NAME: Fairweather Corp Pty Ltd ATF Fairweather Discretionary Trust
-    TRUST_ADDRESS: 113 Taylor Dr, Toowoomba QLD 4350
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '114445.61'
-    BENEFICIARY_NAME: Christina Thomas
     BENEFICIARY_TFN: 656 670 114
-    SHARE_OF_NET_INCOME: '38148.54'
-    FRANKING_CREDIT: '1515.91'
-    CAPITAL_GAIN_COMPONENT: '2825.93'
+    SHARE_OF_NET_INCOME: '103925.01'
+    FRANKING_CREDIT: '18049.25'
+    CAPITAL_GAIN_COMPONENT: '0.00'
     FOREIGN_INCOME: '0.00'
 CASE211:
   layout: trust_return_standard
-  degradation_seed: 1722
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Wetherby Investment Trust
-    TRUST_TFN: 262 473 112
-    TRUST_ABN: 84 065 133 387
-    TRUSTEE_NAME: Wetherby Investments Pty Ltd ATF Wetherby Investment Trust
-    TRUST_ADDRESS: 299 Payne Gr, St Kilda VIC 3182
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '109762.68'
-    BENEFICIARY_NAME: William Valenzuela
-    BENEFICIARY_TFN: 781 080 119
-    SHARE_OF_NET_INCOME: '36587.56'
-    FRANKING_CREDIT: '5547.51'
-    CAPITAL_GAIN_COMPONENT: '13458.94'
-    FOREIGN_INCOME: '0.00'
-CASE212:
-  layout: trust_return_standard
-  degradation_seed: 2684
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Whitfield Investment Trust
-    TRUST_TFN: 606 474 628
-    TRUST_ABN: 87 326 773 602
-    TRUSTEE_NAME: Whitfield Partners Pty Ltd ATF Whitfield Investment Trust
-    TRUST_ADDRESS: 263 Mullins Rd, Brunswick VIC 3056
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '82565.95'
-    BENEFICIARY_NAME: Connor Patel
-    BENEFICIARY_TFN: 872 343 016
-    SHARE_OF_NET_INCOME: '41282.98'
-    FRANKING_CREDIT: '518.05'
-    CAPITAL_GAIN_COMPONENT: '15546.38'
-    FOREIGN_INCOME: '295.48'
-CASE213:
-  layout: trust_return_standard
-  degradation_seed: 4164
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Kingsley Unit Trust
-    TRUST_TFN: 820 812 119
-    TRUST_ABN: 26 980 500 978
-    TRUSTEE_NAME: Kingsley Partners Pty Ltd ATF Kingsley Unit Trust
-    TRUST_ADDRESS: 108 Wood Pde, Hobart TAS 7000
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '395813.51'
-    BENEFICIARY_NAME: Richard Richards
-    BENEFICIARY_TFN: 913 619 313
-    SHARE_OF_NET_INCOME: '395813.51'
-    FRANKING_CREDIT: '45424.55'
-    CAPITAL_GAIN_COMPONENT: '0.00'
-    FOREIGN_INCOME: '0.00'
-CASE214:
-  layout: trust_return_standard
-  degradation_seed: 1027
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Lancaster Investment Trust
-    TRUST_TFN: 543 534 613
-    TRUST_ABN: 40 990 916 998
-    TRUSTEE_NAME: Lancaster Group Pty Ltd ATF Lancaster Investment Trust
-    TRUST_ADDRESS: 59 Jennings Cl, Toowoomba QLD 4350
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '395349.81'
-    BENEFICIARY_NAME: Victoria Meadows
-    BENEFICIARY_TFN: 247 510 719
-    SHARE_OF_NET_INCOME: '98837.45'
-    FRANKING_CREDIT: '17974.84'
-    CAPITAL_GAIN_COMPONENT: '18266.98'
-    FOREIGN_INCOME: '0.00'
-CASE215:
-  layout: trust_return_standard
-  degradation_seed: 6279
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Pemberton Unit Trust
-    TRUST_TFN: 513 542 718
-    TRUST_ABN: 14 991 183 842
-    TRUSTEE_NAME: Pemberton Corp Pty Ltd ATF Pemberton Unit Trust
-    TRUST_ADDRESS: 84 Klein Cres, Unley SA 5061
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '341885.79'
-    BENEFICIARY_NAME: David Martin
-    BENEFICIARY_TFN: 849 808 416
-    SHARE_OF_NET_INCOME: '170942.90'
-    FRANKING_CREDIT: '31565.37'
-    CAPITAL_GAIN_COMPONENT: '41330.24'
-    FOREIGN_INCOME: '0.00'
-CASE216:
-  layout: trust_return_standard
-  degradation_seed: 4185
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Newbold Nominees Trust
-    TRUST_TFN: 935 348 715
-    TRUST_ABN: 27 124 118 244
-    TRUSTEE_NAME: Newbold Enterprises Pty Ltd ATF Newbold Nominees Trust
-    TRUST_ADDRESS: 45 Jones Way, Battery Point TAS 7004
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '162105.54'
-    BENEFICIARY_NAME: Sandra Norton
-    BENEFICIARY_TFN: 401 640 011
-    SHARE_OF_NET_INCOME: '81052.77'
-    FRANKING_CREDIT: '3583.03'
-    CAPITAL_GAIN_COMPONENT: '0.00'
-    FOREIGN_INCOME: '3095.24'
-CASE217:
-  layout: trust_return_standard
-  degradation_seed: 9976
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Wetherby Property Trust
-    TRUST_TFN: 112 805 915
-    TRUST_ABN: 66 524 278 680
-    TRUSTEE_NAME: Wetherby Enterprises Pty Ltd ATF Wetherby Property Trust
-    TRUST_ADDRESS: 38 Hernandez Dr, Subiaco WA 6008
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '494067.30'
-    BENEFICIARY_NAME: Brenda Garcia
-    BENEFICIARY_TFN: 826 204 519
-    SHARE_OF_NET_INCOME: '164689.10'
-    FRANKING_CREDIT: '46938.35'
-    CAPITAL_GAIN_COMPONENT: '43548.46'
-    FOREIGN_INCOME: '0.00'
-CASE218:
-  layout: trust_return_standard
-  degradation_seed: 8633
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Newbold Discretionary Trust
-    TRUST_TFN: 232 260 218
-    TRUST_ABN: 91 053 315 869
-    TRUSTEE_NAME: Newbold Corp Pty Ltd ATF Newbold Discretionary Trust
-    TRUST_ADDRESS: 137 Cherry Tce, Toowoomba QLD 4350
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '274674.59'
-    BENEFICIARY_NAME: Brittany Blake
-    BENEFICIARY_TFN: 563 421 618
-    SHARE_OF_NET_INCOME: '137337.30'
-    FRANKING_CREDIT: '6214.40'
-    CAPITAL_GAIN_COMPONENT: '14211.92'
-    FOREIGN_INCOME: '0.00'
-CASE219:
-  layout: trust_return_standard
-  degradation_seed: 2375
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Family Trust
-    TRUST_TFN: 036 541 415
-    TRUST_ABN: 62 073 375 433
-    TRUSTEE_NAME: Mortlake Capital Pty Ltd ATF Mortlake Family Trust
-    TRUST_ADDRESS: 304 Mcfarland Ct, Paddington QLD 4064
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '143738.30'
-    BENEFICIARY_NAME: Jessica Boyd
-    BENEFICIARY_TFN: 586 850 118
-    SHARE_OF_NET_INCOME: '35934.58'
-    FRANKING_CREDIT: '312.90'
-    CAPITAL_GAIN_COMPONENT: '10338.37'
-    FOREIGN_INCOME: '0.00'
-CASE220:
-  layout: trust_return_standard
-  degradation_seed: 5051
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ulverston Nominees Trust
-    TRUST_TFN: 569 816 918
-    TRUST_ABN: 78 429 401 965
-    TRUSTEE_NAME: Ulverston Capital Pty Ltd ATF Ulverston Nominees Trust
-    TRUST_ADDRESS: 336 Martinez Rd, Hawthorn East VIC 3123
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '19497.81'
-    BENEFICIARY_NAME: Zachary Garcia
-    BENEFICIARY_TFN: 340 608 816
-    SHARE_OF_NET_INCOME: '19497.81'
-    FRANKING_CREDIT: '5848.80'
-    CAPITAL_GAIN_COMPONENT: '5411.63'
-    FOREIGN_INCOME: '0.00'
-CASE221:
-  layout: trust_return_standard
-  degradation_seed: 4978
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Drummond Family Trust
-    TRUST_TFN: 846 564 819
-    TRUST_ABN: 30 356 159 514
-    TRUSTEE_NAME: Drummond Investments Pty Ltd ATF Drummond Family Trust
-    TRUST_ADDRESS: 39 Carpenter Rd, Battery Point TAS 7004
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '162409.07'
-    BENEFICIARY_NAME: Jenna French
-    BENEFICIARY_TFN: 236 629 928
-    SHARE_OF_NET_INCOME: '162409.07'
-    FRANKING_CREDIT: '45257.91'
-    CAPITAL_GAIN_COMPONENT: '59735.54'
-    FOREIGN_INCOME: '0.00'
-CASE222:
-  layout: trust_return_standard
-  degradation_seed: 8921
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ashworth Property Trust
-    TRUST_TFN: 957 773 816
-    TRUST_ABN: 32 468 044 369
-    TRUSTEE_NAME: Ashworth Partners Pty Ltd ATF Ashworth Property Trust
-    TRUST_ADDRESS: 99 Taylor Cl, Paddington QLD 4064
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '480785.91'
-    BENEFICIARY_NAME: Diana Sanford
-    BENEFICIARY_TFN: 721 489 528
-    SHARE_OF_NET_INCOME: '120196.48'
-    FRANKING_CREDIT: '25504.80'
-    CAPITAL_GAIN_COMPONENT: '36879.69'
-    FOREIGN_INCOME: '1423.40'
-CASE223:
-  layout: trust_return_standard
-  degradation_seed: 1166
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Newbold Nominees Trust
-    TRUST_TFN: 791 769 314
-    TRUST_ABN: 88 134 332 003
-    TRUSTEE_NAME: Newbold Partners Pty Ltd ATF Newbold Nominees Trust
-    TRUST_ADDRESS: 112 Randall Pde, South Yarra VIC 3141
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '426966.89'
-    BENEFICIARY_NAME: Sandra Mullen
-    BENEFICIARY_TFN: 676 320 128
-    SHARE_OF_NET_INCOME: '213483.45'
-    FRANKING_CREDIT: '31225.15'
-    CAPITAL_GAIN_COMPONENT: '29978.06'
-    FOREIGN_INCOME: '0.00'
-CASE224:
-  layout: trust_return_standard
-  degradation_seed: 6023
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Pemberton Discretionary Trust
-    TRUST_TFN: 727 889 511
-    TRUST_ABN: 69 632 870 831
-    TRUSTEE_NAME: Pemberton Holdings Pty Ltd ATF Pemberton Discretionary Trust
-    TRUST_ADDRESS: 123 Sanford Way, South Yarra VIC 3141
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '294962.24'
-    BENEFICIARY_NAME: Belinda Velazquez
-    BENEFICIARY_TFN: 798 687 216
-    SHARE_OF_NET_INCOME: '73740.56'
-    FRANKING_CREDIT: '12244.02'
-    CAPITAL_GAIN_COMPONENT: '29409.28'
-    FOREIGN_INCOME: '0.00'
-CASE225:
-  layout: trust_return_standard
-  degradation_seed: 8690
+  degradation_seed: 8179
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Fairweather Discretionary Trust
-    TRUST_TFN: 714 345 510
-    TRUST_ABN: 53 774 348 734
-    TRUSTEE_NAME: Fairweather Holdings Pty Ltd ATF Fairweather Discretionary Trust
-    TRUST_ADDRESS: 148 Jones Cres, Norwood SA 5067
+    TRUST_TFN: 262 473 112
+    TRUST_ABN: 84 065 133 387
+    TRUSTEE_NAME: Fairweather Corp Pty Ltd ATF Fairweather Discretionary Trust
+    TRUST_ADDRESS: 113 Taylor Dr, Toowoomba QLD 4350
     INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '105117.61'
-    BENEFICIARY_NAME: Mercedes Allison
-    BENEFICIARY_TFN: 812 236 216
-    SHARE_OF_NET_INCOME: '52558.81'
-    FRANKING_CREDIT: '5690.24'
-    CAPITAL_GAIN_COMPONENT: '15652.35'
+    TOTAL_NET_INCOME: '45897.75'
+    BENEFICIARY_NAME: Christina Thomas
+    BENEFICIARY_TFN: 781 080 119
+    SHARE_OF_NET_INCOME: '22948.88'
+    FRANKING_CREDIT: '3482.85'
+    CAPITAL_GAIN_COMPONENT: '0.00'
     FOREIGN_INCOME: '0.00'
-CASE226:
+CASE212:
   layout: trust_return_standard
-  degradation_seed: 8025
+  degradation_seed: 3143
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Ridgeway Property Trust
+    TRUST_TFN: 606 474 628
+    TRUST_ABN: 87 326 773 602
+    TRUSTEE_NAME: Ridgeway Group Pty Ltd ATF Ridgeway Property Trust
+    TRUST_ADDRESS: 261 Garcia Rd, Toowoomba QLD 4350
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '427927.28'
+    BENEFICIARY_NAME: Henry Gardner
+    BENEFICIARY_TFN: 872 343 016
+    SHARE_OF_NET_INCOME: '106981.82'
+    FRANKING_CREDIT: '8059.62'
+    CAPITAL_GAIN_COMPONENT: '7251.19'
+    FOREIGN_INCOME: '0.00'
+CASE213:
+  layout: trust_return_standard
+  degradation_seed: 3532
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Ulverston Investment Trust
+    TRUST_TFN: 820 812 119
+    TRUST_ABN: 26 980 500 978
+    TRUSTEE_NAME: Ulverston Capital Pty Ltd ATF Ulverston Investment Trust
+    TRUST_ADDRESS: 315 Mercado Way, Cronulla NSW 2230
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '72448.30'
+    BENEFICIARY_NAME: Cynthia Matthews
+    BENEFICIARY_TFN: 913 619 313
+    SHARE_OF_NET_INCOME: '24149.43'
+    FRANKING_CREDIT: '2641.84'
+    CAPITAL_GAIN_COMPONENT: '9424.77'
+    FOREIGN_INCOME: '0.00'
+CASE214:
+  layout: trust_return_standard
+  degradation_seed: 5564
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Everleigh Discretionary Trust
+    TRUST_TFN: 543 534 613
+    TRUST_ABN: 40 990 916 998
+    TRUSTEE_NAME: Everleigh Partners Pty Ltd ATF Everleigh Discretionary Trust
+    TRUST_ADDRESS: 206 Evans Ct, Alexandria NSW 2015
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '118992.52'
+    BENEFICIARY_NAME: Steven Welch
+    BENEFICIARY_TFN: 247 510 719
+    SHARE_OF_NET_INCOME: '29748.13'
+    FRANKING_CREDIT: '3120.51'
+    CAPITAL_GAIN_COMPONENT: '10559.49'
+    FOREIGN_INCOME: '0.00'
+CASE215:
+  layout: trust_return_standard
+  degradation_seed: 4228
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Faircloth Investment Trust
+    TRUST_TFN: 513 542 718
+    TRUST_ABN: 14 991 183 842
+    TRUSTEE_NAME: Faircloth Group Pty Ltd ATF Faircloth Investment Trust
+    TRUST_ADDRESS: 222 Bishop St, Norwood SA 5067
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '223833.00'
+    BENEFICIARY_NAME: Patricia Cox
+    BENEFICIARY_TFN: 849 808 416
+    SHARE_OF_NET_INCOME: '223833.00'
+    FRANKING_CREDIT: '25865.83'
+    CAPITAL_GAIN_COMPONENT: '31147.01'
+    FOREIGN_INCOME: '0.00'
+CASE216:
+  layout: trust_return_standard
+  degradation_seed: 1006
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Kingsley Nominees Trust
+    TRUST_TFN: 935 348 715
+    TRUST_ABN: 27 124 118 244
+    TRUSTEE_NAME: Kingsley Holdings Pty Ltd ATF Kingsley Nominees Trust
+    TRUST_ADDRESS: 76 Allison Ln, Newtown NSW 2042
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '72371.02'
+    BENEFICIARY_NAME: Omar Floyd
+    BENEFICIARY_TFN: 401 640 011
+    SHARE_OF_NET_INCOME: '18092.76'
+    FRANKING_CREDIT: '3609.12'
+    CAPITAL_GAIN_COMPONENT: '5642.17'
+    FOREIGN_INCOME: '0.00'
+CASE217:
+  layout: trust_return_standard
+  degradation_seed: 7291
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Gainsborough Investment Trust
+    TRUST_TFN: 112 805 915
+    TRUST_ABN: 66 524 278 680
+    TRUSTEE_NAME: Gainsborough Capital Pty Ltd ATF Gainsborough Investment Trust
+    TRUST_ADDRESS: 287 Delgado Tce, Fremantle WA 6160
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '21968.44'
+    BENEFICIARY_NAME: David Munoz
+    BENEFICIARY_TFN: 826 204 519
+    SHARE_OF_NET_INCOME: '10984.22'
+    FRANKING_CREDIT: '3242.33'
+    CAPITAL_GAIN_COMPONENT: '3503.65'
+    FOREIGN_INCOME: '0.00'
+CASE218:
+  layout: trust_return_standard
+  degradation_seed: 9270
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Oakleigh Nominees Trust
+    TRUST_TFN: 232 260 218
+    TRUST_ABN: 91 053 315 869
+    TRUSTEE_NAME: Oakleigh Capital Pty Ltd ATF Oakleigh Nominees Trust
+    TRUST_ADDRESS: 159 Martin Cl, Norwood SA 5067
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '459560.31'
+    BENEFICIARY_NAME: Kara Nichols
+    BENEFICIARY_TFN: 563 421 618
+    SHARE_OF_NET_INCOME: '459560.31'
+    FRANKING_CREDIT: '62931.52'
+    CAPITAL_GAIN_COMPONENT: '130355.30'
+    FOREIGN_INCOME: '3017.72'
+CASE219:
+  layout: trust_return_standard
+  degradation_seed: 4505
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Mortlake Unit Trust
+    TRUST_TFN: 036 541 415
+    TRUST_ABN: 62 073 375 433
+    TRUSTEE_NAME: Mortlake Enterprises Pty Ltd ATF Mortlake Unit Trust
+    TRUST_ADDRESS: 285 Morrison Blvd, Battery Point TAS 7004
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '144552.75'
+    BENEFICIARY_NAME: William Fleming
+    BENEFICIARY_TFN: 586 850 118
+    SHARE_OF_NET_INCOME: '144552.75'
+    FRANKING_CREDIT: '30943.46'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE220:
+  layout: trust_return_standard
+  degradation_seed: 3704
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Faircloth Nominees Trust
+    TRUST_TFN: 569 816 918
+    TRUST_ABN: 78 429 401 965
+    TRUSTEE_NAME: Faircloth Enterprises Pty Ltd ATF Faircloth Nominees Trust
+    TRUST_ADDRESS: 311 Duarte St, Parramatta NSW 2150
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '273728.08'
+    BENEFICIARY_NAME: Brittney Green
+    BENEFICIARY_TFN: 340 608 816
+    SHARE_OF_NET_INCOME: '136864.04'
+    FRANKING_CREDIT: '20046.32'
+    CAPITAL_GAIN_COMPONENT: '30106.63'
+    FOREIGN_INCOME: '0.00'
+CASE221:
+  layout: trust_return_standard
+  degradation_seed: 9837
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Newbold Discretionary Trust
+    TRUST_TFN: 846 564 819
+    TRUST_ABN: 30 356 159 514
+    TRUSTEE_NAME: Newbold Investments Pty Ltd ATF Newbold Discretionary Trust
+    TRUST_ADDRESS: 102 Davis Ct, Paddington QLD 4064
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '113713.54'
+    BENEFICIARY_NAME: Erin King
+    BENEFICIARY_TFN: 236 629 928
+    SHARE_OF_NET_INCOME: '37904.51'
+    FRANKING_CREDIT: '3837.84'
+    CAPITAL_GAIN_COMPONENT: '5586.74'
+    FOREIGN_INCOME: '2165.67'
+CASE222:
+  layout: trust_return_standard
+  degradation_seed: 3683
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Hollingsworth Investment Trust
+    TRUST_TFN: 957 773 816
+    TRUST_ABN: 32 468 044 369
+    TRUSTEE_NAME: Hollingsworth Capital Pty Ltd ATF Hollingsworth Investment Trust
+    TRUST_ADDRESS: 53 Powell Cl, Leederville WA 6007
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '286345.10'
+    BENEFICIARY_NAME: Alexandra Mccormick
+    BENEFICIARY_TFN: 721 489 528
+    SHARE_OF_NET_INCOME: '143172.55'
+    FRANKING_CREDIT: '19974.03'
+    CAPITAL_GAIN_COMPONENT: '25644.11'
+    FOREIGN_INCOME: '0.00'
+CASE223:
+  layout: trust_return_standard
+  degradation_seed: 8102
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Gainsborough Family Trust
+    TRUST_TFN: 791 769 314
+    TRUST_ABN: 88 134 332 003
+    TRUSTEE_NAME: Gainsborough Investments Pty Ltd ATF Gainsborough Family Trust
+    TRUST_ADDRESS: 187 Daniels Ct, Cronulla NSW 2230
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '393491.32'
+    BENEFICIARY_NAME: Brenda White
+    BENEFICIARY_TFN: 676 320 128
+    SHARE_OF_NET_INCOME: '131163.77'
+    FRANKING_CREDIT: '20963.06'
+    CAPITAL_GAIN_COMPONENT: '9723.81'
+    FOREIGN_INCOME: '0.00'
+CASE224:
+  layout: trust_return_standard
+  degradation_seed: 4475
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Kingsley Property Trust
+    TRUST_TFN: 727 889 511
+    TRUST_ABN: 69 632 870 831
+    TRUSTEE_NAME: Kingsley Partners Pty Ltd ATF Kingsley Property Trust
+    TRUST_ADDRESS: 56 Lane Rd, Brunswick VIC 3056
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '146674.84'
+    BENEFICIARY_NAME: Misty Jones
+    BENEFICIARY_TFN: 798 687 216
+    SHARE_OF_NET_INCOME: '36668.71'
+    FRANKING_CREDIT: '2682.65'
+    CAPITAL_GAIN_COMPONENT: '9666.46'
+    FOREIGN_INCOME: '0.00'
+CASE225:
+  layout: trust_return_standard
+  degradation_seed: 6764
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Kingsley Investment Trust
+    TRUST_TFN: 714 345 510
+    TRUST_ABN: 53 774 348 734
+    TRUSTEE_NAME: Kingsley Group Pty Ltd ATF Kingsley Investment Trust
+    TRUST_ADDRESS: 243 Chambers Way, Alexandria NSW 2015
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '229605.53'
+    BENEFICIARY_NAME: Kelly Fox
+    BENEFICIARY_TFN: 812 236 216
+    SHARE_OF_NET_INCOME: '229605.53'
+    FRANKING_CREDIT: '6409.67'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE226:
+  layout: trust_return_standard
+  degradation_seed: 3073
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Wetherby Nominees Trust
     TRUST_TFN: 366 909 615
     TRUST_ABN: 68 316 658 760
-    TRUSTEE_NAME: Oakleigh Group Pty Ltd ATF Oakleigh Nominees Trust
-    TRUST_ADDRESS: 385 Calderon Pde, Battery Point TAS 7004
+    TRUSTEE_NAME: Wetherby Group Pty Ltd ATF Wetherby Nominees Trust
+    TRUST_ADDRESS: 361 Phillips Dr, Norwood SA 5067
     INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '68041.27'
-    BENEFICIARY_NAME: Diana Smith
+    TOTAL_NET_INCOME: '145484.82'
+    BENEFICIARY_NAME: Keith Jimenez
     BENEFICIARY_TFN: 705 466 819
-    SHARE_OF_NET_INCOME: '17010.32'
-    FRANKING_CREDIT: '3094.10'
-    CAPITAL_GAIN_COMPONENT: '2194.17'
+    SHARE_OF_NET_INCOME: '48494.94'
+    FRANKING_CREDIT: '14264.94'
+    CAPITAL_GAIN_COMPONENT: '7453.01'
     FOREIGN_INCOME: '0.00'
 CASE227:
   layout: trust_return_standard
-  degradation_seed: 4241
+  degradation_seed: 3485
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Gainsborough Unit Trust
+    TRUST_NAME: Fairweather Family Trust
     TRUST_TFN: 656 272 917
     TRUST_ABN: 97 893 734 670
-    TRUSTEE_NAME: Gainsborough Investments Pty Ltd ATF Gainsborough Unit Trust
-    TRUST_ADDRESS: 357 Bender Gr, Parramatta NSW 2150
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '123423.35'
-    BENEFICIARY_NAME: Carol Farrell
+    TRUSTEE_NAME: Fairweather Holdings Pty Ltd ATF Fairweather Family Trust
+    TRUST_ADDRESS: 224 Park Blvd, Subiaco WA 6008
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '471121.16'
+    BENEFICIARY_NAME: Mia Rivera
     BENEFICIARY_TFN: 806 990 116
-    SHARE_OF_NET_INCOME: '41141.12'
-    FRANKING_CREDIT: '8676.51'
-    CAPITAL_GAIN_COMPONENT: '11954.98'
-    FOREIGN_INCOME: '3960.36'
+    SHARE_OF_NET_INCOME: '117780.29'
+    FRANKING_CREDIT: '4031.16'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
 CASE228:
   layout: trust_return_standard
-  degradation_seed: 2496
+  degradation_seed: 3847
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Family Trust
+    TRUST_NAME: Broadbent Unit Trust
     TRUST_TFN: 755 646 419
     TRUST_ABN: 76 627 204 653
-    TRUSTEE_NAME: Mortlake Investments Pty Ltd ATF Mortlake Family Trust
-    TRUST_ADDRESS: 400 Douglas St, Hobart TAS 7000
+    TRUSTEE_NAME: Broadbent Group Pty Ltd ATF Broadbent Unit Trust
+    TRUST_ADDRESS: 345 Davis Way, Unley SA 5061
     INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '274590.97'
-    BENEFICIARY_NAME: Steven Wang
+    TOTAL_NET_INCOME: '308719.15'
+    BENEFICIARY_NAME: John Henry
     BENEFICIARY_TFN: 170 805 319
-    SHARE_OF_NET_INCOME: '68647.74'
-    FRANKING_CREDIT: '1656.65'
+    SHARE_OF_NET_INCOME: '308719.15'
+    FRANKING_CREDIT: '87761.77'
     CAPITAL_GAIN_COMPONENT: '0.00'
     FOREIGN_INCOME: '0.00'
 CASE229:
   layout: trust_return_standard
-  degradation_seed: 1601
+  degradation_seed: 5352
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Everleigh Property Trust
+    TRUST_NAME: Ridgeway Family Trust
     TRUST_TFN: 271 937 412
     TRUST_ABN: 77 100 330 923
-    TRUSTEE_NAME: Everleigh Partners Pty Ltd ATF Everleigh Property Trust
-    TRUST_ADDRESS: 38 Walker Ln, Hawthorn East VIC 3123
+    TRUSTEE_NAME: Ridgeway Capital Pty Ltd ATF Ridgeway Family Trust
+    TRUST_ADDRESS: 36 Gardner Tce, Cronulla NSW 2230
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '167318.55'
-    BENEFICIARY_NAME: Jacob Tran
+    TOTAL_NET_INCOME: '346818.61'
+    BENEFICIARY_NAME: Kenneth Ramirez
     BENEFICIARY_TFN: 529 912 413
-    SHARE_OF_NET_INCOME: '167318.55'
-    FRANKING_CREDIT: '43054.40'
-    CAPITAL_GAIN_COMPONENT: '48988.49'
-    FOREIGN_INCOME: '0.00'
+    SHARE_OF_NET_INCOME: '115606.20'
+    FRANKING_CREDIT: '27323.34'
+    CAPITAL_GAIN_COMPONENT: '32533.21'
+    FOREIGN_INCOME: '2183.18'
 CASE230:
   layout: trust_return_standard
-  degradation_seed: 1224
+  degradation_seed: 1339
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Newbold Family Trust
+    TRUST_NAME: Broadbent Family Trust
     TRUST_TFN: 931 491 913
     TRUST_ABN: 34 190 496 631
-    TRUSTEE_NAME: Newbold Group Pty Ltd ATF Newbold Family Trust
-    TRUST_ADDRESS: 398 Li Ave, New Farm QLD 4005
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '279117.62'
-    BENEFICIARY_NAME: Tonya Hughes
+    TRUSTEE_NAME: Broadbent Holdings Pty Ltd ATF Broadbent Family Trust
+    TRUST_ADDRESS: 352 Castillo Ave, Fremantle WA 6160
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '29531.78'
+    BENEFICIARY_NAME: Karen Li
     BENEFICIARY_TFN: 058 651 810
-    SHARE_OF_NET_INCOME: '93039.21'
-    FRANKING_CREDIT: '12228.59'
-    CAPITAL_GAIN_COMPONENT: '8606.05'
-    FOREIGN_INCOME: '3083.47'
+    SHARE_OF_NET_INCOME: '7382.95'
+    FRANKING_CREDIT: '1626.91'
+    CAPITAL_GAIN_COMPONENT: '435.98'
+    FOREIGN_INCOME: '0.00'
 CASE231:
   layout: trust_return_standard
-  degradation_seed: 5891
+  degradation_seed: 6153
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ridgeway Nominees Trust
+    TRUST_NAME: Yeoman Property Trust
     TRUST_TFN: 628 498 716
     TRUST_ABN: 14 506 716 572
-    TRUSTEE_NAME: Ridgeway Holdings Pty Ltd ATF Ridgeway Nominees Trust
-    TRUST_ADDRESS: 154 Garner Ave, Leederville WA 6007
+    TRUSTEE_NAME: Yeoman Partners Pty Ltd ATF Yeoman Property Trust
+    TRUST_ADDRESS: 377 Franco Tce, Chatswood NSW 2067
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '280119.89'
-    BENEFICIARY_NAME: Hannah Jones
+    TOTAL_NET_INCOME: '240305.09'
+    BENEFICIARY_NAME: Martha Walsh
     BENEFICIARY_TFN: 769 453 117
-    SHARE_OF_NET_INCOME: '70029.97'
-    FRANKING_CREDIT: '4004.53'
-    CAPITAL_GAIN_COMPONENT: '21793.49'
+    SHARE_OF_NET_INCOME: '60076.27'
+    FRANKING_CREDIT: '6007.18'
+    CAPITAL_GAIN_COMPONENT: '21039.11'
     FOREIGN_INCOME: '0.00'
 CASE232:
   layout: trust_return_standard
-  degradation_seed: 3492
+  degradation_seed: 4920
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Sedgwick Unit Trust
+    TRUST_NAME: Fairweather Investment Trust
     TRUST_TFN: 752 735 415
     TRUST_ABN: 22 473 799 650
-    TRUSTEE_NAME: Sedgwick Corp Pty Ltd ATF Sedgwick Unit Trust
-    TRUST_ADDRESS: 202 Lopez Way, Battery Point TAS 7004
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '390016.79'
-    BENEFICIARY_NAME: Megan Gray
+    TRUSTEE_NAME: Fairweather Holdings Pty Ltd ATF Fairweather Investment Trust
+    TRUST_ADDRESS: 114 Garrett Gr, St Kilda VIC 3182
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '109743.54'
+    BENEFICIARY_NAME: Tonya Hughes
     BENEFICIARY_TFN: 549 480 818
-    SHARE_OF_NET_INCOME: '390016.79'
-    FRANKING_CREDIT: '37228.23'
-    CAPITAL_GAIN_COMPONENT: '144189.43'
+    SHARE_OF_NET_INCOME: '54871.77'
+    FRANKING_CREDIT: '15270.91'
+    CAPITAL_GAIN_COMPONENT: '16153.56'
     FOREIGN_INCOME: '0.00'
 CASE233:
   layout: trust_return_standard
-  degradation_seed: 8994
+  degradation_seed: 9327
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Wetherby Discretionary Trust
+    TRUST_TFN: 701 436 317
+    TRUST_ABN: 66 313 678 377
+    TRUSTEE_NAME: Wetherby Group Pty Ltd ATF Wetherby Discretionary Trust
+    TRUST_ADDRESS: 371 Doyle Way, Unley SA 5061
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '259347.29'
+    BENEFICIARY_NAME: Norma Jacobs
+    BENEFICIARY_TFN: 495 788 515
+    SHARE_OF_NET_INCOME: '86449.10'
+    FRANKING_CREDIT: '10775.63'
+    CAPITAL_GAIN_COMPONENT: '18610.50'
+    FOREIGN_INCOME: '0.00'
+CASE234:
+  layout: trust_return_standard
+  degradation_seed: 7274
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Xanthos Discretionary Trust
+    TRUST_TFN: 135 182 318
+    TRUST_ABN: 92 685 574 443
+    TRUSTEE_NAME: Xanthos Partners Pty Ltd ATF Xanthos Discretionary Trust
+    TRUST_ADDRESS: 66 Powell Cl, Unley SA 5061
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '273904.48'
+    BENEFICIARY_NAME: Alan Prince
+    BENEFICIARY_TFN: 374 989 419
+    SHARE_OF_NET_INCOME: '91301.49'
+    FRANKING_CREDIT: '9105.68'
+    CAPITAL_GAIN_COMPONENT: '16619.02'
+    FOREIGN_INCOME: '4361.05'
+CASE235:
+  layout: trust_return_standard
+  degradation_seed: 7512
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Everleigh Nominees Trust
+    TRUST_TFN: 240 084 211
+    TRUST_ABN: 89 134 352 408
+    TRUSTEE_NAME: Everleigh Holdings Pty Ltd ATF Everleigh Nominees Trust
+    TRUST_ADDRESS: 60 Green Gr, Leederville WA 6007
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '267716.03'
+    BENEFICIARY_NAME: Kathy Wise
+    BENEFICIARY_TFN: 710 947 713
+    SHARE_OF_NET_INCOME: '66929.01'
+    FRANKING_CREDIT: '308.16'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '4852.79'
+CASE236:
+  layout: trust_return_standard
+  degradation_seed: 3385
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Ulverston Family Trust
+    TRUST_TFN: 719 022 916
+    TRUST_ABN: 25 752 047 116
+    TRUSTEE_NAME: Ulverston Partners Pty Ltd ATF Ulverston Family Trust
+    TRUST_ADDRESS: 193 Parker Cres, Leederville WA 6007
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '489385.49'
+    BENEFICIARY_NAME: William Perez
+    BENEFICIARY_TFN: 413 186 928
+    SHARE_OF_NET_INCOME: '489385.49'
+    FRANKING_CREDIT: '65138.95'
+    CAPITAL_GAIN_COMPONENT: '179212.19'
+    FOREIGN_INCOME: '0.00'
+CASE237:
+  layout: trust_return_standard
+  degradation_seed: 7302
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Everleigh Unit Trust
+    TRUST_TFN: 649 909 111
+    TRUST_ABN: 56 993 867 749
+    TRUSTEE_NAME: Everleigh Enterprises Pty Ltd ATF Everleigh Unit Trust
+    TRUST_ADDRESS: 124 Hickman Rd, Hobart TAS 7000
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '135110.09'
+    BENEFICIARY_NAME: Jeanette Willis
+    BENEFICIARY_TFN: 334 123 211
+    SHARE_OF_NET_INCOME: '122291.77'
+    FRANKING_CREDIT: '36435.48'
+    CAPITAL_GAIN_COMPONENT: '20357.18'
+    FOREIGN_INCOME: '0.00'
+CASE238:
+  layout: trust_return_standard
+  degradation_seed: 1645
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Oakleigh Family Trust
-    TRUST_TFN: 701 436 317
-    TRUST_ABN: 66 313 678 377
-    TRUSTEE_NAME: Oakleigh Capital Pty Ltd ATF Oakleigh Family Trust
-    TRUST_ADDRESS: 127 Smith Pde, Norwood SA 5067
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '315397.11'
-    BENEFICIARY_NAME: Mary Dominguez
-    BENEFICIARY_TFN: 495 788 515
-    SHARE_OF_NET_INCOME: '78849.28'
-    FRANKING_CREDIT: '15371.75'
-    CAPITAL_GAIN_COMPONENT: '27464.74'
-    FOREIGN_INCOME: '1962.05'
-CASE234:
-  layout: trust_return_standard
-  degradation_seed: 3950
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ridgeway Family Trust
-    TRUST_TFN: 135 182 318
-    TRUST_ABN: 92 685 574 443
-    TRUSTEE_NAME: Ridgeway Investments Pty Ltd ATF Ridgeway Family Trust
-    TRUST_ADDRESS: 159 Johnson Gr, Manuka ACT 2603
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '350060.57'
-    BENEFICIARY_NAME: Sarah Parker
-    BENEFICIARY_TFN: 374 989 419
-    SHARE_OF_NET_INCOME: '350060.57'
-    FRANKING_CREDIT: '4829.89'
-    CAPITAL_GAIN_COMPONENT: '53446.80'
-    FOREIGN_INCOME: '0.00'
-CASE235:
-  layout: trust_return_standard
-  degradation_seed: 4886
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Cathcart Discretionary Trust
-    TRUST_TFN: 240 084 211
-    TRUST_ABN: 89 134 352 408
-    TRUSTEE_NAME: Cathcart Holdings Pty Ltd ATF Cathcart Discretionary Trust
-    TRUST_ADDRESS: 210 Gonzalez Tce, Paddington QLD 4064
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '473165.46'
-    BENEFICIARY_NAME: Gloria Perez
-    BENEFICIARY_TFN: 710 947 713
-    SHARE_OF_NET_INCOME: '157721.82'
-    FRANKING_CREDIT: '30232.37'
-    CAPITAL_GAIN_COMPONENT: '21692.17'
-    FOREIGN_INCOME: '1076.16'
-CASE236:
-  layout: trust_return_standard
-  degradation_seed: 8222
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Lancaster Unit Trust
-    TRUST_TFN: 719 022 916
-    TRUST_ABN: 25 752 047 116
-    TRUSTEE_NAME: Lancaster Group Pty Ltd ATF Lancaster Unit Trust
-    TRUST_ADDRESS: 383 Marquez Blvd, Glenelg SA 5045
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '103164.67'
-    BENEFICIARY_NAME: Kellie Brady
-    BENEFICIARY_TFN: 413 186 928
-    SHARE_OF_NET_INCOME: '34388.22'
-    FRANKING_CREDIT: '6992.13'
-    CAPITAL_GAIN_COMPONENT: '9653.24'
-    FOREIGN_INCOME: '3178.42'
-CASE237:
-  layout: trust_return_standard
-  degradation_seed: 5332
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Hollingsworth Unit Trust
-    TRUST_TFN: 649 909 111
-    TRUST_ABN: 56 993 867 749
-    TRUSTEE_NAME: Hollingsworth Group Pty Ltd ATF Hollingsworth Unit Trust
-    TRUST_ADDRESS: 257 Jackson Ave, Glenelg SA 5045
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '414098.01'
-    BENEFICIARY_NAME: Katherine Miller
-    BENEFICIARY_TFN: 334 123 211
-    SHARE_OF_NET_INCOME: '87845.86'
-    FRANKING_CREDIT: '30044.39'
-    CAPITAL_GAIN_COMPONENT: '36713.82'
-    FOREIGN_INCOME: '2394.82'
-CASE238:
-  layout: trust_return_standard
-  degradation_seed: 9850
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ridgeway Family Trust
     TRUST_TFN: 034 471 311
     TRUST_ABN: 14 812 067 974
-    TRUSTEE_NAME: Ridgeway Enterprises Pty Ltd ATF Ridgeway Family Trust
-    TRUST_ADDRESS: 330 Hansen Gr, South Yarra VIC 3141
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '67171.21'
-    BENEFICIARY_NAME: Jason West
+    TRUSTEE_NAME: Oakleigh Capital Pty Ltd ATF Oakleigh Family Trust
+    TRUST_ADDRESS: 273 Andrade St, Manuka ACT 2603
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '402946.66'
+    BENEFICIARY_NAME: Kellie Brady
     BENEFICIARY_TFN: 493 618 310
-    SHARE_OF_NET_INCOME: '67171.21'
-    FRANKING_CREDIT: '19068.46'
-    CAPITAL_GAIN_COMPONENT: '14940.13'
+    SHARE_OF_NET_INCOME: '201473.33'
+    FRANKING_CREDIT: '38478.46'
+    CAPITAL_GAIN_COMPONENT: '57866.68'
     FOREIGN_INCOME: '0.00'
 CASE239:
   layout: trust_return_standard
-  degradation_seed: 1828
+  degradation_seed: 2886
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Unit Trust
+    TRUST_NAME: Gainsborough Nominees Trust
     TRUST_TFN: 471 746 419
     TRUST_ABN: 85 242 102 499
-    TRUSTEE_NAME: Mortlake Corp Pty Ltd ATF Mortlake Unit Trust
-    TRUST_ADDRESS: 276 Camacho Ct, Leederville WA 6007
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '489142.84'
-    BENEFICIARY_NAME: Shannon Arnold
+    TRUSTEE_NAME: Gainsborough Holdings Pty Ltd ATF Gainsborough Nominees Trust
+    TRUST_ADDRESS: 308 Sampson Blvd, Subiaco WA 6008
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '255879.43'
+    BENEFICIARY_NAME: Lee Brown
     BENEFICIARY_TFN: 887 719 019
-    SHARE_OF_NET_INCOME: '163047.61'
-    FRANKING_CREDIT: '2961.76'
-    CAPITAL_GAIN_COMPONENT: '63404.72'
-    FOREIGN_INCOME: '4138.54'
+    SHARE_OF_NET_INCOME: '85293.14'
+    FRANKING_CREDIT: '21250.09'
+    CAPITAL_GAIN_COMPONENT: '28883.79'
+    FOREIGN_INCOME: '0.00'
 CASE240:
   layout: trust_return_standard
-  degradation_seed: 2041
+  degradation_seed: 2035
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Hazelwood Discretionary Trust
+    TRUST_NAME: Newbold Family Trust
     TRUST_TFN: 049 027 811
     TRUST_ABN: 20 659 401 399
-    TRUSTEE_NAME: Hazelwood Capital Pty Ltd ATF Hazelwood Discretionary Trust
-    TRUST_ADDRESS: 255 Green Pde, St Kilda VIC 3182
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '22632.27'
-    BENEFICIARY_NAME: Thomas Moran
+    TRUSTEE_NAME: Newbold Capital Pty Ltd ATF Newbold Family Trust
+    TRUST_ADDRESS: 301 Neal Ave, New Farm QLD 4005
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '196702.49'
+    BENEFICIARY_NAME: Antonio Taylor
     BENEFICIARY_TFN: 742 967 116
-    SHARE_OF_NET_INCOME: '25192.98'
-    FRANKING_CREDIT: '2432.35'
-    CAPITAL_GAIN_COMPONENT: '5796.09'
+    SHARE_OF_NET_INCOME: '77847.53'
+    FRANKING_CREDIT: '2131.19'
+    CAPITAL_GAIN_COMPONENT: '0.00'
     FOREIGN_INCOME: '0.00'
 CASE241:
   layout: trust_return_standard
-  degradation_seed: 7240
+  degradation_seed: 1536
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Oakleigh Nominees Trust
+    TRUST_NAME: Ulverston Nominees Trust
     TRUST_TFN: 746 807 113
     TRUST_ABN: 25 756 551 256
-    TRUSTEE_NAME: Oakleigh Partners Pty Ltd ATF Oakleigh Nominees Trust
-    TRUST_ADDRESS: 232 Anderson Tce, Chatswood NSW 2067
+    TRUSTEE_NAME: Ulverston Corp Pty Ltd ATF Ulverston Nominees Trust
+    TRUST_ADDRESS: 132 Simon Rd, Hawthorn East VIC 3123
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '250231.74'
-    BENEFICIARY_NAME: Nathaniel Jones
+    TOTAL_NET_INCOME: '338538.25'
+    BENEFICIARY_NAME: Morgan Khan
     BENEFICIARY_TFN: 545 168 013
-    SHARE_OF_NET_INCOME: '54284.44'
-    FRANKING_CREDIT: '1379.23'
-    CAPITAL_GAIN_COMPONENT: '0.00'
+    SHARE_OF_NET_INCOME: '68481.38'
+    FRANKING_CREDIT: '14912.79'
+    CAPITAL_GAIN_COMPONENT: '30459.54'
     FOREIGN_INCOME: '0.00'
 CASE242:
+  layout: trust_return_standard
+  degradation_seed: 4538
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Wetherby Investment Trust
+    TRUST_TFN: 703 482 411
+    TRUST_ABN: 34 876 038 597
+    TRUSTEE_NAME: Wetherby Capital Pty Ltd ATF Wetherby Investment Trust
+    TRUST_ADDRESS: 28 Wood Dr, Richmond VIC 3121
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '334756.68'
+    BENEFICIARY_NAME: Matthew Parker
+    BENEFICIARY_TFN: 771 093 217
+    SHARE_OF_NET_INCOME: '334756.68'
+    FRANKING_CREDIT: '5079.45'
+    CAPITAL_GAIN_COMPONENT: '132592.88'
+    FOREIGN_INCOME: '0.00'
+CASE243:
+  layout: trust_return_standard
+  degradation_seed: 8405
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Everleigh Investment Trust
+    TRUST_TFN: 127 484 628
+    TRUST_ABN: 57 480 861 317
+    TRUSTEE_NAME: Everleigh Partners Pty Ltd ATF Everleigh Investment Trust
+    TRUST_ADDRESS: 195 Scott Pde, Subiaco WA 6008
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '17281.56'
+    BENEFICIARY_NAME: Rose Wood
+    BENEFICIARY_TFN: 773 782 617
+    SHARE_OF_NET_INCOME: '8640.78'
+    FRANKING_CREDIT: '1526.44'
+    CAPITAL_GAIN_COMPONENT: '0.00'
+    FOREIGN_INCOME: '0.00'
+CASE244:
+  layout: trust_return_standard
+  degradation_seed: 9692
+  fields:
+    DOCUMENT_TYPE: TRUST_RETURN
+    TRUST_NAME: Pemberton Discretionary Trust
+    TRUST_TFN: 404 499 713
+    TRUST_ABN: 26 398 214 658
+    TRUSTEE_NAME: Pemberton Investments Pty Ltd ATF Pemberton Discretionary Trust
+    TRUST_ADDRESS: 254 Martin Tce, Leederville WA 6007
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '450640.71'
+    BENEFICIARY_NAME: Michael Barr
+    BENEFICIARY_TFN: 278 755 815
+    SHARE_OF_NET_INCOME: '150213.57'
+    FRANKING_CREDIT: '27412.36'
+    CAPITAL_GAIN_COMPONENT: '7853.34'
+    FOREIGN_INCOME: '0.00'
+CASE245:
   layout: trust_return_standard
   degradation_seed: 7105
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Thackeray Unit Trust
-    TRUST_TFN: 703 482 411
-    TRUST_ABN: 34 876 038 597
-    TRUSTEE_NAME: Thackeray Group Pty Ltd ATF Thackeray Unit Trust
+    TRUST_NAME: Gainsborough Nominees Trust
+    TRUST_TFN: 605 766 214
+    TRUST_ABN: 30 867 533 963
+    TRUSTEE_NAME: Gainsborough Investments Pty Ltd ATF Gainsborough Nominees Trust
     TRUST_ADDRESS: 266 Powers Ave, Cronulla NSW 2230
     INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '163136.55'
+    TOTAL_NET_INCOME: '163148.69'
     BENEFICIARY_NAME: Michael Reyes
-    BENEFICIARY_TFN: 771 093 217
-    SHARE_OF_NET_INCOME: '54378.85'
-    FRANKING_CREDIT: '6106.22'
-    CAPITAL_GAIN_COMPONENT: '0.00'
+    BENEFICIARY_TFN: 702 895 114
+    SHARE_OF_NET_INCOME: '54382.90'
+    FRANKING_CREDIT: '10851.15'
+    CAPITAL_GAIN_COMPONENT: '5624.48'
     FOREIGN_INCOME: '428.95'
-CASE243:
+CASE246:
   layout: trust_return_standard
-  degradation_seed: 6062
+  degradation_seed: 1430
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
     TRUST_NAME: Broadbent Unit Trust
-    TRUST_TFN: 127 484 628
-    TRUST_ABN: 57 480 861 317
+    TRUST_TFN: 745 961 512
+    TRUST_ABN: 52 718 702 621
     TRUSTEE_NAME: Broadbent Holdings Pty Ltd ATF Broadbent Unit Trust
     TRUST_ADDRESS: 335 Huffman Cres, Manuka ACT 2603
     INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '66293.80'
+    TOTAL_NET_INCOME: '424232.98'
     BENEFICIARY_NAME: Daniel Chandler
-    BENEFICIARY_TFN: 773 782 617
-    SHARE_OF_NET_INCOME: '22097.93'
-    FRANKING_CREDIT: '3805.93'
-    CAPITAL_GAIN_COMPONENT: '7641.56'
-    FOREIGN_INCOME: '4110.29'
-CASE244:
-  layout: trust_return_standard
-  degradation_seed: 8242
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Hazelwood Investment Trust
-    TRUST_TFN: 404 499 713
-    TRUST_ABN: 26 398 214 658
-    TRUSTEE_NAME: Hazelwood Holdings Pty Ltd ATF Hazelwood Investment Trust
-    TRUST_ADDRESS: 350 Lucero Ave, Subiaco WA 6008
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '390649.45'
-    BENEFICIARY_NAME: John Gray
-    BENEFICIARY_TFN: 278 755 815
-    SHARE_OF_NET_INCOME: '390649.45'
-    FRANKING_CREDIT: '103523.14'
-    CAPITAL_GAIN_COMPONENT: '9632.27'
-    FOREIGN_INCOME: '0.00'
-CASE245:
-  layout: trust_return_standard
-  degradation_seed: 6802
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Mortlake Investment Trust
-    TRUST_TFN: 605 766 214
-    TRUST_ABN: 30 867 533 963
-    TRUSTEE_NAME: Mortlake Capital Pty Ltd ATF Mortlake Investment Trust
-    TRUST_ADDRESS: 185 Bradley Ct, Norwood SA 5067
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '135204.56'
-    BENEFICIARY_NAME: Christopher Martinez
-    BENEFICIARY_TFN: 702 895 114
-    SHARE_OF_NET_INCOME: '45068.19'
-    FRANKING_CREDIT: '1622.24'
-    CAPITAL_GAIN_COMPONENT: '9046.50'
-    FOREIGN_INCOME: '0.00'
-CASE246:
-  layout: trust_return_standard
-  degradation_seed: 6562
-  fields:
-    DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Faircloth Nominees Trust
-    TRUST_TFN: 745 961 512
-    TRUST_ABN: 52 718 702 621
-    TRUSTEE_NAME: Faircloth Partners Pty Ltd ATF Faircloth Nominees Trust
-    TRUST_ADDRESS: 180 Smith Ct, Alexandria NSW 2015
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '187307.82'
-    BENEFICIARY_NAME: James Lewis
     BENEFICIARY_TFN: 865 780 911
-    SHARE_OF_NET_INCOME: '46826.96'
-    FRANKING_CREDIT: '11863.39'
-    CAPITAL_GAIN_COMPONENT: '0.00'
+    SHARE_OF_NET_INCOME: '141410.99'
+    FRANKING_CREDIT: '4873.81'
+    CAPITAL_GAIN_COMPONENT: '18264.03'
     FOREIGN_INCOME: '0.00'
 CASE247:
   layout: trust_return_standard
-  degradation_seed: 6295
+  degradation_seed: 6314
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Everleigh Investment Trust
+    TRUST_NAME: Thackeray Property Trust
     TRUST_TFN: 240 050 428
     TRUST_ABN: 39 134 316 117
-    TRUSTEE_NAME: Everleigh Partners Pty Ltd ATF Everleigh Investment Trust
-    TRUST_ADDRESS: 118 Fernandez Way, Leederville WA 6007
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '305175.50'
-    BENEFICIARY_NAME: Tony Kramer
+    TRUSTEE_NAME: Thackeray Partners Pty Ltd ATF Thackeray Property Trust
+    TRUST_ADDRESS: 369 Sharp St, Hobart TAS 7000
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '44096.86'
+    BENEFICIARY_NAME: Benjamin Smith
     BENEFICIARY_TFN: 556 238 615
-    SHARE_OF_NET_INCOME: '305175.50'
-    FRANKING_CREDIT: '16218.20'
-    CAPITAL_GAIN_COMPONENT: '68036.12'
+    SHARE_OF_NET_INCOME: '44096.86'
+    FRANKING_CREDIT: '1213.87'
+    CAPITAL_GAIN_COMPONENT: '8010.99'
     FOREIGN_INCOME: '0.00'
 CASE248:
   layout: trust_return_standard
-  degradation_seed: 1672
+  degradation_seed: 5938
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Ulverston Investment Trust
+    TRUST_NAME: Yeoman Unit Trust
     TRUST_TFN: 792 374 711
     TRUST_ABN: 47 922 219 693
-    TRUSTEE_NAME: Ulverston Capital Pty Ltd ATF Ulverston Investment Trust
-    TRUST_ADDRESS: 159 Bowman Tce, Fremantle WA 6160
-    INCOME_YEAR: 2023-24
-    TOTAL_NET_INCOME: '37876.12'
-    BENEFICIARY_NAME: Kimberly Bishop
+    TRUSTEE_NAME: Yeoman Investments Pty Ltd ATF Yeoman Unit Trust
+    TRUST_ADDRESS: 275 Jensen Rd, Prospect SA 5082
+    INCOME_YEAR: 2024-25
+    TOTAL_NET_INCOME: '179134.70'
+    BENEFICIARY_NAME: Stephanie Page
     BENEFICIARY_TFN: 407 482 113
-    SHARE_OF_NET_INCOME: '12625.37'
-    FRANKING_CREDIT: '290.63'
-    CAPITAL_GAIN_COMPONENT: '4410.71'
+    SHARE_OF_NET_INCOME: '179134.70'
+    FRANKING_CREDIT: '15221.78'
+    CAPITAL_GAIN_COMPONENT: '39467.22'
     FOREIGN_INCOME: '0.00'
 CASE249:
   layout: trust_return_standard
-  degradation_seed: 7333
+  degradation_seed: 7636
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Newbold Unit Trust
+    TRUST_NAME: Drummond Discretionary Trust
     TRUST_TFN: 671 369 511
     TRUST_ABN: 51 759 464 743
-    TRUSTEE_NAME: Newbold Corp Pty Ltd ATF Newbold Unit Trust
-    TRUST_ADDRESS: 246 Williamson Ln, Battery Point TAS 7004
-    INCOME_YEAR: 2024-25
-    TOTAL_NET_INCOME: '356734.64'
-    BENEFICIARY_NAME: Michael Clark
+    TRUSTEE_NAME: Drummond Partners Pty Ltd ATF Drummond Discretionary Trust
+    TRUST_ADDRESS: 349 Rodriguez Cres, Norwood SA 5067
+    INCOME_YEAR: 2022-23
+    TOTAL_NET_INCOME: '283774.55'
+    BENEFICIARY_NAME: Jonathan Peterson
     BENEFICIARY_TFN: 944 064 019
-    SHARE_OF_NET_INCOME: '89183.66'
-    FRANKING_CREDIT: '14021.51'
-    CAPITAL_GAIN_COMPONENT: '15818.00'
-    FOREIGN_INCOME: '1998.34'
+    SHARE_OF_NET_INCOME: '94591.52'
+    FRANKING_CREDIT: '2045.32'
+    CAPITAL_GAIN_COMPONENT: '6130.08'
+    FOREIGN_INCOME: '0.00'
 CASE250:
   layout: trust_return_standard
-  degradation_seed: 7937
+  degradation_seed: 6724
   fields:
     DOCUMENT_TYPE: TRUST_RETURN
-    TRUST_NAME: Gainsborough Investment Trust
+    TRUST_NAME: Whitfield Investment Trust
     TRUST_TFN: 394 210 414
     TRUST_ABN: 31 909 743 953
-    TRUSTEE_NAME: Gainsborough Corp Pty Ltd ATF Gainsborough Investment Trust
-    TRUST_ADDRESS: 319 Phillips Ave, Paddington QLD 4064
-    INCOME_YEAR: 2022-23
-    TOTAL_NET_INCOME: '194572.86'
-    BENEFICIARY_NAME: Shane Murphy
+    TRUSTEE_NAME: Whitfield Capital Pty Ltd ATF Whitfield Investment Trust
+    TRUST_ADDRESS: 253 Ramos Pde, Cronulla NSW 2230
+    INCOME_YEAR: 2023-24
+    TOTAL_NET_INCOME: '48537.07'
+    BENEFICIARY_NAME: Jose Page
     BENEFICIARY_TFN: 709 521 428
-    SHARE_OF_NET_INCOME: '64857.62'
-    FRANKING_CREDIT: '15822.37'
-    CAPITAL_GAIN_COMPONENT: '22060.39'
+    SHARE_OF_NET_INCOME: '16179.02'
+    FRANKING_CREDIT: '3619.92'
+    CAPITAL_GAIN_COMPONENT: '5490.27'
     FOREIGN_INCOME: '0.00'
