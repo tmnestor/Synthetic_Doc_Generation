@@ -68,15 +68,14 @@ def zip_line_items(fields: dict[str, str]) -> list[dict[str, str]]:
     ]
 
 
-def canonical_identifier(value: str, form: str) -> str:
-    """Render an ABN or TFN in the configured canonical form.
+def validate_identifier_form(form: str) -> None:
+    """Validate that form is a recognised identifier form.
+
+    Shared by every export path that accepts an identifier_form, so the
+    allowed-values list and its diagnostic live in exactly one place.
 
     Args:
-        value: The stored identifier, space-separated, e.g. '79 104 332 181'.
         form: Either 'spaced' or 'digits_only'.
-
-    Returns:
-        The identifier in the requested form.
 
     Raises:
         ValueError: If form is not a recognised identifier form.
@@ -91,6 +90,22 @@ def canonical_identifier(value: str, form: str) -> str:
             f"config/export_config.yml."
         )
         raise ValueError(msg) from None
+
+
+def canonical_identifier(value: str, form: str) -> str:
+    """Render an ABN or TFN in the configured canonical form.
+
+    Args:
+        value: The stored identifier, space-separated, e.g. '79 104 332 181'.
+        form: Either 'spaced' or 'digits_only'.
+
+    Returns:
+        The identifier in the requested form.
+
+    Raises:
+        ValueError: If form is not a recognised identifier form.
+    """
+    validate_identifier_form(form)
     if form == "digits_only":
         return value.replace(" ", "")
     return value
