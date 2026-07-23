@@ -44,7 +44,7 @@ rich      # Coloured console output
 | Ground truth YAML | 8 files | Field-level truth for all 420 documents |
 | Transaction links YAML | 1 file | 110 receipt/invoice-to-bank-statement links at 3 difficulty levels |
 | Trust distribution links YAML | 1 file | 50 four-document quads with compliance ground truth |
-| Derived CSV | 1 file | Flat CSV with all 39 columns (NOT_FOUND for inapplicable fields) |
+| Derived CSV | 1 file | Flat CSV with all 47 columns (image_file + 46 fields; NOT_FOUND for inapplicable fields) |
 | Derived JSONL | 1 file | One JSON object per document with all field values |
 
 ## Document Types
@@ -104,9 +104,9 @@ python -m generators.pipeline <command> [OPTIONS]
 ```mermaid
 graph TD
     GT["ground_truth/*.yml<br/>Field values (420 entries)"]
-    LR["config/layouts/*.yml<br/>Visual rendering specs (34 layouts)"]
+    LR["config/layouts/*.yml<br/>Visual rendering specs (35 layouts)"]
     GC["config/generation_config.yml<br/>Pipeline configuration"]
-    FD["config/field_definitions.yml<br/>39-column schema"]
+    FD["config/field_definitions.yml<br/>46-column schema"]
 
     GT --> V["validate<br/>Schema + layout checks"]
     LR --> V
@@ -158,9 +158,9 @@ CASE001:
 
 | Difficulty | Criteria | Count |
 |------------|----------|-------|
-| Easy | Exact date and amount match | ~50 |
-| Medium | Amount match, date offset 1-3 days | ~30 |
-| Hard | Amount match, date offset 3-7 days | ~28 |
+| Easy | Exact date and amount match | 48 |
+| Medium | Amount match, date offset 1-3 days | 41 |
+| Hard | Amount match, date offset 3-7 days | 21 |
 
 ```yaml
 # Keys are image filenames; source and target share the same CASE### prefix
@@ -500,15 +500,15 @@ ground_truth/
 
 config/
 ├── generation_config.yml      # Pipeline configuration (8 document types)
-├── field_definitions.yml      # 39-column schema for 8 document types
+├── field_definitions.yml      # 46-column schema for 8 document types
 ├── data_pools.yml             # Australian business data, trust names, trustee names
 └── layouts/
-    ├── bank_statements.yml          # 12 layouts
+    ├── bank_statements.yml          # 8 layouts
     ├── receipts.yml                 # 6 layouts
     ├── invoices.yml                 # 4 layouts
     ├── cc_statements.yml            # 8 layouts
     ├── trust_returns.yml            # 1 layout
-    ├── distribution_statements.yml  # 1 layout
+    ├── distribution_statements.yml  # 6 layouts
     ├── trust_income_schedules.yml   # 1 layout
     └── beneficiary_itrs.yml         # 1 layout
 ```
