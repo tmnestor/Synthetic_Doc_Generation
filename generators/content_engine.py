@@ -16,6 +16,8 @@ from pathlib import Path
 import yaml
 from faker import Faker
 
+from generators.common import generate_abn
+
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
 
 # Top-level keys load_pools() requires; each maps to the dotted sub-keys (if
@@ -128,6 +130,56 @@ class ContentEngine:
         street_type = sample(rng, self.pools["street_types"])
         loc = self.location(rng)
         return f"{street_num} {street_name} {street_type}, {loc['suburb']} {loc['state']} {loc['postcode']}"
+
+    def fictional_business(self, rng: random.Random, category: str) -> dict:
+        """Invented AU business (blocklist-screened) + generate_abn() + address.
+
+        Returns:
+            {name, address, abn, category}.
+
+        Raises:
+            ValueError: `category` has no entry in business_name_parts.category_nouns.
+            RuntimeError: the retry budget was exhausted without a clean name.
+        """
+        parts = self.pools["business_name_parts"]
+        nouns = parts["category_nouns"].get(category)
+        if not nouns:
+            raise ValueError(
+                "content_engine.fictional_business: unknown category.\n"
+                f"  What:     category {category!r} has no entry under "
+                "'business_name_parts.category_nouns'.\n"
+                f"  Where:    {_DATA_POOLS_PATH} -> "
+                f"'business_name_parts.category_nouns.{category}'.\n"
+                "  Expected: a list of nouns, e.g. "
+                '\'hardware: ["Hardware", "Trade Supplies"]\'.\n'
+                f"  Recover:  add a '{category}:' entry under "
+                f"'business_name_parts.category_nouns' in {_DATA_POOLS_PATH}."
+            )
+        max_attempts = 20
+        for _ in range(max_attempts):
+            noun = sample(rng, nouns)
+            if rng.random() < 0.5:
+                name = f"{sample(rng, parts['surnames'])} {noun}"
+            else:
+                name = f"{sample(rng, parts['suburb_prefixes'])} {noun}"
+            if name.lower() not in self._blocklist:
+                return {
+                    "name": name,
+                    "address": self.address(rng),
+                    "abn": generate_abn(),
+                    "category": category,
+                }
+        raise RuntimeError(
+            "content_engine.fictional_business: exhausted retry budget without a clean name.\n"
+            f"  What:     {max_attempts} draws for category {category!r} all collided with "
+            "the real-name blocklist.\n"
+            f"  Where:    {_DATA_POOLS_PATH} -> 'business_name_parts' (category {category!r}) "
+            "and 'real_name_blocklist_extra'.\n"
+            "  Expected: enough surname/noun combinations for the category to clear the "
+            f"blocklist within {max_attempts} attempts.\n"
+            "  Recover:  widen 'business_name_parts.surnames', 'suburb_prefixes', or "
+            f"'category_nouns.{category}' in {_DATA_POOLS_PATH}."
+        )
 
 
 def sample(rng: random.Random, pool: list):
