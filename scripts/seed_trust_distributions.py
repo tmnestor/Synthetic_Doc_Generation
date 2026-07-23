@@ -10,8 +10,12 @@ Non-compliance types:
   - Missing CGT (~3 cases): Trust Income Schedule reports $0 CGT despite non-zero
   - Trust Return mismatch (~3 cases): Trust Return share differs by 5-20%
 
+Each case's shared entities (trust, trustee, beneficiary) are generated once
+via content_engine and projected across that case's 4 trust documents, so
+widened content never desyncs a trust_distribution_links.yml quad.
+
 Usage:
-    python scripts/seed_trust_distributions.py
+    python scripts/seed_trust_distributions.py [--dry-run]
 """
 
 import random
@@ -19,11 +23,21 @@ import sys
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
+import typer
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from generators.common import generate_abn, generate_tfn  # noqa: E402
+from generators.common import generate_tfn  # noqa: E402
+from generators.content_engine import (  # noqa: E402
+    ContentEngine,
+    NonRepeatingSampler,
+    build_engine,
+    sample,
+)
+from generators.loader import load_layout_registry  # noqa: E402
+from generators.overflow_check import check_overflow  # noqa: E402
+from generators.schema import validate_entry  # noqa: E402
 
 _SEED = 42
 _TOTAL_CASES = 50
@@ -34,8 +48,7 @@ _GT_DIR = Path(__file__).parent.parent / "ground_truth"
 # Case ID offset to avoid collision with existing CASE001-CASE055
 _CASE_ID_START = 201
 
-# ── Layout IDs ──────────────────────────────────────────────────────────────
-
+# ── Layout IDs (structural, not content — unchanged) ────────────────────────
 _TRUST_RETURN_LAYOUTS = ["trust_return_standard"]
 _DISTRIBUTION_STATEMENT_LAYOUTS = [
     "dist_software_navy",
@@ -47,133 +60,6 @@ _DISTRIBUTION_STATEMENT_LAYOUTS = [
 ]
 _TRUST_INCOME_SCHEDULE_LAYOUTS = ["trust_income_schedule_standard"]
 _BENEFICIARY_ITR_LAYOUTS = ["beneficiary_itr_standard"]
-
-# ── Data pools ──────────────────────────────────────────────────────────────
-
-_TRUST_NAMES = [
-    "Smith Family Trust",
-    "Johnson Discretionary Trust",
-    "Williams Family Trust",
-    "Chen Investment Trust",
-    "Brown Family Trust",
-    "Taylor Discretionary Trust",
-    "Anderson Family Trust",
-    "Wilson Investment Trust",
-    "Martin Family Trust",
-    "Thompson Discretionary Trust",
-    "Robinson Family Trust",
-    "Harris Investment Trust",
-    "Clark Family Trust",
-    "Lee Discretionary Trust",
-    "White Family Trust",
-    "Nguyen Investment Trust",
-    "Mitchell Family Trust",
-    "Campbell Discretionary Trust",
-    "Stewart Family Trust",
-    "Cooper Investment Trust",
-    "Murray Family Trust",
-    "Kelly Discretionary Trust",
-    "Parker Family Trust",
-    "Hughes Investment Trust",
-    "Morgan Family Trust",
-]
-
-_TRUSTEE_NAMES = [
-    "Smith Holdings Pty Ltd",
-    "Johnson Corp Pty Ltd",
-    "Williams Investments Pty Ltd",
-    "Chen Capital Pty Ltd",
-    "Brown Group Pty Ltd",
-    "Taylor Enterprises Pty Ltd",
-    "Anderson Holdings Pty Ltd",
-    "Wilson Capital Pty Ltd",
-    "Martin Group Pty Ltd",
-    "Thompson Holdings Pty Ltd",
-    "Robinson Investments Pty Ltd",
-    "Harris Capital Pty Ltd",
-    "Clark Group Pty Ltd",
-    "Lee Enterprises Pty Ltd",
-    "White Holdings Pty Ltd",
-    "Nguyen Capital Pty Ltd",
-    "Mitchell Group Pty Ltd",
-    "Campbell Holdings Pty Ltd",
-    "Stewart Investments Pty Ltd",
-    "Cooper Capital Pty Ltd",
-    "Murray Group Pty Ltd",
-    "Kelly Enterprises Pty Ltd",
-    "Parker Holdings Pty Ltd",
-    "Hughes Capital Pty Ltd",
-    "Morgan Group Pty Ltd",
-]
-
-_BENEFICIARY_FIRST_NAMES = [
-    "Sarah",
-    "Michael",
-    "Emma",
-    "David",
-    "Jessica",
-    "James",
-    "Olivia",
-    "Daniel",
-    "Sophie",
-    "Ryan",
-    "Hannah",
-    "Thomas",
-    "Mia",
-    "William",
-    "Charlotte",
-    "Alexander",
-    "Grace",
-    "Benjamin",
-    "Chloe",
-    "Ethan",
-    "Isabella",
-    "Noah",
-    "Amelia",
-    "Liam",
-    "Emily",
-]
-
-_BENEFICIARY_LAST_NAMES = [
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Chen",
-    "Brown",
-    "Taylor",
-    "Anderson",
-    "Wilson",
-    "Martin",
-    "Thompson",
-    "Robinson",
-    "Harris",
-    "Clark",
-    "Lee",
-    "White",
-    "Nguyen",
-    "Mitchell",
-    "Campbell",
-    "Stewart",
-    "Cooper",
-    "Murray",
-    "Kelly",
-    "Parker",
-    "Hughes",
-    "Morgan",
-]
-
-_LOCATIONS = [
-    ("Alexandria", "2015", "NSW"),
-    ("Hawthorn East", "3123", "VIC"),
-    ("Fortitude Valley", "4006", "QLD"),
-    ("Norwood", "5067", "SA"),
-    ("Subiaco", "6008", "WA"),
-    ("Hobart", "7000", "TAS"),
-    ("Parramatta", "2150", "NSW"),
-    ("South Yarra", "3141", "VIC"),
-    ("Toowoomba", "4350", "QLD"),
-    ("Glenelg", "5045", "SA"),
-]
 
 # Non-compliance type assignments (must sum to _NON_COMPLIANT_CASES = 15)
 _DISCREPANCY_TYPES = (
@@ -213,29 +99,7 @@ def _rand_dob(rng: random.Random) -> str:
     return f"{day:02d}/{month:02d}/{year}"
 
 
-def _generate_address(rng: random.Random) -> str:
-    """Generate a random Australian address."""
-    loc = rng.choice(_LOCATIONS)
-    street_num = rng.randint(1, 200)
-    street_names = [
-        "Main St",
-        "George St",
-        "Collins St",
-        "King William St",
-        "Bourke St",
-        "Pitt St",
-        "Queen St",
-        "Flinders St",
-        "Elizabeth St",
-        "Murray St",
-        "Adelaide St",
-        "Victoria Ave",
-    ]
-    street = rng.choice(street_names)
-    return f"{street_num} {street}, {loc[0]} {loc[2]} {loc[1]}"
-
-
-def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
+def _generate_cases(engine: ContentEngine, rng: random.Random) -> tuple[dict, dict, dict, dict]:
     """Generate all 50 document quads.
 
     Returns:
@@ -248,10 +112,14 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
     trust_income_schedules: dict = {}
     beneficiary_itrs: dict = {}
 
-    # Shuffle discrepancy types for non-compliant cases
     discrepancy_list = list(_DISCREPANCY_TYPES)
     rng.shuffle(discrepancy_list)
     discrepancy_idx = 0
+
+    tr_layout_draw = NonRepeatingSampler(rng, _TRUST_RETURN_LAYOUTS)
+    ds_layout_draw = NonRepeatingSampler(rng, _DISTRIBUTION_STATEMENT_LAYOUTS)
+    tis_layout_draw = NonRepeatingSampler(rng, _TRUST_INCOME_SCHEDULE_LAYOUTS)
+    itr_layout_draw = NonRepeatingSampler(rng, _BENEFICIARY_ITR_LAYOUTS)
 
     for i in range(_TOTAL_CASES):
         case_num = _CASE_ID_START + i
@@ -259,50 +127,45 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
         is_compliant = i < _COMPLIANT_CASES
 
         # --- Identity generation ---
-        trust_idx = i % len(_TRUST_NAMES)
-        trust_name = _TRUST_NAMES[trust_idx]
-        trustee_name = f"{_TRUSTEE_NAMES[trust_idx]} ATF {trust_name}"
-        trust_abn = generate_abn()
-        trust_tfn = generate_tfn()
-        trust_address = _generate_address(rng)
+        trust = engine.fictional_trust(rng)
+        trust_name = trust["trust_name"]
+        trustee_name = trust["trustee_name"]
+        trust_abn = trust["abn"]
+        trust_tfn = trust["tfn"]
+        trust_address = engine.address(rng)
 
-        beneficiary_first = _BENEFICIARY_FIRST_NAMES[i % len(_BENEFICIARY_FIRST_NAMES)]
-        beneficiary_last = _BENEFICIARY_LAST_NAMES[i % len(_BENEFICIARY_LAST_NAMES)]
-        beneficiary_name = f"{beneficiary_first} {beneficiary_last}"
+        beneficiary = engine.person(rng)
+        beneficiary_name = beneficiary["full_name"]
         beneficiary_tfn = generate_tfn()
-        beneficiary_address = _generate_address(rng)
+        beneficiary_address = engine.address(rng)
         beneficiary_dob = _rand_dob(rng)
 
-        income_year = "2023-24"
+        income_year = sample(rng, engine.pools["income_years"])
         distribution_date = _rand_date(rng, 2024, 2024)
 
-        # --- Source of truth amounts ---
+        # --- Source of truth amounts (unchanged financial logic) ---
         total_net_income = _rand_amount(rng, 10000, 500000)
         num_beneficiaries = rng.randint(1, 4)
         share_of_net_income = (total_net_income / Decimal(str(num_beneficiaries))).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
 
-        # Franking credit: 0-30% of share
         franking_pct = Decimal(str(rng.uniform(0, 0.30)))
         franking_credit = (share_of_net_income * franking_pct).quantize(
             Decimal("0.01"), rounding=ROUND_HALF_UP
         )
 
-        # Capital gain component: 0-40% of share (some cases $0)
         if rng.random() < 0.25:
             capital_gain = Decimal("0.00")
         else:
             cgt_pct = Decimal(str(rng.uniform(0.05, 0.40)))
             capital_gain = (share_of_net_income * cgt_pct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-        # Foreign income: $0 in ~80% of cases
         if rng.random() < 0.80:
             foreign_income = Decimal("0.00")
         else:
             foreign_income = _rand_amount(rng, 100, 5000)
 
-        # Tax-free / tax-deferred: $0 in most cases
         tax_free = Decimal("0.00")
         tax_deferred = Decimal("0.00")
         if rng.random() < 0.10:
@@ -311,7 +174,6 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
             tax_deferred = _rand_amount(rng, 100, 1500)
 
         # --- Values that go into each document ---
-        # Start with source of truth for all documents
         tr_share = share_of_net_income
         tr_franking = franking_credit
         tr_cgt = capital_gain
@@ -328,7 +190,6 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
         itr_franking = franking_credit
 
         discrepancy_type = None
-        discrepancy_details = None
 
         # --- Inject discrepancies for non-compliant cases ---
         if not is_compliant:
@@ -336,57 +197,36 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
             discrepancy_idx += 1
 
             if discrepancy_type == "under_reported_income":
-                # ITR reports 60-90% of actual share
                 reduction = Decimal(str(rng.uniform(0.60, 0.90)))
                 itr_total_trust_income = (share_of_net_income * reduction).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
                 )
-                discrepancy_details = (
-                    f"ITR reports ${_fmt_decimal(itr_total_trust_income)} trust income "
-                    f"but Distribution Statement shows ${_fmt_decimal(share_of_net_income)}"
-                )
 
             elif discrepancy_type == "over_claimed_franking":
-                # ITR claims 110-150% of actual franking credit
                 inflation = Decimal(str(rng.uniform(1.10, 1.50)))
                 itr_franking = (franking_credit * inflation).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
                 )
-                discrepancy_details = (
-                    f"ITR claims ${_fmt_decimal(itr_franking)} franking credit "
-                    f"but Distribution Statement shows ${_fmt_decimal(franking_credit)}"
-                )
 
             elif discrepancy_type == "missing_cgt":
-                # Ensure source of truth has non-zero CGT
                 if capital_gain == Decimal("0.00"):
                     capital_gain = _rand_amount(rng, 2000, 20000)
                     ds_cgt = capital_gain
                     tr_cgt = capital_gain
-                # Trust Income Schedule reports $0
                 tis_cgt = Decimal("0.00")
-                discrepancy_details = (
-                    f"Distribution Statement shows ${_fmt_decimal(capital_gain)} CGT "
-                    f"but Trust Income Schedule reports $0.00"
-                )
 
             elif discrepancy_type == "trust_return_mismatch":
-                # Trust Return share differs by 5-20%
                 variance = Decimal(str(rng.uniform(0.05, 0.20)))
                 direction = rng.choice([1, -1])
                 tr_share = (share_of_net_income * (Decimal("1") + direction * variance)).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
                 )
-                discrepancy_details = (
-                    f"Trust Return Item 57 shows ${_fmt_decimal(tr_share)} "
-                    f"but Distribution Statement shows ${_fmt_decimal(share_of_net_income)}"
-                )
 
         # --- Layout and seed assignment ---
-        tr_layout = _TRUST_RETURN_LAYOUTS[i % len(_TRUST_RETURN_LAYOUTS)]
-        ds_layout = _DISTRIBUTION_STATEMENT_LAYOUTS[i % len(_DISTRIBUTION_STATEMENT_LAYOUTS)]
-        tis_layout = _TRUST_INCOME_SCHEDULE_LAYOUTS[i % len(_TRUST_INCOME_SCHEDULE_LAYOUTS)]
-        itr_layout = _BENEFICIARY_ITR_LAYOUTS[i % len(_BENEFICIARY_ITR_LAYOUTS)]
+        tr_layout = tr_layout_draw.draw()
+        ds_layout = ds_layout_draw.draw()
+        tis_layout = tis_layout_draw.draw()
+        itr_layout = itr_layout_draw.draw()
 
         degradation_seed = rng.randint(1000, 9999)
 
@@ -467,12 +307,58 @@ def _generate_cases(rng: random.Random) -> tuple[dict, dict, dict, dict]:
     return trust_returns, distribution_statements, trust_income_schedules, beneficiary_itrs
 
 
-def main() -> None:
-    """Generate all trust distribution ground truth YAML files with deterministic seed=42."""
-    _GT_DIR.mkdir(parents=True, exist_ok=True)
+def _validate_dry_run(all_entries: dict[str, dict]) -> None:
+    """Validate generated entries in-memory (schema + overflow) without writing YAML."""
+    from generators.beneficiary_itr import render_beneficiary_itr
+    from generators.distribution_statement import render_distribution_statement
+    from generators.trust_income_schedule import render_trust_income_schedule
+    from generators.trust_return import render_trust_return
 
+    renderer_map = {
+        "trust_returns.yml": (render_trust_return, "config/layouts/trust_returns.yml"),
+        "distribution_statements.yml": (
+            render_distribution_statement,
+            "config/layouts/distribution_statements.yml",
+        ),
+        "trust_income_schedules.yml": (
+            render_trust_income_schedule,
+            "config/layouts/trust_income_schedules.yml",
+        ),
+        "beneficiary_itrs.yml": (render_beneficiary_itr, "config/layouts/beneficiary_itrs.yml"),
+    }
+
+    errors: list[str] = []
+    for filename, entries in all_entries.items():
+        renderer, layout_path = renderer_map[filename]
+        layouts = load_layout_registry(Path(layout_path))
+        for case_id, entry in entries.items():
+            errors.extend(validate_entry(str(case_id), entry))
+        errors.extend(check_overflow(entries, layouts, renderer))
+
+    if errors:
+        listing = "\n    ".join(errors)
+        raise RuntimeError(
+            "Dry run failed: generated content did not validate.\n"
+            f"  What:     {len(errors)} error(s) across generated entries:\n"
+            f"    {listing}\n"
+            "  Where:    scripts/seed_trust_distributions.py._generate_cases and the "
+            "config/data_pools.yml content it draws from.\n"
+            "  Expected: every generated entry passes schema validation and renders "
+            "within its layout's field_budgets (no FitError).\n"
+            "  Recover:  fix the failing generator logic or widen the offending pool/budget, "
+            "then rerun `python scripts/seed_trust_distributions.py --dry-run`."
+        )
+
+
+def main(
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Validate in-memory; do not write ground_truth/*.yml"
+    ),
+) -> None:
+    """Generate all trust distribution ground truth YAML files with deterministic seed=42."""
     rng = random.Random(_SEED)
-    tr, ds, tis, itr = _generate_cases(rng)
+    engine = build_engine()
+    tr, ds, tis, itr = _generate_cases(engine, rng)
 
     outputs = [
         ("trust_returns.yml", tr),
@@ -481,6 +367,12 @@ def main() -> None:
         ("beneficiary_itrs.yml", itr),
     ]
 
+    if dry_run:
+        _validate_dry_run(dict(outputs))
+        print("Dry run: all entries validated in-memory; ground_truth/*.yml NOT written.")
+        return
+
+    _GT_DIR.mkdir(parents=True, exist_ok=True)
     for filename, entries in outputs:
         out_path = _GT_DIR / filename
         with out_path.open("w", encoding="utf-8") as fh:
@@ -489,4 +381,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    typer.run(main)
