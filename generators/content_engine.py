@@ -52,6 +52,17 @@ def _missing_key_error(path: Path, dotted_key: str, subkeys: list[str]) -> str:
     )
 
 
+def _not_mapping_error(path: Path, dotted_key: str) -> str:
+    """Four-element diagnostic for a key that is present but not a mapping."""
+    return (
+        "content pool key is present but not a mapping.\n"
+        f"  What:     '{dotted_key}' in {path} is not a YAML mapping (dict).\n"
+        f"  Where:    {path} -> '{dotted_key}'.\n"
+        "  Expected: a mapping, e.g. 'faker_config:\\n  locale: en_AU\\n  seed_base: 42'.\n"
+        f"  Recover:  make '{dotted_key}' a mapping with the required sub-keys in {path}."
+    )
+
+
 def load_pools(path: Path = _DATA_POOLS_PATH) -> dict:
     """Load and validate config/data_pools.yml, failing fast on any missing key.
 
@@ -77,12 +88,22 @@ def load_pools(path: Path = _DATA_POOLS_PATH) -> dict:
 
     data = yaml.safe_load(path.read_text())
 
+    if not isinstance(data, dict):
+        raise ValueError(
+            "content pool file is empty or not a mapping.\n"
+            f"  What:     {path} did not parse to a YAML mapping (got {type(data).__name__}).\n"
+            f"  Where:    {path}\n"
+            "  Expected: a non-empty YAML file whose top level is a mapping of pool keys.\n"
+            f"  Recover:  populate {path} with the required top-level pool keys "
+            "(see generators/content_engine.py _REQUIRED_KEYS)."
+        )
+
     for key, subkeys in _REQUIRED_KEYS.items():
         if key not in data:
             raise ValueError(_missing_key_error(path, key, subkeys))
         if subkeys:
             if not isinstance(data[key], dict):
-                raise ValueError(_missing_key_error(path, key, subkeys))
+                raise ValueError(_not_mapping_error(path, key))
             for sub in subkeys:
                 if sub not in data[key]:
                     raise ValueError(_missing_key_error(path, f"{key}.{sub}", []))
