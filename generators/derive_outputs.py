@@ -11,6 +11,7 @@ from pathlib import Path
 import yaml
 
 from generators.exporters.cord import to_cord
+from generators.exporters.links import transaction_links_to_doc_refs, trust_quads_to_doc_refs
 
 
 def derive_csv(
@@ -134,5 +135,38 @@ def derive_cord(
                     "gt_parse": to_cord(fields, identifier_form),
                 }
                 f.write(json.dumps(record) + "\n")
+
+    return output_path
+
+
+def derive_links(
+    link_files: dict[str, Path],
+    export_config: dict,
+    output_path: Path,
+) -> Path:
+    """Derive doc_refs JSONL from the two link ground truth files.
+
+    Args:
+        link_files: Mapping with keys 'transactions' and 'trust_quads' to
+            their YAML paths.
+        export_config: The validated export config mapping.
+        output_path: Where to write the JSONL.
+
+    Returns:
+        Path to the written JSONL file.
+    """
+    identifier_form = export_config["abn_tfn_canonical_form"]
+    records: list[dict] = []
+
+    transactions = yaml.safe_load(link_files["transactions"].read_text())
+    records.extend(transaction_links_to_doc_refs(transactions, identifier_form))
+
+    quads = yaml.safe_load(link_files["trust_quads"].read_text())
+    records.extend(trust_quads_to_doc_refs(quads, identifier_form))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w") as f:
+        for record in records:
+            f.write(json.dumps(record) + "\n")
 
     return output_path

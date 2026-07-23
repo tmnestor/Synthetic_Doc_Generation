@@ -1,0 +1,92 @@
+"""Map the link ground truth to a FinBalance-style doc_refs convention.
+
+Implements Mapping C of GroundTruth_Export_Spec.md (section 6). No public
+standard exists for cross-document links; this convention is defined by the spec.
+"""
+
+from generators.exporters.normalise import canonical_identifier
+
+QUAD_REF_KEYS: tuple[str, ...] = (
+    "trust_return",
+    "trust_income_schedule",
+    "beneficiary_itr",
+)
+
+IDENTIFIER_LINK_FIELDS: frozenset[str] = frozenset({"trust_abn", "beneficiary_tfn"})
+
+
+def transaction_links_to_doc_refs(data: dict, identifier_form: str) -> list[dict]:
+    """Map transaction_links.yml to doc_refs records.
+
+    Args:
+        data: The parsed transaction_links.yml mapping. Each key is a source
+            document image name; each value is a list of link dicts.
+        identifier_form: 'spaced' or 'digits_only'.
+
+    Returns:
+        One record per link, flattened across sources.
+    """
+    records = []
+    for source_doc, links in data.items():
+        for link in links:
+            records.append(
+                {
+                    "link_type": "receipt_to_bank",
+                    "source_doc": str(source_doc),
+                    "target_doc": link["bank_statement"],
+                    "match_keys": {
+                        "supplier": link["supplier"],
+                        "date": link["receipt_date"],
+                        "amount": link["receipt_total"],
+                    },
+                    "target_evidence": {
+                        "date": link["bank_date"],
+                        "description": link["bank_description"],
+                        "amount": link["bank_amount"],
+                    },
+                    "label": link["match_status"],
+                    "difficulty": link["match_difficulty"],
+                    "notes": link.get("notes", ""),
+                }
+            )
+    return records
+
+
+def trust_quads_to_doc_refs(data: dict, identifier_form: str) -> list[dict]:
+    """Map trust_distribution_links.yml to doc_refs records.
+
+    The distribution statement is the anchor source_doc; the other three
+    documents become the doc_refs list.
+
+    Args:
+        data: The parsed trust_distribution_links.yml mapping.
+        identifier_form: 'spaced' or 'digits_only'. Applied to the ABN and TFN
+            linking fields only, never to the amount fields.
+
+    Returns:
+        One record per quad.
+    """
+    records = []
+    for source_doc, quad in data.items():
+        match_keys = {}
+        for key, value in quad["linking_fields"].items():
+            text = str(value)
+            if key in IDENTIFIER_LINK_FIELDS:
+                text = canonical_identifier(text, identifier_form)
+            match_keys[key] = text
+
+        records.append(
+            {
+                "link_type": "trust_distribution_quad",
+                "source_doc": str(source_doc),
+                "doc_refs": [quad[key] for key in QUAD_REF_KEYS],
+                "match_keys": match_keys,
+                "label": {
+                    "compliance_status": quad["compliance_status"],
+                    "discrepancy_type": quad["discrepancy_type"],
+                    "discrepancy_details": quad["discrepancy_details"],
+                    "match_status": quad["match_status"],
+                },
+            }
+        )
+    return records

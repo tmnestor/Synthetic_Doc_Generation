@@ -15,7 +15,7 @@ from generators.bank_statement import render_bank_statement
 from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
 from generators.common import FitError, degrade_image
-from generators.derive_outputs import derive_cord, derive_csv, derive_jsonl
+from generators.derive_outputs import derive_cord, derive_csv, derive_jsonl, derive_links
 from generators.distribution_statement import render_distribution_statement
 from generators.exporters.config import load_export_config
 from generators.invoice import render_invoice
@@ -125,6 +125,18 @@ def derive(
     if "cord" in export_cfg["export_targets"]:
         cord_path = derive_cord(gt_files, export_cfg, derived_dir / "cord.jsonl")
         rprint(f"[green]CORD JSONL written: {cord_path}[/green]")
+
+    if "doc_refs" in export_cfg["export_targets"]:
+        gt_dir = Path(cfg["ground_truth_dir"])
+        links_path = derive_links(
+            {
+                "transactions": gt_dir / "transaction_links.yml",
+                "trust_quads": gt_dir / "trust_distribution_links.yml",
+            },
+            export_cfg,
+            derived_dir / "doc_refs.jsonl",
+        )
+        rprint(f"[green]doc_refs JSONL written: {links_path}[/green]")
 
 
 @app.command()
