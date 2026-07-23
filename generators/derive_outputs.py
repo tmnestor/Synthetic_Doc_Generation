@@ -10,6 +10,8 @@ from pathlib import Path
 
 import yaml
 
+from generators.exporters.cord import to_cord
+
 
 def derive_csv(
     gt_files: list[Path],
@@ -87,6 +89,49 @@ def derive_jsonl(
                     "degradation_seed": entry.get("degradation_seed"),
                     "image_file": f"{case_id}_{layout}.png",
                     **{k: str(v) for k, v in fields.items()},
+                }
+                f.write(json.dumps(record) + "\n")
+
+    return output_path
+
+
+CORD_DOCUMENT_TYPES: frozenset[str] = frozenset({"RECEIPT", "INVOICE"})
+
+
+def derive_cord(
+    gt_files: list[Path],
+    export_config: dict,
+    output_path: Path,
+) -> Path:
+    """Derive CORD gt_parse JSONL from ground truth YAML files.
+
+    Only receipts and invoices are emitted; other document types have no CORD
+    equivalent (spec section 7).
+
+    Args:
+        gt_files: Paths to ground truth YAML files.
+        export_config: The validated export config mapping.
+        output_path: Where to write the JSONL.
+
+    Returns:
+        Path to the written JSONL file.
+    """
+    identifier_form = export_config["abn_tfn_canonical_form"]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w") as f:
+        for gt_path in gt_files:
+            data = yaml.safe_load(gt_path.read_text())
+            if not isinstance(data, dict):
+                continue
+            for case_id, entry in data.items():
+                fields = entry.get("fields", {})
+                if fields.get("DOCUMENT_TYPE") not in CORD_DOCUMENT_TYPES:
+                    continue
+                layout = entry.get("layout", "unknown")
+                record = {
+                    "case_id": str(case_id),
+                    "image_file": f"{case_id}_{layout}.png",
+                    "gt_parse": to_cord(fields, identifier_form),
                 }
                 f.write(json.dumps(record) + "\n")
 

@@ -15,8 +15,9 @@ from generators.bank_statement import render_bank_statement
 from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
 from generators.common import FitError, degrade_image
-from generators.derive_outputs import derive_csv, derive_jsonl
+from generators.derive_outputs import derive_cord, derive_csv, derive_jsonl
 from generators.distribution_statement import render_distribution_statement
+from generators.exporters.config import load_export_config
 from generators.invoice import render_invoice
 from generators.loader import (
     load_generation_config,
@@ -119,6 +120,11 @@ def derive(
     if formats.get("jsonl"):
         jsonl_path = derive_jsonl(gt_files, derived_dir / "ground_truth.jsonl")
         rprint(f"[green]JSONL written: {jsonl_path}[/green]")
+
+    export_cfg = load_export_config(Path("config/export_config.yml"))
+    if "cord" in export_cfg["export_targets"]:
+        cord_path = derive_cord(gt_files, export_cfg, derived_dir / "cord.jsonl")
+        rprint(f"[green]CORD JSONL written: {cord_path}[/green]")
 
 
 @app.command()
