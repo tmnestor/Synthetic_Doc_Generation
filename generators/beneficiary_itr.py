@@ -18,6 +18,7 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 
 _LAYOUT_PATH = "config/layouts/beneficiary_itrs.yml"
@@ -51,12 +52,15 @@ def _draw_digit_boxes(
         draw.text((cx, cy), ch, font=font, fill="black")
 
 
-def render_beneficiary_itr(entry: dict, layout: dict) -> Image.Image:
+def render_beneficiary_itr(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a beneficiary individual tax return from ground truth and layout config.
 
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout registry entry with rendering config.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered beneficiary ITR.
@@ -79,6 +83,7 @@ def render_beneficiary_itr(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
     y = margin
 
     for section in layout.get("sections", []):
@@ -151,6 +156,8 @@ def render_beneficiary_itr(entry: dict, layout: dict) -> Image.Image:
                         y + 2,
                         budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
                         nominal_size=font_sizes.get("body", 22),
+                        recorder=recorder,
+                        field=field_key or None,
                     )
                     y += 48
 
@@ -165,6 +172,8 @@ def render_beneficiary_itr(entry: dict, layout: dict) -> Image.Image:
                         budget=_budget(layout, layout_id, "TEXT_VALUE"),
                         nominal_size=font_sizes.get("body", 22),
                         line_spacing=40,
+                        recorder=recorder,
+                        field=field_key or None,
                     )
 
             y += 10
@@ -177,5 +186,10 @@ def render_beneficiary_itr(entry: dict, layout: dict) -> Image.Image:
             footer_y = height - 60
             text = section.get("text", "")
             draw_text_center(draw, text, footer_y, width, font_s, fill="gray")
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
 
     return img

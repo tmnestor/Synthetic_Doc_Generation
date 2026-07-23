@@ -73,6 +73,34 @@ class BoxRecorder:
         return dict(self._boxes)
 
 
+def rescale_vertical(
+    boxes: dict[str, list[float]], *, old_height: int, new_height: int
+) -> dict[str, list[float]]:
+    """Correct normalised y-coordinates after a page is cropped post-hoc.
+
+    Receipts render onto an oversized canvas (unknown final length up front)
+    and crop to content afterwards; boxes captured against the oversized
+    canvas need their vertical fractions rescaled to the final, cropped page
+    height. Horizontal fractions are unaffected — width never changes.
+
+    Args:
+        boxes: Normalised boxes as returned by `BoxRecorder.as_dict()`,
+            captured while `old_height` was the recorder's page height.
+        old_height: The page height (px) the boxes were normalised against.
+        new_height: The actual final page height (px) after cropping.
+
+    Returns:
+        A new mapping with the same field keys and corrected y-coordinates.
+    """
+    if old_height == new_height:
+        return dict(boxes)
+    factor = old_height / new_height
+    return {
+        field: [left, _clamp(top * factor), right, _clamp(bottom * factor)]
+        for field, (left, top, right, bottom) in boxes.items()
+    }
+
+
 def _clamp(value: float) -> float:
     """Clamp a normalised coordinate into [0, 1].
 

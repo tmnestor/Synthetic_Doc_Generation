@@ -19,6 +19,7 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 
 _LAYOUT_PATH = "config/layouts/bank_statements.yml"
@@ -80,7 +81,7 @@ def _fmt_amount_plain(amount: Decimal | float | int) -> str:
 # -- CBA Renderer -------------------------------------------------------------
 
 
-def render_cba(entry: dict, layout: dict) -> Image.Image:
+def render_cba(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a Commonwealth Bank statement.
 
     Visual DNA: dark navy bank name, horizontal rules framing column headers,
@@ -89,6 +90,9 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout config with 'page_dimensions', 'font_sizes', etc.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered CBA bank statement.
@@ -102,6 +106,7 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
 
     font_header = load_font(font_sizes["header"], bold=True)
     font_body = load_font(font_sizes["body"])
@@ -184,7 +189,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
 
     date_grouping = layout.get("date_grouping", False)
     current_date_group = ""
-    for txn in txns:
+    for i, txn in enumerate(txns):
+        is_last = i == len(txns) - 1
         if date_grouping:
             # Date-grouped: date on its own row when date changes
             if txn["date"] != current_date_group:
@@ -216,6 +222,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
             budget=desc_budget,
             nominal_size=font_sizes["body"],
             line_spacing=row_height,
+            recorder=recorder,
+            field=f"TRANSACTION_DESCRIPTIONS[{i}]",
         )
 
         if txn["debit"] != "NOT_FOUND":
@@ -225,6 +233,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_withdrawal_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_PAID[{i}]",
             )
         if txn["credit"] != "NOT_FOUND":
             draw_text_right(
@@ -233,6 +243,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_deposit_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_RECEIVED[{i}]",
             )
         if "balance" in txn:
             draw_text_right(
@@ -241,6 +253,8 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_balance_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field="ACCOUNT_BALANCE" if is_last else None,
             )
         y += row_height * len(desc_fit.lines)
 
@@ -265,13 +279,18 @@ def render_cba(entry: dict, layout: dict) -> Image.Image:
         y += 28
         draw.text((margin, y), "CommBank.com.au  |  13 2221", font=font_footer, fill="#666666")
 
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
+
     return img
 
 
 # -- Dispatch -----------------------------------------------------------------
 
 
-def render_westpac(entry: dict, layout: dict) -> Image.Image:
+def render_westpac(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a Westpac bank statement.
 
     Visual DNA: red 'Westpac' logo top-left, bordered table with cell borders,
@@ -281,6 +300,9 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout config with rendering parameters.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered Westpac bank statement.
@@ -294,6 +316,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
 
     font_header = load_font(font_sizes["header"], bold=True)
     font_body = load_font(font_sizes["body"])
@@ -406,7 +429,7 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     date_grouping = layout.get("date_grouping", False)
     current_date_group = ""
 
-    for txn in txns:
+    for i, txn in enumerate(txns):
         is_new_date = txn["date"] != current_date_group
 
         if date_grouping:
@@ -440,6 +463,8 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
             budget=desc_budget,
             nominal_size=font_sizes["body"],
             line_spacing=row_height,
+            recorder=recorder,
+            field=f"TRANSACTION_DESCRIPTIONS[{i}]",
         )
 
         # Amounts (no $ prefix — Westpac style)
@@ -450,6 +475,8 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_debit_right - 8,
                 y=y + 10,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_PAID[{i}]",
             )
         if txn["credit"] != "NOT_FOUND":
             draw_text_right(
@@ -458,6 +485,8 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
                 x_right=right_edge - 8,
                 y=y + 10,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_RECEIVED[{i}]",
             )
 
         y += row_height * len(desc_fit.lines)
@@ -469,10 +498,15 @@ def render_westpac(entry: dict, layout: dict) -> Image.Image:
     for col_x in col_borders:
         draw.line([(col_x, table_body_start), (col_x, y)], fill="black")
 
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
+
     return img
 
 
-def render_nab(entry: dict, layout: dict) -> Image.Image:
+def render_nab(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a National Australia Bank statement.
 
     Visual DNA: light blue header bar and date-group rows, 'Particulars' column,
@@ -482,6 +516,9 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout config with rendering parameters.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered NAB bank statement.
@@ -495,6 +532,7 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
 
     font_header = load_font(font_sizes["header"], bold=True)
     font_body = load_font(font_sizes["body"])
@@ -560,7 +598,7 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
 
     current_date_group = ""
     brought_forward_rendered = False
-    for txn in txns:
+    for i, txn in enumerate(txns):
         # Date grouping: bold date header when date changes
         if layout.get("date_grouping") and txn["date"] != current_date_group:
             current_date_group = txn["date"]
@@ -600,6 +638,8 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
             budget=desc_budget,
             nominal_size=font_sizes["body"],
             line_spacing=row_height,
+            recorder=recorder,
+            field=f"TRANSACTION_DESCRIPTIONS[{i}]",
         )
 
         # Reference number with dotted leader (if enabled)
@@ -617,6 +657,8 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_debit_right,
                 y=y + 8,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_PAID[{i}]",
             )
         if txn["credit"] != "NOT_FOUND":
             draw_text_right(
@@ -625,8 +667,13 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_credit_right,
                 y=y + 8,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_RECEIVED[{i}]",
             )
         if "balance" in txn:
+            # ACCOUNT_BALANCE is captured at the "Carried forward" row below
+            # (the literal field value), not here — the per-row running
+            # balance is a derived value with no ground-truth field of its own.
             draw_text_right(
                 draw,
                 f"{fmt_amount(txn['balance'])} {balance_suffix}",
@@ -647,12 +694,19 @@ def render_nab(entry: dict, layout: dict) -> Image.Image:
             x_right=col_balance_right,
             y=y,
             font=font_body_bold,
+            recorder=recorder,
+            field="ACCOUNT_BALANCE",
         )
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
 
     return img
 
 
-def render_anz(entry: dict, layout: dict) -> Image.Image:
+def render_anz(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render an ANZ bank statement.
 
     Visual DNA: blue header bar, 'Transaction Description' column, DR/CR balance
@@ -661,6 +715,9 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout config with rendering parameters.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered ANZ bank statement.
@@ -674,6 +731,7 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
 
     font_header = load_font(font_sizes["header"], bold=True)
     font_body = load_font(font_sizes["body"])
@@ -741,7 +799,8 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
     total_debits = Decimal("0")
     total_credits = Decimal("0")
 
-    for txn in txns:
+    for i, txn in enumerate(txns):
+        is_last = i == len(txns) - 1
         draw.text((col_date_x, y), txn["date"], font=font_body, fill="black")
 
         # Fit description losslessly (wrap) — never silently truncate.
@@ -762,6 +821,8 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
             budget=desc_budget,
             nominal_size=font_sizes["body"],
             line_spacing=row_height,
+            recorder=recorder,
+            field=f"TRANSACTION_DESCRIPTIONS[{i}]",
         )
 
         if txn["debit"] != "NOT_FOUND":
@@ -773,6 +834,8 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_debit_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_PAID[{i}]",
             )
         if txn["credit"] != "NOT_FOUND":
             credit_val = Decimal(txn["credit"])
@@ -783,6 +846,8 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_credit_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_RECEIVED[{i}]",
             )
         if "balance" in txn:
             draw_text_right(
@@ -791,6 +856,8 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
                 x_right=col_balance_right,
                 y=y,
                 font=font_body,
+                recorder=recorder,
+                field="ACCOUNT_BALANCE" if is_last else None,
             )
         y += row_height * len(desc_fit.lines)
 
@@ -801,6 +868,11 @@ def render_anz(entry: dict, layout: dict) -> Image.Image:
         draw.text((col_desc_x, y), "Totals at end of period", font=font_body_bold, fill="black")
         draw_text_right(draw, fmt_amount(total_debits), x_right=col_debit_right, y=y, font=font_body_bold)
         draw_text_right(draw, fmt_amount(total_credits), x_right=col_credit_right, y=y, font=font_body_bold)
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
 
     return img
 
@@ -813,7 +885,7 @@ _BANK_RENDERERS: dict[str, Callable[..., Image.Image]] = {
 }
 
 
-def render_bank_statement(entry: dict, layout: dict) -> Image.Image:
+def render_bank_statement(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a bank statement image from ground truth entry and layout config.
 
     Dispatches to the per-bank renderer based on layout['renderer'].
@@ -821,6 +893,9 @@ def render_bank_statement(entry: dict, layout: dict) -> Image.Image:
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout registry entry with 'renderer' key.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered bank statement.
@@ -834,4 +909,4 @@ def render_bank_statement(entry: dict, layout: dict) -> Image.Image:
             f"Check the 'renderer' key in config/layouts/bank_statements.yml."
         )
         raise ValueError(msg)
-    return _BANK_RENDERERS[renderer_key](entry, layout)
+    return _BANK_RENDERERS[renderer_key](entry, layout, geometry_out=geometry_out)
