@@ -123,7 +123,7 @@ def _draw_bank_description(
     template = templates[template_key]
     all_categories = engine.pools["receipt_categories"] + engine.pools["service_categories"]
     category = sample(rng, all_categories)
-    merchant = engine.fictional_business(rng, category)["name"][:12].upper()
+    merchant = engine.fictional_business_name(rng, category)[:12].upper()
     return template.format(
         merchant=merchant,
         location=suburb,
