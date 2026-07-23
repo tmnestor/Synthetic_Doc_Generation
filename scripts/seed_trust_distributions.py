@@ -20,6 +20,7 @@ Usage:
 
 import random
 import sys
+from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
@@ -90,6 +91,21 @@ def _rand_date(rng: random.Random, year_start: int = 2023, year_end: int = 2024)
     return f"{day:02d}/{month:02d}/{year}"
 
 
+def _distribution_date(rng: random.Random, income_year: str) -> str:
+    """DD/MM/YYYY date in the 12 months after the income year ends.
+
+    income_year is "YYYY-YY" (e.g. "2023-24"); the year ends 30 Jun of
+    start_year+1, and a trust distributes in the following financial window
+    (1 Jul end_year .. 30 Jun end_year+1).
+    """
+    start_year = int(income_year.split("-")[0])
+    end_year = start_year + 1
+    lo = date(end_year, 7, 1)
+    span = (date(end_year + 1, 6, 30) - lo).days
+    d = lo + timedelta(days=rng.randint(0, span))
+    return f"{d.day:02d}/{d.month:02d}/{d.year}"
+
+
 def _rand_dob(rng: random.Random) -> str:
     """Generate a random date of birth for an adult (25-70 years old)."""
     year = rng.randint(1954, 1999)
@@ -141,7 +157,7 @@ def _generate_cases(engine: ContentEngine, rng: random.Random) -> tuple[dict, di
         beneficiary_dob = _rand_dob(rng)
 
         income_year = sample(rng, engine.pools["income_years"])
-        distribution_date = _rand_date(rng, 2024, 2024)
+        distribution_date = _distribution_date(rng, income_year)
 
         # --- Source of truth amounts (unchanged financial logic) ---
         total_net_income = _rand_amount(rng, 10000, 500000)
