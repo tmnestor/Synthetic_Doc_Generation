@@ -13,6 +13,7 @@ import yaml
 from generators.exporters.cord import to_cord
 from generators.exporters.docile import to_docile
 from generators.exporters.links import transaction_links_to_doc_refs, trust_quads_to_doc_refs
+from generators.exporters.native import to_native
 
 
 def derive_csv(
@@ -251,6 +252,57 @@ def derive_docile(
                     "case_id": str(case_id),
                     "image_file": image_file,
                     **to_docile(fields, boxes, fieldtypes),
+                }
+                f.write(json.dumps(record) + "\n")
+
+    return output_path
+
+
+# Bank/CC statements and the four trust-distribution types have no CORD or
+# DocILE equivalent (spec section 7) and are emitted in a project-defined
+# schema instead. Together with CORD_DOCUMENT_TYPES this partitions the whole
+# corpus: every document type lands in exactly one of the two sets.
+NATIVE_DOCUMENT_TYPES: frozenset[str] = frozenset(
+    {
+        "BANK_STATEMENT",
+        "CC_STATEMENT",
+        "TRUST_RETURN",
+        "DISTRIBUTION_STATEMENT",
+        "TRUST_INCOME_SCHEDULE",
+        "BENEFICIARY_ITR",
+    }
+)
+
+
+def derive_native(gt_files: list[Path], output_path: Path) -> Path:
+    """Derive the native JSONL for document types with no public schema.
+
+    Args:
+        gt_files: Paths to ground truth YAML files.
+        output_path: Where to write the JSONL.
+
+    Returns:
+        Path to the written JSONL file.
+
+    Raises:
+        ValueError: If a statement's transaction register columns have
+            mismatched counts (propagated from to_native).
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w") as f:
+        for gt_path in gt_files:
+            data = yaml.safe_load(gt_path.read_text())
+            if not isinstance(data, dict):
+                continue
+            for case_id, entry in data.items():
+                fields = entry.get("fields", {})
+                if fields.get("DOCUMENT_TYPE") not in NATIVE_DOCUMENT_TYPES:
+                    continue
+                layout = entry.get("layout", "unknown")
+                record = {
+                    "case_id": str(case_id),
+                    "image_file": f"{case_id}_{layout}.png",
+                    **to_native(fields),
                 }
                 f.write(json.dumps(record) + "\n")
 
