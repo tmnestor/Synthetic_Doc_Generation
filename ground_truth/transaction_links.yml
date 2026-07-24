@@ -1,1217 +1,1285 @@
 CASE001_receipt_fuel.png:
 - bank_statement: CASE001_cba_standard.png
   supplier: Ravensdale Health Store
-  receipt_date: 02/03/2023
+  receipt_date: 07/07/2024
   receipt_total: '13.60'
-  bank_date: 02/03/2023
-  bank_description: VISA DEBIT PURCHASE RAVENSDALE HEALTH STORE Alexandria AU
+  bank_date: 07/07/2024
+  bank_description: VISA DEBIT PURCHASE SQ *RAVENSDALE Alexandria AU
   bank_amount: '13.60'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on cba standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE001_tax_invoice_mixed.png:
 - bank_statement: CASE001_cba_standard.png
   supplier: Prime Consulting Partners
-  receipt_date: 20/11/2023
+  receipt_date: 07/07/2024
   receipt_total: '8831.70'
-  bank_date: 20/11/2023
-  bank_description: BPAY PRIME CONSULTING PARTNERS CRN 890779946
+  bank_date: 07/07/2024
+  bank_description: EFT PAYMENT PRIME CONSULTING PARTNERS
   bank_amount: '8831.70'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on cba standard \u2014 exact date and amount match"
+  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
 CASE002_receipt_hospitality.png:
 - bank_statement: CASE002_anz_modern.png
   supplier: Prime Bottle Shop
-  receipt_date: 23/01/2024
+  receipt_date: 16/08/2023
   receipt_total: '3.76'
-  bank_date: 26/01/2024
-  bank_description: DD GREATER TAX  REF41635 MHF 7658
+  bank_date: 16/08/2023
+  bank_description: VISA DEBIT PURCHASE PRIME BOTTLE SHOP South Yarra AU
   bank_amount: '3.76'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Early row on anz modern \u2014 3-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Mid row on anz modern \u2014 exact date and amount, full merchant name"
 CASE002_tax_invoice_high_value.png:
 - bank_statement: CASE002_anz_modern.png
   supplier: Ashby Marketing Group
-  receipt_date: 28/07/2024
+  receipt_date: 29/08/2023
   receipt_total: '3312.98'
-  bank_date: 28/07/2024
-  bank_description: BPAY ASHBY MARKETING GROUP CRN 200604502
+  bank_date: 29/08/2023
+  bank_description: EFT PAYMENT ASHBY MARKETING GROUP
   bank_amount: '3312.98'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz modern \u2014 exact date and amount match"
+  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
 CASE003_receipt_retail_tax.png:
 - bank_statement: CASE003_nab_classic.png
   supplier: Wakeling Bottle Shop
-  receipt_date: 15/10/2024
+  receipt_date: 15/03/2024
   receipt_total: '116.71'
-  bank_date: 15/10/2024
-  bank_description: EFTPOS WAKELING BOTTLE SHOP Brunswick AUS
+  bank_date: 15/03/2024
+  bank_description: EFTPOS CARD 5339 Brunswick AUS
   bank_amount: '116.71'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on nab classic \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on nab classic \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE003_tax_invoice_standard.png:
 - bank_statement: CASE003_nab_classic.png
   supplier: Eastern Creative Agency
-  receipt_date: 19/07/2024
+  receipt_date: 05/03/2024
   receipt_total: '24641.36'
-  bank_date: 25/07/2024
-  bank_description: Transfer To James NetBank
+  bank_date: 05/03/2024
+  bank_description: BPAY EASTERN CREATIVE AGENCY CRN 899925830
   bank_amount: '24641.36'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on nab classic \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
 CASE004_receipt_professional.png:
 - bank_statement: CASE004_anz_standard.png
   supplier: Tremayne AV & Appliances
-  receipt_date: 06/10/2024
+  receipt_date: 18/02/2024
   receipt_total: '70.00'
-  bank_date: 09/10/2024
-  bank_description: VISA DEBIT PURCHASE TREMAYNE AV & APPLIANCES Sydney AU
+  bank_date: 18/02/2024
+  bank_description: VISA DEBIT PURCHASE SQ *TREMAYNE Sydney AU
   bank_amount: '70.00'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz standard \u2014 3-day settlement delay"
+  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE004_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE004_anz_standard.png
   supplier: Metro Accounting Group
-  receipt_date: 24/01/2024
+  receipt_date: 24/02/2024
   receipt_total: '2355.90'
-  bank_date: 24/01/2024
-  bank_description: EFT PAYMENT METRO ACCOUNTING GROUP
+  bank_date: 24/02/2024
+  bank_description: EFT PAYMENT METRO REF66155
   bank_amount: '2355.90'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Late row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE005_receipt_thermal_80mm.png:
 - bank_statement: CASE005_westpac_premium.png
   supplier: Marchbank Fuel
-  receipt_date: 22/07/2024
+  receipt_date: 29/11/2024
   receipt_total: '39.68'
-  bank_date: 24/07/2024
-  bank_description: EFTPOS MARCHBANK FUEL Alexandria AUS
+  bank_date: 29/11/2024
+  bank_description: VISA DEBIT PURCHASE SQ *MARCHBANK Alexandria AU
   bank_amount: '39.68'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on westpac premium \u2014 2-day settlement delay"
+  notes: "Late row on westpac premium \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE005_tax_invoice_mixed.png:
 - bank_statement: CASE005_westpac_premium.png
   supplier: Ockendon IT Solutions
-  receipt_date: 23/09/2023
+  receipt_date: 12/11/2024
   receipt_total: '666.71'
-  bank_date: 24/09/2023
-  bank_description: BPAY OCKENDON IT SOLUTIONS CRN 507943839
+  bank_date: 12/11/2024
+  bank_description: BPAY OCKENDON IT SOLUTIONS CRN 248532577
   bank_amount: '666.71'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on westpac premium \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
 CASE006_receipt_thermal_57mm.png:
 - bank_statement: CASE006_nab_dense.png
   supplier: Southern Motor Spares
-  receipt_date: 10/04/2024
+  receipt_date: 17/09/2023
   receipt_total: '187.16'
-  bank_date: 12/04/2024
-  bank_description: VISA DEBIT PURCHASE SOUTHERN MOTOR SPARES South Yarra AU
+  bank_date: 17/09/2023
+  bank_description: VISA DEBIT PURCHASE CARD 2489 South Yarra AU
   bank_amount: '187.16'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on nab dense \u2014 2-day settlement delay"
+  match_difficulty: hard
+  notes: "Mid row on nab dense \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE006_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE006_nab_dense.png
   supplier: Lonsdale Legal Group
-  receipt_date: 30/03/2024
+  receipt_date: 25/09/2023
   receipt_total: '4288.50'
-  bank_date: 30/03/2024
-  bank_description: EFT PAYMENT LONSDALE LEGAL GROUP
+  bank_date: 25/09/2023
+  bank_description: BPAY LONSDALE REF24371
   bank_amount: '4288.50'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE007_receipt_fuel.png:
 - bank_statement: CASE007_cba_date_grouped.png
   supplier: Northern Retail Co
-  receipt_date: 25/09/2023
+  receipt_date: 05/08/2024
   receipt_total: '211.35'
-  bank_date: 28/09/2023
-  bank_description: EFTPOS BLACKWOOD TE South Yarra AUS
+  bank_date: 05/08/2024
+  bank_description: EFTPOS NORTHERN RETAIL CO South Yarra AUS
   bank_amount: '211.35'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on cba date grouped \u2014 3-day settlement delay, description\
-    \ mismatch"
+  match_difficulty: easy
+  notes: "Early row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE007_tax_invoice_standard.png:
 - bank_statement: CASE007_cba_date_grouped.png
   supplier: Statewide Brand & Media
-  receipt_date: 22/08/2024
+  receipt_date: 26/08/2024
   receipt_total: '11438.02'
-  bank_date: 22/08/2024
+  bank_date: 26/08/2024
   bank_description: EFT PAYMENT STATEWIDE BRAND & MEDIA
   bank_amount: '11438.02'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on cba date grouped \u2014 exact date and amount match"
+  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE008_receipt_thermal_80mm.png:
 - bank_statement: CASE008_westpac_standard.png
   supplier: Ashcroft Fresh Market
-  receipt_date: 28/02/2023
+  receipt_date: 14/10/2024
   receipt_total: '204.73'
-  bank_date: 05/03/2023
-  bank_description: MASTERCARD DEBIT CAPITAL LIQU Hobart AU
+  bank_date: 14/10/2024
+  bank_description: EFTPOS SQ *ASHCROFT Hobart AUS
   bank_amount: '204.73'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Early row on westpac standard \u2014 5-day settlement delay, description\
-    \ mismatch"
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE008_tax_invoice_high_value.png:
 - bank_statement: CASE008_westpac_standard.png
   supplier: Penhallow Legal Group
-  receipt_date: 01/07/2024
+  receipt_date: 13/10/2024
   receipt_total: '4569.29'
-  bank_date: 01/07/2024
-  bank_description: EFT PAYMENT PENHALLOW LEGAL GROUP
+  bank_date: 13/10/2024
+  bank_description: DIRECT DEBIT PENHALLOW REF88104
   bank_amount: '4569.29'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE009_receipt_retail_tax.png:
 - bank_statement: CASE009_nab_dense.png
   supplier: Bramwell Office Supplies
-  receipt_date: 30/07/2024
+  receipt_date: 15/05/2023
   receipt_total: '27.84'
-  bank_date: 30/07/2024
-  bank_description: EFTPOS BRAMWELL OFFICE SUPPLIES Newtown AUS
+  bank_date: 15/05/2023
+  bank_description: VISA DEBIT PURCHASE SQ *BRAMWELL Newtown AU
   bank_amount: '27.84'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE009_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE009_nab_dense.png
   supplier: Southern Marketing Co
-  receipt_date: 27/07/2024
+  receipt_date: 18/05/2023
   receipt_total: '118.36'
-  bank_date: 27/07/2024
-  bank_description: BPAY SOUTHERN MARKETING CO CRN 208449460
+  bank_date: 18/05/2023
+  bank_description: BPAY SOUTHERN REF99166
   bank_amount: '118.36'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on nab dense \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE010_receipt_thermal_57mm.png:
 - bank_statement: CASE010_anz_standard.png
   supplier: Riverside Trade Supplies
-  receipt_date: 28/12/2023
+  receipt_date: 24/07/2023
   receipt_total: '121.07'
-  bank_date: 30/12/2023
-  bank_description: VISA DEBIT PURCHASE RIVERSIDE TRADE SUPPLIES Parramatta AU
+  bank_date: 24/07/2023
+  bank_description: EFTPOS SQ *RIVERSIDE Parramatta AUS
   bank_amount: '121.07'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on anz standard \u2014 2-day settlement delay"
+  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE010_tax_invoice_high_value.png:
 - bank_statement: CASE010_anz_standard.png
   supplier: Ockendon Tax & Advisory
-  receipt_date: 21/05/2023
+  receipt_date: 22/07/2023
   receipt_total: '18656.01'
-  bank_date: 23/05/2023
-  bank_description: BPAY OCKENDON TAX & ADVISORY CRN 819595113
+  bank_date: 22/07/2023
+  bank_description: EFT PAYMENT OCKENDON REF44973
   bank_amount: '18656.01'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz standard \u2014 2-day settlement delay"
+  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE011_receipt_hospitality.png:
 - bank_statement: CASE011_westpac_standard.png
   supplier: National Corner Market
-  receipt_date: 13/07/2024
+  receipt_date: 25/09/2023
   receipt_total: '16.63'
-  bank_date: 13/07/2024
-  bank_description: EFTPOS NATIONAL CORNER MARKET Fortitude Valley AUS
+  bank_date: 25/09/2023
+  bank_description: VISA DEBIT PURCHASE NATIONAL CORNER MARKET Fortitude Valley AU
   bank_amount: '16.63'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on westpac standard \u2014 exact date and amount match"
+  notes: "Late row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE011_tax_invoice_mixed.png:
 - bank_statement: CASE011_westpac_standard.png
   supplier: Yarrow Consulting Partners
-  receipt_date: 17/10/2024
+  receipt_date: 04/09/2023
   receipt_total: '27176.07'
-  bank_date: 17/10/2024
-  bank_description: BPAY YARROW CONSULTING PARTNERS CRN 596348124
+  bank_date: 04/09/2023
+  bank_description: DIRECT DEBIT YARROW CONSULTING PARTNERS
   bank_amount: '27176.07'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  notes: "Early row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE012_receipt_professional.png:
 - bank_statement: CASE012_cba_standard.png
   supplier: Ockendon General Store
-  receipt_date: 15/05/2023
+  receipt_date: 14/08/2023
   receipt_total: '86.25'
-  bank_date: 18/05/2023
-  bank_description: EFTPOS OCKENDON GENERAL STORE Richmond AUS
+  bank_date: 14/08/2023
+  bank_description: EFTPOS SQ *OCKENDON Richmond AUS
   bank_amount: '86.25'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on cba standard \u2014 3-day settlement delay"
+  notes: "Mid row on cba standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE012_tax_invoice_standard.png:
 - bank_statement: CASE012_cba_standard.png
   supplier: Western Legal
-  receipt_date: 25/05/2024
+  receipt_date: 15/08/2023
   receipt_total: '4601.37'
-  bank_date: 25/05/2024
-  bank_description: BPAY WESTERN LEGAL CRN 982403818
+  bank_date: 15/08/2023
+  bank_description: BPAY WESTERN REF44522
   bank_amount: '4601.37'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on cba standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on cba standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE013_receipt_retail_tax.png:
 - bank_statement: CASE013_westpac_premium.png
   supplier: Tremayne Business Supplies
-  receipt_date: 22/11/2023
+  receipt_date: 17/06/2023
   receipt_total: '87.14'
-  bank_date: 24/11/2023
-  bank_description: VISA DEBIT PURCHASE TREMAYNE BUSINESS SUPPLIES Prospect AU
+  bank_date: 17/06/2023
+  bank_description: EFTPOS SQ *TREMAYNE Prospect AUS
   bank_amount: '87.14'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on westpac premium \u2014 2-day settlement delay"
+  notes: "Mid row on westpac premium \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE013_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE013_westpac_premium.png
   supplier: Blackwood & Partners Lawyers
-  receipt_date: 23/04/2023
+  receipt_date: 17/06/2023
   receipt_total: '8862.33'
-  bank_date: 23/04/2023
-  bank_description: EFT PAYMENT BLACKWOOD & PARTNERS LAWYERS
+  bank_date: 17/06/2023
+  bank_description: BPAY BLACKWOOD REF91959
   bank_amount: '8862.33'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on westpac premium \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on westpac premium \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE014_receipt_thermal_57mm.png:
 - bank_statement: CASE014_anz_modern.png
   supplier: Southcott Trade Supplies
-  receipt_date: 25/08/2023
+  receipt_date: 10/09/2024
   receipt_total: '183.58'
-  bank_date: 26/08/2023
-  bank_description: VISA DEBIT PURCHASE SOUTHCOTT TRADE SUPPLIES Fortitude Valley
-    AU
+  bank_date: 10/09/2024
+  bank_description: EFTPOS SOUTHCOTT TRADE SUPPLIES Fortitude Valley AUS
   bank_amount: '183.58'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on anz modern \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
 CASE014_tax_invoice_standard.png:
 - bank_statement: CASE014_anz_modern.png
   supplier: Regional Legal
-  receipt_date: 09/01/2023
+  receipt_date: 05/09/2024
   receipt_total: '1352.56'
-  bank_date: 10/01/2023
+  bank_date: 05/09/2024
   bank_description: DIRECT DEBIT REGIONAL LEGAL
   bank_amount: '1352.56'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on anz modern \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
 CASE015_receipt_hospitality.png:
 - bank_statement: CASE015_nab_classic.png
   supplier: National Discount Chemist
-  receipt_date: 07/04/2023
+  receipt_date: 25/01/2023
   receipt_total: '44.67'
-  bank_date: 07/04/2023
-  bank_description: VISA DEBIT PURCHASE NATIONAL DISCOUNT CHEMIST Leederville AU
+  bank_date: 25/01/2023
+  bank_description: EFTPOS NATIONAL DISCOUNT CHEMIST Leederville AUS
   bank_amount: '44.67'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount match"
+  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
 CASE015_tax_invoice_mixed.png:
 - bank_statement: CASE015_nab_classic.png
   supplier: Blackwood Solicitors
-  receipt_date: 21/02/2024
+  receipt_date: 18/01/2023
   receipt_total: '37731.83'
-  bank_date: 27/02/2024
-  bank_description: EFTPOS VERRALL TECH Leederville AUS
+  bank_date: 18/01/2023
+  bank_description: EFT PAYMENT BLACKWOOD SOLICITORS
   bank_amount: '37731.83'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on nab classic \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Mid row on nab classic \u2014 exact date and amount, full merchant name"
 CASE016_receipt_thermal_80mm.png:
 - bank_statement: CASE016_cba_date_grouped.png
   supplier: Central Timber & Tools
-  receipt_date: 08/06/2024
+  receipt_date: 30/12/2024
   receipt_total: '404.60'
-  bank_date: 08/06/2024
-  bank_description: EFTPOS CENTRAL TIMBER & TOOLS Paddington AUS
+  bank_date: 30/12/2024
+  bank_description: EFTPOS SQ *CENTRAL Paddington AUS
   bank_amount: '404.60'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on cba date grouped \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Late row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE016_tax_invoice_high_value.png:
 - bank_statement: CASE016_cba_date_grouped.png
   supplier: Ashcroft Technology Group
-  receipt_date: 27/09/2023
+  receipt_date: 20/12/2024
   receipt_total: '4704.78'
-  bank_date: 28/09/2023
-  bank_description: BPAY ASHCROFT TECHNOLOGY GROUP CRN 217734861
+  bank_date: 20/12/2024
+  bank_description: DIRECT DEBIT ASHCROFT TECHNOLOGY GROUP
   bank_amount: '4704.78'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on cba date grouped \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE017_receipt_fuel.png:
 - bank_statement: CASE017_anz_standard.png
   supplier: Eastern Trade Supplies
-  receipt_date: 22/03/2023
+  receipt_date: 16/08/2024
   receipt_total: '87.53'
-  bank_date: 22/03/2023
-  bank_description: VISA DEBIT PURCHASE EASTERN TRADE SUPPLIES Manuka AU
+  bank_date: 16/08/2024
+  bank_description: EFTPOS EASTERN TRADE SUPPLIES Manuka AUS
   bank_amount: '87.53'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount match"
+  notes: "Mid row on anz standard \u2014 exact date and amount, full merchant name"
 CASE017_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE017_anz_standard.png
   supplier: Metro Chartered Accountants
-  receipt_date: 24/07/2024
+  receipt_date: 04/08/2024
   receipt_total: '35693.23'
-  bank_date: 24/07/2024
-  bank_description: DIRECT DEBIT METRO CHARTERED ACCOUNTANTS
+  bank_date: 04/08/2024
+  bank_description: DIRECT DEBIT METRO REF50306
   bank_amount: '35693.23'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on anz standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE018_receipt_professional.png:
 - bank_statement: CASE018_nab_classic.png
   supplier: National Tyre & Auto
-  receipt_date: 20/02/2024
+  receipt_date: 08/08/2023
   receipt_total: '263.80'
-  bank_date: 26/02/2024
-  bank_description: MASTERCARD DEBIT LONSDALE STA Toowoomba AU
+  bank_date: 08/08/2023
+  bank_description: EFTPOS SQ *NATIONAL Toowoomba AUS
   bank_amount: '263.80'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on nab classic \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: medium
+  notes: "Early row on nab classic \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE018_tax_invoice_standard.png:
 - bank_statement: CASE018_nab_classic.png
   supplier: Harrowgate & Associates Accounting
-  receipt_date: 26/01/2023
+  receipt_date: 08/08/2023
   receipt_total: '192.58'
-  bank_date: 29/01/2023
-  bank_description: BPAY HARROWGATE & ASSOCIATES ACCOUNTING CRN 830448745
+  bank_date: 08/08/2023
+  bank_description: DIRECT DEBIT REF694916
   bank_amount: '192.58'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on nab classic \u2014 3-day settlement delay"
+  match_difficulty: hard
+  notes: "Early row on nab classic \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE019_receipt_professional.png:
 - bank_statement: CASE019_nab_dense.png
   supplier: Southcott Discount Chemist
-  receipt_date: 07/11/2023
+  receipt_date: 03/09/2024
   receipt_total: '87.70'
-  bank_date: 07/11/2023
-  bank_description: VISA DEBIT PURCHASE SOUTHCOTT DISCOUNT CHEMIST Hobart AU
+  bank_date: 03/09/2024
+  bank_description: EFTPOS SQ *SOUTHCOTT Hobart AUS
   bank_amount: '87.70'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE019_tax_invoice_high_value.png:
 - bank_statement: CASE019_nab_dense.png
   supplier: Southcott Legal
-  receipt_date: 21/02/2024
+  receipt_date: 24/09/2024
   receipt_total: '1172.82'
-  bank_date: 22/02/2024
+  bank_date: 24/09/2024
   bank_description: DIRECT DEBIT SOUTHCOTT LEGAL
   bank_amount: '1172.82'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on nab dense \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
 CASE020_receipt_thermal_80mm.png:
 - bank_statement: CASE020_westpac_standard.png
   supplier: Regional Tyre & Auto
-  receipt_date: 28/01/2024
+  receipt_date: 27/12/2024
   receipt_total: '353.35'
-  bank_date: 28/01/2024
-  bank_description: VISA DEBIT PURCHASE REGIONAL TYRE & AUTO Sydney AU
+  bank_date: 27/12/2024
+  bank_description: EFTPOS REGIONAL TYRE & AUTO Sydney AUS
   bank_amount: '353.35'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  notes: "Late row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE020_tax_invoice_mixed.png:
 - bank_statement: CASE020_westpac_standard.png
   supplier: National Business Consulting
-  receipt_date: 15/01/2024
+  receipt_date: 25/12/2024
   receipt_total: '774.22'
-  bank_date: 18/01/2024
-  bank_description: BPAY NATIONAL BUSINESS CONSULTING CRN 645119047
+  bank_date: 25/12/2024
+  bank_description: DIRECT DEBIT REF658582
   bank_amount: '774.22'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on westpac standard \u2014 3-day settlement delay"
+  match_difficulty: hard
+  notes: "Late row on westpac standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE021_receipt_fuel.png:
 - bank_statement: CASE021_cba_standard.png
   supplier: Fenwick Provisions
-  receipt_date: 06/03/2024
+  receipt_date: 25/06/2024
   receipt_total: '98.98'
-  bank_date: 09/03/2024
-  bank_description: EFTPOS FENWICK PROVISIONS Cronulla AUS
+  bank_date: 25/06/2024
+  bank_description: EFTPOS SQ *FENWICK Cronulla AUS
   bank_amount: '98.98'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on cba standard \u2014 3-day settlement delay"
+  notes: "Late row on cba standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE021_tax_invoice_high_value.png:
 - bank_statement: CASE021_cba_standard.png
   supplier: Metro Legal
-  receipt_date: 05/02/2024
+  receipt_date: 05/06/2024
   receipt_total: '13896.41'
-  bank_date: 06/02/2024
-  bank_description: EFT PAYMENT METRO LEGAL
+  bank_date: 05/06/2024
+  bank_description: DIRECT DEBIT REF791798
   bank_amount: '13896.41'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on cba standard \u2014 1-day settlement delay"
+  match_difficulty: hard
+  notes: "Early row on cba standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE022_receipt_retail_tax.png:
 - bank_statement: CASE022_westpac_premium.png
   supplier: Lonsdale Liquor Merchants
-  receipt_date: 18/12/2023
+  receipt_date: 16/02/2024
   receipt_total: '109.02'
-  bank_date: 23/12/2023
-  bank_description: VISA DEBIT PURCHASE CARD 2934 CENTRAL MARK Prospect AU
+  bank_date: 16/02/2024
+  bank_description: EFTPOS LONSDALE LIQUOR MERCHANTS Prospect AUS
   bank_amount: '109.02'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Early row on westpac premium \u2014 5-day settlement delay, description\
-    \ mismatch"
+  match_difficulty: easy
+  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
 CASE022_tax_invoice_mixed.png:
 - bank_statement: CASE022_westpac_premium.png
   supplier: Prime Business Consulting
-  receipt_date: 05/11/2023
+  receipt_date: 09/02/2024
   receipt_total: '3452.79'
-  bank_date: 05/11/2023
-  bank_description: BPAY PRIME BUSINESS CONSULTING CRN 489747629
+  bank_date: 09/02/2024
+  bank_description: EFT PAYMENT PRIME REF89507
   bank_amount: '3452.79'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on westpac premium \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on westpac premium \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE023_receipt_hospitality.png:
 - bank_statement: CASE023_anz_modern.png
   supplier: Penhallow Petroleum
-  receipt_date: 22/09/2024
+  receipt_date: 14/09/2024
   receipt_total: '226.06'
-  bank_date: 22/09/2024
-  bank_description: EFTPOS PENHALLOW PETROLEUM St Kilda AUS
+  bank_date: 14/09/2024
+  bank_description: EFTPOS CARD 9835 St Kilda AUS
   bank_amount: '226.06'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on anz modern \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on anz modern \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE023_tax_invoice_standard.png:
 - bank_statement: CASE023_anz_modern.png
   supplier: Regional Marketing Co
-  receipt_date: 22/09/2024
+  receipt_date: 25/09/2024
   receipt_total: '4329.44'
   bank_date: 25/09/2024
-  bank_description: Salary PAYROLL REF49514
+  bank_description: DIRECT DEBIT REF865388
   bank_amount: '4329.44'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on anz modern \u2014 3-day settlement delay, description mismatch"
+  notes: "Late row on anz modern \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE024_receipt_thermal_57mm.png:
 - bank_statement: CASE024_cba_date_grouped.png
   supplier: Coastal Wine & Spirits
-  receipt_date: 15/03/2024
+  receipt_date: 23/11/2024
   receipt_total: '155.92'
-  bank_date: 16/03/2024
-  bank_description: EFTPOS COASTAL WINE & SPIRITS Hobart AUS
+  bank_date: 23/11/2024
+  bank_description: EFTPOS SQ *COASTAL Hobart AUS
   bank_amount: '155.92'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 1-day settlement delay"
+  notes: "Late row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE024_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE024_cba_date_grouped.png
   supplier: Underhill Marketing Group
-  receipt_date: 13/01/2023
+  receipt_date: 23/11/2024
   receipt_total: '5268.32'
-  bank_date: 16/01/2023
-  bank_description: BPAY UNDERHILL MARKETING GROUP CRN 384602384
+  bank_date: 23/11/2024
+  bank_description: DIRECT DEBIT UNDERHILL MARKETING GROUP
   bank_amount: '5268.32'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 3-day settlement delay"
+  match_difficulty: easy
+  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE025_receipt_professional.png:
 - bank_statement: CASE025_westpac_standard.png
   supplier: Ellery Grocer
-  receipt_date: 11/10/2023
+  receipt_date: 13/02/2023
   receipt_total: '115.10'
-  bank_date: 17/10/2023
-  bank_description: EFTPOS NORTHERN PRI Toowoomba AUS
+  bank_date: 13/02/2023
+  bank_description: VISA DEBIT PURCHASE ELLERY GROCER Toowoomba AU
   bank_amount: '115.10'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on westpac standard \u2014 6-day settlement delay, description\
-    \ mismatch"
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE025_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE025_westpac_standard.png
   supplier: Greater Chartered Accountants
-  receipt_date: 23/03/2023
+  receipt_date: 15/02/2023
   receipt_total: '3669.57'
-  bank_date: 27/03/2023
-  bank_description: ATM WITHDRAWAL Toowoomba
+  bank_date: 15/02/2023
+  bank_description: EFT PAYMENT GREATER CHARTERED ACCOUNTANTS
   bank_amount: '3669.57'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on westpac standard \u2014 4-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE026_receipt_fuel.png:
 - bank_statement: CASE026_westpac_premium.png
   supplier: Norcott General Store
-  receipt_date: 22/11/2023
+  receipt_date: 15/12/2023
   receipt_total: '172.35'
-  bank_date: 24/11/2023
-  bank_description: VISA DEBIT PURCHASE NORCOTT GENERAL STORE Manuka AU
+  bank_date: 15/12/2023
+  bank_description: EFTPOS NORCOTT GENERAL STORE Manuka AUS
   bank_amount: '172.35'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on westpac premium \u2014 2-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
 CASE026_tax_invoice_high_value.png:
 - bank_statement: CASE026_westpac_premium.png
   supplier: Ashcroft & Partners Lawyers
-  receipt_date: 08/08/2024
+  receipt_date: 08/12/2023
   receipt_total: '175.36'
-  bank_date: 14/08/2024
-  bank_description: VISA DEBIT PURCHASE CARD 2922 HARBOURSIDE  Manuka AU
+  bank_date: 08/12/2023
+  bank_description: BPAY ASHCROFT & PARTNERS LAWYERS CRN 168747287
   bank_amount: '175.36'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on westpac premium \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Early row on westpac premium \u2014 exact date and amount, full merchant\
+    \ name"
 CASE027_receipt_hospitality.png:
 - bank_statement: CASE027_cba_date_grouped.png
   supplier: Dunmore Stationery Co
-  receipt_date: 12/12/2023
+  receipt_date: 11/05/2024
   receipt_total: '120.38'
-  bank_date: 12/12/2023
-  bank_description: EFTPOS DUNMORE STATIONERY CO Hawthorn East AUS
+  bank_date: 11/05/2024
+  bank_description: EFTPOS SQ *DUNMORE Hawthorn East AUS
   bank_amount: '120.38'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on cba date grouped \u2014 exact date and amount, abbreviated\
+    \ merchant reference"
 CASE027_tax_invoice_standard.png:
 - bank_statement: CASE027_cba_date_grouped.png
   supplier: Ellery Business Consulting
-  receipt_date: 05/04/2023
+  receipt_date: 19/05/2024
   receipt_total: '12934.69'
-  bank_date: 06/04/2023
+  bank_date: 19/05/2024
   bank_description: EFT PAYMENT ELLERY BUSINESS CONSULTING
   bank_amount: '12934.69'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE028_receipt_thermal_57mm.png:
 - bank_statement: CASE028_nab_dense.png
   supplier: Capital General Store
-  receipt_date: 30/10/2023
+  receipt_date: 08/01/2023
   receipt_total: '346.82'
-  bank_date: 30/10/2023
+  bank_date: 08/01/2023
   bank_description: EFTPOS CAPITAL GENERAL STORE New Farm AUS
   bank_amount: '346.82'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab dense \u2014 exact date and amount match"
+  notes: "Mid row on nab dense \u2014 exact date and amount, full merchant name"
 CASE028_tax_invoice_mixed.png:
 - bank_statement: CASE028_nab_dense.png
   supplier: Riverside & Associates Accounting
-  receipt_date: 27/12/2023
+  receipt_date: 01/01/2023
   receipt_total: '2119.72'
-  bank_date: 27/12/2023
-  bank_description: EFT PAYMENT RIVERSIDE & ASSOCIATES ACCOUNTING
+  bank_date: 01/01/2023
+  bank_description: BPAY RIVERSIDE & ASSOCIATES ACCOUNTING CRN 860038427
   bank_amount: '2119.72'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount match"
+  notes: "Early row on nab dense \u2014 exact date and amount, full merchant name"
 CASE029_receipt_retail_tax.png:
 - bank_statement: CASE029_anz_standard.png
   supplier: Wakeling Liquor Merchants
-  receipt_date: 06/03/2024
+  receipt_date: 21/05/2024
   receipt_total: '15.51'
-  bank_date: 06/03/2024
+  bank_date: 21/05/2024
   bank_description: EFTPOS WAKELING LIQUOR MERCHANTS Parramatta AUS
   bank_amount: '15.51'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount match"
+  notes: "Mid row on anz standard \u2014 exact date and amount, full merchant name"
 CASE029_tax_invoice_mixed.png:
 - bank_statement: CASE029_anz_standard.png
   supplier: Ashcroft Brand & Media
-  receipt_date: 09/04/2024
+  receipt_date: 08/05/2024
   receipt_total: '22173.73'
-  bank_date: 10/04/2024
-  bank_description: EFT PAYMENT ASHCROFT BRAND & MEDIA
+  bank_date: 08/05/2024
+  bank_description: DIRECT DEBIT REF170674
   bank_amount: '22173.73'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on anz standard \u2014 1-day settlement delay"
+  match_difficulty: hard
+  notes: "Early row on anz standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE030_receipt_thermal_80mm.png:
 - bank_statement: CASE030_nab_classic.png
   supplier: Ibbotson Building Centre
-  receipt_date: 16/12/2024
+  receipt_date: 29/02/2024
   receipt_total: '170.21'
-  bank_date: 19/12/2024
-  bank_description: VISA DEBIT PURCHASE IBBOTSON BUILDING CENTRE Parramatta AU
+  bank_date: 29/02/2024
+  bank_description: EFTPOS IBBOTSON BUILDING CENTRE Parramatta AUS
   bank_amount: '170.21'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on nab classic \u2014 3-day settlement delay"
+  match_difficulty: easy
+  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
 CASE030_tax_invoice_standard.png:
 - bank_statement: CASE030_nab_classic.png
   supplier: Northern & Associates Accounting
-  receipt_date: 17/12/2023
+  receipt_date: 28/02/2024
   receipt_total: '726.40'
-  bank_date: 21/12/2023
-  bank_description: VISA DEBIT PURCHASE CARD 4373 REGIONAL CHE Parramatta AU
+  bank_date: 28/02/2024
+  bank_description: DIRECT DEBIT NORTHERN & ASSOCIATES ACCOUNTING
   bank_amount: '726.40'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on nab classic \u2014 4-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
 CASE031_receipt_hospitality.png:
 - bank_statement: CASE031_cba_standard.png
   supplier: Western Trade Supplies
-  receipt_date: 01/12/2023
+  receipt_date: 03/05/2023
   receipt_total: '10.62'
-  bank_date: 01/12/2023
-  bank_description: VISA DEBIT PURCHASE WESTERN TRADE SUPPLIES New Farm AU
+  bank_date: 03/05/2023
+  bank_description: EFTPOS WESTERN TRADE SUPPLIES New Farm AUS
   bank_amount: '10.62'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba standard \u2014 exact date and amount match"
+  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
 CASE031_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE031_cba_standard.png
   supplier: Harbourside Advisory
-  receipt_date: 10/07/2023
+  receipt_date: 09/05/2023
   receipt_total: '920.92'
-  bank_date: 10/07/2023
-  bank_description: BPAY HARBOURSIDE ADVISORY CRN 204078666
+  bank_date: 09/05/2023
+  bank_description: EFT PAYMENT HARBOURSIDE ADVISORY
   bank_amount: '920.92'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba standard \u2014 exact date and amount match"
+  notes: "Mid row on cba standard \u2014 exact date and amount, full merchant name"
 CASE032_receipt_fuel.png:
 - bank_statement: CASE032_anz_modern.png
   supplier: Norcott Motor Spares
-  receipt_date: 26/06/2023
+  receipt_date: 16/01/2024
   receipt_total: '248.13'
-  bank_date: 28/06/2023
-  bank_description: VISA DEBIT PURCHASE NORCOTT MOTOR SPARES Subiaco AU
+  bank_date: 16/01/2024
+  bank_description: EFTPOS NORCOTT MOTOR SPARES Subiaco AUS
   bank_amount: '248.13'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on anz modern \u2014 2-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on anz modern \u2014 exact date and amount, full merchant name"
 CASE032_tax_invoice_high_value.png:
 - bank_statement: CASE032_anz_modern.png
   supplier: Southern Creative Agency
-  receipt_date: 28/11/2024
+  receipt_date: 18/01/2024
   receipt_total: '4126.65'
-  bank_date: 28/11/2024
-  bank_description: EFT PAYMENT SOUTHERN CREATIVE AGENCY
+  bank_date: 18/01/2024
+  bank_description: BPAY SOUTHERN CREATIVE AGENCY CRN 876693898
   bank_amount: '4126.65'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz modern \u2014 exact date and amount match"
+  notes: "Mid row on anz modern \u2014 exact date and amount, full merchant name"
 CASE033_receipt_retail_tax.png:
 - bank_statement: CASE033_nab_classic.png
   supplier: Riverside Automotive Supplies
-  receipt_date: 27/03/2024
+  receipt_date: 29/02/2024
   receipt_total: '133.40'
-  bank_date: 27/03/2024
+  bank_date: 29/02/2024
   bank_description: VISA DEBIT PURCHASE RIVERSIDE AUTOMOTIVE SUPPLIES South Yarra
     AU
   bank_amount: '133.40'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount match"
+  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
 CASE033_tax_invoice_high_value.png:
 - bank_statement: CASE033_nab_classic.png
   supplier: Harrowgate & Associates Accounting
-  receipt_date: 24/02/2023
+  receipt_date: 08/02/2024
   receipt_total: '9331.61'
-  bank_date: 24/02/2023
-  bank_description: BPAY HARROWGATE & ASSOCIATES ACCOUNTING CRN 305718272
+  bank_date: 08/02/2024
+  bank_description: DIRECT DEBIT HARROWGATE & ASSOCIATES ACCOUNTING
   bank_amount: '9331.61'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab classic \u2014 exact date and amount match"
+  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
 CASE034_receipt_thermal_80mm.png:
 - bank_statement: CASE034_westpac_premium.png
   supplier: Ashby AV & Appliances
-  receipt_date: 14/04/2023
+  receipt_date: 26/09/2024
   receipt_total: '154.44'
-  bank_date: 20/04/2023
-  bank_description: DD HARBOURSIDE  REF11703 MHF 5473
+  bank_date: 26/09/2024
+  bank_description: VISA DEBIT PURCHASE ASHBY AV & APPLIANCES Brunswick AU
   bank_amount: '154.44'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Early row on westpac premium \u2014 6-day settlement delay, description\
-    \ mismatch"
+  match_difficulty: easy
+  notes: "Late row on westpac premium \u2014 exact date and amount, full merchant\
+    \ name"
 CASE034_tax_invoice_standard.png:
 - bank_statement: CASE034_westpac_premium.png
   supplier: Harbourside IT Consulting
-  receipt_date: 27/07/2024
+  receipt_date: 07/09/2024
   receipt_total: '2221.08'
-  bank_date: 28/07/2024
-  bank_description: DIRECT DEBIT HARBOURSIDE IT CONSULTING
+  bank_date: 07/09/2024
+  bank_description: DIRECT DEBIT REF198907
   bank_amount: '2221.08'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on westpac premium \u2014 1-day settlement delay"
+  match_difficulty: hard
+  notes: "Early row on westpac premium \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE035_receipt_thermal_57mm.png:
 - bank_statement: CASE035_westpac_standard.png
   supplier: Underhill Chemist
-  receipt_date: 31/07/2023
+  receipt_date: 04/06/2023
   receipt_total: '177.57'
-  bank_date: 31/07/2023
-  bank_description: EFTPOS UNDERHILL CHEMIST Paddington AUS
+  bank_date: 04/06/2023
+  bank_description: VISA DEBIT PURCHASE CARD 6804 Paddington AU
   bank_amount: '177.57'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Early row on westpac standard \u2014 exact date and amount, no merchant\
+    \ reference in description"
 CASE035_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE035_westpac_standard.png
   supplier: Eastwick Solicitors
-  receipt_date: 16/02/2024
+  receipt_date: 14/06/2023
   receipt_total: '4838.53'
-  bank_date: 19/02/2024
-  bank_description: EFTPOS UNDERHILL CHEMIST Paddington AUS
+  bank_date: 14/06/2023
+  bank_description: DIRECT DEBIT EASTWICK REF71213
   bank_amount: '4838.53'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on westpac standard \u2014 3-day settlement delay, description mismatch"
+  match_difficulty: medium
+  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE036_receipt_professional.png:
 - bank_statement: CASE036_cba_standard.png
   supplier: Riverside Auto Parts
-  receipt_date: 20/08/2023
+  receipt_date: 28/03/2023
   receipt_total: '133.65'
-  bank_date: 23/08/2023
-  bank_description: DD REGIONAL CON REF62354 MHF 9381
+  bank_date: 28/03/2023
+  bank_description: EFTPOS CARD 2612 South Yarra AUS
   bank_amount: '133.65'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on cba standard \u2014 3-day settlement delay, description mismatch"
+  notes: "Late row on cba standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE036_tax_invoice_mixed.png:
 - bank_statement: CASE036_cba_standard.png
   supplier: Regional Marketing Co
-  receipt_date: 28/03/2024
+  receipt_date: 02/03/2023
   receipt_total: '42452.45'
-  bank_date: 28/03/2024
-  bank_description: BPAY REGIONAL MARKETING CO CRN 536383774
+  bank_date: 02/03/2023
+  bank_description: DIRECT DEBIT REGIONAL MARKETING CO
   bank_amount: '42452.45'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount match"
+  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
 CASE037_receipt_professional.png:
 - bank_statement: CASE037_anz_modern.png
   supplier: Yarrow Print & Office
-  receipt_date: 15/06/2023
+  receipt_date: 24/01/2023
   receipt_total: '75.66'
-  bank_date: 16/06/2023
-  bank_description: VISA DEBIT PURCHASE YARROW PRINT & OFFICE Hawthorn East AU
+  bank_date: 24/01/2023
+  bank_description: VISA DEBIT PURCHASE SQ *YARROW Hawthorn East AU
   bank_amount: '75.66'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on anz modern \u2014 1-day settlement delay"
+  notes: "Late row on anz modern \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE037_tax_invoice_high_value.png:
 - bank_statement: CASE037_anz_modern.png
   supplier: Eastern Tax & Advisory
-  receipt_date: 28/06/2023
+  receipt_date: 26/01/2023
   receipt_total: '46866.66'
-  bank_date: 28/06/2023
-  bank_description: DIRECT DEBIT EASTERN TAX & ADVISORY
+  bank_date: 26/01/2023
+  bank_description: BPAY EASTERN TAX & ADVISORY CRN 366992705
   bank_amount: '46866.66'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount match"
+  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
 CASE038_receipt_thermal_80mm.png:
 - bank_statement: CASE038_cba_date_grouped.png
   supplier: Metro Emporium
-  receipt_date: 28/10/2023
+  receipt_date: 07/11/2024
   receipt_total: '235.83'
-  bank_date: 30/10/2023
-  bank_description: VISA DEBIT PURCHASE METRO EMPORIUM Subiaco AU
+  bank_date: 07/11/2024
+  bank_description: EFTPOS CARD 9786 Subiaco AUS
   bank_amount: '235.83'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 2-day settlement delay"
+  match_difficulty: hard
+  notes: "Early row on cba date grouped \u2014 exact date and amount, no merchant\
+    \ reference in description"
 CASE038_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE038_cba_date_grouped.png
   supplier: Northern Accounting Group
-  receipt_date: 22/02/2023
+  receipt_date: 15/11/2024
   receipt_total: '13885.98'
-  bank_date: 25/02/2023
-  bank_description: EFT PAYMENT NORTHERN ACCOUNTING GROUP
+  bank_date: 15/11/2024
+  bank_description: BPAY NORTHERN ACCOUNTING GROUP CRN 552991960
   bank_amount: '13885.98'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 3-day settlement delay"
+  match_difficulty: easy
+  notes: "Early row on cba date grouped \u2014 exact date and amount, full merchant\
+    \ name"
 CASE039_receipt_retail_tax.png:
 - bank_statement: CASE039_anz_standard.png
   supplier: Wakeling Tyre & Auto
-  receipt_date: 09/07/2024
+  receipt_date: 06/02/2023
   receipt_total: '22.04'
-  bank_date: 15/07/2024
-  bank_description: MASTERCARD DEBIT YARROW TECHN Manuka AU
+  bank_date: 06/02/2023
+  bank_description: VISA DEBIT PURCHASE WAKELING TYRE & AUTO Manuka AU
   bank_amount: '22.04'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on anz standard \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Early row on anz standard \u2014 exact date and amount, full merchant name"
 CASE039_tax_invoice_mixed.png:
 - bank_statement: CASE039_anz_standard.png
   supplier: Western Brand & Media
-  receipt_date: 12/01/2024
+  receipt_date: 15/02/2023
   receipt_total: '211.42'
-  bank_date: 12/01/2024
-  bank_description: DIRECT DEBIT WESTERN BRAND & MEDIA
+  bank_date: 15/02/2023
+  bank_description: DIRECT DEBIT REF361941
   bank_amount: '211.42'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on anz standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE040_receipt_thermal_57mm.png:
 - bank_statement: CASE040_nab_dense.png
   supplier: Harrowgate Department Store
-  receipt_date: 10/07/2023
+  receipt_date: 28/04/2024
   receipt_total: '202.84'
-  bank_date: 10/07/2023
-  bank_description: EFTPOS HARROWGATE DEPARTMENT STORE New Farm AUS
+  bank_date: 28/04/2024
+  bank_description: EFTPOS CARD 8260 New Farm AUS
   bank_amount: '202.84'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Late row on nab dense \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE040_tax_invoice_standard.png:
 - bank_statement: CASE040_nab_dense.png
   supplier: Northern Technology Group
-  receipt_date: 13/12/2023
+  receipt_date: 26/04/2024
   receipt_total: '2639.42'
-  bank_date: 14/12/2023
-  bank_description: BPAY NORTHERN TECHNOLOGY GROUP CRN 727255918
+  bank_date: 26/04/2024
+  bank_description: EFT PAYMENT NORTHERN REF22833
   bank_amount: '2639.42'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on nab dense \u2014 1-day settlement delay"
+  notes: "Late row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE041_receipt_fuel.png:
 - bank_statement: CASE041_anz_modern.png
   supplier: Penhallow Print & Office
-  receipt_date: 27/01/2023
+  receipt_date: 02/11/2024
   receipt_total: '151.71'
-  bank_date: 03/02/2023
-  bank_description: Transfer To Jacob NetBank
+  bank_date: 02/11/2024
+  bank_description: EFTPOS CARD 2528 Manuka AUS
   bank_amount: '151.71'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on anz modern \u2014 7-day settlement delay, description mismatch"
+  notes: "Early row on anz modern \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE041_tax_invoice_mixed.png:
 - bank_statement: CASE041_anz_modern.png
   supplier: Carrington Marketing Group
-  receipt_date: 27/08/2024
+  receipt_date: 30/11/2024
   receipt_total: '38027.36'
-  bank_date: 27/08/2024
-  bank_description: EFT PAYMENT CARRINGTON MARKETING GROUP
+  bank_date: 30/11/2024
+  bank_description: BPAY CARRINGTON REF31798
   bank_amount: '38027.36'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Late row on anz modern \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE042_receipt_hospitality.png:
 - bank_statement: CASE042_nab_classic.png
   supplier: Regional Automotive Supplies
-  receipt_date: 12/09/2023
+  receipt_date: 14/11/2024
   receipt_total: '52.09'
-  bank_date: 12/09/2023
-  bank_description: EFTPOS REGIONAL AUTOMOTIVE SUPPLIES Manuka AUS
+  bank_date: 14/11/2024
+  bank_description: VISA DEBIT PURCHASE CARD 8886 Manuka AU
   bank_amount: '52.09'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on nab classic \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE042_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE042_nab_classic.png
   supplier: Northern Marketing Group
-  receipt_date: 11/09/2024
+  receipt_date: 07/11/2024
   receipt_total: '1202.56'
-  bank_date: 11/09/2024
-  bank_description: EFT PAYMENT NORTHERN MARKETING GROUP
+  bank_date: 07/11/2024
+  bank_description: DIRECT DEBIT NORTHERN REF17685
   bank_amount: '1202.56'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on nab classic \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on nab classic \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE043_receipt_thermal_57mm.png:
 - bank_statement: CASE043_anz_standard.png
   supplier: Denholm Building Centre
-  receipt_date: 18/08/2023
+  receipt_date: 06/05/2023
   receipt_total: '342.60'
-  bank_date: 19/08/2023
-  bank_description: EFTPOS DENHOLM BUILDING CENTRE Leederville AUS
+  bank_date: 06/05/2023
+  bank_description: VISA DEBIT PURCHASE DENHOLM BUILDING CENTRE Leederville AU
   bank_amount: '342.60'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on anz standard \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on anz standard \u2014 exact date and amount, full merchant name"
 CASE043_tax_invoice_high_value.png:
 - bank_statement: CASE043_anz_standard.png
   supplier: Regional Solicitors
-  receipt_date: 24/09/2024
+  receipt_date: 01/05/2023
   receipt_total: '1800.74'
-  bank_date: 27/09/2024
-  bank_description: VISA DEBIT PURCHASE CARD 8137 METRO ADVISO Leederville AU
+  bank_date: 01/05/2023
+  bank_description: DIRECT DEBIT REGIONAL REF44760
   bank_amount: '1800.74'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on anz standard \u2014 3-day settlement delay, description mismatch"
+  match_difficulty: medium
+  notes: "Early row on anz standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE044_receipt_hospitality.png:
 - bank_statement: CASE044_nab_dense.png
   supplier: Ibbotson Pharmacy
-  receipt_date: 20/10/2023
+  receipt_date: 30/06/2024
   receipt_total: '40.98'
-  bank_date: 23/10/2023
-  bank_description: VISA DEBIT PURCHASE IBBOTSON PHARMACY Glenelg AU
+  bank_date: 30/06/2024
+  bank_description: VISA DEBIT PURCHASE CARD 5673 Glenelg AU
   bank_amount: '40.98'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on nab dense \u2014 3-day settlement delay"
+  match_difficulty: hard
+  notes: "Late row on nab dense \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE044_tax_invoice_standard.png:
 - bank_statement: CASE044_nab_dense.png
   supplier: Yarrow Accounting Group
-  receipt_date: 05/03/2024
+  receipt_date: 14/06/2024
   receipt_total: '19265.09'
-  bank_date: 05/03/2024
-  bank_description: EFT PAYMENT YARROW ACCOUNTING GROUP
+  bank_date: 14/06/2024
+  bank_description: EFT PAYMENT YARROW REF82845
   bank_amount: '19265.09'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on nab dense \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Mid row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE045_receipt_fuel.png:
 - bank_statement: CASE045_westpac_standard.png
   supplier: Southern Wine & Spirits
-  receipt_date: 04/03/2023
+  receipt_date: 22/03/2023
   receipt_total: '128.02'
-  bank_date: 05/03/2023
-  bank_description: VISA DEBIT PURCHASE SOUTHERN WINE & SPIRITS Fremantle AU
+  bank_date: 22/03/2023
+  bank_description: VISA DEBIT PURCHASE SQ *SOUTHERN Fremantle AU
   bank_amount: '128.02'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on westpac standard \u2014 1-day settlement delay"
+  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE045_tax_invoice_high_value.png:
 - bank_statement: CASE045_westpac_standard.png
   supplier: Eastern Brand & Media
-  receipt_date: 28/11/2024
+  receipt_date: 05/03/2023
   receipt_total: '5123.68'
-  bank_date: 28/11/2024
-  bank_description: EFT PAYMENT EASTERN BRAND & MEDIA
+  bank_date: 05/03/2023
+  bank_description: BPAY EASTERN BRAND & MEDIA CRN 418587604
   bank_amount: '5123.68'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  notes: "Early row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE046_receipt_retail_tax.png:
 - bank_statement: CASE046_westpac_premium.png
   supplier: Southern Office Supplies
-  receipt_date: 26/08/2024
+  receipt_date: 07/03/2024
   receipt_total: '38.14'
-  bank_date: 28/08/2024
-  bank_description: VISA DEBIT PURCHASE SOUTHERN OFFICE SUPPLIES Chatswood AU
+  bank_date: 07/03/2024
+  bank_description: EFTPOS SOUTHERN OFFICE SUPPLIES Chatswood AUS
   bank_amount: '38.14'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on westpac premium \u2014 2-day settlement delay"
+  match_difficulty: easy
+  notes: "Early row on westpac premium \u2014 exact date and amount, full merchant\
+    \ name"
 CASE046_tax_invoice_standard.png:
 - bank_statement: CASE046_westpac_premium.png
   supplier: Riverside Consulting Partners
-  receipt_date: 13/01/2024
+  receipt_date: 19/03/2024
   receipt_total: '19944.06'
-  bank_date: 13/01/2024
-  bank_description: BPAY RIVERSIDE CONSULTING PARTNERS CRN 592080329
+  bank_date: 19/03/2024
+  bank_description: DIRECT DEBIT REF871476
   bank_amount: '19944.06'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on westpac premium \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on westpac premium \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE047_receipt_professional.png:
 - bank_statement: CASE047_cba_standard.png
   supplier: Southern Retail Co
-  receipt_date: 08/09/2023
+  receipt_date: 18/09/2023
   receipt_total: '89.03'
-  bank_date: 08/09/2023
-  bank_description: EFTPOS SOUTHERN RETAIL CO Chatswood AUS
+  bank_date: 18/09/2023
+  bank_description: EFTPOS CARD 6138 Chatswood AUS
   bank_amount: '89.03'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Late row on cba standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE047_tax_invoice_mixed.png:
 - bank_statement: CASE047_cba_standard.png
   supplier: Riverside Accounting Group
-  receipt_date: 07/01/2024
+  receipt_date: 02/09/2023
   receipt_total: '2747.62'
-  bank_date: 08/01/2024
-  bank_description: DIRECT DEBIT RIVERSIDE ACCOUNTING GROUP
+  bank_date: 02/09/2023
+  bank_description: BPAY RIVERSIDE ACCOUNTING GROUP CRN 727255918
   bank_amount: '2747.62'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Late row on cba standard \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
 CASE048_receipt_thermal_80mm.png:
 - bank_statement: CASE048_cba_date_grouped.png
   supplier: Wakeling Trade Supplies
-  receipt_date: 05/11/2023
+  receipt_date: 16/08/2024
   receipt_total: '215.79'
-  bank_date: 05/11/2023
-  bank_description: VISA DEBIT PURCHASE WAKELING TRADE SUPPLIES Leederville AU
+  bank_date: 16/08/2024
+  bank_description: EFTPOS SQ *WAKELING Leederville AUS
   bank_amount: '215.79'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on cba date grouped \u2014 exact date and amount, abbreviated\
+    \ merchant reference"
 CASE048_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE048_cba_date_grouped.png
   supplier: Ashcroft Marketing Group
-  receipt_date: 04/03/2023
+  receipt_date: 02/08/2024
   receipt_total: '42718.06'
-  bank_date: 04/03/2023
-  bank_description: DIRECT DEBIT ASHCROFT MARKETING GROUP
+  bank_date: 02/08/2024
+  bank_description: EFT PAYMENT ASHCROFT REF20500
   bank_amount: '42718.06'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba date grouped \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on cba date grouped \u2014 exact date and amount, abbreviated\
+    \ merchant reference"
 CASE049_receipt_thermal_80mm.png:
 - bank_statement: CASE049_anz_modern.png
   supplier: Ravensdale Provisions
-  receipt_date: 03/08/2023
+  receipt_date: 28/06/2024
   receipt_total: '10.29'
-  bank_date: 10/08/2023
-  bank_description: ATM WITHDRAWAL Subiaco
+  bank_date: 28/06/2024
+  bank_description: EFTPOS RAVENSDALE PROVISIONS Subiaco AUS
   bank_amount: '10.29'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on anz modern \u2014 7-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
 CASE049_tax_invoice_high_value.png:
 - bank_statement: CASE049_anz_modern.png
   supplier: Northern & Associates Accounting
-  receipt_date: 17/08/2023
+  receipt_date: 03/06/2024
   receipt_total: '34164.44'
-  bank_date: 22/08/2023
-  bank_description: MASTERCARD DEBIT REGIONAL PET Subiaco AU
+  bank_date: 03/06/2024
+  bank_description: EFT PAYMENT NORTHERN REF18907
   bank_amount: '34164.44'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Early row on anz modern \u2014 5-day settlement delay, description mismatch"
+  match_difficulty: medium
+  notes: "Early row on anz modern \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE050_receipt_fuel.png:
 - bank_statement: CASE050_cba_standard.png
   supplier: Northern Health Store
-  receipt_date: 25/04/2024
+  receipt_date: 22/09/2023
   receipt_total: '194.15'
-  bank_date: 25/04/2024
-  bank_description: EFTPOS NORTHERN HEALTH STORE Prospect AUS
+  bank_date: 22/09/2023
+  bank_description: EFTPOS CARD 7615 Prospect AUS
   bank_amount: '194.15'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Late row on cba standard \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Late row on cba standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE050_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE050_cba_standard.png
   supplier: Denholm Consulting Partners
-  receipt_date: 04/09/2024
+  receipt_date: 04/09/2023
   receipt_total: '25107.52'
-  bank_date: 04/09/2024
-  bank_description: BPAY DENHOLM CONSULTING PARTNERS CRN 897163846
+  bank_date: 04/09/2023
+  bank_description: EFT PAYMENT DENHOLM REF42271
   bank_amount: '25107.52'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount match"
+  match_difficulty: medium
+  notes: "Early row on cba standard \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
 CASE051_receipt_professional.png:
 - bank_statement: CASE051_westpac_standard.png
   supplier: Regional Foodstore
-  receipt_date: 07/10/2024
+  receipt_date: 19/06/2024
   receipt_total: '9.88'
-  bank_date: 09/10/2024
+  bank_date: 19/06/2024
   bank_description: EFTPOS REGIONAL FOODSTORE Alexandria AUS
   bank_amount: '9.88'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Early row on westpac standard \u2014 2-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on westpac standard \u2014 exact date and amount, full merchant\
+    \ name"
 CASE051_tax_invoice_mixed.png:
 - bank_statement: CASE051_westpac_standard.png
   supplier: Eastern IT Consulting
-  receipt_date: 01/02/2024
+  receipt_date: 20/06/2024
   receipt_total: '17228.62'
-  bank_date: 01/02/2024
-  bank_description: EFT PAYMENT EASTERN IT CONSULTING
+  bank_date: 20/06/2024
+  bank_description: DIRECT DEBIT REF185965
   bank_amount: '17228.62'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Late row on westpac standard \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE052_receipt_thermal_57mm.png:
 - bank_statement: CASE052_westpac_premium.png
   supplier: Ravensdale Trade Supplies
-  receipt_date: 27/04/2023
+  receipt_date: 14/02/2023
   receipt_total: '136.46'
-  bank_date: 03/05/2023
-  bank_description: MASTERCARD DEBIT GREATER AUTO South Yarra AU
+  bank_date: 14/02/2023
+  bank_description: VISA DEBIT PURCHASE RAVENSDALE TRADE SUPPLIES South Yarra AU
   bank_amount: '136.46'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Mid row on westpac premium \u2014 6-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
 CASE052_tax_invoice_standard.png:
 - bank_statement: CASE052_westpac_premium.png
   supplier: Harbourside Marketing Group
-  receipt_date: 28/09/2024
+  receipt_date: 09/02/2023
   receipt_total: '13638.63'
-  bank_date: 28/09/2024
-  bank_description: BPAY HARBOURSIDE MARKETING GROUP CRN 781057736
+  bank_date: 09/02/2023
+  bank_description: BPAY HARBOURSIDE MARKETING GROUP CRN 819112790
   bank_amount: '13638.63'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac premium \u2014 exact date and amount match"
+  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
 CASE053_receipt_retail_tax.png:
 - bank_statement: CASE053_anz_standard.png
   supplier: Southern Business Supplies
-  receipt_date: 11/07/2024
+  receipt_date: 23/03/2024
   receipt_total: '190.06'
-  bank_date: 12/07/2024
-  bank_description: EFTPOS SOUTHERN BUSINESS SUPPLIES Paddington AUS
+  bank_date: 23/03/2024
+  bank_description: VISA DEBIT PURCHASE SOUTHERN BUSINESS SUPPLIES Paddington AU
   bank_amount: '190.06'
   match_status: FOUND
-  match_difficulty: medium
-  notes: "Mid row on anz standard \u2014 1-day settlement delay"
+  match_difficulty: easy
+  notes: "Mid row on anz standard \u2014 exact date and amount, full merchant name"
 CASE053_tax_invoice_standard.png:
 - bank_statement: CASE053_anz_standard.png
   supplier: Ibbotson Accounting Group
-  receipt_date: 07/11/2024
+  receipt_date: 08/03/2024
   receipt_total: '6865.67'
-  bank_date: 07/11/2024
-  bank_description: EFT PAYMENT IBBOTSON ACCOUNTING GROUP
+  bank_date: 08/03/2024
+  bank_description: DIRECT DEBIT IBBOTSON ACCOUNTING GROUP
   bank_amount: '6865.67'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on anz standard \u2014 exact date and amount match"
+  notes: "Early row on anz standard \u2014 exact date and amount, full merchant name"
 CASE054_receipt_hospitality.png:
 - bank_statement: CASE054_nab_classic.png
   supplier: National Print & Office
-  receipt_date: 19/03/2024
+  receipt_date: 13/03/2024
   receipt_total: '149.70'
-  bank_date: 19/03/2024
-  bank_description: VISA DEBIT PURCHASE NATIONAL PRINT & OFFICE Fortitude Valley AU
+  bank_date: 13/03/2024
+  bank_description: EFTPOS CARD 5915 Fortitude Valley AUS
   bank_amount: '149.70'
   match_status: FOUND
-  match_difficulty: easy
-  notes: "Mid row on nab classic \u2014 exact date and amount match"
+  match_difficulty: hard
+  notes: "Mid row on nab classic \u2014 exact date and amount, no merchant reference\
+    \ in description"
 CASE054_tax_invoice_mixed.png:
 - bank_statement: CASE054_nab_classic.png
   supplier: Riverside Legal Group
-  receipt_date: 17/05/2023
+  receipt_date: 15/03/2024
   receipt_total: '3943.01'
-  bank_date: 20/05/2023
-  bank_description: Transfer To Dawn NetBank
+  bank_date: 15/03/2024
+  bank_description: DIRECT DEBIT RIVERSIDE LEGAL GROUP
   bank_amount: '3943.01'
   match_status: FOUND
-  match_difficulty: hard
-  notes: "Late row on nab classic \u2014 3-day settlement delay, description mismatch"
+  match_difficulty: easy
+  notes: "Mid row on nab classic \u2014 exact date and amount, full merchant name"
 CASE055_receipt_professional.png:
 - bank_statement: CASE055_nab_dense.png
   supplier: Calloway Chemist
-  receipt_date: 09/07/2024
+  receipt_date: 30/10/2024
   receipt_total: '255.69'
-  bank_date: 09/07/2024
+  bank_date: 30/10/2024
   bank_description: EFTPOS CALLOWAY CHEMIST Fortitude Valley AUS
   bank_amount: '255.69'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount match"
+  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
 CASE055_tax_invoice_high_value.png:
 - bank_statement: CASE055_nab_dense.png
   supplier: Eastern Tax & Advisory
-  receipt_date: 15/07/2024
+  receipt_date: 01/10/2024
   receipt_total: '9926.94'
-  bank_date: 18/07/2024
-  bank_description: EFT PAYMENT EASTERN TAX & ADVISORY
+  bank_date: 01/10/2024
+  bank_description: DIRECT DEBIT EASTERN REF91416
   bank_amount: '9926.94'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on nab dense \u2014 3-day settlement delay"
+  notes: "Early row on nab dense \u2014 exact date and amount, abbreviated merchant\
+    \ reference"
