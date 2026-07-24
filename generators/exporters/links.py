@@ -60,7 +60,7 @@ def transaction_links_to_doc_refs(data: dict, identifier_form: str) -> list[dict
     return records
 
 
-def trust_quads_to_doc_refs(data: dict, identifier_form: str) -> list[dict]:
+def trust_quads_to_doc_refs(data: dict, identifier_form: str, equality_form: str) -> list[dict]:
     """Map trust_distribution_links.yml to doc_refs records.
 
     The distribution statement is the anchor source_doc; the other three
@@ -69,19 +69,31 @@ def trust_quads_to_doc_refs(data: dict, identifier_form: str) -> list[dict]:
     Args:
         data: The parsed trust_distribution_links.yml mapping.
         identifier_form: 'spaced' or 'digits_only'. Applied to the ABN and TFN
-            linking fields only, never to the amount fields.
+            fields in `match_keys`, never to the amount fields.
+        equality_form: 'spaced' or 'digits_only', from export_config.yml's
+            abn_tfn_equality_form. Applied to a parallel
+            `match_keys_equality` dict carrying only the two identifier
+            fields (trust_abn, beneficiary_tfn), rendered in this form for
+            downstream equality checks. Independent of identifier_form:
+            `match_keys` keeps whatever human-readable form identifier_form
+            selects, while `match_keys_equality` always uses equality_form.
 
     Returns:
-        One record per quad.
+        One record per quad. Each record carries both `match_keys` (all
+        linking fields, ABN/TFN in identifier_form, amounts untouched) and
+        `match_keys_equality` (ABN/TFN only, in equality_form).
     """
     records = []
     for source_doc, quad in data.items():
         match_keys = {}
+        match_keys_equality = {}
         for key, value in quad["linking_fields"].items():
             text = str(value)
             if key in IDENTIFIER_LINK_FIELDS:
-                text = canonical_identifier(text, identifier_form)
-            match_keys[key] = text
+                match_keys[key] = canonical_identifier(text, identifier_form)
+                match_keys_equality[key] = canonical_identifier(text, equality_form)
+            else:
+                match_keys[key] = text
 
         records.append(
             {
@@ -89,6 +101,7 @@ def trust_quads_to_doc_refs(data: dict, identifier_form: str) -> list[dict]:
                 "source_doc": str(source_doc),
                 "doc_refs": [quad[key] for key in QUAD_REF_KEYS],
                 "match_keys": match_keys,
+                "match_keys_equality": match_keys_equality,
                 "label": {
                     "compliance_status": quad["compliance_status"],
                     "discrepancy_type": quad["discrepancy_type"],

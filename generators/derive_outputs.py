@@ -158,13 +158,14 @@ def derive_links(
         Path to the written JSONL file.
     """
     identifier_form = export_config["abn_tfn_canonical_form"]
+    equality_form = export_config["abn_tfn_equality_form"]
     records: list[dict] = []
 
     transactions = yaml.safe_load(link_files["transactions"].read_text())
     records.extend(transaction_links_to_doc_refs(transactions, identifier_form))
 
     quads = yaml.safe_load(link_files["trust_quads"].read_text())
-    records.extend(trust_quads_to_doc_refs(quads, identifier_form))
+    records.extend(trust_quads_to_doc_refs(quads, identifier_form, equality_form))
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w") as f:
