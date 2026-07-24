@@ -1,6 +1,6 @@
 """Map a ground-truth record plus its geometry to DocILE KILE and LIR fields.
 
-Implements Mapping B of GroundTruth_Export_Spec.md (section 5). DocILE is
+Implements Mapping B of docs/GroundTruth_Export_Spec.md (section 5). DocILE is
 restricted to invoices: receipts structurally never render unit price or
 quantity-when-1, so those fields have no bounding box, and DocILE is a
 localisation benchmark where every annotation must be findable on the page.

@@ -1,6 +1,6 @@
 """Normalisation rules applied before emitting any target schema.
 
-Implements section 3 of GroundTruth_Export_Spec.md. Pure functions only — no
+Implements section 3 of docs/GroundTruth_Export_Spec.md. Pure functions only — no
 filesystem access, no config loading, no logging.
 """
 

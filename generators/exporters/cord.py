@@ -1,6 +1,6 @@
 """Map a ground-truth record to CORD's Donut-style gt_parse tree.
 
-Implements Mapping A of GroundTruth_Export_Spec.md (section 4). Values only —
+Implements Mapping A of docs/GroundTruth_Export_Spec.md (section 4). Values only —
 CORD scoring is tree-edit distance over values and needs no coordinates.
 """
 

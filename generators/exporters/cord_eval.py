@@ -45,7 +45,7 @@ have Python 3.12 / arm64 wheels (see the project's Task 6 investigation).
 Rather than drag in that (unusable, multi-GB, ML-training-oriented)
 dependency tree for a ~200-line scoring utility, this module is vendored
 directly into the repository, per
-``GroundTruth_Export_Spec.md``'s own explicit sanctioning of
+``docs/GroundTruth_Export_Spec.md``'s own explicit sanctioning of
 "pip install donut-python, or copy (deps zss + nltk)".
 
 Within that vendoring, one further substitution was made, also per the

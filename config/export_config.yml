@@ -1,6 +1,6 @@
 # Export policy for the portable ground-truth schemas.
 # Every key is required. Omitting a key is an error, never a default.
-# See GroundTruth_Export_Spec.md and Export_Implementation_Design.md.
+# See docs/GroundTruth_Export_Spec.md.
 
 # ABN/TFN are stored space-separated ('79 104 332 181'). The spaced form is
 # emitted in `text` because it is what the renderer draws and therefore what a
