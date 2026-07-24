@@ -12,6 +12,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
+from generators.exporters.geometry import BoxRecorder
+
 Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
 _FONT_CACHE: dict[tuple[int, bool, bool, bool], Font] = {}
@@ -298,6 +300,10 @@ def draw_fitted_left(
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
+    prefix: str | None = None,
+    prefix_field: str | None = None,
 ) -> int:
     """Left-align `text` at x, fitting it to its budget. Returns the advanced y.
 
@@ -305,13 +311,39 @@ def draw_fitted_left(
     line_height); when None the font's own height is used. Advancing by a
     caller-supplied line_spacing keeps the single-line case pixel-identical to
     the pre-fit renderer while multi-line wrap pushes following content down.
+
+    `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
+    when both are given, the drawn extent is recorded against `field`.
+
+    `prefix`/`prefix_field` are an additional, independent opt-in capture: when
+    `text` begins with the literal `prefix` (e.g. a "2x " quantity marker
+    concatenated onto a line-item description before fitting), the prefix's
+    own sub-box -- measured on the first rendered line, at the font size the
+    fit actually chose -- is recorded against `prefix_field`. This never draws
+    anything extra; it only measures where the already-drawn prefix landed.
+    Silently skipped (no record, no error) if the first rendered line does not
+    start with `prefix` -- this should not happen for current callers, since
+    word-wrap never splits an unspaced prefix away from its own first word,
+    but a future caller passing a prefix containing a space could hit it.
     """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
+    top = y
+    max_width = 0
     for line in r.lines:
         draw.text((x, y), line, font=font, fill=fill)
+        bbox = font.getbbox(line)
+        max_width = max(max_width, int(bbox[2] - bbox[0]))
         y += spacing
+    if recorder is not None and field is not None:
+        recorder.record(field, (x, top, x + max_width, y))
+    if recorder is not None and prefix_field is not None and prefix and r.lines:
+        if r.lines[0].startswith(prefix):
+            prefix_bbox = font.getbbox(prefix)
+            prefix_w = int(prefix_bbox[2] - prefix_bbox[0])
+            prefix_h = int(prefix_bbox[3] - prefix_bbox[1])
+            recorder.record(prefix_field, (x, top, x + prefix_w, top + prefix_h))
     return y
 
 
@@ -327,19 +359,30 @@ def draw_fitted_center(
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
 ) -> int:
     """Center `text` within canvas_width, fitting it to its budget. Returns advanced y.
 
-    See draw_fitted_left for `line_spacing` semantics.
+    See draw_fitted_left for `line_spacing` semantics and the optional
+    `recorder`/`field` draw-time bounding-box capture.
     """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
+    top = y
+    left = canvas_width
+    right = 0
     for line in r.lines:
         bbox = font.getbbox(line)
-        w = bbox[2] - bbox[0]
-        draw.text(((canvas_width - w) // 2, y), line, font=font, fill=fill)
+        w = int(bbox[2] - bbox[0])
+        x = (canvas_width - w) // 2
+        draw.text((x, y), line, font=font, fill=fill)
+        left = min(left, x)
+        right = max(right, x + w)
         y += spacing
+    if recorder is not None and field is not None:
+        recorder.record(field, (left, top, right, y))
     return y
 
 
@@ -355,20 +398,93 @@ def draw_fitted_right(
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
 ) -> int:
     """Right-align `text` to x_right, fitting it to its budget. Returns advanced y.
 
-    See draw_fitted_left for `line_spacing` semantics.
+    See draw_fitted_left for `line_spacing` semantics and the optional
+    `recorder`/`field` draw-time bounding-box capture.
     """
     r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
     font = load_font(r.size, mono=mono, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
+    top = y
+    left = x_right
     for line in r.lines:
         bbox = font.getbbox(line)
-        w = bbox[2] - bbox[0]
+        w = int(bbox[2] - bbox[0])
         draw.text((x_right - w, y), line, font=font, fill=fill)
+        left = min(left, x_right - w)
         y += spacing
+    if recorder is not None and field is not None:
+        recorder.record(field, (left, top, x_right, y))
     return y
+
+
+def draw_text_left(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    font: Font,
+    fill: str = "black",
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
+) -> None:
+    """Draw text left-aligned at (x, y).
+
+    `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
+    when both are given, the drawn extent is recorded against `field`.
+    """
+    draw.text((x, y), text, font=font, fill=fill)
+    if recorder is not None and field is not None and text:
+        bbox = font.getbbox(text)
+        text_width = int(bbox[2] - bbox[0])
+        text_height = int(bbox[3] - bbox[1])
+        recorder.record(field, (x, y, x + text_width, y + text_height))
+
+
+def capture_label_prefixed_value(
+    draw: ImageDraw.ImageDraw,
+    label: str,
+    value: str,
+    x: int,
+    y: int,
+    font: Font,
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
+) -> None:
+    """Record the box of `value` as drawn immediately after `label` at (x, y).
+
+    Draws nothing itself -- the caller must already have drawn the combined
+    `f"{label}{value}"` string as a single `draw.text` call (so glyph shaping
+    matches exactly what is on the page; this function never changes pixels).
+    It only measures where the `value` substring landed, so a label+value
+    string like "Date: 02/03/2023" can carry a ground-truth box for the value
+    alone ("02/03/2023"), excluding the label ("Date: ").
+
+    `recorder`/`field` are optional (opt-in): when both are given and `value`
+    is non-empty, the value's extent is recorded against `field`.
+
+    Args:
+        draw: PIL ImageDraw object (used only for `textlength` measurement).
+        label: The literal label text preceding `value` (e.g. "Date: ").
+        value: The value substring whose box should be recorded.
+        x: The x position the combined `f"{label}{value}"` string was drawn at.
+        y: The y position the combined string was drawn at.
+        font: The font the combined string was drawn with.
+    """
+    if recorder is None or field is None or not value:
+        return
+    label_width = draw.textlength(label, font=font)
+    bbox = font.getbbox(value)
+    value_width = int(bbox[2] - bbox[0])
+    value_height = int(bbox[3] - bbox[1])
+    left = int(x + label_width)
+    recorder.record(field, (left, y, left + value_width, y + value_height))
 
 
 def draw_text_right(
@@ -378,11 +494,22 @@ def draw_text_right(
     y: int,
     font: Font,
     fill: str = "black",
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
 ) -> None:
-    """Draw text right-aligned to x_right."""
+    """Draw text right-aligned to x_right.
+
+    `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
+    when both are given, the drawn extent is recorded against `field`.
+    """
     bbox = font.getbbox(text)
-    text_width = bbox[2] - bbox[0]
-    draw.text((x_right - text_width, y), text, font=font, fill=fill)
+    text_width = int(bbox[2] - bbox[0])
+    text_height = int(bbox[3] - bbox[1])
+    left = x_right - text_width
+    draw.text((left, y), text, font=font, fill=fill)
+    if recorder is not None and field is not None:
+        recorder.record(field, (left, y, x_right, y + text_height))
 
 
 def draw_text_center(
@@ -392,12 +519,22 @@ def draw_text_center(
     width: int,
     font: Font,
     fill: str = "black",
+    *,
+    recorder: "BoxRecorder | None" = None,
+    field: str | None = None,
 ) -> None:
-    """Draw text centered within given width."""
+    """Draw text centered within given width.
+
+    `recorder`/`field` are optional draw-time bounding-box capture (opt-in):
+    when both are given, the drawn extent is recorded against `field`.
+    """
     bbox = font.getbbox(text)
-    text_width = bbox[2] - bbox[0]
+    text_width = int(bbox[2] - bbox[0])
+    text_height = int(bbox[3] - bbox[1])
     x = (width - text_width) // 2
     draw.text((x, y), text, font=font, fill=fill)
+    if recorder is not None and field is not None:
+        recorder.record(field, (x, y, x + text_width, y + text_height))
 
 
 def draw_separator(
@@ -446,10 +583,28 @@ def draw_line_item(
     margin: int,
     width: int,
     fill: str = "black",
+    *,
+    recorder: "BoxRecorder | None" = None,
+    amount_field: str | None = None,
 ) -> None:
-    """Draw a receipt line item: left-aligned description, right-aligned amount."""
+    """Draw a receipt line item: left-aligned description, right-aligned amount.
+
+    `desc` is always a static label at every current call site (e.g. "SUBTOTAL",
+    "GST", "TOTAL"), never a ground-truth field, so only the amount cell is
+    capturable. `recorder`/`amount_field` are optional (opt-in): when both are
+    given, the amount's drawn extent is recorded against `amount_field`.
+    """
     draw.text((margin, y), desc, font=font, fill=fill)
-    draw_text_right(draw, amount, x_right=width - margin, y=y, font=font, fill=fill)
+    draw_text_right(
+        draw,
+        amount,
+        x_right=width - margin,
+        y=y,
+        font=font,
+        fill=fill,
+        recorder=recorder,
+        field=amount_field,
+    )
 
 
 def fmt_amount(amount: Decimal | float | int) -> str:
@@ -612,6 +767,7 @@ def draw_table(
     desc_budget: dict,
     amount_budget: dict,
     row_h: int = 52,
+    recorder: "BoxRecorder | None" = None,
 ) -> int:
     """Draw a bordered component table and return the new y coordinate.
 
@@ -624,12 +780,19 @@ def draw_table(
     Args:
         columns: each {"header", "width", "kind"} where kind is one of
             "label_code" | "description" | "amount".
-        rows: each {"label_code", "description", "value"} (value pre-formatted).
+        rows: each {"label_code", "description", "value"} (value pre-formatted),
+            optionally with a "field" key naming the ground-truth column the
+            "value" cell was sourced from (a distinct field per row — unlike
+            line items, table rows are heterogeneous, not indexed repeats of
+            one field). "field" absent or falsy means the row isn't capturable.
         total: optional {"description", "value"} appended as a final row (flows
-            through the same fit-safe per-row loop).
+            through the same fit-safe per-row loop), with the same optional
+            "field" key.
         body_size: nominal font size for description and amount cells.
         desc_budget: fit budget (width/fit/min_font/max_lines) for descriptions.
         amount_budget: fit budget (width/fit/min_font/max_lines) for amounts.
+        recorder: optional draw-time bounding-box recorder (opt-in); when
+            given, each row's amount cell is recorded against its "field".
 
     Returns:
         The y coordinate below the table.
@@ -653,7 +816,12 @@ def draw_table(
     all_rows = list(rows)
     if total is not None:
         all_rows.append(
-            {"label_code": "", "description": total.get("description", ""), "value": total.get("value", "")}
+            {
+                "label_code": "",
+                "description": total.get("description", ""),
+                "value": total.get("value", ""),
+                "field": total.get("field", ""),
+            }
         )
 
     for row in all_rows:
@@ -686,6 +854,8 @@ def draw_table(
                     y + 14,
                     budget=amount_budget,
                     nominal_size=body_size,
+                    recorder=recorder,
+                    field=row.get("field") or None,
                 )
             else:
                 draw_fitted_left(

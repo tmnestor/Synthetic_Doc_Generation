@@ -17,6 +17,7 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 
 _LAYOUT_PATH = "config/layouts/cc_statements.yml"
@@ -128,6 +129,8 @@ def _draw_account_info(
     y: int,
     layout: dict,
     fields: dict,
+    *,
+    recorder: BoxRecorder | None = None,
 ) -> int:
     """Draw payer name and statement period. Returns Y after section."""
     margin = layout.get("margin", 100)
@@ -146,6 +149,8 @@ def _draw_account_info(
             budget=_cc_budget(layout, "PAYER_NAME"),
             nominal_size=size_body,
             line_spacing=line_h,
+            recorder=recorder,
+            field="PAYER_NAME",
         )
 
     date_range = fields.get("STATEMENT_DATE_RANGE", "")
@@ -169,6 +174,8 @@ def _draw_account_info(
             nominal_size=size_small,
             line_spacing=line_h,
             fill="gray",
+            recorder=recorder,
+            field="SUPPLIER_NAME",
         )
 
     return y + 20
@@ -179,6 +186,8 @@ def _draw_summary_box(
     y: int,
     layout: dict,
     fields: dict,
+    *,
+    recorder: BoxRecorder | None = None,
 ) -> int:
     """Draw CC-specific summary box showing balance, limits, and payment info.
 
@@ -205,7 +214,7 @@ def _draw_summary_box(
     minimum_payment_str = fields.get("MINIMUM_PAYMENT", "")
     payment_due_date = fields.get("PAYMENT_DUE_DATE", "")
 
-    # Compute available credit
+    # Compute available credit (not itself a ground-truth field — derived)
     available_credit_str = ""
     if closing_balance_str and credit_limit_str:
         try:
@@ -214,26 +223,30 @@ def _draw_summary_box(
         except Exception:  # noqa: BLE001
             available_credit_str = ""
 
-    summary_rows: list[tuple[str, str]] = []
+    summary_rows: list[tuple[str, str, str | None]] = []
     if closing_balance_str:
         try:
-            summary_rows.append(("Closing Balance", fmt_amount(Decimal(closing_balance_str))))
+            summary_rows.append(
+                ("Closing Balance", fmt_amount(Decimal(closing_balance_str)), "ACCOUNT_BALANCE")
+            )
         except Exception:  # noqa: BLE001
-            summary_rows.append(("Closing Balance", closing_balance_str))
+            summary_rows.append(("Closing Balance", closing_balance_str, "ACCOUNT_BALANCE"))
     if credit_limit_str:
         try:
-            summary_rows.append(("Credit Limit", fmt_amount(Decimal(credit_limit_str))))
+            summary_rows.append(("Credit Limit", fmt_amount(Decimal(credit_limit_str)), "CREDIT_LIMIT"))
         except Exception:  # noqa: BLE001
-            summary_rows.append(("Credit Limit", credit_limit_str))
+            summary_rows.append(("Credit Limit", credit_limit_str, "CREDIT_LIMIT"))
     if available_credit_str:
-        summary_rows.append(("Available Credit", available_credit_str))
+        summary_rows.append(("Available Credit", available_credit_str, None))
     if minimum_payment_str:
         try:
-            summary_rows.append(("Minimum Payment", fmt_amount(Decimal(minimum_payment_str))))
+            summary_rows.append(
+                ("Minimum Payment", fmt_amount(Decimal(minimum_payment_str)), "MINIMUM_PAYMENT")
+            )
         except Exception:  # noqa: BLE001
-            summary_rows.append(("Minimum Payment", minimum_payment_str))
+            summary_rows.append(("Minimum Payment", minimum_payment_str, "MINIMUM_PAYMENT"))
     if payment_due_date:
-        summary_rows.append(("Payment Due Date", payment_due_date))
+        summary_rows.append(("Payment Due Date", payment_due_date, "PAYMENT_DUE_DATE"))
 
     box_height = padding * 2 + len(summary_rows) * line_h + 10
     box_y1 = box_y0 + box_height
@@ -245,9 +258,17 @@ def _draw_summary_box(
     row_y = box_y0 + padding + line_h
 
     right_edge = box_x1 - padding
-    for label, value in summary_rows:
+    for label, value, field in summary_rows:
         draw.text((box_x0 + padding, row_y), label, font=font_body, fill="#333333")
-        draw_text_right(draw, value, x_right=right_edge, y=row_y, font=font_body)
+        draw_text_right(
+            draw,
+            value,
+            x_right=right_edge,
+            y=row_y,
+            font=font_body,
+            recorder=recorder,
+            field=field,
+        )
         row_y += line_h
 
     return box_y1 + 20
@@ -285,6 +306,8 @@ def _draw_transactions(
     y: int,
     layout: dict,
     txns: list[dict],
+    *,
+    recorder: BoxRecorder | None = None,
 ) -> int:
     """Draw CC transaction rows with a single Amount column. Returns Y after last row."""
     columns = layout["columns"]
@@ -297,7 +320,7 @@ def _draw_transactions(
     right_edge = margin + content_width
     desc_budget = _cc_budget(layout, "TRANSACTION_DESC")
 
-    for txn in txns:
+    for i, txn in enumerate(txns):
         # Fit the description first so a wrapped description grows the row height,
         # keeping the amount/date on the first line and never colliding downward.
         desc_fit = fit_text(
@@ -334,6 +357,8 @@ def _draw_transactions(
                 budget=desc_budget,
                 nominal_size=size_body,
                 line_spacing=row_h,
+                recorder=recorder,
+                field=f"TRANSACTION_DESCRIPTIONS[{i}]",
             )
 
         amount = txn.get("amount", "NOT_FOUND")
@@ -349,6 +374,8 @@ def _draw_transactions(
                 x_right=amount_col["x"] + amount_col["width"],
                 y=y + 14,
                 font=font,
+                recorder=recorder,
+                field=f"TRANSACTION_AMOUNTS_PAID[{i}]",
             )
 
         y += this_row_h
@@ -356,12 +383,15 @@ def _draw_transactions(
     return y
 
 
-def render_cc_statement(entry: dict, layout: dict) -> Image.Image:
+def render_cc_statement(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a credit card statement image from ground truth entry and layout config.
 
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout registry entry with rendering config.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered credit card statement.
@@ -374,13 +404,19 @@ def render_cc_statement(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
 
     y = _draw_header(draw, layout, fields, width)
-    y = _draw_account_info(draw, y + 30, layout, fields)
-    y = _draw_summary_box(draw, y, layout, fields)
+    y = _draw_account_info(draw, y + 30, layout, fields, recorder=recorder)
+    y = _draw_summary_box(draw, y, layout, fields, recorder=recorder)
     y = _draw_column_headers(draw, y + 10, layout)
 
     txns = _parse_transactions(fields)
-    _draw_transactions(draw, y + 5, layout, txns)
+    _draw_transactions(draw, y + 5, layout, txns, recorder=recorder)
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
 
     return img

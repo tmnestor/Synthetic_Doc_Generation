@@ -22,6 +22,7 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 
 _LAYOUT_PATH = "config/layouts/distribution_statements.yml"
@@ -85,6 +86,8 @@ def _draw_column_block(
     accent: str,
     budget: dict,
     nominal_size: int,
+    *,
+    recorder: "BoxRecorder | None" = None,
 ) -> int:
     """Draw one column of a two_column section; return its bottom y."""
     title = block.get("title", "")
@@ -94,24 +97,32 @@ def _draw_column_block(
     for fd in block.get("fields", []):
         draw.text((x, y), f"{fd.get('label', '')}:", font=font_s, fill="gray")
         y += 26
+        field_key = fd.get("field", "")
         y = draw_fitted_left(
             draw,
-            str(fields.get(fd.get("field", ""), "")),
+            str(fields.get(field_key, "")),
             x + 20,
             y,
             budget=budget,
             nominal_size=nominal_size,
             line_spacing=38,
+            recorder=recorder,
+            field=field_key or None,
         )
     return y
 
 
-def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
+def render_distribution_statement(
+    entry: dict, layout: dict, *, geometry_out: dict | None = None
+) -> Image.Image:
     """Render a distribution statement from ground truth and layout config.
 
     Args:
         entry: Ground truth YAML entry with a 'fields' dict.
         layout: Layout registry entry with rendering config.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered distribution statement.
@@ -139,6 +150,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
 
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
     y = margin
 
     for section in layout.get("sections", []):
@@ -175,7 +187,8 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 y += 40
             for fd in section.get("fields", []):
                 label = fd.get("label", "")
-                value = str(fields.get(fd.get("field", ""), ""))
+                field_key = fd.get("field", "")
+                value = str(fields.get(field_key, ""))
                 if fd.get("format") == "amount":
                     draw.text((margin + 20, y), label, font=font_b, fill="black")
                     draw_fitted_right(
@@ -185,6 +198,8 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                         y,
                         budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
                         nominal_size=font_sizes.get("body", 22),
+                        recorder=recorder,
+                        field=field_key or None,
                     )
                     draw_separator_line(draw, margin + 20, right_edge, y + 34, color=line_color, width=1)
                     y += 52
@@ -199,6 +214,8 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                         budget=_budget(layout, layout_id, "TEXT_VALUE"),
                         nominal_size=font_sizes.get("body", 22),
                         line_spacing=38,
+                        recorder=recorder,
+                        field=field_key or None,
                     )
             y += 16
 
@@ -217,6 +234,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 accent_color,
                 _budget(layout, layout_id, "COLUMN_TEXT_LEFT"),
                 body_size,
+                recorder=recorder,
             )
             y_right = _draw_column_block(
                 draw,
@@ -229,6 +247,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 accent_color,
                 _budget(layout, layout_id, "COLUMN_TEXT_RIGHT"),
                 body_size,
+                recorder=recorder,
             )
             y = max(y_left, y_right) + 16
 
@@ -238,6 +257,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                     "label_code": r.get("label_code", ""),
                     "description": r.get("description", ""),
                     "value": _fmt(str(fields.get(r.get("field", ""), ""))),
+                    "field": r.get("field", ""),
                 }
                 for r in section.get("rows", [])
             ]
@@ -247,6 +267,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 total = {
                     "description": tr.get("label", ""),
                     "value": _fmt(str(fields.get(tr.get("field", ""), ""))),
+                    "field": tr.get("field", ""),
                 }
             y = draw_table(
                 draw,
@@ -267,6 +288,7 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                 label_code_color=colors.get("label_code_color", "#0066CC"),
                 desc_budget=_budget(layout, layout_id, "DESC_COL"),
                 amount_budget=_budget(layout, layout_id, "TABLE_AMOUNT"),
+                recorder=recorder,
             )
 
         elif sec_type == "letter_meta":
@@ -279,6 +301,8 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                     y,
                     budget=_budget(layout, layout_id, "AMOUNT_VALUE"),
                     nominal_size=font_sizes.get("body", 22),
+                    recorder=recorder,
+                    field=date_field or None,
                 )
                 y += 44
             for fkey in section.get("addressee_fields", []):
@@ -290,6 +314,8 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
                     budget=_budget(layout, layout_id, "ADDRESSEE_VALUE"),
                     nominal_size=font_sizes.get("body", 22),
                     line_spacing=34,
+                    recorder=recorder,
+                    field=fkey or None,
                 )
             y += 16
             salutation = section.get("salutation", "")
@@ -346,5 +372,10 @@ def render_distribution_statement(entry: dict, layout: dict) -> Image.Image:
 
         elif sec_type == "footer":
             draw_text_center(draw, section.get("text", ""), height - 60, width, font_s, fill="gray")
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
 
     return img
