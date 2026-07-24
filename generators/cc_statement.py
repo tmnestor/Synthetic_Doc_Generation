@@ -163,8 +163,13 @@ def _draw_account_info(
         )
         y += line_h
 
+    # Suppress the supplier line only when it is already drawn verbatim as the
+    # header letterhead (logo_text) — NOT when it merely equals the legal bank
+    # name, which is a different string from what the header renders. This corpus
+    # benchmarks VLM extraction against SUPPLIER_NAME, so the exact string must be
+    # on the page or it is unextractable.
     supplier = fields.get("SUPPLIER_NAME", "")
-    if supplier and supplier != layout.get("bank", ""):
+    if supplier and supplier != layout["header"]["logo_text"]:
         y = draw_fitted_left(
             draw,
             supplier,

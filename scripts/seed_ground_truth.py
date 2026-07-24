@@ -142,13 +142,16 @@ def _generate_bank_entries(
     """Generate bank statement ground truth entries (25-40 txns each)."""
     entries: dict = {}
     layout_draw = NonRepeatingSampler(rng, _BANK_LAYOUTS)
-    bank_draw = NonRepeatingSampler(rng, engine.pools["banks"])
+    banks_by_code = {b["code"]: b for b in engine.pools["banks"]}
 
     for i in range(count):
         case_id = f"CASE{i + 1:03d}"
         layout = layout_draw.draw()
 
-        bank = bank_draw.draw()
+        # The bank is a function of the layout, never an independent draw: a CBA
+        # layout must carry a CBA supplier, or the SUPPLIER_NAME the VLM is scored
+        # against contradicts the letterhead. The layout-id prefix is the pool code.
+        bank = banks_by_code[layout.split("_")[0]]
         holder = case_entities[i]["holder"]
         suburb = case_entities[i]["location"]["suburb"]
 
@@ -332,13 +335,15 @@ def _generate_cc_entries(
     """Generate credit card statement ground truth entries."""
     entries: dict = {}
     layout_draw = NonRepeatingSampler(rng, _CC_LAYOUTS)
-    bank_draw = NonRepeatingSampler(rng, engine.pools["banks"])
+    banks_by_code = {b["code"]: b for b in engine.pools["banks"]}
 
     for i in range(count):
         case_id = f"CASE{i + 1:03d}"
         layout = layout_draw.draw()
 
-        bank = bank_draw.draw()
+        # The bank is a function of the layout, never an independent draw (see
+        # _generate_bank_entries). The layout-id prefix is the banks-pool code.
+        bank = banks_by_code[layout.split("_")[0]]
         holder = case_entities[i]["holder"]
         suburb = case_entities[i]["location"]["suburb"]
 
