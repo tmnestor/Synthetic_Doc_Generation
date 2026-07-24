@@ -1,6 +1,6 @@
 """Native export for document types with no public-schema equivalent.
 
-Implements section 7 of GroundTruth_Export_Spec.md. Bank statements,
+Implements section 7 of docs/GroundTruth_Export_Spec.md. Bank statements,
 credit-card statements and the four trust-distribution types are emitted in a
 project-defined schema rather than force-fitted into CORD or DocILE.
 """

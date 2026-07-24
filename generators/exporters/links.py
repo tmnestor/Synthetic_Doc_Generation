@@ -1,6 +1,6 @@
 """Map the link ground truth to a FinBalance-style doc_refs convention.
 
-Implements Mapping C of GroundTruth_Export_Spec.md (section 6). No public
+Implements Mapping C of docs/GroundTruth_Export_Spec.md (section 6). No public
 standard exists for cross-document links; this convention is defined by the spec.
 """
 
