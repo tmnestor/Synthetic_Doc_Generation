@@ -26,12 +26,19 @@ python -m generators.pipeline derive
 ### Dependencies
 
 ```
-Pillow    # Image rendering
-numpy     # Noise generation for degradation
-PyYAML    # YAML parsing
-typer     # CLI framework
-rich      # Coloured console output
+Pillow                  # Image rendering
+numpy                   # Noise generation for degradation
+PyYAML                  # YAML parsing
+typer                   # CLI framework
+rich                    # Coloured console output
+Faker                   # Fictional en_AU people and addresses
+opencv-python-headless  # Camera-scan degrade/rectify (cv2 perspective warp)
+apted                   # MIT tree-edit-distance backend for CORD scoring
+rapidfuzz               # Fuzzy string matching
+docile-benchmark        # Published DocILE KILE/LIR scorer (self-score check)
 ```
+
+All dependencies are pinned in `environment.yml` (conda env `synthetic`).
 
 ---
 
@@ -46,6 +53,11 @@ rich      # Coloured console output
 | Trust distribution links YAML | 1 file | 50 four-document quads with compliance ground truth |
 | Derived CSV | 1 file | Flat CSV with all 47 columns (image_file + 46 fields; NOT_FOUND for inapplicable fields) |
 | Derived JSONL | 1 file | One JSON object per document with all field values |
+| Geometry JSONL | 1 file | Per-document field bounding boxes (relative coords), captured at draw time during `generate` |
+| CORD JSONL | 110 records | Receipts + invoices as CORD Donut-style `gt_parse` value trees |
+| DocILE JSONL | 55 records | Invoices as DocILE KILE + LIR fields with bounding boxes |
+| Native JSONL | 310 records | Bank/CC statements + 4 trust types in a project-defined schema |
+| doc_refs JSONL | 160 records | Cross-document links (110 transaction + 50 trust quads) in FinBalance-style `doc_refs` |
 
 ## Document Types
 
@@ -121,9 +133,15 @@ graph TD
 
     GT --> D["derive<br/>YAML → CSV/JSONL"]
     FD --> D
+    EC["config/export_config.yml<br/>Export policy (targets, ID form)"] --> D
     D --> CSV["derived/ground_truth.csv"]
     D --> JSONL["derived/ground_truth.jsonl"]
+    D --> EXP["derived/cord.jsonl<br/>docile.jsonl<br/>native.jsonl<br/>doc_refs.jsonl"]
+    G --> GEO["derived/geometry.jsonl<br/>Field bounding boxes"]
+    GEO -.-> D
 ```
+
+> `derive` emits the CSV/JSONL always, and each benchmark view (`cord`, `docile`, `native`, `doc_refs`) only when it is listed under `export_targets` in `config/export_config.yml`. The DocILE export reads `derived/geometry.jsonl`, which is written by `generate`.
 
 ---
 
@@ -169,6 +187,40 @@ The seed scripts run at `seed=42`, seeding the local RNG, Faker, and the module-
 Every variable field is drawn through `fit_text` against per-layout pixel budgets (`config/layouts/*.yml` `field_budgets:`, loaded by `generators/layout_budgets.py`): text that doesn't fit **wraps or shrinks losslessly**, and a genuinely impossible fit raises `FitError`. The `validate` command runs an overflow backstop (`generators/overflow_check.py`) across all 8 document types, so no rendered field can silently truncate — a benchmark-corrupting failure fails loudly instead.
 
 `config/data_pools.yml` is the single source of content (fictional business/trust name-parts, Faker config, product/service catalogs, bank-description grammar, street types, income years, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
+
+---
+
+## Benchmark Export Schemas
+
+Beyond the flat `ground_truth.csv`/`.jsonl`, the `derive` command re-projects the corpus onto standard document-AI benchmark schemas so results are comparable to public leaderboards. The mapping code lives in `generators/exporters/` and the policy in `config/export_config.yml` (every key required, no silent defaults).
+
+The authoritative field maps and worked examples are in [`docs/GroundTruth_Export_Spec.md`](docs/GroundTruth_Export_Spec.md) (normalisation §3, CORD §4, DocILE §5, doc_refs §6, native §7). Each exporter module's docstring cites the spec section it implements.
+
+| Target | File | Scope | Schema |
+|--------|------|-------|--------|
+| `cord` | `derived/cord.jsonl` | Receipts + invoices (110) | CORD Donut-style `gt_parse` value trees. Fields with no CORD slot (supplier, ABN, address, date, payer) go under an `extension` subtree |
+| `docile` | `derived/docile.jsonl` | Invoices only (55) | DocILE KILE + LIR fields, each with a bounding box from `geometry.jsonl` |
+| `native` | `derived/native.jsonl` | Bank/CC statements + 4 trust types (310) | Project-defined schema for types with no public equivalent |
+| `doc_refs` | `derived/doc_refs.jsonl` | Transaction links + trust quads (160) | FinBalance-style cross-document `doc_refs` |
+
+Which targets are emitted is controlled by `export_targets:` in `config/export_config.yml`. To ship a target as a no-op, remove it from that list. Do not delete the key.
+
+### Export policy (`config/export_config.yml`)
+
+| Key | Purpose |
+|-----|---------|
+| `abn_tfn_canonical_form` | Form emitted in `text` (`spaced` — what the renderer draws, so what a VLM reads) |
+| `abn_tfn_equality_form` | Form used for internal equality checks (`digits_only`) |
+| `cord_extension_scoring` | Whether the `extension` subtree counts toward the headline CORD score (`excluded_scored_separately` keeps the number leaderboard-comparable) |
+| `export_targets` | List of derived views to emit |
+| `docile_fieldtypes` | Ground-truth column → DocILE field-type map (verified byte-exact against `rossumai/docile`) |
+
+### Scoring
+
+The export layer ships self-scoring so the mappings are provably lossless:
+
+- **CORD** — `generators/exporters/cord_eval.py` is a vendored, `apted`-backed port of Donut's `JSONParseEvaluator` (MIT `apted` replaces the GPL-adjacent `zss`; original Donut MIT licence reproduced in-file). `cord_score.py` applies the `cord_extension_scoring` policy.
+- **DocILE** — scored via the published `docile-benchmark` KILE/LIR scorer; the test suite asserts a perfect self-score and that corrupting a single box or field-type degrades only the expected metric.
 
 ---
 
@@ -222,16 +274,16 @@ CASE001_receipt_fuel.png:
 ### Link Format
 
 ```yaml
-CASE201_distribution_statement_standard.png:
+CASE201_dist_table_plain.png:
   trust_return: CASE201_trust_return_standard.png
   trust_income_schedule: CASE201_trust_income_schedule_standard.png
   beneficiary_itr: CASE201_beneficiary_itr_standard.png
   linking_fields:
-    trust_abn: '51 196 744 081'
-    beneficiary_tfn: '425 478 019'
-    share_of_net_income: '88412.31'
-    franking_credit: '5846.90'
-    capital_gain_component: '29467.88'
+    trust_abn: '79 104 332 181'
+    beneficiary_tfn: '890 838 614'
+    share_of_net_income: '73078.48'
+    franking_credit: '20985.50'
+    capital_gain_component: '6026.13'
   compliance_status: compliant    # or "non_compliant"
   discrepancy_type: null          # or one of the 4 types above
   discrepancy_details: null       # human-readable description
@@ -488,7 +540,7 @@ generators/
 ├── overflow_check.py          # Fail-fast overflow backstop — catches text that cannot fit its box (fit-safety)
 ├── schema.py                  # Ground truth schema validation
 ├── loader.py                  # YAML loaders with fail-fast diagnostics
-├── derive_outputs.py          # YAML → CSV/JSONL derivation
+├── derive_outputs.py          # YAML → CSV/JSONL + CORD/DocILE/native/doc_refs derivation
 ├── pipeline.py                # Typer CLI (validate, generate, derive)
 ├── bank_statement.py          # Bank statement renderer
 ├── receipt.py                 # Receipt renderer (thermal/letterhead)
@@ -497,7 +549,17 @@ generators/
 ├── trust_return.py            # Trust tax return renderer (NAT 0660-inspired)
 ├── distribution_statement.py  # Distribution statement renderer
 ├── trust_income_schedule.py   # Trust income schedule renderer
-└── beneficiary_itr.py         # Beneficiary ITR renderer (NAT 2541-inspired)
+├── beneficiary_itr.py         # Beneficiary ITR renderer (NAT 2541-inspired)
+└── exporters/                 # Benchmark-schema export layer
+    ├── config.py              # Load + fail-fast-validate export_config.yml
+    ├── normalise.py           # Shared normalisation rules (pure functions)
+    ├── cord.py                # Ground truth → CORD gt_parse tree
+    ├── cord_eval.py           # Vendored apted-backed Donut JSONParseEvaluator
+    ├── cord_score.py          # Apply cord_extension_scoring policy
+    ├── docile.py              # Ground truth + geometry → DocILE KILE/LIR
+    ├── geometry.py            # Draw-time bounding-box recorder (relative coords)
+    ├── links.py               # Link ground truth → doc_refs records
+    └── native.py              # Statements + trust types → native schema
 
 linking/
 ├── __init__.py
@@ -525,6 +587,7 @@ ground_truth/
 config/
 ├── generation_config.yml      # Pipeline configuration (8 document types)
 ├── field_definitions.yml      # 46-column schema for 8 document types
+├── export_config.yml          # Benchmark-export policy (targets, ID form, CORD/DocILE field maps)
 ├── data_pools.yml             # Content pools: fictional business/trust name-parts, Faker config, product/service catalogs, real-name blocklist
 └── layouts/
     ├── bank_statements.yml          # 8 layouts
@@ -535,4 +598,17 @@ config/
     ├── distribution_statements.yml  # 6 layouts
     ├── trust_income_schedules.yml   # 1 layout
     └── beneficiary_itrs.yml         # 1 layout
+
+derived/                            # Regenerated by `generate` (geometry) and `derive` (the rest)
+├── ground_truth.csv                # Flat 47-column CSV
+├── ground_truth.jsonl              # One JSON object per document
+├── geometry.jsonl                  # Per-document field bounding boxes (written by generate)
+├── cord.jsonl                      # 110 receipt/invoice CORD gt_parse trees
+├── docile.jsonl                    # 55 invoice DocILE KILE/LIR records
+├── native.jsonl                    # 310 statement/trust native records
+└── doc_refs.jsonl                  # 160 cross-document link records
+
+docs/
+├── GroundTruth_Export_Spec.md      # Authoritative export schema: field maps, worked examples (§3-7)
+└── ...                             # design/plan notes for renderers, fit-safety, content variety
 ```

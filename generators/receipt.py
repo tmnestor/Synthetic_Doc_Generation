@@ -10,6 +10,7 @@ from decimal import Decimal
 from PIL import Image, ImageDraw
 
 from generators.common import (
+    capture_label_prefixed_value,
     draw_fitted_center,
     draw_fitted_left,
     draw_fitted_right,
@@ -20,6 +21,7 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder, rescale_vertical
 from generators.layout_budgets import field_budget
 
 _LAYOUT_PATH = "config/layouts/receipts.yml"
@@ -122,12 +124,15 @@ def _derive_receipt_details(case_id: str, invoice_date: str) -> dict:
     }
 
 
-def render_receipt(entry: dict, layout: dict) -> Image.Image:
+def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
     """Render a receipt image from ground truth entry and layout config.
 
     Args:
         entry: Ground truth YAML entry with 'fields' dict.
         layout: Layout registry entry with rendering config.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
 
     Returns:
         PIL Image of the rendered receipt.
@@ -151,6 +156,7 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
     img = Image.new("RGB", (width, max_h), "white")
     draw = ImageDraw.Draw(img)
     y = margin
+    recorder = BoxRecorder(width, max_h) if geometry_out is not None else None
 
     for section in layout.get("sections", []):
         sec_type = section.get("type")
@@ -166,6 +172,8 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 mono=is_mono,
                 bold=True,
                 line_spacing=line_h,
+                recorder=recorder,
+                field="SUPPLIER_NAME",
             )
             addr = fields.get("BUSINESS_ADDRESS", "")
             if addr:
@@ -178,6 +186,8 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                     nominal_size=font_size,
                     mono=is_mono,
                     line_spacing=line_h,
+                    recorder=recorder,
+                    field="BUSINESS_ADDRESS",
                 )
             abn = fields.get("BUSINESS_ABN", "")
             if abn:
@@ -190,6 +200,8 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                     nominal_size=font_size,
                     mono=is_mono,
                     line_spacing=line_h,
+                    recorder=recorder,
+                    field="BUSINESS_ABN",
                 )
             phone = fields.get("BUSINESS_PHONE", "")
             if phone:
@@ -210,6 +222,9 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
             # Line 1: Date + Time
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
             draw_text_right(draw, f"Time: {pos_details['time']}", x_right=width - margin, y=y, font=font)
             y += line_h
             # Line 2: Register + Staff + Receipt #
@@ -232,21 +247,29 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
             y += line_h
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
                 y += line_h
 
         elif sec_type == "metadata":
             if inv_date:
                 draw.text((margin, y), f"Date: {inv_date}", font=font, fill="black")
+                capture_label_prefixed_value(
+                    draw, "Date: ", inv_date, margin, y, font, recorder=recorder, field="INVOICE_DATE"
+                )
                 y += line_h
 
         elif sec_type in ("line_items", "itemized"):
             items = _parse_line_items(fields)
-            for item in items:
+            for i, item in enumerate(items):
                 desc = item["description"]
                 qty = item["quantity"]
                 total = item["total"]
+                qty_prefix = None
                 if qty and qty != "1":
-                    desc = f"{qty}x {desc}"
+                    qty_prefix = f"{qty}x "
+                    desc = f"{qty_prefix}{desc}"
                 amount_str = f"{Decimal(total):,.2f}" if total else ""
                 draw_fitted_left(
                     draw,
@@ -257,6 +280,10 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                     nominal_size=font_size,
                     mono=is_mono,
                     line_spacing=line_h,
+                    recorder=recorder,
+                    field=f"LINE_ITEM_DESCRIPTIONS[{i}]",
+                    prefix=qty_prefix,
+                    prefix_field=f"LINE_ITEM_QUANTITIES[{i}]" if qty_prefix else None,
                 )
                 draw_fitted_right(
                     draw,
@@ -267,6 +294,8 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                     nominal_size=font_size,
                     mono=is_mono,
                     line_spacing=line_h,
+                    recorder=recorder,
+                    field=f"LINE_ITEM_TOTAL_PRICES[{i}]",
                 )
                 y += line_h
 
@@ -278,9 +307,29 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 subtotal_ex = str(Decimal(total) - Decimal(gst))
                 draw_line_item(draw, "SUBTOTAL", f"{Decimal(subtotal_ex):,.2f}", y, font, margin, width)
                 y += line_h
-                draw_line_item(draw, "GST", f"{Decimal(gst):,.2f}", y, font, margin, width)
+                draw_line_item(
+                    draw,
+                    "GST",
+                    f"{Decimal(gst):,.2f}",
+                    y,
+                    font,
+                    margin,
+                    width,
+                    recorder=recorder,
+                    amount_field="GST_AMOUNT",
+                )
                 y += line_h
-            draw_line_item(draw, "TOTAL", fmt_amount(Decimal(total)), y, font_bold, margin, width)
+            draw_line_item(
+                draw,
+                "TOTAL",
+                fmt_amount(Decimal(total)),
+                y,
+                font_bold,
+                margin,
+                width,
+                recorder=recorder,
+                amount_field="TOTAL_AMOUNT",
+            )
             y += line_h
 
         elif sec_type == "payment":
@@ -307,20 +356,56 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
                 if total:
                     try:
                         draw_line_item(
-                            draw, label or "TOTAL", fmt_amount(Decimal(total)), y, font_bold, margin, width
+                            draw,
+                            label or "TOTAL",
+                            fmt_amount(Decimal(total)),
+                            y,
+                            font_bold,
+                            margin,
+                            width,
+                            recorder=recorder,
+                            amount_field="TOTAL_AMOUNT",
                         )
                     except Exception:  # noqa: BLE001
-                        draw_line_item(draw, label or "TOTAL", total, y, font_bold, margin, width)
+                        draw_line_item(
+                            draw,
+                            label or "TOTAL",
+                            total,
+                            y,
+                            font_bold,
+                            margin,
+                            width,
+                            recorder=recorder,
+                            amount_field="TOTAL_AMOUNT",
+                        )
                     y += line_h
             elif name == "tax" or name == "gst":
                 gst = fields.get("GST_AMOUNT", "")
                 if gst:
                     try:
                         draw_line_item(
-                            draw, label or "GST", fmt_amount(Decimal(gst)), y, font, margin, width
+                            draw,
+                            label or "GST",
+                            fmt_amount(Decimal(gst)),
+                            y,
+                            font,
+                            margin,
+                            width,
+                            recorder=recorder,
+                            amount_field="GST_AMOUNT",
                         )
                     except Exception:  # noqa: BLE001
-                        draw_line_item(draw, label or "GST", gst, y, font, margin, width)
+                        draw_line_item(
+                            draw,
+                            label or "GST",
+                            gst,
+                            y,
+                            font,
+                            margin,
+                            width,
+                            recorder=recorder,
+                            amount_field="GST_AMOUNT",
+                        )
                     y += line_h
 
         elif sec_type == "content":
@@ -328,5 +413,14 @@ def render_receipt(entry: dict, layout: dict) -> Image.Image:
             pass
 
     y += margin
-    img = img.crop((0, 0, width, min(y, max_h)))
+    final_height = min(y, max_h)
+    img = img.crop((0, 0, width, final_height))
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = final_height
+        geometry_out["boxes"] = rescale_vertical(
+            recorder.as_dict(), old_height=max_h, new_height=final_height
+        )
+
     return img
