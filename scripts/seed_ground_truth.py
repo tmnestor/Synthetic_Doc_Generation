@@ -366,17 +366,23 @@ def _generate_cc_entries(
         credit_limit = Decimal(str(round(float(credit_limit) / 500) * 500))
 
         n_txns = rng.randint(5, 12)
-        txn_dates, txn_descs, txn_amounts = [], [], []
+        txns: list[tuple[int, str, str]] = []
         total_charges = Decimal("0")
 
         for _j in range(n_txns):
             txn_day = rng.randint(1, max_day)
-            txn_dates.append(_fmt_date(txn_day, m, y))
             desc = _draw_bank_description(engine, rng, suburb=suburb, holder_first=holder["first_name"])
-            txn_descs.append(desc)
             amt = _rand_amount(rng, 10, 800)
-            txn_amounts.append(_fmt_decimal(amt))
+            txns.append((txn_day, desc, _fmt_decimal(amt)))
             total_charges += amt
+
+        # A real statement lists transactions chronologically; sort by day (all
+        # in the one statement month) and derive the period from the date column.
+        txns.sort(key=lambda t: t[0])
+        txn_dates = [_fmt_date(day, m, y) for day, _, _ in txns]
+        txn_descs = [desc for _, desc, _ in txns]
+        txn_amounts = [amt for _, _, amt in txns]
+        statement_range = f"{txn_dates[0]} - {txn_dates[-1]}" if txns else statement_range
 
         closing_balance = total_charges
         min_payment_pct = (closing_balance * Decimal("0.02")).quantize(
