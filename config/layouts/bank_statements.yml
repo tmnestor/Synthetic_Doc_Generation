@@ -4,7 +4,9 @@ layouts:
     # Wrap (not shrink) to keep row font uniform; replaces the old silent char-truncation.
     field_budgets:
       TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Commonwealth Bank of Australia
+    logo_text: Commonwealth Bank
     bank_code: CBA
     renderer: cba
     variant: standard
@@ -27,7 +29,9 @@ layouts:
   cba_date_grouped:
     field_budgets:
       TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Commonwealth Bank of Australia
+    logo_text: Commonwealth Bank
     bank_code: CBA
     renderer: cba
     variant: date_grouped
@@ -51,7 +55,9 @@ layouts:
   westpac_standard:
     field_budgets:
       TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Westpac Banking Corporation
+    logo_text: Westpac
     bank_code: WBC
     renderer: westpac
     variant: standard
@@ -72,7 +78,9 @@ layouts:
   westpac_premium:
     field_budgets:
       TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Westpac Banking Corporation
+    logo_text: Westpac
     bank_code: WBC
     renderer: westpac
     variant: premium
@@ -95,7 +103,9 @@ layouts:
   nab_classic:
     field_budgets:
       TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
+    logo_text: NAB Classic Banking
     bank_code: NAB
     renderer: nab
     variant: classic
@@ -120,7 +130,9 @@ layouts:
   nab_dense:
     field_budgets:
       TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
+    logo_text: NAB Classic Banking
     bank_code: NAB
     renderer: nab
     variant: dense
@@ -145,7 +157,9 @@ layouts:
   anz_standard:
     field_budgets:
       TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
+    logo_text: ANZ
     bank_code: ANZ
     renderer: anz
     variant: standard
@@ -170,7 +184,9 @@ layouts:
   anz_modern:
     field_budgets:
       TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
+      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
+    logo_text: ANZ
     bank_code: ANZ
     renderer: anz
     variant: modern

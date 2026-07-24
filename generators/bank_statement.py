@@ -30,6 +30,44 @@ def _bank_budget(layout: dict, layout_id: str, field: str) -> dict:
     return field_budget(layout, layout_id, field, layout_path=_LAYOUT_PATH)
 
 
+def _draw_supplier_line(
+    draw: ImageDraw.ImageDraw,
+    layout: dict,
+    entry: dict,
+    x: int,
+    y: int,
+    *,
+    size: int,
+    line_spacing: int,
+    recorder: BoxRecorder | None,
+) -> int:
+    """Draw SUPPLIER_NAME as a subordinate gray line, mirroring cc_statement.py.
+
+    The letterhead brand comes from the layout (``logo_text``); the statement's
+    content supplier is a separate field. This corpus benchmarks VLM extraction
+    against SUPPLIER_NAME, so the exact string MUST appear on the page or it is
+    unextractable. The supplier line is therefore suppressed only when the
+    supplier already appears verbatim as the drawn letterhead (``logo_text``) —
+    NOT when it merely equals the legal ``bank`` name, which is a different
+    string from what the header renders. Returns the new y.
+    """
+    supplier = entry["fields"].get("SUPPLIER_NAME", "")
+    if not supplier or supplier == layout["logo_text"]:
+        return y
+    return draw_fitted_left(
+        draw,
+        supplier,
+        x,
+        y,
+        budget=_bank_budget(layout, entry.get("layout", ""), "SUPPLIER_NAME"),
+        nominal_size=size,
+        line_spacing=line_spacing,
+        fill="gray",
+        recorder=recorder,
+        field="SUPPLIER_NAME",
+    )
+
+
 # -- Shared utilities ---------------------------------------------------------
 
 
@@ -119,7 +157,7 @@ def render_cba(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
 
     # -- Bank name and legal lines --
     bank_color = layout.get("bank_name_color", "#12107D")
-    draw.text((margin, y), "Commonwealth Bank", font=font_header, fill=bank_color)
+    draw.text((margin, y), layout["logo_text"], font=font_header, fill=bank_color)
     y += 68
 
     legal_lines = [
@@ -148,6 +186,9 @@ def render_cba(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
                 fill="black",
             )
         y += 44
+    y = _draw_supplier_line(
+        draw, layout, entry, margin, y, size=font_sizes["body"], line_spacing=44, recorder=recorder
+    )
     y += 28
 
     # -- Column positions --
@@ -330,7 +371,7 @@ def render_westpac(entry: dict, layout: dict, *, geometry_out: dict | None = Non
 
     # -- Westpac logo (top-left, red) --
     logo_color = layout.get("logo_color", "#C41E3A")
-    draw.text((margin, y), "Westpac", font=font_header, fill=logo_color)
+    draw.text((margin, y), layout["logo_text"], font=font_header, fill=logo_color)
 
     # -- Page number (top-right) --
     draw_text_right(draw, "Page 1 of 1", x_right=right_edge, y=y, font=font_footer, fill="#666666")
@@ -402,6 +443,9 @@ def render_westpac(entry: dict, layout: dict, *, geometry_out: dict | None = Non
     if date_range:
         draw.text((margin, y), f"Statement Period: {date_range}", font=font_small, fill="#666666")
         y += 32
+    y = _draw_supplier_line(
+        draw, layout, entry, margin, y, size=font_sizes["body"], line_spacing=38, recorder=recorder
+    )
     y += 10
 
     # -- Column positions for bordered table --
@@ -547,7 +591,7 @@ def render_nab(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
     y = margin
 
     # -- Bank name header --
-    draw.text((margin, y), "NAB Classic Banking", font=font_header, fill="#003366")
+    draw.text((margin, y), layout["logo_text"], font=font_header, fill="#003366")
     y += 72
 
     # -- Account Details box --
@@ -564,6 +608,9 @@ def render_nab(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
     draw_text_right(draw, "Account Number", x_right=right_edge - 250, y=y, font=font_small, fill="#666666")
     draw_text_right(draw, "98-765-4321", x_right=right_edge - 15, y=y, font=font_body, fill="black")
     y = box_top + 170
+    y = _draw_supplier_line(
+        draw, layout, entry, margin, y, size=font_sizes["body"], line_spacing=40, recorder=recorder
+    )
 
     # -- Section header --
     draw.text((margin, y), "Transaction Details (continued)", font=font_body_bold, fill="black")
@@ -748,7 +795,7 @@ def render_anz(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
 
     # -- Blue header bar --
     draw.rectangle([(0, 0), (width, 120)], fill=header_color)
-    draw.text((margin, 30), "ANZ", font=font_header, fill="white")
+    draw.text((margin, 30), layout["logo_text"], font=font_header, fill="white")
 
     # -- Account info --
     y = 140
@@ -758,6 +805,9 @@ def render_anz(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
         draw, "Account number    0000-00000", x_right=right_edge, y=y, font=font_small, fill="#666666"
     )
     y += 38
+    y = _draw_supplier_line(
+        draw, layout, entry, margin, y, size=font_sizes["body"], line_spacing=44, recorder=recorder
+    )
     draw.text((margin, y), "Transaction Details", font=font_body_bold, fill="black")
     y += 52
 
