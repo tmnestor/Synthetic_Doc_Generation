@@ -20,6 +20,7 @@ export_targets:
   - cord
   - doc_refs
   - docile
+  - native
 
 # Confirmed byte-exact against rossumai/docile in Task 2.
 docile_fieldtypes:
