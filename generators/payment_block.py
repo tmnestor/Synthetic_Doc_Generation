@@ -14,8 +14,20 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
+from PIL import ImageDraw
+
+from generators.common import (
+    Font,
+    draw_fitted_center,
+    draw_fitted_left,
+    draw_line_item,
+    fmt_amount,
+)
+from generators.layout_budgets import field_budget
 
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
+
+_LAYOUT_PATH = "config/layouts/receipts.yml"
 
 _ROOT_KEY = "payment_terminal"
 
@@ -318,4 +330,130 @@ def derive_payment(
         tendered=None,
         change=None,
         purchase_total=total_dec,
+    )
+
+
+def render_payment_block(
+    draw: ImageDraw.ImageDraw,
+    details: PaymentDetails,
+    y: int,
+    *,
+    layout: dict,
+    layout_id: str,
+    width: int,
+    margin: int,
+    line_h: int,
+    font: Font,
+    font_bold: Font,
+    font_size: int,
+    is_mono: bool,
+    pools: dict | None = None,
+) -> int:
+    """Draw the terminal block for `details`, returning the y below it.
+
+    Cash renders a two-line tender block; card and wallet render the full
+    EFTPOS customer-copy slip, wallet adding a CONTACTLESS line.
+
+    Args:
+        draw: The PIL drawing context.
+        details: Derived terminal values for this receipt.
+        y: Top y to draw from.
+        layout: The single-layout dict, for field budgets.
+        layout_id: Layout id, used in budget diagnostics.
+        width: Canvas width in pixels.
+        margin: Layout margin in pixels.
+        line_h: Layout line height in pixels.
+        font: Regular font at nominal size.
+        font_bold: Bold font at nominal size.
+        font_size: Nominal font size, for fitted helpers.
+        is_mono: Whether the layout font is monospace.
+        pools: Validated payment_terminal mapping; loaded from YAML if omitted.
+
+    Returns:
+        The y coordinate below the last drawn line.
+    """
+    cfg = pools if pools is not None else load_terminal_pools()
+    acquirer_budget = field_budget(layout, layout_id, "PAYMENT_ACQUIRER", layout_path=_LAYOUT_PATH)
+    line_budget = field_budget(layout, layout_id, "PAYMENT_LINE", layout_path=_LAYOUT_PATH)
+
+    def line(text: str) -> None:
+        nonlocal y
+        y = draw_fitted_left(
+            draw,
+            text,
+            margin,
+            y,
+            budget=line_budget,
+            nominal_size=font_size,
+            mono=is_mono,
+            line_spacing=line_h,
+        )
+
+    if details.kind == "cash":
+        cash = cfg["cash"]
+        tendered, change = details.tendered, details.change
+        if tendered is None or change is None:  # pragma: no cover - derive_payment guarantees both
+            raise ValueError(
+                "cash payment is missing its tender amounts.\n"
+                f"  What:     PaymentDetails(kind='cash') for method '{details.method}' has "
+                f"tendered={tendered!r}, change={change!r}.\n"
+                "  Where:    generators/payment_block.py -> derive_payment().\n"
+                "  Expected: both set to Decimal values for kind == 'cash'.\n"
+                "  Recover:  set tendered/change in the cash branch of derive_payment()."
+            )
+        draw_line_item(draw, cash["tendered_label"], fmt_amount(tendered), y, font, margin, width)
+        y += line_h
+        draw_line_item(draw, cash["change_label"], fmt_amount(change), y, font_bold, margin, width)
+        return y + line_h
+
+    y = draw_fitted_center(
+        draw,
+        cfg["customer_copy_text"],
+        y,
+        width,
+        budget=acquirer_budget,
+        nominal_size=font_size,
+        mono=is_mono,
+        bold=True,
+        line_spacing=line_h,
+    )
+    y = draw_fitted_center(
+        draw,
+        details.acquirer,
+        y,
+        width,
+        budget=acquirer_budget,
+        nominal_size=font_size,
+        mono=is_mono,
+        line_spacing=line_h,
+    )
+    y += line_h // 4
+
+    if details.kind == "wallet":
+        line(f"{cfg['contactless_label']} - {details.wallet_label}")
+    line(f"{details.scheme_display} {details.account_type}")
+    line(f"AID: {details.aid}")
+    line(f"Card: {details.masked_pan} {details.entry_mode}")
+    line(f"PSN: {details.psn}, ATC: {details.atc}")
+    y += line_h // 4
+
+    draw_line_item(draw, "Purchase   AUD", fmt_amount(details.purchase_total), y, font, margin, width)
+    y += line_h
+    line(f"{cfg['approved_text']}   {cfg['response_code']}")
+    y += line_h // 4
+
+    line(f"Terminal ID: {details.terminal_id}")
+    line(f"Transaction Ref: {details.transaction_ref}")
+    line(details.timestamp)
+    y += line_h // 4
+
+    return draw_fitted_center(
+        draw,
+        cfg["retain_text"],
+        y,
+        width,
+        budget=acquirer_budget,
+        nominal_size=font_size,
+        mono=is_mono,
+        line_spacing=line_h,
     )

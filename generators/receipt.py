@@ -23,6 +23,7 @@ from generators.common import (
 )
 from generators.exporters.geometry import BoxRecorder, rescale_vertical
 from generators.layout_budgets import field_budget
+from generators.payment_block import derive_payment, render_payment_block
 
 _LAYOUT_PATH = "config/layouts/receipts.yml"
 
@@ -44,8 +45,6 @@ _STAFF_NAMES = [
     "Isla",
     "Tom",
 ]
-
-_PAYMENT_METHODS = ["EFTPOS", "VISA", "MASTERCARD", "CASH", "AMEX"]
 
 
 def _parse_line_items(fields: dict) -> list[dict]:
@@ -86,15 +85,17 @@ def _derive_receipt_number(case_id: str, invoice_date: str) -> str:
 def _derive_receipt_details(case_id: str, invoice_date: str) -> dict:
     """Derive deterministic POS details from case ID and invoice date.
 
-    Generates time, register number, staff name, and payment method
-    using a hash so the same case always produces the same values.
+    Generates time, register number, and staff name using a hash so the same
+    case always produces the same values. Payment values come from
+    generators.payment_block.derive_payment, which consumes a later slice of
+    the same digest.
 
     Args:
         case_id: The case identifier (e.g. "CASE001").
         invoice_date: Invoice date string (e.g. "08/04/2023").
 
     Returns:
-        Dict with keys: time, register, staff, payment_method.
+        Dict with keys: time, register, staff.
     """
     raw = f"{case_id}:pos:{invoice_date}"
     digest = hashlib.sha256(raw.encode()).hexdigest()
@@ -112,15 +113,10 @@ def _derive_receipt_details(case_id: str, invoice_date: str) -> dict:
     staff_idx = int(digest[6:8], 16) % len(_STAFF_NAMES)
     staff = _STAFF_NAMES[staff_idx]
 
-    # Payment method
-    pay_idx = int(digest[8:10], 16) % len(_PAYMENT_METHODS)
-    payment_method = _PAYMENT_METHODS[pay_idx]
-
     return {
         "time": time_str,
         "register": register_str,
         "staff": staff,
-        "payment_method": payment_method,
     }
 
 
@@ -333,9 +329,23 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             y += line_h
 
         elif sec_type == "payment":
-            method = fields.get("PAYMENT_METHOD") or pos_details["payment_method"]
-            draw.text((margin, y), method, font=font, fill="black")
-            y += line_h
+            details = derive_payment(
+                case_id, inv_date, fields.get("TOTAL_AMOUNT", "0"), pos_details["time"]
+            )
+            y = render_payment_block(
+                draw,
+                details,
+                y,
+                layout=layout,
+                layout_id=layout_id,
+                width=width,
+                margin=margin,
+                line_h=line_h,
+                font=font,
+                font_bold=font_bold,
+                font_size=font_size,
+                is_mono=is_mono,
+            )
 
         elif sec_type == "footer":
             text = section.get("text", "")
