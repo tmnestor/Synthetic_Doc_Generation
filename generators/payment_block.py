@@ -27,6 +27,8 @@ from generators.layout_budgets import field_budget
 
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
 
+_LINKS_PATH = Path(__file__).resolve().parent.parent / "ground_truth" / "transaction_links.yml"
+
 _LAYOUT_PATH = "config/layouts/receipts.yml"
 
 _ROOT_KEY = "payment_terminal"
@@ -34,7 +36,7 @@ _ROOT_KEY = "payment_terminal"
 # Required sub-keys of payment_terminal, each mapped to a short description of
 # the expected shape used in the fail-fast diagnostic.
 _REQUIRED_KEYS: dict[str, str] = {
-    "receipt_method_weights": "a mapping of method name -> positive integer weight",
+    "receipt_method_weights": "a mapping of method name -> non-negative integer weight",
     "acquirers": "a non-empty list of acquirer display names",
     "schemes": "a mapping of scheme name -> {display, aid, pan_digits, account_types}",
     "wallets": "a mapping of wallet method name -> printed wallet label",
@@ -45,6 +47,8 @@ _REQUIRED_KEYS: dict[str, str] = {
     "response_code": "the printed response code as a string, e.g. '00'",
     "retain_text": "the printed footer, e.g. 'Retain copy for your records'",
     "cash": "a mapping with 'tendered_label' and 'change_label'",
+    "bank_description_methods": "a mapping of bank-description prefix -> schemes key",
+    "wallet_presentation_weights": "a mapping of 'none' plus wallet names -> non-negative weights",
 }
 
 _REQUIRED_SCHEME_KEYS = ("display", "aid", "pan_digits", "account_types")
@@ -155,16 +159,120 @@ def load_terminal_pools(path: Path = _DATA_POOLS_PATH) -> dict:
                 f"Known: {sorted(known)}.",
                 recover=f"remove '{method}' or add a matching scheme/wallet entry",
             )
-        if not isinstance(weight, int) or weight <= 0:
+        if not isinstance(weight, int) or weight < 0:
             raise _err(
-                f"weight for '{method}' is not a positive integer (got {weight!r}).",
+                f"weight for '{method}' is not a non-negative integer (got {weight!r}).",
                 path=path,
                 key_path=f"{_ROOT_KEY}.receipt_method_weights.{method}",
-                expected="a positive integer, e.g. 'EFTPOS: 30'.",
-                recover=f"set a positive integer weight for '{method}'",
+                expected="a non-negative integer, e.g. 'EFTPOS: 30'. Use 0 to disable a "
+                "method explicitly rather than deleting its key.",
+                recover=f"set a non-negative integer weight for '{method}'",
+            )
+
+    if not any(pools["receipt_method_weights"].values()):
+        raise _err(
+            "every receipt_method_weights entry is zero, so no method can be picked.",
+            path=path,
+            key_path=f"{_ROOT_KEY}.receipt_method_weights",
+            expected="at least one positive weight.",
+            recover="give at least one method a positive weight",
+        )
+
+    for prefix, scheme_name in pools["bank_description_methods"].items():
+        if scheme_name not in pools["schemes"]:
+            raise _err(
+                f"bank_description_methods['{prefix}'] names scheme '{scheme_name}', "
+                "which is not configured.",
+                path=path,
+                key_path=f"{_ROOT_KEY}.bank_description_methods.{prefix}",
+                expected=f"a key of 'schemes': {sorted(pools['schemes'])}.",
+                recover=f"point '{prefix}' at a configured scheme",
+            )
+
+    for name, weight in pools["wallet_presentation_weights"].items():
+        if name != "none" and name not in pools["wallets"]:
+            raise _err(
+                f"wallet_presentation_weights['{name}'] is not a configured wallet.",
+                path=path,
+                key_path=f"{_ROOT_KEY}.wallet_presentation_weights.{name}",
+                expected=f"'none' or a key of 'wallets': {sorted(pools['wallets'])}.",
+                recover=f"remove '{name}' or add it to {_ROOT_KEY}.wallets",
+            )
+        if not isinstance(weight, int) or weight < 0:
+            raise _err(
+                f"wallet presentation weight for '{name}' is not a non-negative integer (got {weight!r}).",
+                path=path,
+                key_path=f"{_ROOT_KEY}.wallet_presentation_weights.{name}",
+                expected="a non-negative integer, e.g. 'none: 90'.",
+                recover=f"set a non-negative integer weight for '{name}'",
             )
 
     return pools
+
+
+def method_from_bank_description(description: str, cfg: dict) -> str:
+    """Resolve a bank-statement description to the scheme the receipt must print.
+
+    Longest matching prefix wins, so 'MASTERCARD DEBIT' beats 'MASTERCARD'.
+
+    Args:
+        description: The linked row's bank_description.
+        cfg: The validated payment_terminal mapping.
+
+    Returns:
+        A key of cfg['schemes'].
+
+    Raises:
+        ValueError: no configured prefix matches the description.
+    """
+    mapping = cfg["bank_description_methods"]
+    for prefix in sorted(mapping, key=len, reverse=True):
+        if description.startswith(prefix):
+            return mapping[prefix]
+
+    raise _err(
+        f"bank description '{description}' matches no configured prefix.",
+        path=_DATA_POOLS_PATH,
+        key_path=f"{_ROOT_KEY}.bank_description_methods",
+        expected=f"a description starting with one of: {sorted(mapping)}.",
+        recover="add a prefix mapping for this description shape",
+    )
+
+
+@lru_cache(maxsize=None)
+def load_link_index(path: Path = _LINKS_PATH) -> dict[str, str]:
+    """Map each linked receipt's image stem to its bank_description.
+
+    Invoice links are skipped: invoices render no payment block. Where a stem
+    carries several links the first is used; the seed script emits one per
+    receipt.
+
+    Args:
+        path: Path to transaction_links.yml.
+
+    Returns:
+        {"CASE001_receipt_fuel": "VISA DEBIT PURCHASE ...", ...}
+
+    Raises:
+        FileNotFoundError: `path` does not exist.
+    """
+    if not path.exists():
+        raise FileNotFoundError(
+            "transaction links file not found.\n"
+            f"  What:     {path} does not exist.\n"
+            f"  Where:    {path}\n"
+            "  Expected: the receipt/invoice -> bank statement link ground truth.\n"
+            f"  Recover:  restore {path} or run scripts/seed_transaction_links.py."
+        )
+
+    data = yaml.safe_load(path.read_text()) or {}
+    index: dict[str, str] = {}
+    for image_name, links in data.items():
+        stem = str(image_name).removesuffix(".png")
+        if "_receipt" not in stem or not links:
+            continue
+        index[stem] = links[0]["bank_description"]
+    return index
 
 
 @dataclass(frozen=True)
