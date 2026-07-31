@@ -356,6 +356,7 @@ def derive_payment(
     time_str: str,
     *,
     pools: dict | None = None,
+    bank_description: str | None = None,
 ) -> PaymentDetails:
     """Derive deterministic terminal-slip values for one receipt.
 
@@ -370,6 +371,11 @@ def derive_payment(
         total: TOTAL_AMOUNT as a decimal string, e.g. "137.73".
         time_str: 24-hour HH:MM already printed by the receipt_meta header.
         pools: Validated payment_terminal mapping; loaded from YAML if omitted.
+        bank_description: The linked bank row's description. When given, the
+            scheme is taken from it (the bank statement is the source of truth
+            for a linked receipt) and wallet_presentation_weights decides
+            whether the payment is presented as a phone wallet over that same
+            scheme. When None, the weighted pool picks the method.
 
     Returns:
         The derived PaymentDetails.
@@ -377,8 +383,17 @@ def derive_payment(
     cfg = pools if pools is not None else load_terminal_pools()
     digest = hashlib.sha256(f"{case_id}:pos:{invoice_date}".encode()).hexdigest()
 
-    method_pool = _weighted_pool(cfg["receipt_method_weights"])
-    method = method_pool[int(digest[10:14], 16) % len(method_pool)]
+    if bank_description is None:
+        method_pool = _weighted_pool(cfg["receipt_method_weights"])
+        method = method_pool[int(digest[10:14], 16) % len(method_pool)]
+        forced_scheme = None
+    else:
+        # A linked receipt's scheme is fixed by its bank row; the same hash slice
+        # that would have picked a method now picks the wallet presentation.
+        forced_scheme = method_from_bank_description(bank_description, cfg)
+        presentation_pool = _weighted_pool(cfg["wallet_presentation_weights"])
+        presentation = presentation_pool[int(digest[10:14], 16) % len(presentation_pool)]
+        method = forced_scheme if presentation == "none" else presentation
 
     acquirers = cfg["acquirers"]
     acquirer = acquirers[int(digest[14:16], 16) % len(acquirers)]
@@ -410,9 +425,14 @@ def derive_payment(
 
     wallets = cfg["wallets"]
     is_wallet = method in wallets
-    scheme_names = sorted(cfg["schemes"])
-    # A wallet transaction still runs over a card scheme; pick one by hash.
-    scheme_name = scheme_names[int(digest[16:18], 16) % len(scheme_names)] if is_wallet else method
+    if forced_scheme is not None:
+        scheme_name = forced_scheme
+    elif is_wallet:
+        # A wallet transaction still runs over a card scheme; pick one by hash.
+        scheme_names = sorted(cfg["schemes"])
+        scheme_name = scheme_names[int(digest[16:18], 16) % len(scheme_names)]
+    else:
+        scheme_name = method
     scheme = cfg["schemes"][scheme_name]
     account_types = scheme["account_types"]
 
