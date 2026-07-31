@@ -131,6 +131,62 @@ service_catalog:
 
 payment_methods: [EFTPOS, Visa, Mastercard, Cash, AMEX, PayPal, "Google Pay", "Apple Pay", "Bank Transfer", BPAY]
 
+# EFTPOS terminal-slip constants for the receipt payment block. Every key is
+# required; generators/payment_block.py fails fast on any omission.
+payment_terminal:
+  # Weighted method pool for receipts. POS-plausible only — deliberately
+  # excludes BPAY / PayPal / Bank Transfer, which never print a terminal slip.
+  receipt_method_weights:
+    EFTPOS: 30
+    Visa: 25
+    Mastercard: 20
+    AMEX: 5
+    Cash: 12
+    Apple Pay: 5
+    Google Pay: 3
+  acquirers:
+    - Tyro Payments EFTPOS
+    - Westpac EFTPOS
+    - CBA Smart EFTPOS
+    - ANZ Worldline EFTPOS
+    - Smartpay EFTPOS
+    - NAB EFTPOS
+  schemes:
+    EFTPOS:
+      display: eftpos
+      aid: A0000003841001
+      pan_digits: 16
+      account_types: [SAV, CHQ]
+    Visa:
+      display: VISA CREDIT
+      aid: A0000000031010
+      pan_digits: 16
+      account_types: [CR]
+    Mastercard:
+      display: MASTERCARD
+      aid: A0000000041010
+      pan_digits: 16
+      account_types: [CR]
+    AMEX:
+      display: AMERICAN EXPRESS
+      aid: A00000002501
+      pan_digits: 15
+      account_types: [CR]
+  wallets:
+    Apple Pay: APPLE PAY
+    Google Pay: GOOGLE PAY
+  entry_modes:
+    card: (c)
+    wallet: (t)
+  contactless_label: CONTACTLESS
+  customer_copy_text: CUSTOMER COPY
+  approved_text: APPROVED
+  response_code: '00'
+  retain_text: Retain copy for your records
+  cash:
+    tendered_label: CASH TENDERED
+    change_label: CHANGE
+
 banks:
   - {code: cba, name: Commonwealth Bank, bsb_prefix: "06", header_color: "#FFD700", header_bg: "#000000"}
   - {code: westpac, name: Westpac, bsb_prefix: "03", header_color: "#FFFFFF", header_bg: "#D5002B"}
