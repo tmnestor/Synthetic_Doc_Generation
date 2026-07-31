@@ -23,7 +23,7 @@ from generators.common import (
 )
 from generators.exporters.geometry import BoxRecorder, rescale_vertical
 from generators.layout_budgets import field_budget
-from generators.payment_block import derive_payment, render_payment_block
+from generators.payment_block import derive_payment, load_link_index, render_payment_block
 
 _LAYOUT_PATH = "config/layouts/receipts.yml"
 
@@ -329,8 +329,14 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             y += line_h
 
         elif sec_type == "payment":
+            # A linked receipt's scheme comes from its bank row; `.get` leaves an
+            # unlinked receipt on the weighted pool.
             details = derive_payment(
-                case_id, inv_date, fields.get("TOTAL_AMOUNT", "0"), pos_details["time"]
+                case_id,
+                inv_date,
+                fields.get("TOTAL_AMOUNT", "0"),
+                pos_details["time"],
+                bank_description=load_link_index().get(f"{case_id}_{layout_id}"),
             )
             y = render_payment_block(
                 draw,
