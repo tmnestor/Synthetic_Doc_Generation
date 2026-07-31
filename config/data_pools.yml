@@ -141,7 +141,7 @@ payment_terminal:
     Visa: 25
     Mastercard: 20
     AMEX: 5
-    Cash: 12
+    Cash: 0            # every receipt in this corpus is linked to a bank transaction
     Apple Pay: 5
     Google Pay: 3
   acquirers:
@@ -172,6 +172,28 @@ payment_terminal:
       aid: A00000002501
       pan_digits: 15
       account_types: [CR]
+    Visa Debit:
+      display: VISA DEBIT
+      aid: A0000000031010
+      pan_digits: 16
+      account_types: [CHQ, SAV]
+    Mastercard Debit:
+      display: MASTERCARD DEBIT
+      aid: A0000000041010
+      pan_digits: 16
+      account_types: [CHQ, SAV]
+  # A linked receipt's scheme is fixed by its bank row, not by the weighted pool.
+  # Longest matching prefix wins. `validate` fails if a linked description matches none.
+  bank_description_methods:
+    MASTERCARD DEBIT: Mastercard Debit
+    VISA DEBIT: Visa Debit
+    EFTPOS: EFTPOS
+  # A linked receipt's scheme is fixed; this decides how often that payment is
+  # presented as a phone wallet over the same scheme. 'none' means plain card.
+  wallet_presentation_weights:
+    none: 90
+    Apple Pay: 6
+    Google Pay: 4
   wallets:
     Apple Pay: APPLE PAY
     Google Pay: GOOGLE PAY
