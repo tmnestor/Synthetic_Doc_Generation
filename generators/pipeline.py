@@ -252,5 +252,30 @@ def generate(
         rprint(f"[green]Geometry written: {geometry_path} ({len(geometry_records)} documents)[/green]")
 
 
+@app.command("eval-set")
+def eval_set(
+    out: Path = typer.Option(..., "--out", help="Directory to write the evaluation set into"),
+    config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
+    relabel: bool = typer.Option(
+        True, "--relabel/--no-relabel", help="Run LMM_POC's relabel script after export"
+    ),
+    force: bool = typer.Option(False, "--force", help="Replace a non-empty output directory"),
+) -> None:
+    """Export a flat evaluation set for the LMM_POC extraction pipeline."""
+    from generators.eval_set import export_eval_set
+
+    try:
+        summary = export_eval_set(config, out, relabel=relabel, force=force)
+    except (ValueError, FileNotFoundError) as exc:
+        rprint(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from None
+
+    rprint(f"[green]Exported {summary['images']} images to {summary['out_dir']}.[/green]")
+    if summary["relabelled"]:
+        rprint(f"[green]Relabelled and projected. CSV: {summary['csv']}[/green]")
+    else:
+        rprint("[yellow]Raw set only (--no-relabel): no ground_truth.jsonl, no CSV.[/yellow]")
+
+
 if __name__ == "__main__":
     app()
