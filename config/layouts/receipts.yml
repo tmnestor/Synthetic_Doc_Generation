@@ -16,6 +16,8 @@ layouts:
       PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 318, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 70, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -46,6 +48,8 @@ layouts:
       PHONE: {width: 294, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 234, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 52, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 294, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 294, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -76,6 +80,8 @@ layouts:
       PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: merchant_header
@@ -106,6 +112,8 @@ layouts:
       PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: fuel_station_header
@@ -136,6 +144,8 @@ layouts:
       PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: business_header
@@ -166,6 +176,8 @@ layouts:
       PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
+      PAYMENT_ACQUIRER: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
+      PAYMENT_LINE: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
     sections:
       - type: header
         name: restaurant_header
