@@ -250,7 +250,6 @@ sample of rendered receipts against the reference photo of a real Tyro EFTPOS sl
 
 ## Known follow-up
 
-Payment-method consistency with `ground_truth/transaction_links.yml` is unresolved: a receipt
-may render `Cash` while its linked bank-statement row reads `VISA DEBIT PURCHASE …`. Fixing
-it means reconciling the derived method against the linked `bank_description`, and is a
-separate piece of work against the linking ground truth.
+Resolved by `docs/receipt_bank_payment_consistency_design.md`: a linked receipt's scheme is
+now derived from its bank row, and `validate` fails on any bank description the mapping cannot
+resolve.
