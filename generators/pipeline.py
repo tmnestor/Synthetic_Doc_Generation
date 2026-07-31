@@ -33,6 +33,11 @@ from generators.loader import (
     load_layout_registry,
 )
 from generators.overflow_check import build_overflow_error, check_overflow
+from generators.payment_block import (
+    load_link_index,
+    load_terminal_pools,
+    method_from_bank_description,
+)
 from generators.receipt import render_receipt
 from generators.schema import validate_entry
 from generators.trust_income_schedule import render_trust_income_schedule
@@ -93,6 +98,21 @@ def validate(
         renderer = _RENDERERS.get(doc_type)
         if renderer and layouts:
             all_errors.extend(check_overflow(gt_data, layouts, renderer))
+
+    # Every linked receipt's bank description must resolve to a card scheme, so a
+    # reseed introducing a new description shape fails here rather than silently
+    # rendering a receipt that contradicts its bank statement.
+    terminal_cfg = load_terminal_pools()
+    for stem, description in sorted(load_link_index().items()):
+        try:
+            method_from_bank_description(description, terminal_cfg)
+        except ValueError:
+            all_errors.append(
+                f"{stem}: bank description '{description}' maps to no card scheme. "
+                f"Add a prefix to payment_terminal.bank_description_methods in "
+                f"config/data_pools.yml. Known prefixes: "
+                f"{sorted(terminal_cfg['bank_description_methods'])}."
+            )
 
     if all_errors:
         rprint(f"[red]Validation failed with {len(all_errors)} error(s):[/red]")
