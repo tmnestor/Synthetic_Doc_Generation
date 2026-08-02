@@ -314,7 +314,12 @@ def _generate_invoice_entries(
                 "BUSINESS_ABN": provider["abn"],
                 "BUSINESS_ADDRESS": provider["address"],
                 "INVOICE_DATE": invoice_date,
-                "IS_GST_INCLUDED": "false",
+                # Records whether GST is included in TOTAL_AMOUNT — the Tax Office
+                # compliance question. TOTAL_AMOUNT is total_incl_gst, so this is
+                # true even though the LINE ITEM prices are GST-exclusive. Do not
+                # set it from how the prices are presented: that is a different
+                # question, and docile.py keys TOTAL_AMOUNT_GROSS/NET off this flag.
+                "IS_GST_INCLUDED": "true",
                 "GST_AMOUNT": _fmt_decimal(gst_amount),
                 "TOTAL_AMOUNT": _fmt_decimal(total_incl_gst),
                 "LINE_ITEM_DESCRIPTIONS": "|".join(item_descs),

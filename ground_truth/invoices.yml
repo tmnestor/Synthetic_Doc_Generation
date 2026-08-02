@@ -7,7 +7,7 @@ CASE001:
     BUSINESS_ABN: 57 773 872 148
     BUSINESS_ADDRESS: 307 Ibarra Way, St Kilda VIC 3182
     INVOICE_DATE: 07/07/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '802.88'
     TOTAL_AMOUNT: '8831.70'
     LINE_ITEM_DESCRIPTIONS: Tax return preparation|Trademark registration|Business
@@ -26,7 +26,7 @@ CASE002:
     BUSINESS_ABN: 29 951 343 320
     BUSINESS_ADDRESS: 62 Mckenzie Way, Chatswood NSW 2067
     INVOICE_DATE: 29/08/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '301.18'
     TOTAL_AMOUNT: '3312.98'
     LINE_ITEM_DESCRIPTIONS: Due diligence review|Contract review and drafting
@@ -44,7 +44,7 @@ CASE003:
     BUSINESS_ABN: 86 037 917 693
     BUSINESS_ADDRESS: 256 King Cres, Subiaco WA 6008
     INVOICE_DATE: 05/03/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '2240.12'
     TOTAL_AMOUNT: '24641.36'
     LINE_ITEM_DESCRIPTIONS: Cybersecurity assessment
@@ -62,7 +62,7 @@ CASE004:
     BUSINESS_ABN: 48 676 320 163
     BUSINESS_ADDRESS: 179 Leblanc Dr, Subiaco WA 6008
     INVOICE_DATE: 24/02/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '214.17'
     TOTAL_AMOUNT: '2355.90'
     LINE_ITEM_DESCRIPTIONS: Brand identity design|Software development services
@@ -80,7 +80,7 @@ CASE005:
     BUSINESS_ABN: 61 287 083 172
     BUSINESS_ADDRESS: 19 Owen Pde, St Kilda VIC 3182
     INVOICE_DATE: 12/11/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '60.61'
     TOTAL_AMOUNT: '666.71'
     LINE_ITEM_DESCRIPTIONS: Marketing campaign management
@@ -98,7 +98,7 @@ CASE006:
     BUSINESS_ABN: 82 788 957 986
     BUSINESS_ADDRESS: 142 Lewis Dr, New Farm QLD 4005
     INVOICE_DATE: 25/09/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '389.86'
     TOTAL_AMOUNT: '4288.50'
     LINE_ITEM_DESCRIPTIONS: Payroll processing services|Due diligence review|Annual
@@ -117,7 +117,7 @@ CASE007:
     BUSINESS_ABN: 14 872 774 348
     BUSINESS_ADDRESS: 312 Haley Cres, Leederville WA 6007
     INVOICE_DATE: 26/08/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1039.82'
     TOTAL_AMOUNT: '11438.02'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation|Financial planning services|Brand
@@ -136,7 +136,7 @@ CASE008:
     BUSINESS_ABN: 57 734 714 345
     BUSINESS_ADDRESS: 268 Garrett Cl, Leederville WA 6007
     INVOICE_DATE: 13/10/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '415.39'
     TOTAL_AMOUNT: '4569.29'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation
@@ -154,7 +154,7 @@ CASE009:
     BUSINESS_ABN: 44 581 223 623
     BUSINESS_ADDRESS: 387 Benton Way, Leederville WA 6007
     INVOICE_DATE: 18/05/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '10.76'
     TOTAL_AMOUNT: '118.36'
     LINE_ITEM_DESCRIPTIONS: IT support and maintenance
@@ -172,7 +172,7 @@ CASE010:
     BUSINESS_ABN: 98 166 587 603
     BUSINESS_ADDRESS: 188 Rubio Rd, Chatswood NSW 2067
     INVOICE_DATE: 22/07/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1696.00'
     TOTAL_AMOUNT: '18656.01'
     LINE_ITEM_DESCRIPTIONS: Brand identity design|Trademark registration
@@ -190,7 +190,7 @@ CASE011:
     BUSINESS_ABN: 56 669 096 705
     BUSINESS_ADDRESS: 369 Martin Way, St Kilda VIC 3182
     INVOICE_DATE: 04/09/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '2470.55'
     TOTAL_AMOUNT: '27176.07'
     LINE_ITEM_DESCRIPTIONS: Trademark registration|Cloud infrastructure migration
@@ -208,7 +208,7 @@ CASE012:
     BUSINESS_ABN: 51 466 889 373
     BUSINESS_ADDRESS: 69 Navarro Cl, Norwood SA 5067
     INVOICE_DATE: 15/08/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '418.31'
     TOTAL_AMOUNT: '4601.37'
     LINE_ITEM_DESCRIPTIONS: Brand identity design|Payroll processing services
@@ -226,7 +226,7 @@ CASE013:
     BUSINESS_ABN: 65 467 065 627
     BUSINESS_ADDRESS: 290 Jimenez St, Toowoomba QLD 4350
     INVOICE_DATE: 17/06/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '805.67'
     TOTAL_AMOUNT: '8862.33'
     LINE_ITEM_DESCRIPTIONS: Professional consultation services|Accounting and bookkeeping|Cloud
@@ -245,7 +245,7 @@ CASE014:
     BUSINESS_ABN: 11 298 069 901
     BUSINESS_ADDRESS: 279 Best Tce, Fremantle WA 6160
     INVOICE_DATE: 05/09/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '122.96'
     TOTAL_AMOUNT: '1352.56'
     LINE_ITEM_DESCRIPTIONS: Contract review and drafting
@@ -263,7 +263,7 @@ CASE015:
     BUSINESS_ABN: 76 627 204 653
     BUSINESS_ADDRESS: 280 Brown Ln, Battery Point TAS 7004
     INVOICE_DATE: 18/01/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3430.17'
     TOTAL_AMOUNT: '37731.83'
     LINE_ITEM_DESCRIPTIONS: Professional consultation services|Brand identity design|Cloud
@@ -282,7 +282,7 @@ CASE016:
     BUSINESS_ABN: 77 755 646 417
     BUSINESS_ADDRESS: 86 Harris Ct, Norwood SA 5067
     INVOICE_DATE: 20/12/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '427.71'
     TOTAL_AMOUNT: '4704.78'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation|Payroll processing services|Corporate
@@ -301,7 +301,7 @@ CASE017:
     BUSINESS_ABN: 89 080 531 003
     BUSINESS_ADDRESS: 20 Rivera Cl, South Yarra VIC 3141
     INVOICE_DATE: 04/08/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3244.84'
     TOTAL_AMOUNT: '35693.23'
     LINE_ITEM_DESCRIPTIONS: Corporate training workshop|Cloud infrastructure migration
@@ -319,7 +319,7 @@ CASE018:
     BUSINESS_ABN: 13 309 232 719
     BUSINESS_ADDRESS: 340 Edwards Cl, Paddington QLD 4064
     INVOICE_DATE: 08/08/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '17.51'
     TOTAL_AMOUNT: '192.58'
     LINE_ITEM_DESCRIPTIONS: IT support and maintenance
@@ -337,7 +337,7 @@ CASE019:
     BUSINESS_ABN: 98 374 529 912
     BUSINESS_ADDRESS: 271 Duffy Ln, Hawthorn East VIC 3123
     INVOICE_DATE: 24/09/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '106.62'
     TOTAL_AMOUNT: '1172.82'
     LINE_ITEM_DESCRIPTIONS: Professional consultation services
@@ -355,7 +355,7 @@ CASE020:
     BUSINESS_ABN: 54 419 049 663
     BUSINESS_ADDRESS: 84 Allen Way, Fortitude Valley QLD 4006
     INVOICE_DATE: 25/12/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '70.38'
     TOTAL_AMOUNT: '774.22'
     LINE_ITEM_DESCRIPTIONS: Marketing campaign management
@@ -373,7 +373,7 @@ CASE021:
     BUSINESS_ABN: 48 193 149 190
     BUSINESS_ADDRESS: 190 Harris Rd, Parramatta NSW 2150
     INVOICE_DATE: 05/06/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1263.31'
     TOTAL_AMOUNT: '13896.41'
     LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping|Annual report preparation|Due
@@ -392,7 +392,7 @@ CASE022:
     BUSINESS_ABN: 98 586 518 506
     BUSINESS_ADDRESS: 394 Watts Blvd, St Kilda VIC 3182
     INVOICE_DATE: 09/02/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '313.89'
     TOTAL_AMOUNT: '3452.79'
     LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Annual report preparation|Legal
@@ -411,7 +411,7 @@ CASE023:
     BUSINESS_ABN: 52 716 572 628
     BUSINESS_ADDRESS: 396 Chung Tce, St Kilda VIC 3182
     INVOICE_DATE: 25/09/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '393.59'
     TOTAL_AMOUNT: '4329.44'
     LINE_ITEM_DESCRIPTIONS: Legal document preparation|Professional consultation services|Payroll
@@ -430,7 +430,7 @@ CASE024:
     BUSINESS_ABN: 93 498 776 945
     BUSINESS_ADDRESS: 342 Sherman Ct, Glenelg SA 5045
     INVOICE_DATE: 23/11/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '478.94'
     TOTAL_AMOUNT: '5268.32'
     LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Trademark registration
@@ -448,7 +448,7 @@ CASE025:
     BUSINESS_ABN: 91 314 737 996
     BUSINESS_ADDRESS: 149 Navarro Pl, Unley SA 5061
     INVOICE_DATE: 15/02/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '333.60'
     TOTAL_AMOUNT: '3669.57'
     LINE_ITEM_DESCRIPTIONS: IT support and maintenance|Contract review and drafting
@@ -466,7 +466,7 @@ CASE026:
     BUSINESS_ABN: 27 507 527 354
     BUSINESS_ADDRESS: 337 Brooks Dr, Glenelg SA 5045
     INVOICE_DATE: 08/12/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '15.94'
     TOTAL_AMOUNT: '175.36'
     LINE_ITEM_DESCRIPTIONS: Payroll processing services
@@ -484,7 +484,7 @@ CASE027:
     BUSINESS_ABN: 43 549 480 831
     BUSINESS_ADDRESS: 18 Kerr Ct, Paddington QLD 4064
     INVOICE_DATE: 19/05/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1175.88'
     TOTAL_AMOUNT: '12934.69'
     LINE_ITEM_DESCRIPTIONS: Due diligence review|Legal document preparation|Annual
@@ -503,7 +503,7 @@ CASE028:
     BUSINESS_ABN: 36 367 837 770
     BUSINESS_ADDRESS: 177 Mercado Ct, Norwood SA 5067
     INVOICE_DATE: 01/01/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '192.70'
     TOTAL_AMOUNT: '2119.72'
     LINE_ITEM_DESCRIPTIONS: Trademark registration
@@ -521,7 +521,7 @@ CASE029:
     BUSINESS_ABN: 97 143 634 957
     BUSINESS_ADDRESS: 257 Hood Cres, Parramatta NSW 2150
     INVOICE_DATE: 08/05/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '2015.79'
     TOTAL_AMOUNT: '22173.73'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation|Brand identity design|Due diligence
@@ -540,7 +540,7 @@ CASE030:
     BUSINESS_ABN: 57 885 685 574
     BUSINESS_ADDRESS: 73 Ballard Cl, Subiaco WA 6008
     INVOICE_DATE: 28/02/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '66.04'
     TOTAL_AMOUNT: '726.40'
     LINE_ITEM_DESCRIPTIONS: Payroll processing services
@@ -558,7 +558,7 @@ CASE031:
     BUSINESS_ABN: 17 443 135 182
     BUSINESS_ADDRESS: 318 Watson Dr, Richmond VIC 3121
     INVOICE_DATE: 09/05/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '83.72'
     TOTAL_AMOUNT: '920.92'
     LINE_ITEM_DESCRIPTIONS: Professional consultation services
@@ -576,7 +576,7 @@ CASE032:
     BUSINESS_ABN: 10 337 498 941
     BUSINESS_ADDRESS: 244 Bishop Ln, Alexandria NSW 2015
     INVOICE_DATE: 18/01/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '375.15'
     TOTAL_AMOUNT: '4126.65'
     LINE_ITEM_DESCRIPTIONS: Risk assessment review
@@ -594,7 +594,7 @@ CASE033:
     BUSINESS_ABN: 23 343 524 082
     BUSINESS_ADDRESS: 123 Wyatt Tce, Fortitude Valley QLD 4006
     INVOICE_DATE: 08/02/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '848.33'
     TOTAL_AMOUNT: '9331.61'
     LINE_ITEM_DESCRIPTIONS: Software development services|Website design and development|Marketing
@@ -613,7 +613,7 @@ CASE034:
     BUSINESS_ABN: 90 400 842 710
     BUSINESS_ADDRESS: 19 Fisher Dr, Leederville WA 6007
     INVOICE_DATE: 07/09/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '201.92'
     TOTAL_AMOUNT: '2221.08'
     LINE_ITEM_DESCRIPTIONS: Trademark registration
@@ -631,7 +631,7 @@ CASE035:
     BUSINESS_ABN: 48 947 775 204
     BUSINESS_ADDRESS: 101 Lozano Cres, St Kilda VIC 3182
     INVOICE_DATE: 14/06/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '439.87'
     TOTAL_AMOUNT: '4838.53'
     LINE_ITEM_DESCRIPTIONS: Trademark registration|Business strategy consulting
@@ -649,7 +649,7 @@ CASE036:
     BUSINESS_ABN: 16 711 671 902
     BUSINESS_ADDRESS: 359 Jackson Cres, Cronulla NSW 2230
     INVOICE_DATE: 02/03/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3859.31'
     TOTAL_AMOUNT: '42452.45'
     LINE_ITEM_DESCRIPTIONS: Corporate training workshop|Cloud infrastructure migration|Risk
@@ -668,7 +668,7 @@ CASE037:
     BUSINESS_ABN: 17 294 131 869
     BUSINESS_ADDRESS: 253 King Rd, Subiaco WA 6008
     INVOICE_DATE: 26/01/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '4260.61'
     TOTAL_AMOUNT: '46866.66'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation|Cloud infrastructure migration|Marketing
@@ -687,7 +687,7 @@ CASE038:
     BUSINESS_ABN: 56 993 867 749
     BUSINESS_ADDRESS: 286 Roberts Gr, Fortitude Valley QLD 4006
     INVOICE_DATE: 15/11/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1262.36'
     TOTAL_AMOUNT: '13885.98'
     LINE_ITEM_DESCRIPTIONS: Financial planning services|Professional consultation
@@ -706,7 +706,7 @@ CASE039:
     BUSINESS_ABN: 33 649 909 133
     BUSINESS_ADDRESS: 233 Garcia Ct, New Farm QLD 4005
     INVOICE_DATE: 15/02/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '19.22'
     TOTAL_AMOUNT: '211.42'
     LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping
@@ -724,7 +724,7 @@ CASE040:
     BUSINESS_ABN: 44 412 328 120
     BUSINESS_ADDRESS: 76 Williams Dr, Alexandria NSW 2015
     INVOICE_DATE: 26/04/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '239.95'
     TOTAL_AMOUNT: '2639.42'
     LINE_ITEM_DESCRIPTIONS: Professional consultation services|Financial planning
@@ -743,7 +743,7 @@ CASE041:
     BUSINESS_ABN: 43 679 740 344
     BUSINESS_ADDRESS: 123 Smith St, Parramatta NSW 2150
     INVOICE_DATE: 30/11/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3457.03'
     TOTAL_AMOUNT: '38027.36'
     LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Brand identity design|Risk
@@ -762,7 +762,7 @@ CASE042:
     BUSINESS_ABN: 64 713 493 618
     BUSINESS_ADDRESS: 305 Baker Pde, Leederville WA 6007
     INVOICE_DATE: 07/11/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '109.32'
     TOTAL_AMOUNT: '1202.56'
     LINE_ITEM_DESCRIPTIONS: Software development services
@@ -780,7 +780,7 @@ CASE043:
     BUSINESS_ABN: 21 324 210 249
     BUSINESS_ADDRESS: 361 Kemp Tce, Hobart TAS 7000
     INVOICE_DATE: 01/05/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '163.70'
     TOTAL_AMOUNT: '1800.74'
     LINE_ITEM_DESCRIPTIONS: Financial planning services
@@ -798,7 +798,7 @@ CASE044:
     BUSINESS_ABN: 89 947 174 648
     BUSINESS_ADDRESS: 255 Howard Cl, Prospect SA 5082
     INVOICE_DATE: 14/06/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1751.37'
     TOTAL_AMOUNT: '19265.09'
     LINE_ITEM_DESCRIPTIONS: Tax return preparation|Contract review and drafting|Business
@@ -817,7 +817,7 @@ CASE045:
     BUSINESS_ABN: 71 877 190 659
     BUSINESS_ADDRESS: 160 Mcmillan St, Hobart TAS 7000
     INVOICE_DATE: 05/03/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '465.79'
     TOTAL_AMOUNT: '5123.68'
     LINE_ITEM_DESCRIPTIONS: Annual report preparation|Accounting and bookkeeping
@@ -835,7 +835,7 @@ CASE046:
     BUSINESS_ABN: 43 401 399 049
     BUSINESS_ADDRESS: 188 Oliver Ct, Manuka ACT 2603
     INVOICE_DATE: 19/03/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1813.10'
     TOTAL_AMOUNT: '19944.06'
     LINE_ITEM_DESCRIPTIONS: Software development services|Corporate training workshop|Due
@@ -854,7 +854,7 @@ CASE047:
     BUSINESS_ABN: 76 027 874 296
     BUSINESS_ADDRESS: 315 Thomas Ave, Alexandria NSW 2015
     INVOICE_DATE: 02/09/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '249.78'
     TOTAL_AMOUNT: '2747.62'
     LINE_ITEM_DESCRIPTIONS: Accounting and bookkeeping|Audit services|IT support and
@@ -873,7 +873,7 @@ CASE048:
     BUSINESS_ABN: 74 717 565 512
     BUSINESS_ADDRESS: 156 Smith Pde, South Yarra VIC 3141
     INVOICE_DATE: 02/08/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3883.46'
     TOTAL_AMOUNT: '42718.06'
     LINE_ITEM_DESCRIPTIONS: Cloud infrastructure migration|Annual report preparation|Audit
@@ -892,7 +892,7 @@ CASE049:
     BUSINESS_ABN: 17 567 468 071
     BUSINESS_ADDRESS: 4 Hanson Ct, Toowoomba QLD 4350
     INVOICE_DATE: 03/06/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '3105.86'
     TOTAL_AMOUNT: '34164.44'
     LINE_ITEM_DESCRIPTIONS: Cloud infrastructure migration|Trademark registration
@@ -910,7 +910,7 @@ CASE050:
     BUSINESS_ABN: 26 545 168 087
     BUSINESS_ADDRESS: 159 Bowman Ln, Richmond VIC 3121
     INVOICE_DATE: 04/09/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '2282.50'
     TOTAL_AMOUNT: '25107.52'
     LINE_ITEM_DESCRIPTIONS: Cybersecurity assessment|Legal document preparation|Employee
@@ -929,7 +929,7 @@ CASE051:
     BUSINESS_ABN: 37 603 859 770
     BUSINESS_ADDRESS: 136 Mills Cres, Fortitude Valley QLD 4006
     INVOICE_DATE: 20/06/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1566.24'
     TOTAL_AMOUNT: '17228.62'
     LINE_ITEM_DESCRIPTIONS: Business strategy consulting|Website design and development|Annual
@@ -948,7 +948,7 @@ CASE052:
     BUSINESS_ABN: 95 348 247 710
     BUSINESS_ADDRESS: 48 White Pde, Fortitude Valley QLD 4006
     INVOICE_DATE: 09/02/2023
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '1239.88'
     TOTAL_AMOUNT: '13638.63'
     LINE_ITEM_DESCRIPTIONS: Trademark registration|Tax return preparation
@@ -966,7 +966,7 @@ CASE053:
     BUSINESS_ABN: 34 932 480 861
     BUSINESS_ADDRESS: 269 Carter Tce, Leederville WA 6007
     INVOICE_DATE: 08/03/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '624.15'
     TOTAL_AMOUNT: '6865.67'
     LINE_ITEM_DESCRIPTIONS: Trademark registration|IT support and maintenance
@@ -984,7 +984,7 @@ CASE054:
     BUSINESS_ABN: 87 317 127 484
     BUSINESS_ADDRESS: 235 Owens Gr, Cronulla NSW 2230
     INVOICE_DATE: 15/03/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '358.46'
     TOTAL_AMOUNT: '3943.01'
     LINE_ITEM_DESCRIPTIONS: Website design and development|Financial planning services|Tax
@@ -1003,7 +1003,7 @@ CASE055:
     BUSINESS_ABN: 45 677 378 263
     BUSINESS_ADDRESS: 203 Barrett Dr, Manuka ACT 2603
     INVOICE_DATE: 01/10/2024
-    IS_GST_INCLUDED: 'false'
+    IS_GST_INCLUDED: 'true'
     GST_AMOUNT: '902.45'
     TOTAL_AMOUNT: '9926.94'
     LINE_ITEM_DESCRIPTIONS: Tax return preparation|Accounting and bookkeeping|Corporate
