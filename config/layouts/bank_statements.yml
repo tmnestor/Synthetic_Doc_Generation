@@ -96,6 +96,22 @@ _nab_account_box_children: &nab_account_box_children
       - - {type: pair, label: "Account Number", value: "98-765-4321", role: sub_description,
             color: "#666666"}
 
+# ANZ's transaction columns (see bank_statement.py:808-980, render_anz). Shared
+# by both the transaction table and the totals table below it — the totals
+# row only ever populates description/debit/credit, so reusing this list
+# costs nothing (a synthetic row with no `date`/`balance` key just draws
+# neither cell). The balance column carries no `currency_suffix`: unlike
+# NAB's fixed "Cr", ANZ's DR/CR suffix depends on the balance's own sign, so
+# `params.balance_suffix` on the transactions table below has the provider
+# pre-format the whole "$137.73 CR" string; the column just draws it as text.
+_anz_txn_columns: &anz_txn_columns
+  - {key: date, label: Date, align: left, x: 0}
+  - {key: description, label: Transaction Description, align: left, x: 200,
+     budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS}
+  - {key: debit, label: Debits, align: right, x_right: -400, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -200, field: TRANSACTION_AMOUNTS_RECEIVED}
+  - {key: balance, label: Balance, align: right, x_right: 0, last_row_field: ACCOUNT_BALANCE}
+
 # Every spacer below corrects a `text` block's own computed `line_height`
 # advance up to the legacy renderer's real, unconditional pixel jump (72,
 # 150, 170, 40, 52 — see bank_statement.py:645-669), which does not scale
@@ -157,6 +173,95 @@ _nab_dense_body: &nab_dense_body
     synthetic_row_placement: after_first_group_header
     params: {brought_forward: true, carried_forward: true}
     columns: *nab_txn_columns
+
+# ANZ draws its logo on a full-width blue bar at the very page top (:849) —
+# outside the margin every other primitive respects — so it is the one layout
+# using `banner`, the DSL's one primitive allowed to paint outside `ctx.region`.
+# The bar's own height and the "ANZ" logo text underneath it never advance the
+# y-cursor (matching legacy, which draws the bar, then hard-jumps to y=140
+# rather than flowing from the bar's own height); the spacer immediately after
+# it makes up that jump explicitly. SUPPLIER_NAME is never drawn as its own
+# line: it equals `logo_text` ("ANZ") for every ANZ ground-truth entry, and
+# legacy's `_draw_supplier_line` suppresses the line whenever that holds, so
+# there is deliberately no SUPPLIER_NAME text block here to match.
+#
+# The transaction table uses `frame: ruled` with `header_rule_top: false` and
+# `header_rule_gap: 14`: legacy ANZ rules only *below* its column headers (one
+# line, not CBA's rule-above-and-below), at a 14px gap CBA's 16px doesn't
+# match. `header_height: 44` is a flat legacy constant (`y += 44`), not
+# derived from either variant's body font size, so both variants set it
+# explicitly rather than relying on the computed default (which is only
+# right for anz_standard's own body size by coincidence). The leading
+# `brought_forward` row uses `brought_forward_label` to reproduce legacy's
+# all-caps "BALANCE BROUGHT FORWARD" (NAB's default label is mixed-case), and
+# `brought_forward_bold: [description]` because legacy draws that row with
+# mixed weight — the label bold, the balance value not — unlike NAB's
+# leading row (entirely regular) or its own trailing "Carried forward" row
+# (entirely bold). `balance_suffix` has the provider pre-format every
+# balance as "$X CR"/"$X DR" by sign, matching `_format_balance` — a fixed
+# `currency_suffix` (NAB's "Cr") cannot express a suffix that depends on the
+# value itself.
+#
+# The totals row is a *second* table, not a trailing row on the first: legacy
+# draws "Totals at end of period" after its own fresh rule, entirely outside
+# the transaction loop, and never touches ACCOUNT_BALANCE — folding it into
+# `bank_transactions`'s own row list would move `last_row_field`'s "last row"
+# off the real closing balance and onto this one, which has no balance of its
+# own. `bank_transaction_totals` (a second provider) returns exactly that one
+# row, and `rule_above` (set on the row, not the table) reproduces the fresh
+# rule + 12px gap between the two tables. Every element of both tables below
+# is unrecorded (no `field:` on the account bar, the account-number line, or
+# either table's `description`/`balance` decoration except what the columns
+# list already declares) because legacy passes no recorder to any of them.
+_anz_standard_body: &anz_standard_body
+  - {type: banner, content: "ANZ", height: 120, color: "#0061B5", text_y: 30, role: header, bold: true}
+  - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
+  - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
+     color: "#666666"}
+  - {type: spacer, height: 5}  # line_height(24)=33 -> legacy's real 38px (y += 38).
+  - {type: text, content: "Transaction Details", role: body, bold: true}
+  - {type: spacer, height: 8}  # line_height(32)=44 -> legacy's real 52px gap before the header.
+  - type: table
+    rows: bank_transactions
+    frame: ruled
+    grouping: none
+    header_height: 44
+    header_rule_top: false
+    header_rule_gap: 14
+    params: {brought_forward: true, brought_forward_label: "BALANCE BROUGHT FORWARD",
+             brought_forward_bold: [description], balance_suffix: {debit: DR, credit: CR}}
+    columns: *anz_txn_columns
+  - type: table
+    rows: bank_transaction_totals
+    frame: plain
+    grouping: none
+    header: false
+    columns: *anz_txn_columns
+
+_anz_modern_body: &anz_modern_body
+  - {type: banner, content: "ANZ", height: 120, color: "#0061B5", text_y: 30, role: header, bold: true}
+  - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
+  - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
+     color: "#666666"}
+  - {type: spacer, height: 8}  # line_height(22)=30 -> legacy's real 38px (y += 38).
+  - {type: text, content: "Transaction Details", role: body, bold: true}
+  - {type: spacer, height: 13}  # line_height(28)=39 -> legacy's real 52px gap before the header.
+  - type: table
+    rows: bank_transactions
+    frame: ruled
+    grouping: none
+    header_height: 44
+    header_rule_top: false
+    header_rule_gap: 14
+    params: {brought_forward: true, brought_forward_label: "BALANCE BROUGHT FORWARD",
+             brought_forward_bold: [description], balance_suffix: {debit: DR, credit: CR}}
+    columns: *anz_txn_columns
+  - type: table
+    rows: bank_transaction_totals
+    frame: plain
+    grouping: none
+    header: false
+    columns: *anz_txn_columns
 
 layouts:
   cba_standard:
@@ -428,6 +533,7 @@ layouts:
     show_totals_row: true
     show_brought_forward: true
     date_format: "DD/MM/YY"
+    body: *anz_standard_body
 
   anz_modern:
     field_budgets:
@@ -455,3 +561,4 @@ layouts:
     show_totals_row: true
     show_brought_forward: true
     date_format: "DD MMM YYYY"
+    body: *anz_modern_body
