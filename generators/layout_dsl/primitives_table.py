@@ -115,6 +115,10 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     frame = block["frame"]
     grouping = block["grouping"]
     fill_color = block.get("fill_color")
+    fill_inset = int(block.get("fill_inset", 0))
+    label_inset_y = block.get("label_inset_y")
+    if label_inset_y is not None:
+        label_inset_y = int(label_inset_y)
     columns = block["columns"]
     dividers = block.get("dividers", [])
     row_height = _resolve_row_height(block, ctx)
@@ -124,6 +128,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
 
     if block.get("header", True):
         header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
+        fill_height = int(block["fill_height"]) if "fill_height" in block else header_height
         y = _draw_header(
             columns,
             ctx,
@@ -131,8 +136,10 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             size=body_size,
             frame=frame,
             header_height=header_height,
+            fill_height=fill_height,
             dividers=dividers,
             fill_color=fill_color,
+            label_inset_y=label_inset_y,
         )
 
     table_body_start = y
@@ -145,7 +152,9 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             if previous_date is not None:
                 y += 10  # Gap between date groups, matching the legacy renderers.
             if frame == "filled":
-                ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + row_height)], fill=fill_color)
+                ctx.draw.rectangle(
+                    [(ctx.region.x, y), (ctx.region.right, y + row_height - fill_inset)], fill=fill_color
+                )
             draw_text_left(
                 ctx.draw, str(row.get("date", "")), ctx.region.x, y, load_font(body_size, bold=True)
             )
@@ -196,8 +205,10 @@ def _draw_header(
     size: int,
     frame: str,
     header_height: int,
+    fill_height: int,
     dividers: list,
     fill_color: str | None,
+    label_inset_y: int | None,
 ) -> int:
     """Draw the column-header row in the table's frame.
 
@@ -209,15 +220,22 @@ def _draw_header(
 
     The `bordered` frame additionally decorates: a bordered rectangle spans
     the header height and `dividers` cut it into columns, matching the legacy
-    Westpac renderer's bordered header. The `filled` frame instead fills that
-    same rectangle with `fill_color` and draws no dividers, matching the
-    legacy NAB renderer's light-blue header bar. Both box frames centre their
-    labels vertically within the header rather than pinning them to its top —
-    the geometry-only equivalence harness cannot see this (no field box is
-    recorded for header labels), and it would otherwise silently regress to
-    bare text. A label may contain "\\n" for a legacy-matching multi-line
+    Westpac renderer's bordered header. The `filled` frame instead fills a
+    rectangle of `fill_height` (defaulting to `header_height`, but settable
+    independently — legacy NAB fills a 44px bar and then advances 50px, a gap
+    `header_height` alone cannot express) with `fill_color` and draws no
+    dividers, matching the legacy NAB renderer's light-blue header bar.
+
+    Both box frames centre their labels vertically within the header rather
+    than pinning them to its top by default — the geometry-only equivalence
+    harness cannot see this (no field box is recorded for header labels), and
+    it would otherwise silently regress to bare text. `label_inset_y`, when
+    given, overrides that computed centring with an exact declared offset
+    from `y`, for a legacy renderer (like NAB, whose labels sit at `y + 10`
+    inside a 44px bar) whose real offset the centring formula does not
+    reproduce. A label may contain "\\n" for a legacy-matching multi-line
     header cell (e.g. Westpac's "Date of" / "Transaction"); each line is
-    centred as one block.
+    positioned relative to that same start, one `line_height` apart.
     """
     font = load_font(size, bold=True)
     if frame == "ruled":
@@ -229,12 +247,14 @@ def _draw_header(
             dx = column_x(divider, ctx)
             ctx.draw.line([(dx, y), (dx, y + header_height)], fill="black")
     elif frame == "filled":
-        ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + header_height)], fill=fill_color)
+        ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + fill_height)], fill=fill_color)
 
     for column in columns:
         x = column_x(column, ctx)
         lines = str(column["label"]).split("\n")
-        if frame in _BOXED_FRAMES:
+        if label_inset_y is not None:
+            start = y + label_inset_y
+        elif frame in _BOXED_FRAMES:
             block_height = line_height(size) * len(lines)
             start = y + max(0, (header_height - block_height) // 2)
         else:
