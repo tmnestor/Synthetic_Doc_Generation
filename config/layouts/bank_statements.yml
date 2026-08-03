@@ -226,8 +226,17 @@ _anz_standard_body: &anz_standard_body
   - {type: banner, from_layout: logo_text, height: 120, color: "#0061B5", text_y: 30,
      role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
-  - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
-     color: "#666666"}
+  # The account holder shares the account-number line: legacy left that half of the row
+  # empty, so this costs no vertical space on a layout where 3 entries already overflow.
+  - type: split
+    children:
+      - - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: sub_description,
+           color: "#666666", field: PAYER_NAME}
+      - - {type: text, content: "Account number    0000-00000", role: sub_description,
+           align: right, color: "#666666"}
+  - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}",
+     role: sub_description, color: "#666666", when: STATEMENT_DATE_RANGE,
+     field: STATEMENT_DATE_RANGE}
   - {type: spacer, height: 5}  # line_height(24)=33 -> legacy's real 38px (y += 38).
   - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
      suppress_if_equals: logo_text}
@@ -255,8 +264,16 @@ _anz_modern_body: &anz_modern_body
   - {type: banner, from_layout: logo_text, height: 120, color: "#0061B5", text_y: 30,
      role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
-  - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
-     color: "#666666"}
+  # See anz_standard_body: account holder shares the account-number line, zero added height.
+  - type: split
+    children:
+      - - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: sub_description,
+           color: "#666666", field: PAYER_NAME}
+      - - {type: text, content: "Account number    0000-00000", role: sub_description,
+           align: right, color: "#666666"}
+  - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}",
+     role: sub_description, color: "#666666", when: STATEMENT_DATE_RANGE,
+     field: STATEMENT_DATE_RANGE}
   - {type: spacer, height: 8}  # line_height(22)=30 -> legacy's real 38px (y += 38).
   - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
      suppress_if_equals: logo_text}
