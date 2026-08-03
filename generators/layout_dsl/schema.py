@@ -49,11 +49,20 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "fill_inset",
             "fill_height",
             "label_inset_y",
+            "group_gap",
+            "synthetic_row_placement",
         ),
     ),
 }
 
 _CONTAINERS = ("panel", "split")
+
+# Where a provider's leading synthetic row (opening_balance / brought_forward)
+# renders relative to `grouping: dedicated_row`'s first date sub-header row:
+# "leading" (default) renders it first, ahead of any group header -- CBA's
+# Opening Balance. "after_first_group_header" defers it until that header has
+# been drawn -- NAB's Brought-forward row, which sits *under* the first date.
+SYNTHETIC_ROW_PLACEMENTS = ("leading", "after_first_group_header")
 
 
 class LayoutSchemaError(RuntimeError):
@@ -287,6 +296,36 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
                 recover=f"remove {filled_only_key}, or set frame: filled.",
             )
 
+    if grouping != "dedicated_row" and "group_gap" in block:
+        raise _err(
+            "group_gap is set but grouping is not 'dedicated_row', which never reads it — "
+            "only dedicated_row inserts date sub-header rows with a gap between them.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.group_gap",
+            expected="group_gap only alongside grouping: dedicated_row.",
+            recover="remove group_gap, or set grouping: dedicated_row.",
+        )
+
+    if "synthetic_row_placement" in block:
+        if grouping != "dedicated_row":
+            raise _err(
+                "synthetic_row_placement is set but grouping is not 'dedicated_row', which "
+                "never reads it — there is no group header for a synthetic row to be placed "
+                "relative to.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.synthetic_row_placement",
+                expected="synthetic_row_placement only alongside grouping: dedicated_row.",
+                recover="remove synthetic_row_placement, or set grouping: dedicated_row.",
+            )
+        if block["synthetic_row_placement"] not in SYNTHETIC_ROW_PLACEMENTS:
+            raise _err(
+                f"unknown synthetic_row_placement {block['synthetic_row_placement']!r}.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.synthetic_row_placement",
+                expected=f"one of {list(SYNTHETIC_ROW_PLACEMENTS)}.",
+                recover=f"set synthetic_row_placement: to one of {list(SYNTHETIC_ROW_PLACEMENTS)}.",
+            )
+
     if frame != "bordered" and "dividers" in block:
         raise _err(
             f"dividers is set but frame is '{frame}', which never draws them — only "
@@ -316,6 +355,16 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
                     expected="{key: date, label: Date, align: left, x: 0}.",
                     recover=f"add {required}: to the column.",
                 )
+        sub_line = column.get("sub_line")
+        if sub_line is not None and (not isinstance(sub_line, dict) or "key" not in sub_line):
+            raise _err(
+                f"column {index} sub_line is missing 'key'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.columns[{index}].sub_line",
+                expected="{key: reference, role: sub_description, color: '#999999', "
+                "offset_y: 34, height: 32} — only 'key' is required.",
+                recover="add key: to the column's sub_line, naming the row field it reads.",
+            )
         if "x" not in column and "x_right" not in column:
             raise _err(
                 f"column {index} has neither 'x' nor 'x_right'.",

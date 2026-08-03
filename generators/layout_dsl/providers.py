@@ -6,6 +6,7 @@ arithmetic in YAML, a table names a provider registered here, and the provider
 returns row dicts. Providers return data only — they never draw or position.
 """
 
+import hashlib
 from collections.abc import Callable
 from decimal import Decimal
 
@@ -132,21 +133,32 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
     Args:
         entry: The ground-truth entry.
         params: Optional `opening_balance` or `brought_forward` booleans, which
-            prepend a synthetic balance row. They are mutually exclusive.
+            prepend a synthetic leading balance row (mutually exclusive with
+            each other). An independent optional `carried_forward` boolean
+            appends a trailing synthetic closing-balance row — it may combine
+            with either leading option, matching NAB's legacy renderer, which
+            shows both a "Brought forward" row (under the first date-group
+            header) and a "Carried forward" row (after every transaction).
+            An independent optional `references` boolean adds a `reference`
+            key to every real (non-synthetic) row — NAB's dotted-leader
+            reference number, computed exactly as the legacy renderer does:
+            sha256 of the description, taken mod 10**10, zero-padded to 10
+            digits, prefixed "Ref: " and suffixed with 40 dots.
 
     Returns:
         One dict per row with keys `date`, `description`, `debit`, `credit`,
-        `balance` (Decimal), and `synthetic` (bool).
+        `balance` (Decimal), `synthetic` (bool), and — only on real rows, and
+        only when `references` is set — `reference`.
 
     Raises:
-        ProviderError: If both synthetic-row options are requested, or the
-            transaction lists are ragged.
+        ProviderError: If both leading synthetic-row options are requested, or
+            the transaction lists are ragged.
     """
     wants = [key for key in _SYNTHETIC_LABELS if params.get(key)]
     if len(wants) > 1:
         msg = (
             "opening_balance and brought_forward are mutually exclusive; both were set.\n"
-            "  Remediation: keep exactly one synthetic balance row on the table block."
+            "  Remediation: keep exactly one leading synthetic balance row on the table block."
         )
         raise ProviderError(msg)
 
@@ -174,6 +186,18 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
             if row[key] != "NOT_FOUND":
                 row[key] = _to_decimal(row[key])
 
+    if params.get("references"):
+        for row in rows:
+            digest = hashlib.sha256(row["description"].encode()).hexdigest()
+            ref_num = str(int(digest, 16) % 10**10).zfill(10)
+            row["reference"] = f"Ref: {ref_num}" + "." * 40
+
+    # The closing balance is exactly the last real row's own balance -- the
+    # reversed loop above seeds it straight from ACCOUNT_BALANCE before any
+    # adjustment -- captured now, before a leading synthetic row (if any)
+    # shifts what rows[0] means, and before a trailing one is appended.
+    closing_balance = rows[-1]["balance"] if rows else balance
+
     if wants and rows:
         first = rows[0]
         opening = first["balance"] - _to_decimal(first["credit"]) + _to_decimal(first["debit"])
@@ -188,6 +212,19 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
                 "synthetic": True,
             },
         )
+
+    if params.get("carried_forward") and rows:
+        rows.append(
+            {
+                "date": "",
+                "description": "Carried forward",
+                "debit": "NOT_FOUND",
+                "credit": "NOT_FOUND",
+                "balance": closing_balance,
+                "synthetic": True,
+            }
+        )
+
     return rows
 
 
