@@ -7,14 +7,19 @@ container positions correctly without knowing it is nested.
 
 from decimal import Decimal
 
+from PIL import ImageDraw
+
 from generators.common import (
+    Font,
     draw_fitted_left,
+    draw_fitted_right,
     draw_separator_line,
     draw_text_left,
     draw_text_right,
     fmt_amount,
     load_font,
 )
+from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 from generators.layout_dsl.context import RenderContext
 from generators.layout_dsl.primitives_text import resolve_role
@@ -99,6 +104,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     row_height = _resolve_row_height(block, ctx)
     body_size = resolve_role(ctx.layout, "body")
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
+    total_real = sum(1 for row in rows if not row.get("synthetic"))
 
     if block.get("header", True):
         y = _draw_header(columns, ctx, y, size=body_size, style=style, row_height=row_height)
@@ -106,7 +112,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     index = 0
     previous_date = None
     for row in rows:
-        if style == "grouped" and not row.get("synthetic") and row.get("date") != previous_date:
+        synthetic = bool(row.get("synthetic"))
+        if style == "grouped" and not synthetic and row.get("date") != previous_date:
             draw_text_left(
                 ctx.draw, str(row.get("date", "")), ctx.region.x, y, load_font(body_size, bold=True)
             )
@@ -121,9 +128,10 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             size=body_size,
             style=style,
             row_height=row_height,
-            index=None if row.get("synthetic") else index,
+            index=None if synthetic else index,
+            is_last=(not synthetic and index == total_real - 1),
         )
-        if not row.get("synthetic"):
+        if not synthetic:
             index += 1
 
     return y
@@ -162,8 +170,14 @@ def _draw_row(
     style: str,
     row_height: int,
     index: int | None,
+    is_last: bool,
 ) -> int:
-    """Draw one row; `index` is None for synthetic rows, which are not recorded."""
+    """Draw one row; `index` is None for synthetic rows, which are not recorded.
+
+    `is_last` marks the final REAL (non-synthetic) row, which is where a
+    column's `last_row_field` — if any — additionally records unindexed
+    geometry, matching legacy renderers that record a closing balance once.
+    """
     font = load_font(size)
     bottom = y + row_height
 
@@ -173,24 +187,48 @@ def _draw_row(
         if not text:
             continue
 
+        right = column.get("align") == "right"
+        budget = None
         budget_name = column.get("budget")
-        if budget_name is not None and column.get("align") != "right":
-            field = column.get("field")
-            draw_fitted_left(
+        if budget_name is not None:
+            budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
+
+        field = column.get("field")
+        record_field = f"{field}[{index}]" if field is not None and index is not None else None
+        recorder = ctx.recorder if index is not None else None
+        _draw_cell(
+            ctx.draw,
+            text,
+            x,
+            y,
+            right=right,
+            budget=budget,
+            size=size,
+            row_height=row_height,
+            font=font,
+            recorder=recorder,
+            field=record_field,
+        )
+
+        last_row_field = column.get("last_row_field")
+        if last_row_field is not None and is_last and ctx.recorder is not None:
+            # Redraw the identical cell — same text, same coordinates, same fit —
+            # purely to reuse the tested measurement logic in draw_text_*/
+            # draw_fitted_* for the second, unindexed record. Pixels are
+            # unchanged: this draws over itself.
+            _draw_cell(
                 ctx.draw,
                 text,
                 x,
                 y,
-                budget=field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path),
-                nominal_size=size,
-                line_spacing=row_height,
-                recorder=ctx.recorder if index is not None else None,
-                field=f"{field}[{index}]" if field is not None and index is not None else None,
+                right=right,
+                budget=budget,
+                size=size,
+                row_height=row_height,
+                font=font,
+                recorder=ctx.recorder,
+                field=last_row_field,
             )
-        elif column.get("align") == "right":
-            draw_text_right(ctx.draw, text, x_right=x, y=y, font=font)
-        else:
-            draw_text_left(ctx.draw, text, x, y, font)
 
     if style == "bordered":
         ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, bottom)], outline="#999999")
@@ -198,3 +236,49 @@ def _draw_row(
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, bottom, color="#CCCCCC")
 
     return bottom
+
+
+def _draw_cell(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    x: int,
+    y: int,
+    *,
+    right: bool,
+    budget: dict | None,
+    size: int,
+    row_height: int,
+    font: Font,
+    recorder: BoxRecorder | None,
+    field: str | None,
+) -> None:
+    """Draw one cell, dispatching on alignment and whether it has a fit budget."""
+    if budget is not None:
+        if right:
+            draw_fitted_right(
+                draw,
+                text,
+                x,
+                y,
+                budget=budget,
+                nominal_size=size,
+                line_spacing=row_height,
+                recorder=recorder,
+                field=field,
+            )
+        else:
+            draw_fitted_left(
+                draw,
+                text,
+                x,
+                y,
+                budget=budget,
+                nominal_size=size,
+                line_spacing=row_height,
+                recorder=recorder,
+                field=field,
+            )
+    elif right:
+        draw_text_right(draw, text, x_right=x, y=y, font=font, recorder=recorder, field=field)
+    else:
+        draw_text_left(draw, text, x, y, font, recorder=recorder, field=field)

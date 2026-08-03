@@ -167,6 +167,12 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         row["balance"] = balance
         row["synthetic"] = False
         balance = balance + _to_decimal(row["debit"]) - _to_decimal(row["credit"])
+        # Coerce real amounts to Decimal so the table formats them as currency, matching
+        # the legacy renderer. The absent sentinel is left alone: legacy draws nothing
+        # for it, and _cell_text maps it to the empty string.
+        for key in ("debit", "credit"):
+            if row[key] != "NOT_FOUND":
+                row[key] = _to_decimal(row[key])
 
     if wants and rows:
         first = rows[0]
