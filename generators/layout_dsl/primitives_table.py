@@ -114,9 +114,12 @@ def _cell_bold(row: dict, column_key: str) -> bool:
     keys for a row bold in only some of its cells — ANZ's "BALANCE BROUGHT
     FORWARD" row, whose legacy renderer draws the description in
     `font_body_bold` but the balance value in the plain `font_body`, a mix
-    a single per-row flag cannot express. Anything else (absent, `False`)
-    renders every cell in the row at regular weight, the default for every
-    other provider-set and real row.
+    a single per-row flag cannot express. Anything else (absent, `False`, or
+    an empty collection) renders every cell in the row at regular weight, the
+    default for every other provider-set and real row. A non-empty collection
+    naming a column this table does not have is a caller error, not a silent
+    no-op — `_validate_bold_spec` rejects it before any cell in the row is
+    drawn (see there for why that check lives here rather than in schema.py).
     """
     spec = row.get("bold", False)
     if spec is True:
@@ -124,6 +127,48 @@ def _cell_bold(row: dict, column_key: str) -> bool:
     if spec:
         return column_key in spec
     return False
+
+
+def _validate_bold_spec(row: dict, columns: list) -> None:
+    """Fail fast if a row's `bold` collection names a column the table lacks.
+
+    `row["bold"]` is provider-set data (see `_cell_bold`), not a layout YAML
+    key, so schema.py — which validates the static `body:` tree and knows
+    nothing about any specific provider's row shape — cannot check it; a
+    provider's row list does not exist until a table actually calls it, and
+    `python -m generators.pipeline validate` never invokes providers (the
+    same reason a typo in e.g. `pipe_fields`'s `fields:` mapping is a
+    render-time `ProviderError`, not a validate-time one). This is the one
+    place both the row's `bold` collection and the table's real `columns`
+    are in scope together, so it is the one place able to catch a typo (a
+    misspelled `*_bold` entry in a table's `params:`) before it silently
+    renders as "nothing bold" — indistinguishable, at a glance, from the
+    typo never having been caught at all.
+
+    Args:
+        row: The row dict about to be drawn.
+        columns: The table's column specs.
+
+    Raises:
+        TableError: If `row["bold"]` is a non-empty collection containing a
+            key absent from every column.
+    """
+    spec = row.get("bold", False)
+    if spec is True or not spec:
+        return
+    known = {column["key"] for column in columns}
+    unknown = sorted(set(spec) - known)
+    if unknown:
+        raise TableError(
+            "Row bold spec names an unknown column.\n"
+            f"  What:     row['bold'] names column key(s) {unknown}, which this table has no "
+            "column for.\n"
+            "  Where:    a row provider's 'bold' collection (e.g. a *_bold entry in a table's "
+            "params:) versus that table's columns:.\n"
+            f"  Expected: bold column keys drawn from this table's real columns: {sorted(known)}.\n"
+            "  Recover:  fix the typo in the *_bold param, or add the missing column to the "
+            "table's columns:."
+        )
 
 
 def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
@@ -151,7 +196,9 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
         The advanced y-cursor.
 
     Raises:
-        TableError: If no row height is available from the block or layout.
+        TableError: If no row height is available from the block or layout,
+            or a row's `bold` collection (see `_validate_bold_spec`) names a
+            column this table does not have.
     """
     frame = block["frame"]
     grouping = block["grouping"]
@@ -408,7 +455,9 @@ def _draw_row(
     YAML key: which specific row is bold is a fact about legacy's renderer
     (which row it is), not a per-layout style choice an author would toggle,
     exactly parallel to how `synthetic` itself is provider-set rather than
-    YAML-configurable.
+    YAML-configurable. A collection naming a column this table does not have
+    raises `TableError` (`_validate_bold_spec`) before any cell draws, rather
+    than silently rendering the row entirely unbolded.
 
     A row draws a fresh black rule above itself, with a fixed 12px gap
     before its own content, when a provider marks it `row["rule_above"] =
@@ -422,6 +471,7 @@ def _draw_row(
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 12
 
+    _validate_bold_spec(row, columns)
     regular_font = load_font(size, bold=False)
     bold_font = load_font(size, bold=True)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
