@@ -39,7 +39,17 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "split": (("children",), ("gap", "divider", "divider_color")),
     "table": (
         ("rows", "columns", "frame", "grouping"),
-        ("params", "row_height", "header", "header_height", "dividers", "fill_color"),
+        (
+            "params",
+            "row_height",
+            "header",
+            "header_height",
+            "dividers",
+            "fill_color",
+            "fill_inset",
+            "fill_height",
+            "label_inset_y",
+        ),
     ),
 }
 
