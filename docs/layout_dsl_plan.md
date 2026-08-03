@@ -2416,6 +2416,8 @@ git commit -m ":sparkles: add layout DSL table primitive with four row styles"
 
 **Note:** the containers (Task 7) render children through the injected `ctx.render_children` rather than importing this module, so there is no import cycle and no ordering constraint between them.
 
+**Error location.** Validate-time errors carry a precise `key_path` (`cba_standard.body[2].children[1]`); runtime errors must too, or an author hitting a failure three levels inside `panel > split > panel` is told only "some block in this layout failed". The walker accumulates the location on the exception as it unwinds — each `render_blocks` level prepends its own `[index](type)` segment — and `render_body` surfaces it as a trailing `At:` line. This keeps every primitive ignorant of how deeply it is nested. The error types are imported into `engine.py` for the `except` clause; verified no cycle, since `layout_budgets.py` imports nothing and `binding.py` imports only `re`.
+
 - [ ] **Step 1: Write the failing test**
 
 ```python
@@ -2577,7 +2579,22 @@ def render_body(
 
     Returns:
         The y-cursor after the last block.
+
+    Raises:
+        EngineError: If the layout has no `body` key. `validate_layout` guards this,
+            but nothing forces validation to run first — `generate` and `validate` are
+            independent CLI subcommands — so the engine must diagnose it itself rather
+            than surface a bare KeyError.
     """
+    if "body" not in layout:
+        raise EngineError(
+            "Cannot render layout.\n"
+            f"  What:     layout '{layout_id}' has no 'body' key.\n"
+            f"  Where:    {layout_path} -> {layout_id}.body\n"
+            "  Expected: body: a list of block mappings, each with a 'type' key.\n"
+            f"  Recover:  add a 'body:' list to {layout_id}, or run "
+            "`python -m generators.pipeline validate` to see the full diagnostic."
+        )
     ctx = RenderContext(
         draw=draw,
         entry=entry,
