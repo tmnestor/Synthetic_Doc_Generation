@@ -276,6 +276,27 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
             recover="remove fill_color, or set frame: filled.",
         )
 
+    for filled_only_key in ("fill_height", "fill_inset"):
+        if frame != "filled" and filled_only_key in block:
+            raise _err(
+                f"{filled_only_key} is set but frame is '{frame}', which never reads it — only "
+                "frame: filled draws a fill for it to adjust.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.{filled_only_key}",
+                expected=f"{filled_only_key} only alongside frame: filled.",
+                recover=f"remove {filled_only_key}, or set frame: filled.",
+            )
+
+    if frame != "bordered" and "dividers" in block:
+        raise _err(
+            f"dividers is set but frame is '{frame}', which never draws them — only "
+            "frame: bordered cuts the header/body into columns with dividers.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.dividers",
+            expected="dividers only alongside frame: bordered.",
+            recover="remove dividers, or set frame: bordered.",
+        )
+
     columns = block["columns"]
     if not isinstance(columns, list) or not columns:
         raise _err(
