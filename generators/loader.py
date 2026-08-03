@@ -78,7 +78,25 @@ def load_layout_registry(path: Path) -> dict:
         raise ValueError(msg)
 
     # If the YAML has a top-level "layouts:" wrapper, extract the inner dict.
-    if "layouts" in data and isinstance(data["layouts"], dict) and len(data) == 1:
+    # Underscore-prefixed siblings are anchor definitions (e.g. `_bank_base`,
+    # `_cba`) used for de-duplication via YAML merge keys — they are not
+    # layouts and must not surface in the registry. Any other sibling is a
+    # mis-indented layout and must fail fast rather than be silently
+    # swallowed as a bogus "layout id".
+    if "layouts" in data and isinstance(data["layouts"], dict):
+        stray = sorted(k for k in data if k != "layouts" and not str(k).startswith("_"))
+        if stray:
+            msg = (
+                f"Unexpected top-level key(s) {stray} in {path.resolve()}.\n"
+                f"  What:     only 'layouts:' and underscore-prefixed anchor "
+                f"definitions may sit at the top level.\n"
+                f"  Where:    {path.resolve()}\n"
+                f"  Expected: layouts:\\n  <layout_id>: ...   plus optional "
+                f"_anchor: &anchor blocks.\n"
+                f"  Recover:  indent {stray} under 'layouts:', or rename to "
+                f"'_{stray[0]}' if it is an anchor definition."
+            )
+            raise ValueError(msg)
         return data["layouts"]
 
     return data
