@@ -23,6 +23,43 @@ python -m generators.pipeline generate --clean-only
 python -m generators.pipeline derive
 ```
 
+### Extraction ground truth for LMM_POC
+
+`derive` emits this repo's own 420-row `derived/ground_truth.csv`. To build the
+**165-row extraction CSV** that LMM_POC's `evaluate` stage consumes — bank statements,
+invoices and receipts only, columns and formatting taken from LMM_POC's schema — use:
+
+```bash
+python scripts/generate_extraction_gt.py \
+    --output   /path/to/evaluation_data/<dataset>/ground_truth_extraction.csv \
+    --data-dir /path/to/evaluation_data/<dataset>   # optional: validates filenames
+```
+
+No other checkout is needed. The columns and value formatting come from
+`config/extraction_schema.yml` — the **extraction** contract, defining what a model
+is asked for and scored on.
+
+That is a different file from `config/field_definitions.yml`, the **generation**
+contract describing what the renderers draw. They differ deliberately: bank
+statements carry `ACCOUNT_BALANCE` and `TRANSACTION_DESCRIPTIONS` when generated but
+are a 5-field extraction task; receipts show no payer, yet `PAYER_NAME` and
+`PAYER_ADDRESS` are still scored, because the prompt asks for them and the right
+answer is `NOT_FOUND` — that is how a hallucinated payer gets caught. Pass the
+generation contract by mistake and the script refuses with a diagnostic rather than
+emitting a wrongly-shaped CSV.
+
+`--data-dir` is worth passing: it warns when a generated filename is missing from the
+image directory, which is how you catch ground truth and images having drifted apart.
+
+### Scoring a model against that ground truth
+
+`field_f1_standalone.ipynb` reads a model's `raw_extractions.jsonl` plus a ground-truth
+file and reports F1 per extraction field, by document type, macro and micro. It is
+fully standalone — pandas and the standard library only, no imports from this repo or
+LMM_POC — so it runs here with no other checkout. Set the paths and the per-document-type
+field lists in its config cell; the field lists must match the prompt your model was
+given, since that is what defines a fair scoring set.
+
 ### Dependencies
 
 ```
