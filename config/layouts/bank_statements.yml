@@ -118,7 +118,7 @@ _anz_txn_columns: &anz_txn_columns
 # different font_sizes and therefore different natural line_height() advances.
 _nab_classic_body: &nab_classic_body
   # Letterhead reads logo_text dynamically (legacy: draw.text(..., layout["logo_text"], ...)).
-  - {type: text, content: logo_text, from_layout: true, role: header, color: "#003366", bold: true}
+  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true}
   - {type: spacer, height: 11}  # line_height(44)=61 -> legacy's real 72px jump.
   - type: panel
     height: 150
@@ -151,7 +151,7 @@ _nab_classic_body: &nab_classic_body
 
 _nab_dense_body: &nab_dense_body
   # See nab_classic_body's identical comments.
-  - {type: text, content: logo_text, from_layout: true, role: header, color: "#003366", bold: true}
+  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true}
   - {type: spacer, height: 16}  # line_height(40)=56 -> legacy's real 72px jump.
   - type: panel
     height: 150
@@ -223,7 +223,7 @@ _nab_dense_body: &nab_dense_body
 # either table's `description`/`balance` decoration except what the columns
 # list already declares) because legacy passes no recorder to any of them.
 _anz_standard_body: &anz_standard_body
-  - {type: banner, content: logo_text, from_layout: true, height: 120, color: "#0061B5", text_y: 30,
+  - {type: banner, from_layout: logo_text, height: 120, color: "#0061B5", text_y: 30,
      role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
   - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
@@ -252,7 +252,7 @@ _anz_standard_body: &anz_standard_body
 
 _anz_modern_body: &anz_modern_body
   # See anz_standard_body's identical comments.
-  - {type: banner, content: logo_text, from_layout: true, height: 120, color: "#0061B5", text_y: 30,
+  - {type: banner, from_layout: logo_text, height: 120, color: "#0061B5", text_y: 30,
      role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
   - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
@@ -295,7 +295,7 @@ layouts:
       # The content supplier is a separate, subordinate line further down,
       # suppressed whenever it already equals the letterhead (see
       # suppress_if_equals below) — mirrors legacy's `_draw_supplier_line`.
-      - {type: text, content: logo_text, from_layout: true, role: header, color: "#12107D"}
+      - {type: text, from_layout: logo_text, role: header, color: "#12107D"}
       - type: block
         role: footer
         color: "#666666"
@@ -340,7 +340,7 @@ layouts:
     body:
       # See cba_standard's identical comment: letterhead reads logo_text
       # dynamically; the supplier line is suppressed when it matches.
-      - {type: text, content: logo_text, from_layout: true, role: header, color: "#12107D"}
+      - {type: text, from_layout: logo_text, role: header, color: "#12107D"}
       - type: block
         role: footer
         color: "#666666"
@@ -389,7 +389,7 @@ layouts:
       # `_draw_supplier_line`, called right before the column header row.
       - type: split
         children:
-          - - {type: text, content: logo_text, from_layout: true, role: header, color: "#C41E3A",
+          - - {type: text, from_layout: logo_text, role: header, color: "#C41E3A",
                 bold: true}
           - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
       - {type: text, content: "Transaction Details", role: body, bold: true}
@@ -417,7 +417,7 @@ layouts:
       # See westpac_standard's identical comment.
       - type: split
         children:
-          - - {type: text, content: logo_text, from_layout: true, role: header, color: "#C41E3A",
+          - - {type: text, from_layout: logo_text, role: header, color: "#C41E3A",
                 bold: true}
           - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
       - {type: spacer, height: 37}
