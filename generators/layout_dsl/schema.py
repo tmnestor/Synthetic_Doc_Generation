@@ -6,7 +6,9 @@ unregistered row providers all fail here with a four-element diagnostic.
 """
 
 from generators.layout_dsl.binding import referenced_fields
-from generators.layout_dsl.providers import provider_names
+from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
+from generators.layout_dsl.primitives_text import ALIGNMENTS
+from generators.layout_dsl.providers import provider_names, provider_param_keys
 
 # `frame` and `grouping` are independent axes describing a table's row style.
 #
@@ -69,6 +71,26 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
 }
 
 _CONTAINERS = ("panel", "split")
+
+# A table column's own allowed keys — the "one level down" counterpart to
+# PRIMITIVES above. Without this, a typo (e.g. `feild` for `field`) is a
+# silent no-op: the column simply never draws that cell, indistinguishable
+# at a glance from the field genuinely being absent from the entry.
+_COLUMN_KEYS = frozenset(
+    {
+        "key",
+        "label",
+        "align",
+        "x",
+        "x_right",
+        "budget",
+        "field",
+        "last_row_field",
+        "currency",
+        "currency_suffix",
+        "sub_line",
+    }
+)
 
 # Where a provider's leading synthetic row (opening_balance / brought_forward)
 # renders relative to `grouping: dedicated_row`'s first date sub-header row:
@@ -220,10 +242,21 @@ def _validate_block(
                 recover="set 'content:' or 'from_layout:', not both or neither.",
             )
 
+    if kind == "text":
+        align = block.get("align")
+        if align is not None and align not in ALIGNMENTS:
+            raise _err(
+                f"unknown align '{align}'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.align",
+                expected=f"one of {list(ALIGNMENTS)}.",
+                recover=f"set align: to one of {list(ALIGNMENTS)}.",
+            )
+
     _validate_references(block, layout_path=layout_path, known_fields=known_fields, key_path=key_path)
 
     if kind == "table":
-        _validate_table(block, layout_path=layout_path, key_path=key_path)
+        _validate_table(block, known_fields=known_fields, layout_path=layout_path, key_path=key_path)
     if kind in _CONTAINERS:
         _validate_children(
             block,
@@ -235,7 +268,13 @@ def _validate_block(
 
 
 def _validate_references(block: dict, *, layout_path: str, known_fields: set[str], key_path: str) -> None:
-    """Check every {FIELD} placeholder and `when:` field is a known field."""
+    """Check every {FIELD} placeholder, `when:`, and `field:` is a known field.
+
+    `field:` decides what a block's drawn geometry gets recorded as in
+    `derived/geometry.jsonl` — a typo there is invisible to both the pixel
+    snapshot (pixels are unaffected) and a `{FIELD}`-reference check (it is
+    not a template), so it needs its own check here.
+    """
     texts: list[str] = []
     for key in ("content", "label", "value", "heading"):
         if isinstance(block.get(key), str):
@@ -265,9 +304,19 @@ def _validate_references(block: dict, *, layout_path: str, known_fields: set[str
             recover=f"fix the field name, or add '{when}' to config/field_definitions.yml.",
         )
 
+    field = block.get("field")
+    if field is not None and field not in known_fields:
+        raise _err(
+            f"'field' references unknown field '{field}'.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.field",
+            expected=f"a field defined for this document type: {sorted(known_fields)}.",
+            recover=f"fix the field name, or add '{field}' to config/field_definitions.yml.",
+        )
 
-def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
-    """Check a table's provider, row style, and column definitions."""
+
+def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, key_path: str) -> None:
+    """Check a table's provider, params, row style, and column definitions."""
     rows = block["rows"]
     if rows not in provider_names():
         raise _err(
@@ -277,6 +326,19 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
             expected=f"one of {provider_names()}.",
             recover="set rows: to a registered provider, or register one with "
             "@row_provider in generators/layout_dsl/providers.py.",
+        )
+
+    params = block.get("params", {})
+    accepted_params = provider_param_keys(rows)
+    unknown_params = sorted(set(params) - accepted_params)
+    if unknown_params:
+        raise _err(
+            f"table params names unknown key(s) {unknown_params} for provider '{rows}'.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.params",
+            expected=f"one of {sorted(accepted_params)} for provider '{rows}'.",
+            recover=f"fix the typo, or add {unknown_params} to provider '{rows}''s "
+            "params=frozenset({...}) in generators/layout_dsl/providers.py.",
         )
 
     frame = block["frame"]
@@ -397,6 +459,39 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
                     expected="{key: date, label: Date, align: left, x: 0}.",
                     recover=f"add {required}: to the column.",
                 )
+
+        unknown_col_keys = sorted(set(column) - _COLUMN_KEYS)
+        if unknown_col_keys:
+            raise _err(
+                f"column {index} has unknown key(s) {unknown_col_keys}.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.columns[{index}]",
+                expected=f"only {sorted(_COLUMN_KEYS)}.",
+                recover=f"remove {unknown_col_keys}, or add them to _COLUMN_KEYS in "
+                "generators/layout_dsl/schema.py.",
+            )
+
+        col_align = column.get("align")
+        if col_align is not None and col_align not in COLUMN_ALIGNMENTS:
+            raise _err(
+                f"column {index} has unknown align '{col_align}'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.columns[{index}].align",
+                expected=f"one of {list(COLUMN_ALIGNMENTS)} (table columns do not support 'center').",
+                recover=f"set align: to one of {list(COLUMN_ALIGNMENTS)}.",
+            )
+
+        for field_key in ("field", "last_row_field"):
+            name = column.get(field_key)
+            if name is not None and name not in known_fields:
+                raise _err(
+                    f"column {index} {field_key!r} references unknown field '{name}'.",
+                    layout_path=layout_path,
+                    key_path=f"{key_path}.columns[{index}].{field_key}",
+                    expected=f"a field defined for this document type: {sorted(known_fields)}.",
+                    recover=f"fix the field name, or add '{name}' to config/field_definitions.yml.",
+                )
+
         sub_line = column.get("sub_line")
         if sub_line is not None and (not isinstance(sub_line, dict) or "key" not in sub_line):
             raise _err(
@@ -620,16 +715,27 @@ def _validate_column_budgets(
             )
 
         anchor = _column_anchor(column, width)
-        following = [value for value in anchors if value > anchor]
-        available = (min(following) if following else width) - anchor
+        if column.get("align") == "right":
+            # Right-aligned text extends LEFT from its anchor (the anchor is
+            # its right edge), so the room available is measured back to the
+            # previous anchor -- or the region's own left edge (0) if this is
+            # the leftmost column -- the mirror image of the left-aligned
+            # case below, where text grows right from the anchor instead.
+            preceding = [value for value in anchors if value < anchor]
+            available = anchor - (max(preceding) if preceding else 0)
+            direction = "before the previous column"
+        else:
+            following = [value for value in anchors if value > anchor]
+            available = (min(following) if following else width) - anchor
+            direction = "before the next column"
         declared = int(budgets[name]["width"])
         if declared > available:
             raise _err(
                 f"column {index} budget '{name}' declares width {declared}px but only "
-                f"{available}px is available before the next column.",
+                f"{available}px is available {direction}.",
                 layout_path=layout_path,
                 key_path=f"{key_path}.columns[{index}]",
                 expected=f"field_budgets.{name}.width <= {available}.",
                 recover=f"set field_budgets.{name}.width to {available} or less, or move "
-                f"the following column right.",
+                f"the {'previous' if column.get('align') == 'right' else 'following'} column.",
             )
