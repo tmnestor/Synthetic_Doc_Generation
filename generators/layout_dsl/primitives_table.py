@@ -1,4 +1,4 @@
-"""The table primitive and its four row styles.
+"""The table primitive and its row styles.
 
 Row data comes from a named provider; this module only lays it out. Column
 positions resolve against the current region, so a table nested inside a
@@ -26,6 +26,13 @@ from generators.layout_dsl.primitives_text import line_height, resolve_role
 from generators.layout_dsl.providers import get_provider
 
 _ABSENT = "NOT_FOUND"
+
+# Row styles that draw a bordered grid (outer box + interior column dividers),
+# as opposed to `ruled` (rule lines) or `plain`/`grouped` (no framing at all).
+# `bordered_grouped` additionally blanks a repeated date cell within a date
+# group — see `_draw_row` — without inserting a dedicated date-only row the
+# way `grouped` does.
+_GRID_STYLES = ("bordered", "bordered_grouped")
 
 
 class TableError(RuntimeError):
@@ -76,11 +83,18 @@ def _resolve_row_height(block: dict, ctx: RenderContext) -> int:
     )
 
 
-def _cell_text(row: dict, key: str) -> str:
-    """Render one cell's value as display text."""
-    value = row.get(key, "")
+def _cell_text(row: dict, column: dict) -> str:
+    """Render one cell's value as display text.
+
+    A column may set `currency: plain` to drop the `$` prefix `fmt_amount`
+    otherwise adds — Westpac's legacy renderer prints amounts as `1,234.56`,
+    not `$1,234.56`, and the ground truth the table draws must match the
+    bank's real formatting, not just land in the right place.
+    """
+    value = row.get(column["key"], "")
     if isinstance(value, Decimal):
-        return fmt_amount(value)
+        text = fmt_amount(value)
+        return text.lstrip("$") if column.get("currency") == "plain" else text
     text = str(value)
     return "" if text == _ABSENT else text
 
@@ -101,6 +115,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     """
     style = block.get("row_style", "plain")
     columns = block["columns"]
+    dividers = block.get("dividers", [])
     row_height = _resolve_row_height(block, ctx)
     body_size = resolve_role(ctx.layout, "body")
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
@@ -108,10 +123,14 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
 
     if block.get("header", True):
         header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
-        y = _draw_header(columns, ctx, y, size=body_size, style=style, header_height=header_height)
+        y = _draw_header(
+            columns, ctx, y, size=body_size, style=style, header_height=header_height, dividers=dividers
+        )
 
+    table_body_start = y
     index = 0
     previous_date = None
+    first_row = True
     for row in rows:
         synthetic = bool(row.get("synthetic"))
         if style == "grouped" and not synthetic and row.get("date") != previous_date:
@@ -123,6 +142,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             previous_date = row.get("date")
             y += row_height
 
+        is_new_group = not synthetic and row.get("date") != previous_date
         y = _draw_row(
             row,
             columns,
@@ -133,15 +153,39 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             row_height=row_height,
             index=None if synthetic else index,
             is_last=(not synthetic and index == total_real - 1),
+            first_row=first_row,
+            is_new_group=is_new_group,
         )
+        if style == "bordered_grouped" and not synthetic:
+            previous_date = row.get("date")
         if not synthetic:
             index += 1
+        first_row = False
+
+    if style in _GRID_STYLES:
+        # Mirrors the legacy renderers' one-shot outer box + column dividers,
+        # drawn once across the whole table body rather than per row — the
+        # header already closed the top edge, so only left/right/bottom and
+        # the interior dividers remain.
+        ctx.draw.line([(ctx.region.x, table_body_start), (ctx.region.x, y)], fill="black")
+        ctx.draw.line([(ctx.region.right, table_body_start), (ctx.region.right, y)], fill="black")
+        ctx.draw.line([(ctx.region.x, y), (ctx.region.right, y)], fill="black")
+        for divider in dividers:
+            dx = column_x(divider, ctx)
+            ctx.draw.line([(dx, table_body_start), (dx, y)], fill="black")
 
     return y
 
 
 def _draw_header(
-    columns: list, ctx: RenderContext, y: int, *, size: int, style: str, header_height: int
+    columns: list,
+    ctx: RenderContext,
+    y: int,
+    *,
+    size: int,
+    style: str,
+    header_height: int,
+    dividers: list,
 ) -> int:
     """Draw the column-header row in the table's style.
 
@@ -150,18 +194,41 @@ def _draw_header(
     independent: a table's data rows may be taller or shorter than its single
     header line, and conflating them drifts the header away from wherever the
     legacy renderer being compared against actually puts it.
+
+    The `bordered`/`bordered_grouped` styles additionally decorate: a bordered
+    rectangle spans the header height, `dividers` cut it into columns, and
+    labels are vertically centred within it rather than pinned to its top —
+    matching the legacy Westpac renderer's bordered header, which the
+    geometry-only equivalence harness cannot see (no field box is recorded
+    for header labels) and would otherwise silently regress to bare text.
+    A label may contain "\\n" for a legacy-matching multi-line header cell
+    (e.g. Westpac's "Date of" / "Transaction"); each line is centred as one
+    block.
     """
     font = load_font(size, bold=True)
     if style == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 12
+    elif style in _GRID_STYLES:
+        ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + header_height)], outline="black")
+        for divider in dividers:
+            dx = column_x(divider, ctx)
+            ctx.draw.line([(dx, y), (dx, y + header_height)], fill="black")
 
     for column in columns:
         x = column_x(column, ctx)
-        if column.get("align") == "right":
-            draw_text_right(ctx.draw, column["label"], x_right=x, y=y, font=font)
+        lines = str(column["label"]).split("\n")
+        if style in _GRID_STYLES:
+            block_height = line_height(size) * len(lines)
+            start = y + max(0, (header_height - block_height) // 2)
         else:
-            draw_text_left(ctx.draw, column["label"], x, y, font)
+            start = y
+        for position, text in enumerate(lines):
+            line_y = start + position * line_height(size)
+            if column.get("align") == "right":
+                draw_text_right(ctx.draw, text, x_right=x, y=line_y, font=font)
+            else:
+                draw_text_left(ctx.draw, text, x, line_y, font)
 
     y += header_height
     if style == "ruled":
@@ -181,12 +248,21 @@ def _draw_row(
     row_height: int,
     index: int | None,
     is_last: bool,
+    first_row: bool = False,
+    is_new_group: bool = True,
 ) -> int:
     """Draw one row; `index` is None for synthetic rows, which are not recorded.
 
     `is_last` marks the final REAL (non-synthetic) row, which is where a
     column's `last_row_field` — if any — additionally records unindexed
     geometry, matching legacy renderers that record a closing balance once.
+
+    `first_row`/`is_new_group` drive the `bordered`/`bordered_grouped` styles
+    only: `bordered` draws a divider above every row but the first;
+    `bordered_grouped` draws one only when `is_new_group` is true (and blanks
+    the `date` cell otherwise), matching the legacy Westpac renderer's
+    date-grouped table, which shows one row per transaction — never a
+    dedicated date-only row the way `grouped` does for CBA/NAB.
 
     Cells are drawn first, and `bottom` is derived from the tallest cell's own
     returned advance — the same advance `draw_fitted_left`/`draw_fitted_right`
@@ -199,8 +275,10 @@ def _draw_row(
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
+        if style == "bordered_grouped" and column["key"] == "date" and not is_new_group:
+            continue  # Blank the repeated date cell within a date group.
         x = column_x(column, ctx)
-        text = _cell_text(row, column["key"])
+        text = _cell_text(row, column)
         if not text:
             continue
 
@@ -248,8 +326,10 @@ def _draw_row(
                 field=last_row_field,
             )
 
-    if style == "bordered":
-        ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, bottom)], outline="#999999")
+    if style == "bordered" and not first_row:
+        draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
+    elif style == "bordered_grouped" and not first_row and is_new_group:
+        draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
     elif style == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, bottom, color="#CCCCCC")
 

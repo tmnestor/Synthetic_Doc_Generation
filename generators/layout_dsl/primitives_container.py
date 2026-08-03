@@ -87,7 +87,11 @@ def draw_split(block: dict, ctx: RenderContext, y: int) -> int:
 
     Args:
         block: The `split` block, carrying `children` (a list of block lists,
-            one per column) and an optional `gap`.
+            one per column), an optional `gap`, and an optional `divider`
+            (draws a vertical rule down the middle of each gap, e.g. Westpac's
+            rewards panel, which splits into a points summary and a message
+            column separated by a ruled line — decorative only, so unlike
+            column geometry it is never checked by the equivalence harness).
         ctx: Render context.
         y: Current y-cursor.
 
@@ -101,4 +105,10 @@ def draw_split(block: dict, ctx: RenderContext, y: int) -> int:
         render_children(child_blocks, ctx.within(region), y)
         for child_blocks, region in zip(columns, regions, strict=True)
     ]
-    return max(ends)
+    bottom = max(ends)
+    if block.get("divider"):
+        color = block.get("divider_color", "black")
+        for left_region, right_region in zip(regions, regions[1:]):
+            divider_x = (left_region.right + right_region.x) // 2
+            ctx.draw.line([(divider_x, y), (divider_x, bottom)], fill=color)
+    return bottom

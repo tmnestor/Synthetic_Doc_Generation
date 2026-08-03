@@ -84,6 +84,7 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
         size=size,
         align=block.get("align", "left"),
         color=block.get("color", "black"),
+        bold=bool(block.get("bold", False)),
     )
     end = y + line_height(size)
     field = block.get("field")
