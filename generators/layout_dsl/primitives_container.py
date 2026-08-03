@@ -48,6 +48,9 @@ def draw_panel(block: dict, ctx: RenderContext, y: int) -> int:
 
     Returns:
         The advanced y-cursor: past the panel's border and padding.
+
+    Raises:
+        ContainerError: If a fixed height is given but children overflow it.
     """
     render_children = _walker(ctx)
     padding = int(block.get("padding", 0))
@@ -55,7 +58,22 @@ def draw_panel(block: dict, ctx: RenderContext, y: int) -> int:
     inner_end = render_children(block["children"], inner_ctx, y + padding)
 
     fixed = block.get("height")
-    bottom = y + int(fixed) if fixed is not None else inner_end + padding
+    if fixed is not None:
+        natural = inner_end + padding
+        limit = y + int(fixed)
+        if natural > limit:
+            raise ContainerError(
+                "Panel content overflows its fixed height.\n"
+                f"  What:     children need {natural - y}px but the panel declares "
+                f"height: {int(fixed)}.\n"
+                f"  Where:    {ctx.layout_path} -> {ctx.layout_id}.body (a panel block)\n"
+                f"  Expected: height >= {natural - y}, or fewer/smaller children.\n"
+                f"  Recover:  raise the panel's height to at least {natural - y}, or "
+                "reduce its children."
+            )
+        bottom = limit
+    else:
+        bottom = inner_end + padding
 
     ctx.draw.rectangle(
         [(ctx.region.x, y), (ctx.region.right, bottom)],
