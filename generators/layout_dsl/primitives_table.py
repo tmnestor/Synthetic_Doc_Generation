@@ -16,14 +16,13 @@ from generators.common import (
     draw_separator_line,
     draw_text_left,
     draw_text_right,
-    fit_text,
     fmt_amount,
     load_font,
 )
 from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 from generators.layout_dsl.context import RenderContext
-from generators.layout_dsl.primitives_text import resolve_role
+from generators.layout_dsl.primitives_text import line_height, resolve_role
 from generators.layout_dsl.providers import get_provider
 
 _ABSENT = "NOT_FOUND"
@@ -108,7 +107,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     total_real = sum(1 for row in rows if not row.get("synthetic"))
 
     if block.get("header", True):
-        y = _draw_header(columns, ctx, y, size=body_size, style=style, row_height=row_height)
+        header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
+        y = _draw_header(columns, ctx, y, size=body_size, style=style, header_height=header_height)
 
     index = 0
     previous_date = None
@@ -141,9 +141,16 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
 
 
 def _draw_header(
-    columns: list, ctx: RenderContext, y: int, *, size: int, style: str, row_height: int
+    columns: list, ctx: RenderContext, y: int, *, size: int, style: str, header_height: int
 ) -> int:
-    """Draw the column-header row in the table's style."""
+    """Draw the column-header row in the table's style.
+
+    `header_height` is the label row's own advance — a function of the header
+    font's line height, not the data row pitch (`row_height`). The two are
+    independent: a table's data rows may be taller or shorter than its single
+    header line, and conflating them drifts the header away from wherever the
+    legacy renderer being compared against actually puts it.
+    """
     font = load_font(size, bold=True)
     if style == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
@@ -156,40 +163,11 @@ def _draw_header(
         else:
             draw_text_left(ctx.draw, column["label"], x, y, font)
 
-    y += row_height
+    y += header_height
     if style == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 16
     return y
-
-
-def _row_line_count(row: dict, columns: list, ctx: RenderContext, *, size: int) -> int:
-    """Return how many lines this row's tallest budgeted cell wraps to.
-
-    Mirrors the legacy bank renderers, which size every row from the
-    transaction description's wrap result — the only cell that can span
-    multiple lines — so a wrapped description pushes every following row
-    down by the same amount in both renderers.
-    """
-    lines = 1
-    for column in columns:
-        budget_name = column.get("budget")
-        if budget_name is None:
-            continue
-        text = _cell_text(row, column["key"])
-        if not text:
-            continue
-        budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
-        result = fit_text(
-            text,
-            width=budget["width"],
-            fit=budget["fit"],
-            min_font=budget["min_font"],
-            max_lines=budget["max_lines"],
-            nominal_size=size,
-        )
-        lines = max(lines, len(result.lines))
-    return lines
 
 
 def _draw_row(
@@ -209,9 +187,16 @@ def _draw_row(
     `is_last` marks the final REAL (non-synthetic) row, which is where a
     column's `last_row_field` — if any — additionally records unindexed
     geometry, matching legacy renderers that record a closing balance once.
+
+    Cells are drawn first, and `bottom` is derived from the tallest cell's own
+    returned advance — the same advance `draw_fitted_left`/`draw_fitted_right`
+    already compute while wrapping a budgeted cell — rather than a second,
+    separate wrap computation that could drift out of sync with the one the
+    draw call actually used. Only then is the row's own decoration (a border
+    or rule, which needs the final `bottom`) drawn.
     """
     font = load_font(size)
-    bottom = y + row_height * _row_line_count(row, columns, ctx, size=size)
+    bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
         x = column_x(column, ctx)
@@ -228,7 +213,7 @@ def _draw_row(
         field = column.get("field")
         record_field = f"{field}[{index}]" if field is not None and index is not None else None
         recorder = ctx.recorder if index is not None else None
-        _draw_cell(
+        cell_bottom = _draw_cell(
             ctx.draw,
             text,
             x,
@@ -241,13 +226,14 @@ def _draw_row(
             recorder=recorder,
             field=record_field,
         )
+        bottom = max(bottom, cell_bottom)
 
         last_row_field = column.get("last_row_field")
         if last_row_field is not None and is_last and ctx.recorder is not None:
             # Redraw the identical cell — same text, same coordinates, same fit —
             # purely to reuse the tested measurement logic in draw_text_*/
             # draw_fitted_* for the second, unindexed record. Pixels are
-            # unchanged: this draws over itself.
+            # unchanged: this draws over itself, so it cannot change `bottom`.
             _draw_cell(
                 ctx.draw,
                 text,
@@ -283,11 +269,17 @@ def _draw_cell(
     font: Font,
     recorder: BoxRecorder | None,
     field: str | None,
-) -> None:
-    """Draw one cell, dispatching on alignment and whether it has a fit budget."""
+) -> int:
+    """Draw one cell, dispatching on alignment and whether it has a fit budget.
+
+    Returns:
+        The cell's own bottom y: the wrapped advance from `draw_fitted_left`/
+        `draw_fitted_right` for a budgeted cell, or `y + row_height` for an
+        unbudgeted (always single-line) cell.
+    """
     if budget is not None:
         if right:
-            draw_fitted_right(
+            return draw_fitted_right(
                 draw,
                 text,
                 x,
@@ -298,19 +290,19 @@ def _draw_cell(
                 recorder=recorder,
                 field=field,
             )
-        else:
-            draw_fitted_left(
-                draw,
-                text,
-                x,
-                y,
-                budget=budget,
-                nominal_size=size,
-                line_spacing=row_height,
-                recorder=recorder,
-                field=field,
-            )
-    elif right:
+        return draw_fitted_left(
+            draw,
+            text,
+            x,
+            y,
+            budget=budget,
+            nominal_size=size,
+            line_spacing=row_height,
+            recorder=recorder,
+            field=field,
+        )
+    if right:
         draw_text_right(draw, text, x_right=x, y=y, font=font, recorder=recorder, field=field)
     else:
         draw_text_left(draw, text, x, y, font, recorder=recorder, field=field)
+    return y + row_height

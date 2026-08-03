@@ -42,7 +42,7 @@ def resolve_role(layout: dict, role: str) -> int:
     return int(sizes[role])
 
 
-def _line_height(size: int) -> int:
+def line_height(size: int) -> int:
     """Return the vertical advance for a font size."""
     return int(size * 1.4)
 
@@ -85,7 +85,7 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
         align=block.get("align", "left"),
         color=block.get("color", "black"),
     )
-    end = y + _line_height(size)
+    end = y + line_height(size)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
         ctx.recorder.record(field, (left, y, right, end))
@@ -108,7 +108,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     value = interpolate(block["value"], ctx.entry["fields"])
     text = f"{label}: {value}"
     left, right = _draw_line(ctx, text, y, size=size, align="left", color=block.get("color", "black"))
-    end = y + _line_height(size)
+    end = y + line_height(size)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
         # Record the value's own extent, not the label's.
@@ -147,10 +147,10 @@ def draw_block(block: dict, ctx: RenderContext, y: int) -> int:
             color=color,
             bold=True,
         )
-        y += _line_height(size)
+        y += line_height(size)
     for line in block["lines"]:
         _draw_line(ctx, interpolate(line, ctx.entry["fields"]), y, size=size, align="left", color=color)
-        y += _line_height(size)
+        y += line_height(size)
     return y
 
 
