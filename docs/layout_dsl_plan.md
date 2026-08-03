@@ -3266,6 +3266,40 @@ git commit -m ":sparkles: express ANZ bank layouts in the declarative DSL"
 
 ---
 
+### Task 13b: Persisted pixel-snapshot test (prerequisite for Task 14)
+
+**Files:**
+- Test: `tests/test_bank_pixel_snapshot.py`
+- Create: `tests/fixtures/bank_pixel_hashes.json` (checked in? No — `tests/` is gitignored; see note)
+
+**Why this exists.** The equivalence harness compares recorded field geometry only. It
+cannot see colour, font weight, rules, fills, or anything in a region carrying no
+ground-truth field. Four consecutive banks passed it while rendering something visibly
+wrong — Westpac's grey text rendering black, NAB's un-bolded Carried-forward row, ANZ's
+brought-forward weight, and a stray `#CCCCCC` per-row rule that CBA shipped for four
+tasks (53,217 spurious pixels against legacy's 386). Every one was caught by ad-hoc pixel
+inspection; none by an assertion, and none of that evidence persists in `tests/`.
+
+Task 14 deletes `generators/bank_statement.py`. After that there is no oracle to diff
+against, so the snapshot must be captured **while legacy still exists**.
+
+**What to capture.** For every bank ground-truth entry, render through the DSL and store
+a hash of the full page. Assert on every run that the hash is unchanged. Capture the
+legacy renderer's hash too, and record — as data, not as an assertion — which entries are
+currently byte-identical between the two paths (today: ANZ 14/14; the other six differ,
+CBA overwhelmingly by the known 2px offset, Westpac by disclosed content choices).
+
+The DSL hash is the regression guard and must be asserted. The legacy hash is historical
+evidence of what the migration changed, and retires with Task 14.
+
+**Note on gitignored tests.** `tests/` is gitignored in this repo, so the snapshot file
+cannot be committed. Write it under `tests/fixtures/` for local use, and additionally
+emit the DSL hashes to a committed location the pipeline can verify against — decide
+where with the same reasoning used for `derived/geometry.jsonl`, which is a regenerable
+artefact kept out of `ground_truth/`.
+
+---
+
 ### Task 14: Delete the legacy bank renderers
 
 **Files:**
