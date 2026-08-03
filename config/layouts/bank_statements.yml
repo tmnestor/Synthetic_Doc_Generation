@@ -48,6 +48,116 @@ _westpac_txn_dividers: &westpac_txn_dividers
   - {x_right: -320}
   - {x_right: -160}
 
+# NAB's transaction columns (see bank_statement.py:674-684, render_nab). Row
+# content anchors, not the header's: the description column sits at
+# col_desc_x+20 (legacy indents row text but not the "Particulars" header
+# label by the same 20px) because TRANSACTION_DESCRIPTIONS geometry is what
+# the equivalence harness checks — the header label itself is never recorded,
+# so it is the one place these two layouts accept a small, deliberate, purely
+# cosmetic 20px rightward shift from legacy rather than adding a primitive
+# concept (a column's label anchor independent of its content anchor) that
+# nothing else in this file needs. The `reference` sub_line (nab_classic
+# only) reads a row key the `references: true` provider param computes —
+# NAB's sha256-derived dotted-leader reference number.
+_nab_txn_columns_with_reference: &nab_txn_columns_with_reference
+  - {key: date, label: Date, align: left, x: 10}
+  - {key: description, label: Particulars, align: left, x: 180,
+     budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS,
+     sub_line: {key: reference, role: sub_description, color: "#999999", offset_y: 34, height: 32}}
+  - {key: debit, label: Debits, align: right, x_right: -380, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -190, field: TRANSACTION_AMOUNTS_RECEIVED}
+  - {key: balance, label: Balance, align: right, x_right: -10,
+     currency_suffix: "Cr", last_row_field: ACCOUNT_BALANCE}
+
+_nab_txn_columns: &nab_txn_columns
+  - {key: date, label: Date, align: left, x: 10}
+  - {key: description, label: Particulars, align: left, x: 180,
+     budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS}
+  - {key: debit, label: Debits, align: right, x_right: -380, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -190, field: TRANSACTION_AMOUNTS_RECEIVED}
+  - {key: balance, label: Balance, align: right, x_right: -10,
+     currency_suffix: "Cr", last_row_field: ACCOUNT_BALANCE}
+
+# The "Account Details" box's own interior (heading/payer/BSB/account number)
+# records no ground-truth field in the legacy renderer (bank_statement.py:650-665
+# — none of those draw calls pass a recorder), so its content below is a
+# faithful-but-not-pixel-exact stand-in: legacy right-aligns BSB/Account Number
+# as label+value pairs at a fixed offset from the right edge, drawn on the same
+# line as the account holder; this uses `pair` (a colon-joined single string)
+# in a `split` instead, which is the closest existing primitive vocabulary
+# gets. It costs nothing on the equivalence harness either way.
+_nab_account_box_children: &nab_account_box_children
+  - {type: text, content: "Account Details", role: body, bold: true}
+  - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body}
+  - type: split
+    gap: 20
+    children:
+      - - {type: pair, label: "BSB Number", value: "082-456", role: sub_description, color: "#666666"}
+      - - {type: pair, label: "Account Number", value: "98-765-4321", role: sub_description,
+            color: "#666666"}
+
+# Every spacer below corrects a `text` block's own computed `line_height`
+# advance up to the legacy renderer's real, unconditional pixel jump (72,
+# 150, 170, 40, 52 — see bank_statement.py:645-669), which does not scale
+# with font_sizes. Both variants share the same box height (150), the same
+# 170px jump to the supplier line, the same 40px supplier-line advance, and
+# the same 52px gap before the header bar; only the correction each spacer
+# needs to reach that target differs, because nab_classic and nab_dense use
+# different font_sizes and therefore different natural line_height() advances.
+_nab_classic_body: &nab_classic_body
+  - {type: text, content: "NAB Classic Banking", role: header, color: "#003366", bold: true}
+  - {type: spacer, height: 11}  # line_height(44)=61 -> legacy's real 72px jump.
+  - type: panel
+    height: 150
+    padding: 18
+    border_color: "#003366"
+    children: *nab_account_box_children
+  - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME}
+  - {type: spacer, height: 1}  # line_height(28)=39 -> legacy's real 40px (_draw_supplier_line's line_spacing).
+  - {type: text, content: "Transaction Details (continued)", role: body, bold: true}
+  - {type: spacer, height: 13}  # line_height(28)=39 -> legacy's real 52px gap before the header bar.
+  - type: table
+    rows: bank_transactions
+    frame: filled
+    grouping: dedicated_row
+    fill_color: "#E8F0FE"
+    fill_inset: 2
+    header_height: 50
+    fill_height: 44
+    label_inset_y: 10
+    group_gap: 0
+    synthetic_row_placement: after_first_group_header
+    params: {brought_forward: true, carried_forward: true, references: true}
+    columns: *nab_txn_columns_with_reference
+
+_nab_dense_body: &nab_dense_body
+  - {type: text, content: "NAB Classic Banking", role: header, color: "#003366", bold: true}
+  - {type: spacer, height: 16}  # line_height(40)=56 -> legacy's real 72px jump.
+  - type: panel
+    height: 150
+    padding: 18
+    border_color: "#003366"
+    children: *nab_account_box_children
+  - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME}
+  - {type: spacer, height: 7}  # line_height(24)=33 -> legacy's real 40px (_draw_supplier_line's line_spacing).
+  - {type: text, content: "Transaction Details (continued)", role: body, bold: true}
+  - {type: spacer, height: 19}  # line_height(24)=33 -> legacy's real 52px gap before the header bar.
+  - type: table
+    rows: bank_transactions
+    frame: filled
+    grouping: dedicated_row
+    fill_color: "#E8F0FE"
+    fill_inset: 2
+    header_height: 50
+    fill_height: 44
+    label_inset_y: 10
+    group_gap: 0
+    synthetic_row_placement: after_first_group_header
+    params: {brought_forward: true, carried_forward: true}
+    columns: *nab_txn_columns
+
 layouts:
   cba_standard:
     <<: *cba
@@ -262,6 +372,7 @@ layouts:
     show_references: true
     show_brought_forward: true
     date_format: "DD MMM YYYY"
+    body: *nab_classic_body
 
   nab_dense:
     field_budgets:
@@ -289,6 +400,7 @@ layouts:
     show_references: false
     show_brought_forward: true
     date_format: "DD MMM YY"
+    body: *nab_dense_body
 
   anz_standard:
     field_budgets:
