@@ -25,6 +25,8 @@
 - `tests/` is gitignored — local only, never committed. Commit source and config only.
 - Pre-commit gates, all four must pass: `conda run -n synthetic pytest tests/`, `ruff check --fix --ignore ARG001,ARG002,F841 *.py`, `ruff format .`, `mypy . --ignore-missing-imports`. **Never** use `--no-verify`.
 - Commit messages use gitmoji. **No Claude attribution, ever.**
+- Import the shared test helper as `from conftest import assert_diagnostic_error` — bare, not `from tests.conftest import ...`. This is the repo's existing convention and works from test subdirectories (see `tests/exporters/test_config.py:8`).
+- A `.git/hooks/pre-commit` hook runs `ruff check --fix` on staged Python files. Never bypass it.
 - Never write the term "ATO" anywhere. Use "PROD".
 - Branch: `feat/declarative-layouts`.
 
@@ -851,7 +853,7 @@ Budget widths are validated, never derived — operator intent stays visible in 
 import pytest
 
 from generators.layout_dsl.schema import LayoutSchemaError, validate_body
-from tests.conftest import assert_diagnostic_error
+from conftest import assert_diagnostic_error
 
 FIELDS = {"PAYER_NAME", "SUPPLIER_NAME", "STATEMENT_DATE_RANGE"}
 
@@ -1470,7 +1472,7 @@ from generators.layout_dsl.primitives_text import (
     draw_text_block,
     resolve_role,
 )
-from tests.conftest import assert_diagnostic_error
+from conftest import assert_diagnostic_error
 
 LAYOUT = {"font_sizes": {"header": 48, "body": 32, "footer": 18}, "margin": 100}
 
@@ -2260,7 +2262,7 @@ from PIL import Image, ImageDraw
 from generators.layout_dsl.context import Region, RenderContext
 from generators.layout_dsl.engine import PRIMITIVE_DRAWERS, EngineError, render_blocks
 from generators.layout_dsl.schema import PRIMITIVES
-from tests.conftest import assert_diagnostic_error
+from conftest import assert_diagnostic_error
 
 
 def _ctx() -> RenderContext:
@@ -3015,7 +3017,7 @@ import pytest
 
 from generators.layout_dsl.schema import LayoutSchemaError, validate_layout
 from generators.loader import load_layout_registry
-from tests.conftest import assert_diagnostic_error
+from conftest import assert_diagnostic_error
 
 LAYOUT_PATH = Path("config/layouts/bank_statements.yml")
 BANK_FIELDS = {
