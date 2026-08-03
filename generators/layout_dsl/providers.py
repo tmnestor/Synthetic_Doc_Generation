@@ -15,17 +15,31 @@ from generators.common import fmt_amount
 RowProvider = Callable[[dict, dict], list[dict]]
 
 _REGISTRY: dict[str, RowProvider] = {}
+# Each provider declares the top-level `params:` keys it reads, at
+# registration time, alongside the function itself — the provider is the one
+# place that knowledge belongs, since only it knows what it accepts. schema.py
+# reads this via `provider_param_keys()` to reject an unknown params key (e.g.
+# a typo like `opening_balnce`) at validate time rather than have it silently
+# do nothing, indistinguishable from a param that was never set.
+_PARAM_KEYS: dict[str, frozenset[str]] = {}
 
 
 class ProviderError(RuntimeError):
     """Raised when a provider is unknown, duplicated, or given bad input."""
 
 
-def row_provider(name: str) -> Callable[[RowProvider], RowProvider]:
+def row_provider(
+    name: str, *, params: frozenset[str] = frozenset()
+) -> Callable[[RowProvider], RowProvider]:
     """Register a row provider under `name`.
 
     Args:
         name: The name layouts use in a table's `rows:` key.
+        params: The top-level `params:` keys this provider reads. Combinations
+            the provider itself further restricts (e.g. two keys being
+            mutually exclusive) stay a render-time `ProviderError` raised by
+            the provider — this only declares which key *names* are valid,
+            for schema.py to catch a typo before any provider runs.
 
     Returns:
         A decorator that registers and returns the function unchanged.
@@ -42,6 +56,7 @@ def row_provider(name: str) -> Callable[[RowProvider], RowProvider]:
             )
             raise ProviderError(msg)
         _REGISTRY[name] = func
+        _PARAM_KEYS[name] = params
         return func
 
     return decorate
@@ -77,7 +92,23 @@ def provider_names() -> list[str]:
     return sorted(_REGISTRY)
 
 
-@row_provider("pipe_fields")
+def provider_param_keys(name: str) -> frozenset[str]:
+    """Return the top-level `params:` keys a registered provider accepts.
+
+    Args:
+        name: A registered provider name (validate the name itself with
+            `provider_names()`/`get_provider()` first; this returns an empty
+            set for an unknown name rather than raising, since schema.py
+            already reports the unknown-provider case with its own
+            diagnostic before ever reaching a params check).
+
+    Returns:
+        The frozenset passed to this provider's `@row_provider(..., params=...)`.
+    """
+    return _PARAM_KEYS.get(name, frozenset())
+
+
+@row_provider("pipe_fields", params=frozenset({"fields"}))
 def pipe_fields(entry: dict, params: dict) -> list[dict]:
     """Zip pipe-delimited list fields into row dicts.
 
@@ -124,7 +155,22 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
 _SYNTHETIC_LABELS = {"opening_balance": "Opening Balance", "brought_forward": "Balance Brought Forward"}
 
 
-@row_provider("bank_transactions")
+@row_provider(
+    "bank_transactions",
+    params=frozenset(
+        {
+            "opening_balance",
+            "brought_forward",
+            "opening_balance_label",
+            "brought_forward_label",
+            "opening_balance_bold",
+            "brought_forward_bold",
+            "carried_forward",
+            "references",
+            "balance_suffix",
+        }
+    ),
+)
 def bank_transactions(entry: dict, params: dict) -> list[dict]:
     """Build bank statement rows with running balances computed backwards.
 
@@ -281,7 +327,7 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
     return rows
 
 
-@row_provider("bank_transaction_totals")
+@row_provider("bank_transaction_totals", params=frozenset({"label"}))
 def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
     """Build a single trailing row summing every transaction's debits and credits.
 

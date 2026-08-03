@@ -27,6 +27,13 @@ from generators.layout_dsl.providers import get_provider
 
 _ABSENT = "NOT_FOUND"
 
+# Public: schema.py imports this as the single source of truth for validating
+# a table column's `align:` key. Deliberately narrower than
+# primitives_text.ALIGNMENTS — a column's cells dispatch on exactly
+# `align == "right"` (see `_draw_row`/`_draw_header` below) and treat every
+# other value, including "center", as left; there is no third option here.
+COLUMN_ALIGNMENTS = ("left", "right")
+
 # Frames whose header label block is vertically centred within header_height
 # rather than pinned to its top: `bordered` draws an outlined box, `filled`
 # a solid one, and both need their labels centred inside it, matching the
@@ -422,13 +429,16 @@ def _draw_row(
     """Draw one row; `index` is None for synthetic rows, which are not recorded.
 
     `is_last` marks the final row in the table's own row list — real or
-    synthetic — which is where a column's `last_row_field`, if any,
-    additionally records unindexed geometry, matching legacy renderers that
-    record a closing balance once. For CBA (a leading synthetic row, or
-    none) this is always the final real transaction; for NAB (a *trailing*
-    synthetic "Carried forward" row, via `carried_forward` on the provider)
-    it is that synthetic row instead, since `last_row_field`'s redraw does
-    not gate on `index is not None` the way ordinary `field` recording does.
+    synthetic — which is where a column's `last_row_field`, if any, records
+    unindexed geometry *instead of* its ordinary indexed `field`, matching
+    legacy renderers that record a closing balance once. For CBA (a leading
+    synthetic row, or none) this is always the final real transaction; for
+    NAB (a *trailing* synthetic "Carried forward" row, via `carried_forward`
+    on the provider) it is that synthetic row instead, since
+    `last_row_field`'s recording does not gate on `index is not None` the
+    way ordinary `field` recording does. No bank column carries both `field`
+    and `last_row_field` (verified across all 8 layouts), so selecting one
+    name per cell for a single draw is exhaustive — see the loop below.
 
     `first_row`/`is_new_group` drive the `bordered` frame combined with
     `inline` grouping: plain `bordered` (grouping `none`) draws a divider
@@ -492,9 +502,26 @@ def _draw_row(
         if budget_name is not None:
             budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
 
+        # `last_row_field` (unindexed, only on the table's final row) and
+        # `field` (indexed, every row) are mutually exclusive on every real
+        # column, so a single draw picks whichever one applies rather than
+        # drawing the cell twice under two names. A second `draw.text` at
+        # the identical position is not a no-op: PIL alpha-composites each
+        # call's antialiased glyph mask onto what is already there, so the
+        # "redraw" this used to do measurably darkened every soft edge
+        # whenever a recorder was present -- i.e. always in production
+        # (generators/pipeline.py always passes geometry_out={}), never in
+        # a bare render_via_dsl() call. 22/55 real bank entries differed by
+        # 267-1109px between the two before this fix.
+        last_row_field = column.get("last_row_field")
         field = column.get("field")
-        record_field = f"{field}[{index}]" if field is not None and index is not None else None
-        recorder = ctx.recorder if index is not None else None
+        if last_row_field is not None and is_last:
+            record_field = last_row_field
+            recorder = ctx.recorder
+        else:
+            record_field = f"{field}[{index}]" if field is not None and index is not None else None
+            recorder = ctx.recorder if index is not None else None
+
         cell_bottom = _draw_cell(
             ctx.draw,
             text,
@@ -510,27 +537,6 @@ def _draw_row(
             field=record_field,
         )
         bottom = max(bottom, cell_bottom)
-
-        last_row_field = column.get("last_row_field")
-        if last_row_field is not None and is_last and ctx.recorder is not None:
-            # Redraw the identical cell — same text, same coordinates, same fit —
-            # purely to reuse the tested measurement logic in draw_text_*/
-            # draw_fitted_* for the second, unindexed record. Pixels are
-            # unchanged: this draws over itself, so it cannot change `bottom`.
-            _draw_cell(
-                ctx.draw,
-                text,
-                x,
-                y,
-                right=right,
-                budget=budget,
-                size=size,
-                row_height=row_height,
-                font=font,
-                bold=cell_bold,
-                recorder=ctx.recorder,
-                field=last_row_field,
-            )
 
     bottom += _draw_sub_lines(row, columns, ctx, y)
 

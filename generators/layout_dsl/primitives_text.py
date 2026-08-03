@@ -8,7 +8,10 @@ from generators.common import draw_separator_line, load_font
 from generators.layout_dsl.binding import interpolate
 from generators.layout_dsl.context import RenderContext
 
-_ALIGNMENTS = ("left", "center", "right")
+# Public: schema.py imports this as the single source of truth for validating
+# a `text` block's `align:` key, so a typo (e.g. "centre") fails at validate
+# time rather than silently left-aligning (the pre-typo-check default here).
+ALIGNMENTS = ("left", "center", "right")
 
 
 class RoleError(RuntimeError):
@@ -103,6 +106,7 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     if suppress_key is not None and (not text or text == str(ctx.layout.get(suppress_key))):
         return y
 
+    bold = bool(block.get("bold", False))
     left, right = _draw_line(
         ctx,
         text,
@@ -110,12 +114,19 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
         size=size,
         align=block.get("align", "left"),
         color=block.get("color", "black"),
-        bold=bool(block.get("bold", False)),
+        bold=bold,
     )
-    end = y + line_height(size)
+    end = y + line_height(size)  # Flow advance: unrelated to the recorded box below.
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
-        ctx.recorder.record(field, (left, y, right, end))
+        # Ink extent, not the line-height advance `end` -- matches draw_pair
+        # and four of common.py's five text recorders (draw_text_left/right/
+        # center, capture_label_prefixed_value); the advance box is 1.43-
+        # 1.70x too tall for a single line, which systematically depresses
+        # IoU against a localisation benchmark's ground truth.
+        bbox = load_font(size, bold=bold).getbbox(text)
+        text_height = int(bbox[3] - bbox[1])
+        ctx.recorder.record(field, (left, y, right, y + text_height))
     return end
 
 
@@ -134,7 +145,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     label = interpolate(block["label"], ctx.entry["fields"])
     value = interpolate(block["value"], ctx.entry["fields"])
     text = f"{label}: {value}"
-    left, right = _draw_line(ctx, text, y, size=size, align="left", color=block.get("color", "black"))
+    left, _ = _draw_line(ctx, text, y, size=size, align="left", color=block.get("color", "black"))
     end = y + line_height(size)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
