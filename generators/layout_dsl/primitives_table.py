@@ -357,8 +357,18 @@ def _draw_row(
     separate wrap computation that could drift out of sync with the one the
     draw call actually used. Only then is the row's own decoration (a border
     or rule, which needs the final `bottom`) drawn.
+
+    A row renders bold throughout when a provider marks it `row["bold"] =
+    True` — NAB's "Carried forward" row, which legacy draws in
+    `font_body_bold`, unlike its "Brought forward"/"Opening Balance" leading
+    rows, which stay regular. This is provider-set row data, not a layout
+    YAML key: which specific row is bold is a fact about legacy's renderer
+    (which row it is), not a per-layout style choice an author would toggle,
+    exactly parallel to how `synthetic` itself is provider-set rather than
+    YAML-configurable.
     """
-    font = load_font(size)
+    row_bold = bool(row.get("bold", False))
+    font = load_font(size, bold=row_bold)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
@@ -388,6 +398,7 @@ def _draw_row(
             size=size,
             row_height=row_height,
             font=font,
+            bold=row_bold,
             recorder=recorder,
             field=record_field,
         )
@@ -409,6 +420,7 @@ def _draw_row(
                 size=size,
                 row_height=row_height,
                 font=font,
+                bold=row_bold,
                 recorder=ctx.recorder,
                 field=last_row_field,
             )
@@ -484,10 +496,16 @@ def _draw_cell(
     size: int,
     row_height: int,
     font: Font,
+    bold: bool = False,
     recorder: BoxRecorder | None,
     field: str | None,
 ) -> int:
     """Draw one cell, dispatching on alignment and whether it has a fit budget.
+
+    `font` already carries the row's weight (see `_draw_row`) for the
+    unbudgeted path below; `bold` is threaded separately to `draw_fitted_left`/
+    `draw_fitted_right`, which build their own font internally from
+    `nominal_size` and do not accept a pre-built `Font`.
 
     Returns:
         The cell's own bottom y: the wrapped advance from `draw_fitted_left`/
@@ -503,6 +521,7 @@ def _draw_cell(
                 y,
                 budget=budget,
                 nominal_size=size,
+                bold=bold,
                 line_spacing=row_height,
                 recorder=recorder,
                 field=field,
@@ -514,6 +533,7 @@ def _draw_cell(
             y,
             budget=budget,
             nominal_size=size,
+            bold=bold,
             line_spacing=row_height,
             recorder=recorder,
             field=field,

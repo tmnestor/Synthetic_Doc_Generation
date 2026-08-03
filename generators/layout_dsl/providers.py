@@ -147,8 +147,10 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
 
     Returns:
         One dict per row with keys `date`, `description`, `debit`, `credit`,
-        `balance` (Decimal), `synthetic` (bool), and — only on real rows, and
-        only when `references` is set — `reference`.
+        `balance` (Decimal), `synthetic` (bool); `reference` only on real
+        rows, and only when `references` is set; `bold` (True) only on the
+        `carried_forward` row, which legacy draws in `font_body_bold` unlike
+        its leading-row counterparts.
 
     Raises:
         ProviderError: If both leading synthetic-row options are requested, or
@@ -222,6 +224,12 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
                 "credit": "NOT_FOUND",
                 "balance": closing_balance,
                 "synthetic": True,
+                # Legacy draws this row in font_body_bold, unlike the leading
+                # Opening Balance / Brought Forward rows above, which stay
+                # regular weight -- a fact about this specific row, not a
+                # layout-level style choice, so it is set here rather than
+                # exposed as a YAML key.
+                "bold": True,
             }
         )
 
