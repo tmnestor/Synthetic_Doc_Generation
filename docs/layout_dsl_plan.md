@@ -722,6 +722,24 @@ def test_bank_transactions_rejects_both_synthetic_rows():
 def test_bank_transactions_without_synthetic_row_marks_all_real():
     rows = get_provider("bank_transactions")(_bank_entry(), {})
     assert all(row["synthetic"] is False for row in rows)
+
+
+def test_malformed_amount_fails_loudly_rather_than_becoming_zero():
+    entry = _bank_entry()
+    entry["fields"]["TRANSACTION_AMOUNTS_PAID"] = "12.3.4|NOT_FOUND"
+    with pytest.raises(ProviderError) as exc_info:
+        get_provider("bank_transactions")(entry, {})
+    message = str(exc_info.value)
+    assert "12.3.4" in message
+    assert "Remediation:" in message
+
+
+def test_absent_value_sentinels_still_read_as_zero():
+    from generators.layout_dsl.providers import _to_decimal
+
+    assert _to_decimal("") == Decimal("0")
+    assert _to_decimal("NOT_FOUND") == Decimal("0")
+    assert _to_decimal("137.73") == Decimal("137.73")
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -802,21 +820,40 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
 
 
 def _to_decimal(value: str) -> Decimal:
-    """Parse an amount, treating the NOT_FOUND sentinel and junk as zero.
+    """Parse an amount, treating only the absent-value sentinels as zero.
+
+    A malformed amount is a ground-truth defect and must fail loudly: coercing
+    it to zero would corrupt every running balance below it and emit a
+    plausible-looking but wrong statement.
 
     Args:
         value: An amount string from ground truth.
 
     Returns:
-        The parsed Decimal, or Decimal("0").
+        The parsed Decimal, or Decimal("0") for the absent-value sentinels.
+
+    Raises:
+        ProviderError: If the value is neither a sentinel nor a valid amount.
     """
     if value in ("", "NOT_FOUND"):
         return Decimal("0")
     try:
         return Decimal(value)
-    except ArithmeticError:
-        return Decimal("0")
+    except ArithmeticError as err:
+        msg = (
+            f"Malformed amount {value!r} in a bank transaction.\n"
+            f"  Remediation: fix the amount in ground_truth/bank_statements.yml; "
+            f"amounts are decimal strings without a currency sign, e.g. '137.73'."
+        )
+        raise ProviderError(msg) from err
 ```
+
+**Ruling (supersedes the original plan text):** an earlier draft of this task caught
+`ArithmeticError` and returned `Decimal("0")`. Because `decimal.InvalidOperation` is an
+`ArithmeticError`, that silently coerced malformed amounts to zero — corrupting every
+balance below them — which contradicts CLAUDE.md's "NEVER use silent fallbacks" rule.
+The legacy `_compute_running_balances` raised `InvalidOperation` on the same input, so
+the silent version was also *quieter* than the code it replaces. Fail-fast governs.
 
 - [ ] **Step 4: Run test to verify it passes**
 
