@@ -186,17 +186,29 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
 
 
 def _to_decimal(value: str) -> Decimal:
-    """Parse an amount, treating the NOT_FOUND sentinel and junk as zero.
+    """Parse an amount, treating only the absent-value sentinels as zero.
+
+    A malformed amount is a ground-truth defect and must fail loudly: coercing
+    it to zero would corrupt every running balance below it and emit a
+    plausible-looking but wrong statement.
 
     Args:
         value: An amount string from ground truth.
 
     Returns:
-        The parsed Decimal, or Decimal("0").
+        The parsed Decimal, or Decimal("0") for the absent-value sentinels.
+
+    Raises:
+        ProviderError: If the value is neither a sentinel nor a valid amount.
     """
     if value in ("", "NOT_FOUND"):
         return Decimal("0")
     try:
         return Decimal(value)
-    except ArithmeticError:
-        return Decimal("0")
+    except (ArithmeticError, TypeError) as err:
+        msg = (
+            f"Malformed amount {value!r} in a bank transaction.\n"
+            f"  Remediation: fix the amount in ground_truth/bank_statements.yml; "
+            f"amounts are decimal strings without a currency sign, e.g. '137.73'."
+        )
+        raise ProviderError(msg) from err
