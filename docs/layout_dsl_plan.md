@@ -1134,7 +1134,8 @@ ROW_STYLES = ("ruled", "bordered", "grouped", "plain")
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "text": (("content",), ("role", "align", "color", "field")),
-    "pair": (("label", "value"), ("role", "color", "field", "gap")),
+    # No "gap": draw_pair renders "label: value" as one string and never reads it.
+    "pair": (("label", "value"), ("role", "color", "field")),
     "block": (("lines",), ("role", "color", "heading")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),
@@ -1759,9 +1760,12 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     end = y + _line_height(size)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
-        # Record the value's own extent, not the label's.
+        # Record the value's own extent, not the label's. Measure the label with
+        # textlength (glyph advance) to match generators/common.py:482 _record_paired,
+        # the existing helper that solves exactly this problem; getbbox (ink extent)
+        # would place the left edge 0-2px right of where the rest of the corpus puts it.
         font = load_font(size)
-        label_width = int(font.getbbox(f"{label}: ")[2])
+        label_width = int(ctx.draw.textlength(f"{label}: ", font=font))
         ctx.recorder.record(field, (left + label_width, y, right, end))
     return end
 
@@ -1801,9 +1805,19 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
+    thickness = int(block.get("thickness", 1))
     y += int(block.get("pad_above", 0))
-    draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color=block.get("color", "black"))
-    y += int(block.get("thickness", 1)) + int(block.get("pad_below", 0))
+    # Pass thickness through: it must change the drawn line, not only the space
+    # reserved for it, or a layout setting thickness: 3 silently draws 1px.
+    draw_separator_line(
+        ctx.draw,
+        ctx.region.x,
+        ctx.region.right,
+        y,
+        color=block.get("color", "black"),
+        width=thickness,
+    )
+    y += thickness + int(block.get("pad_below", 0))
     return y
 
 
