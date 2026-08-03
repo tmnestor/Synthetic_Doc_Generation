@@ -67,18 +67,23 @@ def _draw_line(
 def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a single line of text.
 
-    Two optional keys change how `content` resolves and whether the line
-    draws at all — both exist to let a letterhead/supplier pair share one
+    `content` and `from_layout` are mutually exclusive alternatives for
+    *what* to draw (enforced at validate time, in schema.py's
+    `_validate_block`); `suppress_if_equals` separately controls *whether*
+    to draw at all. Together they let a letterhead/supplier pair share one
     block vocabulary instead of hand-written Python (mirrors the legacy
     renderers' `_draw_supplier_line`):
 
-    - `from_layout: true` reads `content` as a layout key (e.g. `logo_text`)
-      rather than a `{FIELD}` template, so the drawn brand genuinely comes
-      from the layout, not a Python or YAML literal that can drift from it.
+    - `content: '{FIELD}'` interpolates an entry field, as usual.
+    - `from_layout: <layout_key>` reads that key directly off the layout
+      dict instead — e.g. `from_layout: logo_text` — so the drawn brand
+      genuinely comes from the layout, not a Python or YAML literal that
+      can drift from it. Unlike `content`, this is not a template: the
+      layout's value is used verbatim, with no `{FIELD}` substitution.
     - `suppress_if_equals: <layout_key>` skips drawing (and recording)
-      entirely when the interpolated text is empty or equals that layout
-      key's value — the content supplier line is redundant whenever it
-      already matches the letterhead already on the page.
+      entirely when the resolved text is empty or equals that layout key's
+      value — the content supplier line is redundant whenever it already
+      matches the letterhead already on the page.
 
     Args:
         block: The `text` block.
@@ -89,8 +94,8 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
         The advanced y-cursor (unchanged if the block was suppressed).
     """
     size = resolve_role(ctx.layout, block.get("role", "body"))
-    if block.get("from_layout"):
-        text = str(ctx.layout[block["content"]])
+    if "from_layout" in block:
+        text = str(ctx.layout[block["from_layout"]])
     else:
         text = interpolate(block["content"], ctx.entry["fields"])
 
@@ -225,12 +230,12 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
     content below the bar actually starts at.
 
     Args:
-        block: The `banner` block, carrying `content`, `height`, `color`, and
-            optional `text_color` (default white), `role` (font-size role,
-            default "header"), `bold` (default False), `text_y` (the text's
-            absolute y from the page top, default 0), and `from_layout`
-            (when true, `content` names a layout key read literally instead
-            of a `{FIELD}` template — see `draw_text_block`).
+        block: The `banner` block, carrying `height`, `color`, and either
+            `content` or `from_layout` (mutually exclusive — see
+            `draw_text_block`), plus optional `text_color` (default white),
+            `role` (font-size role, default "header"), `bold` (default
+            False), and `text_y` (the text's absolute y from the page top,
+            default 0).
         ctx: Render context.
         y: Current y-cursor, returned unchanged.
 
@@ -243,8 +248,8 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
 
     size = resolve_role(ctx.layout, block.get("role", "header"))
     font = load_font(size, bold=bool(block.get("bold", False)))
-    if block.get("from_layout"):
-        text = str(ctx.layout[block["content"]])
+    if "from_layout" in block:
+        text = str(ctx.layout[block["from_layout"]])
     else:
         text = interpolate(block["content"], ctx.entry["fields"])
     ctx.draw.text(

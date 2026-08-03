@@ -30,9 +30,13 @@ GROUPINGS = ("none", "dedicated_row", "inline")
 
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    # `content` and `from_layout` are mutually exclusive alternatives, not two
+    # independent optional keys — see the "exactly one of" check in
+    # _validate_block. Neither is in `required` because the choice between
+    # them is validated there, with a diagnostic naming both options.
     "text": (
-        ("content",),
-        ("role", "align", "color", "field", "bold", "from_layout", "suppress_if_equals"),
+        (),
+        ("content", "from_layout", "role", "align", "color", "field", "bold", "suppress_if_equals"),
     ),
     "pair": (("label", "value"), ("role", "color", "field")),
     "block": (("lines",), ("role", "color", "heading")),
@@ -41,8 +45,8 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
     "banner": (
-        ("content", "height", "color"),
-        ("text_color", "role", "text_y", "bold", "from_layout"),
+        ("height", "color"),
+        ("content", "from_layout", "text_color", "role", "text_y", "bold"),
     ),
     "table": (
         ("rows", "columns", "frame", "grouping"),
@@ -197,6 +201,24 @@ def _validate_block(
             expected=f"only {sorted(allowed)}.",
             recover=f"remove {unknown}, or add them to PRIMITIVES in generators/layout_dsl/schema.py.",
         )
+
+    if kind in ("text", "banner"):
+        has_content = "content" in block
+        has_from_layout = "from_layout" in block
+        if has_content == has_from_layout:
+            raise _err(
+                f"'{kind}' block sets "
+                + (
+                    "both 'content' and 'from_layout'."
+                    if has_content
+                    else "neither 'content' nor 'from_layout'."
+                ),
+                layout_path=layout_path,
+                key_path=key_path,
+                expected="exactly one of: content: '{FIELD}' (an entry-field template) or "
+                "from_layout: <layout_key> (a layout value read literally).",
+                recover="set 'content:' or 'from_layout:', not both or neither.",
+            )
 
     _validate_references(block, layout_path=layout_path, known_fields=known_fields, key_path=key_path)
 
@@ -491,17 +513,19 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
         here = f"{key_path}[{index}]"
         kind = block["type"]
 
-        # `from_layout` and `suppress_if_equals` (text/banner) name a layout
-        # key to read at render time, not a `{FIELD}` template — check the
+        # `from_layout` and `suppress_if_equals` (text/banner) each hold a
+        # layout key name directly (not a `{FIELD}` template) — check the
         # key actually exists here, where the layout dict is in scope, since
-        # `_validate_references` only knows entry fields.
-        if block.get("from_layout"):
-            key = block["content"]
+        # `_validate_references` only knows entry fields. Each is validated
+        # against its own value at its own key_path — do not conflate the
+        # two: `from_layout`'s value never lives in `content`.
+        if "from_layout" in block:
+            key = block["from_layout"]
             if key not in layout:
                 raise _err(
                     f"'from_layout' names layout key '{key}', which this layout does not define.",
                     layout_path=layout_path,
-                    key_path=f"{here}.content",
+                    key_path=f"{here}.from_layout",
                     expected=f"a key present in the layout, e.g. {key}: <value>.",
                     recover=f"add '{key}:' to the layout, or fix the key name.",
                 )
