@@ -16,6 +16,7 @@ from generators.common import (
     draw_separator_line,
     draw_text_left,
     draw_text_right,
+    fit_text,
     fmt_amount,
     load_font,
 )
@@ -114,6 +115,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     for row in rows:
         synthetic = bool(row.get("synthetic"))
         if style == "grouped" and not synthetic and row.get("date") != previous_date:
+            if previous_date is not None:
+                y += 10  # Gap between date groups, matching the legacy renderers.
             draw_text_left(
                 ctx.draw, str(row.get("date", "")), ctx.region.x, y, load_font(body_size, bold=True)
             )
@@ -160,6 +163,35 @@ def _draw_header(
     return y
 
 
+def _row_line_count(row: dict, columns: list, ctx: RenderContext, *, size: int) -> int:
+    """Return how many lines this row's tallest budgeted cell wraps to.
+
+    Mirrors the legacy bank renderers, which size every row from the
+    transaction description's wrap result — the only cell that can span
+    multiple lines — so a wrapped description pushes every following row
+    down by the same amount in both renderers.
+    """
+    lines = 1
+    for column in columns:
+        budget_name = column.get("budget")
+        if budget_name is None:
+            continue
+        text = _cell_text(row, column["key"])
+        if not text:
+            continue
+        budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
+        result = fit_text(
+            text,
+            width=budget["width"],
+            fit=budget["fit"],
+            min_font=budget["min_font"],
+            max_lines=budget["max_lines"],
+            nominal_size=size,
+        )
+        lines = max(lines, len(result.lines))
+    return lines
+
+
 def _draw_row(
     row: dict,
     columns: list,
@@ -179,7 +211,7 @@ def _draw_row(
     geometry, matching legacy renderers that record a closing balance once.
     """
     font = load_font(size)
-    bottom = y + row_height
+    bottom = y + row_height * _row_line_count(row, columns, ctx, size=size)
 
     for column in columns:
         x = column_x(column, ctx)
