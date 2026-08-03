@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from PIL import ImageDraw
 
+from generators.common import FitError
 from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import LayoutBudgetError
 from generators.layout_dsl.binding import BindingError, is_present
@@ -48,6 +49,7 @@ _DSL_ERRORS: tuple[type[RuntimeError], ...] = (
     RoleError,
     BindingError,
     LayoutBudgetError,
+    FitError,
 )
 
 
@@ -79,9 +81,9 @@ def render_blocks(blocks: list, ctx: RenderContext, y: int) -> int:
 
     Raises:
         EngineError: If a block names a primitive with no registered drawer.
-        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError:
-            Propagated from a primitive, tagged with the failing block's path
-            so render_body can report exactly where it happened.
+        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError |
+        FitError: Propagated from a primitive, tagged with the failing block's
+            path so render_body can report exactly where it happened.
     """
     for position, block in enumerate(blocks):
         when = block.get("when")
@@ -140,10 +142,10 @@ def render_body(
 
     Raises:
         EngineError: If the layout has no `body` key.
-        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError:
-            Propagated from a primitive, re-raised with the failing block's
-            path appended to the message so the author knows exactly where to
-            look, not just which layout.
+        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError |
+        FitError: Propagated from a primitive, re-raised with the failing
+            block's path appended to the message so the author knows exactly
+            where to look, not just which layout.
     """
     if "body" not in layout:
         raise EngineError(
