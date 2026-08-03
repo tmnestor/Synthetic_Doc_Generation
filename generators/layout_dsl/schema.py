@@ -8,18 +8,21 @@ unregistered row providers all fail here with a four-element diagnostic.
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.providers import provider_names
 
-ROW_STYLES = ("ruled", "bordered", "grouped", "plain")
+ROW_STYLES = ("ruled", "bordered", "bordered_grouped", "grouped", "plain")
 
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
-    "text": (("content",), ("role", "align", "color", "field")),
+    "text": (("content",), ("role", "align", "color", "field", "bold")),
     "pair": (("label", "value"), ("role", "color", "field")),
     "block": (("lines",), ("role", "color", "heading")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
-    "split": (("children",), ("gap",)),
-    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header", "header_height")),
+    "split": (("children",), ("gap", "divider", "divider_color")),
+    "table": (
+        ("rows", "columns"),
+        ("row_style", "params", "row_height", "header", "header_height", "dividers"),
+    ),
 }
 
 _CONTAINERS = ("panel", "split")
@@ -244,6 +247,16 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
                 key_path=f"{key_path}.columns[{index}]",
                 expected="x: <offset from region left> or x_right: <offset from region right>.",
                 recover="add x: or x_right: to position the column.",
+            )
+
+    for index, divider in enumerate(block.get("dividers", [])):
+        if not isinstance(divider, dict) or ("x" not in divider and "x_right" not in divider):
+            raise _err(
+                f"divider {index} has neither 'x' nor 'x_right'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.dividers[{index}]",
+                expected="x: <offset from region left> or x_right: <offset from region right>.",
+                recover="add x: or x_right: to position the divider, e.g. {x_right: -320}.",
             )
 
 
