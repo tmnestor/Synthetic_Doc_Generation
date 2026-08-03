@@ -2584,11 +2584,103 @@ Tasks 10–13 add DSL layouts alongside the existing ones and prove equivalence 
 ### Task 10: Equivalence harness and CBA layouts
 
 **Files:**
+- Modify: `generators/loader.py` (unwrap `layouts:` alongside anchor siblings)
 - Modify: `config/layouts/bank_statements.yml`
-- Test: `tests/test_bank_dsl_equivalence.py`
+- Test: `tests/test_bank_dsl_equivalence.py`, `tests/test_loader_anchors.py`
 
 **Interfaces:**
 - Consumes: `render_body` (Task 9); `render_cba` from `generators.bank_statement`.
+
+### Step 0 (prerequisite): let the loader see anchor siblings
+
+`load_layout_registry` currently unwraps `layouts:` only when it is the sole top-level
+key:
+
+```python
+if "layouts" in data and isinstance(data["layouts"], dict) and len(data) == 1:
+    return data["layouts"]
+```
+
+The de-duplication scheme puts anchor definitions (`_bank_base`, `_cba`, …) at top level
+as siblings of `layouts:`, so `len(data)` becomes 2+ and the loader returns the whole
+dict — making `_bank_base` look like a layout id and hiding every real layout. Fix this
+before touching the YAML, or every subsequent step fails for the wrong reason.
+
+Anchor keys are distinguished by a leading underscore. A non-underscore sibling is a
+genuine authoring error (a mis-indented layout) and must fail fast rather than be
+silently swallowed:
+
+```python
+    if "layouts" in data and isinstance(data["layouts"], dict):
+        stray = sorted(k for k in data if k != "layouts" and not str(k).startswith("_"))
+        if stray:
+            msg = (
+                f"Unexpected top-level key(s) {stray} in {path.resolve()}.\n"
+                f"  What:     only 'layouts:' and underscore-prefixed anchor "
+                f"definitions may sit at the top level.\n"
+                f"  Where:    {path.resolve()}\n"
+                f"  Expected: layouts:\\n  <layout_id>: ...   plus optional "
+                f"_anchor: &anchor blocks.\n"
+                f"  Recover:  indent {stray} under 'layouts:', or rename to "
+                f"'_{stray[0]}' if it is an anchor definition."
+            )
+            raise ValueError(msg)
+        return data["layouts"]
+```
+
+Covering test:
+
+```python
+# tests/test_loader_anchors.py
+from pathlib import Path
+
+import pytest
+
+from generators.loader import load_layout_registry
+
+
+def _write(tmp_path: Path, text: str) -> Path:
+    path = tmp_path / "layouts.yml"
+    path.write_text(text)
+    return path
+
+
+def test_anchor_siblings_are_not_mistaken_for_layouts(tmp_path: Path):
+    path = _write(tmp_path, """
+_base: &base
+  page_dimensions: {width: 1800, height: 3508}
+  content_width: 1600
+layouts:
+  cba_standard:
+    <<: *base
+    row_height: 72
+""")
+    registry = load_layout_registry(path)
+    assert list(registry) == ["cba_standard"]
+    assert registry["cba_standard"]["content_width"] == 1600
+    assert registry["cba_standard"]["row_height"] == 72
+
+
+def test_a_non_anchor_top_level_key_fails_fast(tmp_path: Path):
+    path = _write(tmp_path, """
+cba_standard:
+  row_height: 72
+layouts:
+  westpac_standard:
+    row_height: 62
+""")
+    with pytest.raises(ValueError) as exc_info:
+        load_layout_registry(path)
+    message = str(exc_info.value)
+    assert "cba_standard" in message
+    assert "Recover:" in message
+
+
+def test_a_file_with_only_layouts_still_unwraps(tmp_path: Path):
+    path = _write(tmp_path, "layouts:\n  a:\n    row_height: 10\n")
+    assert list(load_layout_registry(path)) == ["a"]
+```
+
 - Produces: `render_via_dsl(entry: dict, layout: dict, layout_id: str, *, geometry_out: dict | None) -> Image.Image` in `generators/bank_statement.py`, and a reusable `assert_geometry_equivalent` helper in the test module.
 
 Equivalence is checked on **geometry**, not pixels: the spec permits re-baselining, so fields must land in the same places but need not be byte-identical. Tolerance is 1.5% of page dimension.
