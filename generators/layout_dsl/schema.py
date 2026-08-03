@@ -13,7 +13,7 @@ ROW_STYLES = ("ruled", "bordered", "grouped", "plain")
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "text": (("content",), ("role", "align", "color", "field")),
-    "pair": (("label", "value"), ("role", "color", "field", "gap")),
+    "pair": (("label", "value"), ("role", "color", "field")),
     "block": (("lines",), ("role", "color", "heading")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),

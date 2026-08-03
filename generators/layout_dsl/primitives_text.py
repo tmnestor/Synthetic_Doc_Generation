@@ -113,9 +113,13 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     if ctx.recorder is not None and field is not None:
         # Record the value's own extent, not the label's.
         font = load_font(size)
-        label_bbox = font.getbbox(f"{label}: ")
-        label_width = int(label_bbox[2] - label_bbox[0])
-        ctx.recorder.record(field, (left + label_width, y, right, end))
+        label_width = int(ctx.draw.textlength(f"{label}: ", font=font))
+        value_bbox = font.getbbox(value)
+        value_width = int(value_bbox[2] - value_bbox[0])
+        value_height = int(value_bbox[3] - value_bbox[1])
+        ctx.recorder.record(
+            field, (left + label_width, y, left + label_width + value_width, y + value_height)
+        )
     return end
 
 
@@ -162,8 +166,11 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
         The advanced y-cursor.
     """
     y += int(block.get("pad_above", 0))
-    draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color=block.get("color", "black"))
-    y += int(block.get("thickness", 1)) + int(block.get("pad_below", 0))
+    thickness = int(block.get("thickness", 1))
+    draw_separator_line(
+        ctx.draw, ctx.region.x, ctx.region.right, y, color=block.get("color", "black"), width=thickness
+    )
+    y += thickness + int(block.get("pad_below", 0))
     return y
 
 
