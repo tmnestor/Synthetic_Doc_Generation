@@ -187,3 +187,41 @@ def draw_spacer(block: dict, ctx: RenderContext, y: int) -> int:
         The advanced y-cursor.
     """
     return y + int(block.get("height", 0))
+
+
+def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
+    """Draw a full-bleed colour bar at the very top of the page.
+
+    Every other primitive draws inside `ctx.region` — inset from the page
+    edge by the layout's margin. A masthead like ANZ's blue header bar does
+    not: it spans edge-to-edge, ignoring the margin entirely. This is the one
+    primitive allowed to paint outside the region, and it always paints at
+    the fixed page position `(0, 0)` regardless of the cursor, matching the
+    legacy renderer it replaces, which draws it before establishing any
+    cursor-driven layout and then jumps straight to a hardcoded y for the
+    content below. It leaves the y-cursor untouched for the same reason — a
+    `spacer` placed after it in the layout's `body:` reaches whichever y the
+    content below the bar actually starts at.
+
+    Args:
+        block: The `banner` block, carrying `content`, `height`, `color`, and
+            optional `text_color` (default white), `role` (font-size role,
+            default "header"), `bold` (default False), and `text_y` (the
+            text's absolute y from the page top, default 0).
+        ctx: Render context.
+        y: Current y-cursor, returned unchanged.
+
+    Returns:
+        `y`, unchanged — this primitive never advances the flow.
+    """
+    width = int(ctx.layout["page_dimensions"]["width"])
+    height = int(block["height"])
+    ctx.draw.rectangle([(0, 0), (width, height)], fill=block["color"])
+
+    size = resolve_role(ctx.layout, block.get("role", "header"))
+    font = load_font(size, bold=bool(block.get("bold", False)))
+    text = interpolate(block["content"], ctx.entry["fields"])
+    ctx.draw.text(
+        (ctx.region.x, int(block.get("text_y", 0))), text, font=font, fill=block.get("text_color", "white")
+    )
+    return y

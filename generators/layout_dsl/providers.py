@@ -10,6 +10,8 @@ import hashlib
 from collections.abc import Callable
 from decimal import Decimal
 
+from generators.common import fmt_amount
+
 RowProvider = Callable[[dict, dict], list[dict]]
 
 _REGISTRY: dict[str, RowProvider] = {}
@@ -134,23 +136,45 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         entry: The ground-truth entry.
         params: Optional `opening_balance` or `brought_forward` booleans, which
             prepend a synthetic leading balance row (mutually exclusive with
-            each other). An independent optional `carried_forward` boolean
-            appends a trailing synthetic closing-balance row — it may combine
-            with either leading option, matching NAB's legacy renderer, which
-            shows both a "Brought forward" row (under the first date-group
-            header) and a "Carried forward" row (after every transaction).
+            each other). Each may be paired with `<key>_label` (e.g.
+            `brought_forward_label`) to override the row's default
+            description text — ANZ's leading row reads "BALANCE BROUGHT
+            FORWARD" (all caps), unlike NAB's "Balance Brought Forward"; both
+            share the same computed opening-balance value, only the label
+            differs, so it is an override rather than a third label key. Each
+            may also be paired with `<key>_bold` (e.g. `brought_forward_bold:
+            ["description"]`), a collection of row keys to render bold on
+            that one row — ANZ's leading row is the one legacy draws with
+            mixed weight (its label bold, its balance value not); absent, the
+            whole row stays regular, matching every other leading row. An
+            independent optional `carried_forward` boolean appends a trailing
+            synthetic closing-balance row — it may combine with either
+            leading option, matching NAB's legacy renderer, which shows both
+            a "Brought forward" row (under the first date-group header) and a
+            "Carried forward" row (after every transaction).
             An independent optional `references` boolean adds a `reference`
             key to every real (non-synthetic) row — NAB's dotted-leader
             reference number, computed exactly as the legacy renderer does:
             sha256 of the description, taken mod 10**10, zero-padded to 10
             digits, prefixed "Ref: " and suffixed with 40 dots.
+            An independent optional `balance_suffix` dict — `{debit: "DR",
+            credit: "CR"}` — replaces every row's Decimal `balance` with an
+            already-formatted string carrying the sign-dependent suffix ANZ's
+            legacy renderer picks (`_format_balance`): the amount's absolute
+            value plus `debit` when negative, or the amount plus `credit`
+            otherwise. Applied last, to every row (real and synthetic) that
+            still carries a Decimal `balance` — a fixed `currency_suffix` on
+            the column, as NAB uses, cannot express a suffix that depends on
+            the value itself, so the provider computes the final display
+            string instead and the column just draws it verbatim.
 
     Returns:
         One dict per row with keys `date`, `description`, `debit`, `credit`,
-        `balance` (Decimal), `synthetic` (bool); `reference` only on real
-        rows, and only when `references` is set; `bold` (True) only on the
-        `carried_forward` row, which legacy draws in `font_body_bold` unlike
-        its leading-row counterparts.
+        `balance` (Decimal, or a pre-formatted string when `balance_suffix`
+        is set), `synthetic` (bool); `reference` only on real rows, and only
+        when `references` is set; `bold` (True) only on the `carried_forward`
+        row, which legacy draws in `font_body_bold` unlike its leading-row
+        counterparts.
 
     Raises:
         ProviderError: If both leading synthetic-row options are requested, or
@@ -201,17 +225,26 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
     closing_balance = rows[-1]["balance"] if rows else balance
 
     if wants and rows:
+        key = wants[0]
         first = rows[0]
         opening = first["balance"] - _to_decimal(first["credit"]) + _to_decimal(first["debit"])
         rows.insert(
             0,
             {
                 "date": "",
-                "description": _SYNTHETIC_LABELS[wants[0]],
+                "description": params.get(f"{key}_label", _SYNTHETIC_LABELS[key]),
                 "debit": "NOT_FOUND",
                 "credit": "NOT_FOUND",
                 "balance": opening,
                 "synthetic": True,
+                # ANZ's "BALANCE BROUGHT FORWARD" is the one leading row
+                # legacy draws with mixed weight -- its description bold, its
+                # balance value not -- so `<key>_bold` names which columns
+                # should render bold (see primitives_table._cell_bold);
+                # absent, the whole row stays regular, matching every other
+                # leading row (CBA's "Opening Balance", NAB's own "Brought
+                # forward"), which legacy draws entirely unbolded.
+                **({"bold": set(params[f"{key}_bold"])} if params.get(f"{key}_bold") else {}),
             },
         )
 
@@ -233,7 +266,61 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
             }
         )
 
+    suffix = params.get("balance_suffix")
+    if suffix:
+        for row in rows:
+            bal = row.get("balance")
+            if not isinstance(bal, Decimal):
+                continue
+            row["balance"] = (
+                f"{fmt_amount(bal)} {suffix['credit']}"
+                if bal >= 0
+                else f"{fmt_amount(abs(bal))} {suffix['debit']}"
+            )
+
     return rows
+
+
+@row_provider("bank_transaction_totals")
+def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
+    """Build a single trailing row summing every transaction's debits and credits.
+
+    ANZ draws a "Totals at end of period" row below its transaction table,
+    after a fresh rule -- not as part of the same row run `bank_transactions`
+    produces. Appending it there instead would move `last_row_field`'s "last
+    row" off the real closing-balance row and onto this one, which never
+    carries a balance in legacy. A second table block, using this provider
+    and the same column geometry, keeps the two concerns apart.
+
+    Args:
+        entry: The ground-truth entry.
+        params: Optional `label` (default "Totals at end of period").
+
+    Returns:
+        A single-row list: `date` and `balance` empty (legacy draws neither
+        for this row), `description` the label, `debit`/`credit` the summed
+        Decimal totals, `synthetic: True` (never recorded — this row has no
+        ground-truth field of its own), `bold: True` (legacy draws it in
+        `font_body_bold`), `rule_above: True` (legacy rules above it after a
+        fresh 12px gap, unlike an ordinary continued row).
+    """
+    rows = pipe_fields(
+        entry,
+        {"fields": {"debit": "TRANSACTION_AMOUNTS_PAID", "credit": "TRANSACTION_AMOUNTS_RECEIVED"}},
+    )
+    total_debits = sum((_to_decimal(row["debit"]) for row in rows), Decimal("0"))
+    total_credits = sum((_to_decimal(row["credit"]) for row in rows), Decimal("0"))
+    return [
+        {
+            "date": "",
+            "description": params.get("label", "Totals at end of period"),
+            "debit": total_debits,
+            "credit": total_credits,
+            "synthetic": True,
+            "bold": True,
+            "rule_above": True,
+        }
+    ]
 
 
 def _to_decimal(value: str) -> Decimal:

@@ -13,6 +13,7 @@ from generators.layout_dsl.primitives_container import ContainerError, draw_pane
 from generators.layout_dsl.primitives_table import TableError, draw_table
 from generators.layout_dsl.primitives_text import (
     RoleError,
+    draw_banner,
     draw_block,
     draw_pair,
     draw_rule,
@@ -31,6 +32,7 @@ PRIMITIVE_DRAWERS: dict[str, Drawer] = {
     "panel": draw_panel,
     "split": draw_split,
     "table": draw_table,
+    "banner": draw_banner,
 }
 
 

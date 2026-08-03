@@ -11,7 +11,7 @@ from generators.layout_dsl.providers import provider_names
 # `frame` and `grouping` are independent axes describing a table's row style.
 #
 # `frame` -- how rows and the header are decorated:
-#   ruled    -- rule lines above/below the header, a light rule under each row.
+#   ruled    -- rule lines above/below the header.
 #   bordered -- a bordered header box + interior column dividers, a rule
 #               above every row but the first.
 #   filled   -- a `fill_color` rectangle drawn behind the header bar and
@@ -37,6 +37,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
+    "banner": (("content", "height", "color"), ("text_color", "role", "text_y", "bold")),
     "table": (
         ("rows", "columns", "frame", "grouping"),
         (
@@ -51,6 +52,8 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "label_inset_y",
             "group_gap",
             "synthetic_row_placement",
+            "header_rule_top",
+            "header_rule_gap",
         ),
     ),
 }
@@ -335,6 +338,17 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
             expected="dividers only alongside frame: bordered.",
             recover="remove dividers, or set frame: bordered.",
         )
+
+    for ruled_only_key in ("header_rule_top", "header_rule_gap"):
+        if frame != "ruled" and ruled_only_key in block:
+            raise _err(
+                f"{ruled_only_key} is set but frame is '{frame}', which never draws a header rule "
+                "to adjust — only frame: ruled draws one.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.{ruled_only_key}",
+                expected=f"{ruled_only_key} only alongside frame: ruled.",
+                recover=f"remove {ruled_only_key}, or set frame: ruled.",
+            )
 
     columns = block["columns"]
     if not isinstance(columns, list) or not columns:
