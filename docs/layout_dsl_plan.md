@@ -3292,11 +3292,10 @@ CBA overwhelmingly by the known 2px offset, Westpac by disclosed content choices
 The DSL hash is the regression guard and must be asserted. The legacy hash is historical
 evidence of what the migration changed, and retires with Task 14.
 
-**Note on gitignored tests.** `tests/` is gitignored in this repo, so the snapshot file
-cannot be committed. Write it under `tests/fixtures/` for local use, and additionally
-emit the DSL hashes to a committed location the pipeline can verify against — decide
-where with the same reasoning used for `derived/geometry.jsonl`, which is a regenerable
-artefact kept out of `ground_truth/`.
+**Note on gitignored tests.** `tests/` is gitignored in this repo by design — the whole
+suite is local-only, as is `derived/`. The snapshot file lives under `tests/fixtures/`
+like any other test artefact. Do not invent a committed home for it: that would cut
+against a deliberate choice about what this repo carries.
 
 ---
 
