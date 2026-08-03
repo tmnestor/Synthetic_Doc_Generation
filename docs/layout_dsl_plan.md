@@ -1460,6 +1460,16 @@ def _validate_geometry(
                     expected=f"padding below {width // 2}, e.g. padding: 10.",
                     recover="reduce the panel's padding, or widen content_width.",
                 )
+            declared = block.get("height")
+            if declared is not None and int(declared) < 2 * padding:
+                raise _err(
+                    f"panel declares height {int(declared)} but its padding alone needs "
+                    f"{2 * padding}px.",
+                    layout_path=layout_path,
+                    key_path=f"{here}.height",
+                    expected=f"height >= {2 * padding}, or padding <= {int(declared) // 2}.",
+                    recover="raise the panel's height, or reduce its padding.",
+                )
             _validate_geometry(block["children"], layout=layout, layout_path=layout_path,
                                width=inner, key_path=f"{here}.children")
         elif kind == "split":
@@ -2010,6 +2020,21 @@ def draw_panel(block: dict, ctx: RenderContext, y: int) -> int:
     inner_end = render_children(block["children"], inner_ctx, y + padding)
 
     fixed = block.get("height")
+    if fixed is not None:
+        # A fixed height must not silently let children draw outside their own box:
+        # the border would be short, the return value wrong, and following blocks
+        # would overlap the spilled content. Fail with the numbers needed to fix it.
+        natural = inner_end + padding
+        if natural > y + int(fixed):
+            raise ContainerError(
+                "Panel content overflows its fixed height.\n"
+                f"  What:     children need {natural - y}px but the panel declares "
+                f"height: {int(fixed)}.\n"
+                f"  Where:    {ctx.layout_path} -> {ctx.layout_id}.body (a panel block)\n"
+                f"  Expected: height >= {natural - y}, or fewer/smaller children.\n"
+                f"  Recover:  raise the panel's height: to at least {natural - y}, or "
+                f"reduce its children."
+            )
     bottom = y + int(fixed) if fixed is not None else inner_end + padding
 
     ctx.draw.rectangle(
