@@ -8,7 +8,25 @@ unregistered row providers all fail here with a four-element diagnostic.
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.providers import provider_names
 
-ROW_STYLES = ("ruled", "bordered", "bordered_grouped", "grouped", "plain")
+# `frame` and `grouping` are independent axes describing a table's row style.
+#
+# `frame` -- how rows and the header are decorated:
+#   ruled    -- rule lines above/below the header, a light rule under each row.
+#   bordered -- a bordered header box + interior column dividers, a rule
+#               above every row but the first.
+#   filled   -- a `fill_color` rectangle drawn behind the header bar and
+#               behind each group's dedicated date row (NAB's light-blue bar).
+#   plain    -- no header or row decoration at all.
+#
+# `grouping` -- how repeated transaction dates are handled:
+#   none          -- dates repeat on every row.
+#   dedicated_row -- a separate bold date sub-header row is inserted whenever
+#                    the date changes (CBA's "grouped").
+#   inline        -- the repeated date is blanked within the row and the row
+#                    above a new group is ruled/bordered, without consuming a
+#                    row of its own (Westpac premium's "bordered_grouped").
+FRAMES = ("ruled", "bordered", "filled", "plain")
+GROUPINGS = ("none", "dedicated_row", "inline")
 
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
@@ -20,8 +38,8 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
     "table": (
-        ("rows", "columns"),
-        ("row_style", "params", "row_height", "header", "header_height", "dividers"),
+        ("rows", "columns", "frame", "grouping"),
+        ("params", "row_height", "header", "header_height", "dividers", "fill_color"),
     ),
 }
 
@@ -211,14 +229,41 @@ def _validate_table(block: dict, *, layout_path: str, key_path: str) -> None:
             "@row_provider in generators/layout_dsl/providers.py.",
         )
 
-    style = block.get("row_style", "plain")
-    if style not in ROW_STYLES:
+    frame = block["frame"]
+    if frame not in FRAMES:
         raise _err(
-            f"unknown row_style '{style}'.",
+            f"unknown frame '{frame}'.",
             layout_path=layout_path,
-            key_path=f"{key_path}.row_style",
-            expected=f"one of {list(ROW_STYLES)}.",
-            recover="set row_style to a supported style.",
+            key_path=f"{key_path}.frame",
+            expected=f"one of {list(FRAMES)}.",
+            recover=f"set frame: to one of {list(FRAMES)}.",
+        )
+
+    grouping = block["grouping"]
+    if grouping not in GROUPINGS:
+        raise _err(
+            f"unknown grouping '{grouping}'.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.grouping",
+            expected=f"one of {list(GROUPINGS)}.",
+            recover=f"set grouping: to one of {list(GROUPINGS)}.",
+        )
+
+    if frame == "filled" and "fill_color" not in block:
+        raise _err(
+            "frame: filled requires fill_color, which this table block does not set.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.fill_color",
+            expected='a hex color string, e.g. fill_color: "#E8F0FE".',
+            recover=f"add fill_color: to the table block, or use a different frame ({list(FRAMES)}).",
+        )
+    if frame != "filled" and "fill_color" in block:
+        raise _err(
+            f"fill_color is set but frame is '{frame}', which never draws it.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.fill_color",
+            expected="fill_color only alongside frame: filled.",
+            recover="remove fill_color, or set frame: filled.",
         )
 
     columns = block["columns"]

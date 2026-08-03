@@ -82,7 +82,8 @@ layouts:
       - {type: spacer, height: 28}
       - type: table
         rows: bank_transactions
-        row_style: ruled
+        frame: ruled
+        grouping: none
         params: {opening_balance: true}
         columns:
           - {key: date, label: Date, align: left, x: 0}
@@ -130,8 +131,9 @@ layouts:
       - {type: spacer, height: 28}
       - type: table
         rows: bank_transactions
-        row_style: grouped
-        # grouped rows draw no ruled header lines, but legacy CBA always ruled-lines
+        frame: plain
+        grouping: dedicated_row
+        # plain rows draw no ruled header lines, but legacy CBA always ruled-lines
         # its header (12px rule + 44px labels + 16px rule = 72px) regardless of
         # date_grouping. Override the computed default (line_height(32)=44) to match.
         header_height: 72
@@ -172,7 +174,8 @@ layouts:
       - {type: spacer, height: 41}
       - type: table
         rows: bank_transactions
-        row_style: bordered
+        frame: bordered
+        grouping: none
         header_height: 72
         dividers: *westpac_txn_dividers
         columns: *westpac_txn_columns
@@ -227,7 +230,8 @@ layouts:
       - {type: spacer, height: 10}
       - type: table
         rows: bank_transactions
-        row_style: bordered_grouped
+        frame: bordered
+        grouping: inline
         header_height: 72
         dividers: *westpac_txn_dividers
         columns: *westpac_txn_columns
