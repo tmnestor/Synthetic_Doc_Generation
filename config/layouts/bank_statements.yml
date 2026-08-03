@@ -158,16 +158,18 @@ layouts:
     row_height: 62
     date_format: "DD MMM YY"
     body:
-      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
-         field: SUPPLIER_NAME}
-      - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+      - type: split
+        children:
+          - - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
+                field: SUPPLIER_NAME}
+          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
       - {type: text, content: "Transaction Details", role: body, bold: true}
       - {type: spacer, height: 14}
       - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
-         when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
-      - {type: spacer, height: 19}
+         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: spacer, height: 41}
       - type: table
         rows: bank_transactions
         row_style: bordered
@@ -185,10 +187,12 @@ layouts:
     date_grouping: true
     date_format: "DD MMM YY"
     body:
-      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
-         field: SUPPLIER_NAME}
-      - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
-      - {type: spacer, height: 15}
+      - type: split
+        children:
+          - - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
+                field: SUPPLIER_NAME}
+          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+      - {type: spacer, height: 37}
       - type: panel
         height: 260
         padding: 10
@@ -219,7 +223,7 @@ layouts:
       - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
-         when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
       - {type: spacer, height: 10}
       - type: table
         rows: bank_transactions
