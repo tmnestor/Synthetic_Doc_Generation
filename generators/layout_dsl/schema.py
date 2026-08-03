@@ -5,10 +5,26 @@ fail-fast rule: unknown primitives, missing keys, unknown field references and
 unregistered row providers all fail here with a four-element diagnostic.
 """
 
+import re
+
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
 from generators.layout_dsl.primitives_text import ALIGNMENTS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
+
+# Matches a `{` opened but never closed, or a `}` closed but never opened --
+# `referenced_fields`'s `\{([A-Z][A-Z0-9_]*)\}` only matches well-formed
+# `{FIELD}`, so a typo like `{PAYER_NAME` (missing `}`) is invisible to it and
+# draws as a silent literal instead of failing validation.
+#
+# The second alternative's lookbehind excludes `[A-Z0-9_{]`, not just `{`: a
+# lone `(?<!\{)` only rejects a match starting immediately after `{`, but
+# `.search()` also tries starting mid-identifier -- e.g. at the "A" in a
+# well-formed "{PAYER_NAME}", where the preceding character is "P", not "{" --
+# and would wrongly flag "AYER_NAME}" as an unopened placeholder. Excluding
+# every identifier character too forces a match to start at a token's true
+# beginning.
+_UNBALANCED = re.compile(r"\{[A-Z][A-Z0-9_]*(?![A-Z0-9_]*\})|(?<![A-Z0-9_{])[A-Z][A-Z0-9_]*\}")
 
 # `frame` and `grouping` are independent axes describing a table's row style.
 #
@@ -124,6 +140,22 @@ def _err(what: str, *, layout_path: str, key_path: str, expected: str, recover: 
         f"  Expected: {expected}\n"
         f"  Recover:  {recover}"
     )
+
+
+def _check_braces(template: str, *, layout_path: str, key_path: str) -> None:
+    """Reject a placeholder missing its opening or closing brace.
+
+    `referenced_fields` only matches well-formed `{FIELD}`, so a typo like
+    `{PAYER_NAME` is invisible to it and draws as a literal.
+    """
+    if _UNBALANCED.search(template):
+        raise _err(
+            f"template {template!r} contains an unbalanced placeholder brace.",
+            layout_path=layout_path,
+            key_path=key_path,
+            expected='every placeholder written as {FIELD_NAME}, e.g. content: "Account: {PAYER_NAME}".',
+            recover=f"add the missing brace in {key_path}.",
+        )
 
 
 def validate_body(
@@ -284,6 +316,7 @@ def _validate_references(block: dict, *, layout_path: str, known_fields: set[str
             texts.append(line)
 
     for text in texts:
+        _check_braces(text, layout_path=layout_path, key_path=key_path)
         for name in referenced_fields(text):
             if name not in known_fields:
                 raise _err(

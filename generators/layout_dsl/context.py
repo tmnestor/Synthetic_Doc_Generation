@@ -45,15 +45,33 @@ class Region:
         """
         width = self.width - left - right
         if width < 1:
-            msg = (
-                f"Region.indent({left}, {right}) leaves width {width} from {self.width}. "
-                f"Remediation: reduce the container's padding."
-            )
-            raise ValueError(msg)
+            raise self._indent_error(left, right, width)
         return Region(x=self.x + left, width=width)
 
+    def _indent_error(self, left: int, right: int, width: int) -> ValueError:
+        """Build a four-element diagnostic for an indent that consumes the region.
+
+        `panel` is the only caller (see `generators/layout_dsl/primitives_container.py`),
+        always with `left == right == padding`, so the remediation names that key.
+        """
+        max_padding = max((self.width - 1) // 2, 0)
+        return ValueError(
+            "Region.indent leaves no usable width.\n"
+            f"  What:     indent(left={left}, right={right}) leaves width {width} from "
+            f"a {self.width}px region.\n"
+            "  Where:    config/layouts/*.yml -> a panel block's `padding` key.\n"
+            f"  Expected: padding <= {max_padding} for a {self.width}px region, e.g. "
+            f"padding: {max_padding}.\n"
+            "  Recover:  reduce the panel's padding, or widen its content_width."
+        )
+
     def divide(self, n: int, gap: int) -> list["Region"]:
-        """Split this region into `n` equal columns separated by `gap` px.
+        """Split this region into `n` columns separated by `gap` px.
+
+        Columns differ by at most 1px: the remainder left over by floor
+        division is handed out one pixel at a time to the leftmost columns,
+        so the last column's right edge always reaches `self.right` instead
+        of falling short by up to `n - 1` px.
 
         Args:
             n: Number of columns; must be at least 1.
@@ -69,14 +87,37 @@ class Region:
             msg = f"Region.divide needs n >= 1, got {n}. Remediation: pass a positive column count."
             raise ValueError(msg)
         total_gap = gap * (n - 1)
-        column = (self.width - total_gap) // n
+        usable = self.width - total_gap
+        column = usable // n
         if column < 1:
-            msg = (
-                f"Region.divide({n}, gap={gap}) leaves column width {column} "
-                f"from {self.width}. Remediation: reduce the gap or the column count."
-            )
-            raise ValueError(msg)
-        return [Region(x=self.x + i * (column + gap), width=column) for i in range(n)]
+            raise self._divide_error(n, gap, column)
+        # Hand the remainder out one pixel at a time to the leftmost columns, so
+        # the columns differ by at most 1px and the last one reaches self.right.
+        remainder = usable - column * n
+        regions: list[Region] = []
+        x = self.x
+        for i in range(n):
+            width = column + (1 if i < remainder else 0)
+            regions.append(Region(x=x, width=width))
+            x += width + gap
+        return regions
+
+    def _divide_error(self, n: int, gap: int, column: int) -> ValueError:
+        """Build a four-element diagnostic for a divide that leaves no column width.
+
+        `split` is the only caller (see `generators/layout_dsl/primitives_container.py`),
+        so the remediation names its `gap` key.
+        """
+        max_gap = max((self.width - n) // max(n - 1, 1), 0)
+        return ValueError(
+            "Region.divide leaves no usable column width.\n"
+            f"  What:     divide({n}, gap={gap}) leaves column width {column} from a "
+            f"{self.width}px region.\n"
+            "  Where:    config/layouts/*.yml -> a split block's `gap` key.\n"
+            f"  Expected: gap <= {max_gap} for {n} columns in a {self.width}px region, "
+            f"e.g. gap: {max_gap}.\n"
+            "  Recover:  reduce the split's gap, or its number of columns."
+        )
 
 
 @dataclass

@@ -477,11 +477,12 @@ def _draw_row(
     unlike every other row decoration here — is drawn regardless of `frame`,
     since it is a fact about this one row, not a frame-wide style.
     """
+    _validate_bold_spec(row, columns)
+
     if row.get("rule_above"):
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 12
 
-    _validate_bold_spec(row, columns)
     regular_font = load_font(size, bold=False)
     bold_font = load_font(size, bold=True)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
