@@ -7,6 +7,7 @@ returns row dicts. Providers return data only — they never draw or position.
 """
 
 from collections.abc import Callable
+from decimal import Decimal
 
 RowProvider = Callable[[dict, dict], list[dict]]
 
@@ -115,3 +116,87 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
 
     count = next(iter(lengths.values()), 0)
     return [{key: columns[key][i] for key in columns} for i in range(count)]
+
+
+_SYNTHETIC_LABELS = {"opening_balance": "Opening Balance", "brought_forward": "Balance Brought Forward"}
+
+
+@row_provider("bank_transactions")
+def bank_transactions(entry: dict, params: dict) -> list[dict]:
+    """Build bank statement rows with running balances computed backwards.
+
+    Mirrors the legacy `_parse_transactions` / `_compute_running_balances`
+    helpers: balances are derived from ACCOUNT_BALANCE (the closing balance) by
+    walking the transactions in reverse.
+
+    Args:
+        entry: The ground-truth entry.
+        params: Optional `opening_balance` or `brought_forward` booleans, which
+            prepend a synthetic balance row. They are mutually exclusive.
+
+    Returns:
+        One dict per row with keys `date`, `description`, `debit`, `credit`,
+        `balance` (Decimal), and `synthetic` (bool).
+
+    Raises:
+        ProviderError: If both synthetic-row options are requested, or the
+            transaction lists are ragged.
+    """
+    wants = [key for key in _SYNTHETIC_LABELS if params.get(key)]
+    if len(wants) > 1:
+        msg = (
+            "opening_balance and brought_forward are mutually exclusive; both were set.\n"
+            "  Remediation: keep exactly one synthetic balance row on the table block."
+        )
+        raise ProviderError(msg)
+
+    rows = pipe_fields(
+        entry,
+        {
+            "fields": {
+                "date": "TRANSACTION_DATES",
+                "description": "TRANSACTION_DESCRIPTIONS",
+                "debit": "TRANSACTION_AMOUNTS_PAID",
+                "credit": "TRANSACTION_AMOUNTS_RECEIVED",
+            }
+        },
+    )
+
+    balance = _to_decimal(entry["fields"].get("ACCOUNT_BALANCE", "0"))
+    for row in reversed(rows):
+        row["balance"] = balance
+        row["synthetic"] = False
+        balance = balance + _to_decimal(row["debit"]) - _to_decimal(row["credit"])
+
+    if wants and rows:
+        first = rows[0]
+        opening = first["balance"] - _to_decimal(first["credit"]) + _to_decimal(first["debit"])
+        rows.insert(
+            0,
+            {
+                "date": "",
+                "description": _SYNTHETIC_LABELS[wants[0]],
+                "debit": "NOT_FOUND",
+                "credit": "NOT_FOUND",
+                "balance": opening,
+                "synthetic": True,
+            },
+        )
+    return rows
+
+
+def _to_decimal(value: str) -> Decimal:
+    """Parse an amount, treating the NOT_FOUND sentinel and junk as zero.
+
+    Args:
+        value: An amount string from ground truth.
+
+    Returns:
+        The parsed Decimal, or Decimal("0").
+    """
+    if value in ("", "NOT_FOUND"):
+        return Decimal("0")
+    try:
+        return Decimal(value)
+    except ArithmeticError:
+        return Decimal("0")
