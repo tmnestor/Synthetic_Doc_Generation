@@ -3437,7 +3437,33 @@ def render_bank_statement(
     return image
 ```
 
-Then strip the dead keys from every layout in `config/layouts/bank_statements.yml`: `renderer`, `variant`, `column_headers`, and every `show_*` and `date_grouping` key.
+Then strip the keys that become unreadable once `generators/bank_statement.py` is gone.
+
+An audit of `config/layouts/bank_statements.yml` against every consumer found **seventeen**
+such keys, not the five families originally listed here:
+
+```
+balance_suffix_credit   balance_suffix_debit   bank_name_color   column_headers
+date_grouping           header_bar_color       header_color      logo_color
+logo_text               renderer               variant           show_brought_forward
+show_footer_transaction_types   show_opening_balance   show_references
+show_rewards_section    show_totals_row
+```
+
+Three more (`bank`, `bank_code`, `date_format`) already have no reader anywhere, even with
+the legacy renderer present, and should go in the same sweep.
+
+**Do not blind-sweep.** `page_dimensions`, `margin` and `content_width` look dead to a grep
+of `generators/layout_dsl/` alone, because they are read by the *caller* — today
+`render_bank_statement`, after this task the thin adapter. They must stay.
+
+`logo_text` has two non-legacy Python readers; establish what they are before removing it.
+
+For each candidate, grep **all** consumers — `generators/`, `scripts/`, `linking/` — not
+just `layout_dsl/`. A key left in YAML after its only reader is deleted is the same
+"validates but does nothing" defect this project has hit six times, and this would be the
+most misleading instance yet: the YAML would still read as though it configures the
+renderer.
 
 - [ ] **Step 4: Wire DSL validation into the pipeline**
 
