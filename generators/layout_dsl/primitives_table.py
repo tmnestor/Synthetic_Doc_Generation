@@ -88,12 +88,19 @@ def _cell_text(row: dict, column: dict) -> str:
     A column may set `currency: plain` to drop the `$` prefix `fmt_amount`
     otherwise adds — Westpac's legacy renderer prints amounts as `1,234.56`,
     not `$1,234.56`, and the ground truth the table draws must match the
-    bank's real formatting, not just land in the right place.
+    bank's real formatting, not just land in the right place. A column may
+    also set `currency_suffix` (e.g. NAB's `"Cr"`) to append a fixed suffix
+    after the formatted amount — a separate, composable concern from the `$`
+    prefix, since a suffix is a per-column display choice, not a property
+    `fmt_amount` itself needs to know about.
     """
     value = row.get(column["key"], "")
     if isinstance(value, Decimal):
         text = fmt_amount(value)
-        return text.lstrip("$") if column.get("currency") == "plain" else text
+        if column.get("currency") == "plain":
+            text = text.lstrip("$")
+        suffix = column.get("currency_suffix")
+        return f"{text} {suffix}" if suffix else text
     text = str(value)
     return "" if text == _ABSENT else text
 
@@ -102,7 +109,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a table's header and rows.
 
     Args:
-        block: The `table` block.
+        block: The `table` block. Two more keys support `grouping:
+            dedicated_row`: `group_gap` (default 10px, the gap inserted
+            between consecutive date sub-header rows — CBA's real value;
+            NAB's legacy renderer inserts none, so NAB's layout sets
+            `group_gap: 0`), and `synthetic_row_placement` (default
+            `leading`, a provider's synthetic row renders first, before any
+            group header — CBA's "Opening Balance"; NAB's "Brought forward"
+            instead renders *under* the first date-group header, expressed
+            as `synthetic_row_placement: after_first_group_header`).
         ctx: Render context.
         y: Current y-cursor.
 
@@ -116,6 +131,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     grouping = block["grouping"]
     fill_color = block.get("fill_color")
     fill_inset = int(block.get("fill_inset", 0))
+    group_gap = int(block.get("group_gap", 10))
+    synthetic_after_header = block.get("synthetic_row_placement") == "after_first_group_header"
     label_inset_y = block.get("label_inset_y")
     if label_inset_y is not None:
         label_inset_y = int(label_inset_y)
@@ -124,7 +141,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     row_height = _resolve_row_height(block, ctx)
     body_size = resolve_role(ctx.layout, "body")
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
-    total_real = sum(1 for row in rows if not row.get("synthetic"))
+
+    # A leading synthetic row normally renders first, ahead of any group
+    # header (CBA's Opening Balance). NAB's Brought-forward row instead
+    # belongs *under* the first date-group header, so it is set aside here
+    # and spliced in once that header has been drawn, below.
+    deferred_synthetic = None
+    if synthetic_after_header and rows and rows[0].get("synthetic"):
+        deferred_synthetic = rows[0]
+        rows = rows[1:]
 
     if block.get("header", True):
         header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
@@ -143,14 +168,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
         )
 
     table_body_start = y
+    total_rows = len(rows)
     index = 0
     previous_date = None
     first_row = True
-    for row in rows:
+    for position, row in enumerate(rows):
         synthetic = bool(row.get("synthetic"))
         if grouping == "dedicated_row" and not synthetic and row.get("date") != previous_date:
             if previous_date is not None:
-                y += 10  # Gap between date groups, matching the legacy renderers.
+                y += group_gap  # Gap between date groups; 0 for NAB, 10 (CBA's real value) by default.
             if frame == "filled":
                 ctx.draw.rectangle(
                     [(ctx.region.x, y), (ctx.region.right, y + row_height - fill_inset)], fill=fill_color
@@ -160,6 +186,24 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             )
             previous_date = row.get("date")
             y += row_height
+
+            if deferred_synthetic is not None:
+                y = _draw_row(
+                    deferred_synthetic,
+                    columns,
+                    ctx,
+                    y,
+                    size=body_size,
+                    frame=frame,
+                    grouping=grouping,
+                    row_height=row_height,
+                    index=None,
+                    is_last=False,
+                    first_row=first_row,
+                    is_new_group=False,
+                )
+                first_row = False
+                deferred_synthetic = None
 
         is_new_group = not synthetic and row.get("date") != previous_date
         y = _draw_row(
@@ -172,7 +216,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             grouping=grouping,
             row_height=row_height,
             index=None if synthetic else index,
-            is_last=(not synthetic and index == total_real - 1),
+            is_last=(position == total_rows - 1),
             first_row=first_row,
             is_new_group=is_new_group,
         )
@@ -290,9 +334,14 @@ def _draw_row(
 ) -> int:
     """Draw one row; `index` is None for synthetic rows, which are not recorded.
 
-    `is_last` marks the final REAL (non-synthetic) row, which is where a
-    column's `last_row_field` — if any — additionally records unindexed
-    geometry, matching legacy renderers that record a closing balance once.
+    `is_last` marks the final row in the table's own row list — real or
+    synthetic — which is where a column's `last_row_field`, if any,
+    additionally records unindexed geometry, matching legacy renderers that
+    record a closing balance once. For CBA (a leading synthetic row, or
+    none) this is always the final real transaction; for NAB (a *trailing*
+    synthetic "Carried forward" row, via `carried_forward` on the provider)
+    it is that synthetic row instead, since `last_row_field`'s redraw does
+    not gate on `index is not None` the way ordinary `field` recording does.
 
     `first_row`/`is_new_group` drive the `bordered` frame combined with
     `inline` grouping: plain `bordered` (grouping `none`) draws a divider
@@ -364,12 +413,64 @@ def _draw_row(
                 field=last_row_field,
             )
 
+    bottom += _draw_sub_lines(row, columns, ctx, y)
+
     if frame == "bordered" and not first_row and (grouping != "inline" or is_new_group):
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
     elif frame == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, bottom, color="#CCCCCC")
 
     return bottom
+
+
+def _draw_sub_lines(row: dict, columns: list, ctx: RenderContext, y: int) -> int:
+    """Draw each column's sub-line, if it has data this row, and report its height.
+
+    A column may carry `sub_line: {key, role, color, offset_y, height}` to
+    render a second line of text beneath its main cell — NAB's dotted-leader
+    reference number beneath the transaction description. `key` names the row
+    key the text comes from; `role` (default "body") resolves a font size the
+    same way any other text primitive does; `offset_y` (default 0) positions
+    it as an offset from the row's own start `y` — not the wrapped main
+    cell's bottom — matching the legacy renderer, which draws the reference
+    line at a fixed offset regardless of how many lines the description
+    wrapped to (a legacy quirk, reproduced rather than "fixed", since
+    equivalence means matching the renderer being replaced, bugs included).
+    `height` is a flat addition to the row's own advance, contributed once
+    per row even if more than one column happens to carry a sub_line with
+    data (the tallest of them wins, not their sum).
+
+    Args:
+        row: The row dict; a sub_line draws only when `row[sub_line["key"]]`
+            is present and not the absent-value sentinel.
+        columns: The table's column specs.
+        ctx: Render context.
+        y: The row's own start y, before any wrapping advance.
+
+    Returns:
+        The extra height claimed by the tallest sub_line drawn this row (0 if
+        no column has a sub_line, or none has data for this row).
+    """
+    extra = 0
+    for column in columns:
+        sub_line = column.get("sub_line")
+        if sub_line is None:
+            continue
+        text = str(row.get(sub_line["key"], ""))
+        if not text or text == _ABSENT:
+            continue
+        x = column_x(column, ctx)
+        size = resolve_role(ctx.layout, sub_line.get("role", "body"))
+        draw_text_left(
+            ctx.draw,
+            text,
+            x,
+            y + int(sub_line.get("offset_y", 0)),
+            load_font(size),
+            fill=sub_line.get("color", "black"),
+        )
+        extra = max(extra, int(sub_line.get("height", 0)))
+    return extra
 
 
 def _draw_cell(
