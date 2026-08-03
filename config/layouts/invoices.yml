@@ -142,7 +142,6 @@ layouts:
       subheader: 28
       body: 20
       footer: 16
-    gst_inclusive_mode: true
     sections:
       - type: header
         name: invoice_title
@@ -213,6 +212,10 @@ layouts:
         height: 20
       - type: totals
         name: totals
+        # GST-inclusive presentation: no subtotal, GST shown as a component of
+        # the total rather than added to it. The renderer branches on this key;
+        # every other invoice layout omits it and gets "separate".
+        gst_display: inclusive
         fields:
           - name: total_gst_inclusive
             label: "TOTAL (inc. GST):"

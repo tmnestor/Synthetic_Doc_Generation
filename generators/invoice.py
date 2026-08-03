@@ -269,11 +269,29 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
             y += 64
 
             if gst_display == "inclusive":
-                draw.text(
-                    (totals_x, y),
-                    "Total price includes GST",
-                    font=font_s,
-                    fill="gray",
+                # GST is a component of the total, not an addition to it, so it
+                # is drawn after the total rather than before. It MUST still be
+                # drawn with the recorder: GST_AMOUNT is a KILE column, and the
+                # DocILE exporter raises KeyError on a present field with no
+                # captured bounding box.
+                gst_label = "GST included (10%):"
+                gst_text = fmt_amount(Decimal(gst))
+                # This label is far longer than the "GST (10%):" used in the
+                # separate branch and overruns the fixed 400px totals column,
+                # colliding with the right-aligned amount. Place it so a gap
+                # always remains, otherwise the two merge into one OCR token.
+                label_width = int(draw.textlength(gst_label, font=font_s))
+                amount_width = int(draw.textlength(gst_text, font=font_s))
+                label_x = min(totals_x, right_edge - amount_width - label_width - 24)
+                draw.text((label_x, y), gst_label, font=font_s, fill="black")
+                draw_text_right(
+                    draw,
+                    gst_text,
+                    right_edge,
+                    y,
+                    font_s,
+                    recorder=recorder,
+                    field="GST_AMOUNT",
                 )
                 y += 40
 
