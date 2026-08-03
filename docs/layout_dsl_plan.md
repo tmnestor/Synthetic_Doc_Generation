@@ -1053,6 +1053,48 @@ def test_panel_padding_wider_than_the_page_is_rejected():
     assert_diagnostic_error(str(exc_info.value))
 
 
+def test_validate_layout_reports_a_missing_key_diagnostically():
+    # A layout not yet migrated to the DSL lacks these keys; the gate must say so
+    # rather than surface a bare KeyError traceback.
+    for missing in ("body", "content_width"):
+        layout = {"content_width": 1600, "field_budgets": {}, "body": []}
+        del layout[missing]
+        with pytest.raises(LayoutSchemaError) as exc_info:
+            _validate_layout(layout)
+        message = str(exc_info.value)
+        assert missing in message
+        assert_diagnostic_error(message)
+
+
+def test_budgeted_table_nested_in_a_panel_uses_the_narrowed_width():
+    # Panel padding narrows the region; the nested table's column arithmetic must use
+    # the narrowed width, not the layout's full content_width. This is the interaction
+    # Stage 2's Westpac rewards panel (a panel containing a split) depends on.
+    layout = {
+        "content_width": 1600,
+        "field_budgets": {"DESC": {"width": 1200, "fit": "wrap", "min_font": 10, "max_lines": 2}},
+        "body": [
+            {
+                "type": "panel",
+                "padding": 100,
+                "children": [
+                    {
+                        "type": "table",
+                        "rows": "pipe_fields",
+                        "columns": [
+                            {"key": "d", "label": "D", "align": "left", "x": 0, "budget": "DESC"},
+                            {"key": "x", "label": "X", "align": "right", "x_right": -400},
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    with pytest.raises(LayoutSchemaError) as exc_info:
+        _validate_layout(layout)
+    assert_diagnostic_error(str(exc_info.value))
+
+
 def test_split_with_too_large_a_gap_is_rejected():
     layout = {
         "content_width": 100,
@@ -1098,7 +1140,9 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap",)),
-    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header", "budget")),
+    # No block-level "budget": budgets are declared per column, and advertising an
+    # unread block-level key would be silently accepted and silently ignored.
+    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header")),
 }
 
 _CONTAINERS = ("panel", "split")
@@ -1362,8 +1406,19 @@ def validate_layout(
         known_fields: Field names the document type may reference.
 
     Raises:
-        LayoutSchemaError: On any structural, reference, or geometry problem.
+        LayoutSchemaError: On any structural, reference, or geometry problem, or if
+            the layout lacks a key this function needs.
     """
+    for key, example in (("body", "a list of block mappings"), ("content_width", "1600")):
+        if key not in layout:
+            raise _err(
+                f"layout '{layout_id}' has no '{key}' key.",
+                layout_path=layout_path,
+                key_path=f"{layout_id}.{key}",
+                expected=f"{key}: {example}.",
+                recover=f"add a '{key}:' key to {layout_id}, or do not pass this layout "
+                f"to validate_layout.",
+            )
     validate_body(
         layout["body"], layout_id=layout_id, layout_path=layout_path, known_fields=known_fields
     )
