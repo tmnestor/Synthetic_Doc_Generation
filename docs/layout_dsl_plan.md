@@ -801,6 +801,12 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         row["balance"] = balance
         row["synthetic"] = False
         balance = balance + _to_decimal(row["debit"]) - _to_decimal(row["credit"])
+        # Coerce real amounts to Decimal so the table primitive formats them as currency
+        # ("$100.00"), matching the legacy renderer. Leave the absent sentinel a string:
+        # legacy draws nothing for it and _cell_text maps it to the empty string.
+        for key in ("debit", "credit"):
+            if row[key] != "NOT_FOUND":
+                row[key] = _to_decimal(row[key])
 
     if wants and rows:
         first = rows[0]
@@ -2317,8 +2323,24 @@ def _draw_header(columns: list, ctx: RenderContext, y: int, *, size: int, style:
 
 
 def _draw_row(row: dict, columns: list, ctx: RenderContext, y: int, *, size: int, style: str,
-              row_height: int, index: int | None) -> int:
-    """Draw one row; `index` is None for synthetic rows, which are not recorded."""
+              row_height: int, index: int | None, is_last_real: bool = False) -> int:
+    """Draw one row.
+
+    Args:
+        row: The row dict from the provider.
+        columns: The table's column specs.
+        ctx: Render context.
+        y: Current y-cursor.
+        size: Body font size.
+        style: One of the four row styles.
+        row_height: Vertical advance for this row.
+        index: The real-row index, or None for synthetic rows, which are never recorded.
+        is_last_real: True on the final real row, enabling any column's
+            `last_row_field` capture.
+
+    Returns:
+        The advanced y-cursor.
+    """
     font = load_font(size)
     bottom = y + row_height
 
@@ -2328,25 +2350,36 @@ def _draw_row(row: dict, columns: list, ctx: RenderContext, y: int, *, size: int
         if not text:
             continue
 
+        # Alignment picks the helper; recording happens on EVERY path. The legacy
+        # renderer records the right-aligned amount columns too, so omitting them here
+        # would fail Stage 2's equivalence assertion on every case.
+        right = column.get("align") == "right"
+        recorder = ctx.recorder if index is not None else None
         budget_name = column.get("budget")
-        if budget_name is not None and column.get("align") != "right":
-            field = column.get("field")
-            draw_fitted_left(
-                ctx.draw,
-                text,
-                x,
-                y,
-                budget=field_budget(ctx.layout, ctx.layout_id, budget_name,
-                                    layout_path=ctx.layout_path),
-                nominal_size=size,
-                line_spacing=row_height,
-                recorder=ctx.recorder if index is not None else None,
-                field=f"{field}[{index}]" if field is not None and index is not None else None,
-            )
-        elif column.get("align") == "right":
-            draw_text_right(ctx.draw, text, x_right=x, y=y, font=font)
+
+        # A column records either per-row (`field` -> FIELD[i]) or once on the final
+        # real row (`last_row_field` -> FIELD, unindexed). Legacy's balance column uses
+        # the latter: it records ACCOUNT_BALANCE on the last row and nothing elsewhere
+        # (bank_statement.py:290-299). Synthetic rows have index None and record nothing.
+        field = column.get("field")
+        if field is not None and index is not None:
+            record_field = f"{field}[{index}]"
+        elif column.get("last_row_field") and is_last_real:
+            record_field = column["last_row_field"]
         else:
-            draw_text_left(ctx.draw, text, x, y, font)
+            record_field = None
+
+        if budget_name is not None:
+            budget = field_budget(ctx.layout, ctx.layout_id, budget_name,
+                                  layout_path=ctx.layout_path)
+            fitted = draw_fitted_right if right else draw_fitted_left
+            fitted(ctx.draw, text, x, y, budget=budget, nominal_size=size,
+                   line_spacing=row_height, recorder=recorder, field=record_field)
+        elif right:
+            draw_text_right(ctx.draw, text, x_right=x, y=y, font=font,
+                            recorder=recorder, field=record_field)
+        else:
+            draw_text_left(ctx.draw, text, x, y, font, recorder=recorder, field=record_field)
 
     if style == "bordered":
         ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, bottom)], outline="#999999")
