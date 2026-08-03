@@ -60,6 +60,86 @@
 
 ---
 
+## Task 0: The snapshot net for receipts and invoices
+> **Execute this task first.** It captures the Phase A parity baseline from the
+> legacy renderers at the branch's current HEAD, before any engine change lands.
+> Tasks 1-12 should be inert to the legacy receipt and invoice paths, but the
+> baseline must not depend on that being true.
+
+
+**Files:**
+- Create: `tests/regenerate_doc_pixel_snapshot.py`, `tests/test_receipt_pixel_snapshot.py`, `tests/test_invoice_pixel_snapshot.py`
+- Create: `tests/fixtures/receipt_legacy_snapshot.json`, `tests/fixtures/invoice_legacy_snapshot.json`
+
+**Interfaces:**
+- Consumes: `render_receipt`, `render_invoice` — the legacy renderers, still intact.
+- Produces: `_digest(image: Image.Image) -> str` (sha256 of `image.tobytes()`), `_entries(path: Path) -> list[dict]`, `_RECEIPT_SNAPSHOT_PATH`, `_INVOICE_SNAPSHOT_PATH` in `tests/regenerate_doc_pixel_snapshot.py`, plus the two fixture files. This is the Phase A parity gate — Tasks 14 and 15 are defined as done by these tests.
+
+**Capture this before authoring a single body.** Once Tasks 14 and 15 delete the legacy renderers there is no oracle left, which is exactly the reasoning `tests/test_bank_pixel_snapshot.py`'s docstring records for the bank migration.
+
+- [ ] **Step 1: Write the capture script**
+
+Model it on `regenerate_bank_pixel_snapshot.py`. For each entry in `ground_truth/receipts.yml` and `ground_truth/invoices.yml`, render through the legacy renderer with `geometry_out={}` and record `{"hash": sha256 of image bytes, "size": [w, h], "boxes": geometry_out["boxes"]}` keyed `"{case_id}_{layout_id}"`. Require `--confirm` to write, exactly as the bank script does, so a bare run only prints a dry-run summary.
+
+- [ ] **Step 2: Capture the baseline**
+
+```bash
+conda run -n synthetic python tests/regenerate_doc_pixel_snapshot.py --confirm
+```
+
+Expected: two fixture files written, 55 receipt entries and 55 invoice entries.
+
+- [ ] **Step 3: Write the parity tests**
+
+```python
+# tests/test_receipt_pixel_snapshot.py
+"""Phase A parity gate. Renders every receipt entry and asserts the page hash
+and every recorded box match the baseline captured from the legacy renderer.
+
+This does not retire with the legacy path the way the bank equivalence harness
+did. After Task 14 it becomes the permanent regression guard for receipts, and
+it is re-blessed only when Phase B intentionally changes the rendering.
+"""
+
+import json
+from pathlib import Path
+
+import pytest
+
+from generators.loader import load_ground_truth, load_layout_registry
+from generators.receipt import render_receipt
+from regenerate_doc_pixel_snapshot import _digest
+
+BASELINE = json.loads(Path("tests/fixtures/receipt_legacy_snapshot.json").read_text())
+LAYOUTS = load_layout_registry(Path("config/layouts/receipts.yml"))
+ENTRIES = load_ground_truth(Path("ground_truth/receipts.yml"))["documents"]
+
+
+@pytest.mark.parametrize("entry", ENTRIES, ids=lambda e: f"{e['case_id']}_{e['layout']}")
+def test_receipt_render_matches_baseline(entry):
+    key = f"{entry['case_id']}_{entry['layout']}"
+    geometry: dict = {}
+    image = render_receipt(entry, LAYOUTS[entry["layout"]], geometry_out=geometry)
+    expected = BASELINE[key]
+
+    assert [image.width, image.height] == expected["size"]
+    assert _digest(image) == expected["hash"]
+    assert geometry["boxes"] == expected["boxes"]
+```
+
+Write the invoice test identically against `render_invoice` and the invoice fixture.
+
+- [ ] **Step 4: Confirm the net is green against the legacy path**
+
+Run: `conda run -n synthetic pytest tests/test_receipt_pixel_snapshot.py tests/test_invoice_pixel_snapshot.py -v`
+Expected: PASS, 110 cases. A failure here means the capture is non-deterministic — investigate before proceeding, because a flaky baseline is worse than none.
+
+- [ ] **Step 5: Commit**
+
+`tests/` is gitignored, so only note in the commit body that the net exists. There is nothing to stage; skip the commit and record completion in the plan checkbox.
+
+---
+
 ## Task 1: Stage 3 prerequisites
 
 The four items in `docs/layout_dsl_stage3_prerequisites.md`. All are inert against the 8 bank layouts and go live the moment a hand-authored body exists.
@@ -392,20 +472,25 @@ def test_incomplete_defaults_block_is_rejected():
     assert "align" in str(exc_info.value)
 
 
-def test_every_parameter_name_is_covered_by_the_real_layouts():
+def test_bank_layouts_cover_every_parameter_name():
     """Guards against adding a parameter to PARAMETER_DEFAULTS and forgetting to
-    seed it in the shipped layouts — validate would then fail only at render."""
-    from generators.loader import load_layout_registry
+    seed it in the shipped layouts — validate would then fail only at render.
+
+    Scoped to bank_statements.yml: receipts and invoices gain their defaults: in
+    Tasks 14 and 15, and test_all_layouts_cover_every_parameter_name widens this
+    to all three files there.
+    """
     from pathlib import Path
 
-    for path in ("bank_statements", "receipts", "invoices"):
-        registry = load_layout_registry(Path(f"config/layouts/{path}.yml"))
-        for layout_id, layout in registry.items():
-            missing = PARAMETER_DEFAULTS - set(layout.get("defaults", {}))
-            assert not missing, f"{path}.yml -> {layout_id} missing defaults: {sorted(missing)}"
+    from generators.loader import load_layout_registry
+
+    registry = load_layout_registry(Path("config/layouts/bank_statements.yml"))
+    for layout_id, layout in registry.items():
+        missing = PARAMETER_DEFAULTS - set(layout.get("defaults", {}))
+        assert not missing, f"bank_statements.yml -> {layout_id} missing defaults: {sorted(missing)}"
 ```
 
-The second test will fail for `receipts` and `invoices` until Tasks 14 and 15. Mark it `@pytest.mark.xfail(strict=False)` now with the reason `"receipts/invoices gain defaults: in Tasks 14-15"`, and remove the marker in Task 15.
+Scoped to bank layouts deliberately — no `xfail`. A test that cannot fail yet is a test nobody trusts, and one whose removal depends on a later task remembering is a test that outlives its reason. Task 15 adds the widened version once all three files carry `defaults:`.
 
 - [ ] **Step 2: Run and confirm failure**
 
@@ -1224,81 +1309,6 @@ git commit -m ":sparkles: add the receipt line-item row provider"
 
 ---
 
-## Task 13: The snapshot net for receipts and invoices
-
-**Files:**
-- Create: `tests/regenerate_doc_pixel_snapshot.py`, `tests/test_receipt_pixel_snapshot.py`, `tests/test_invoice_pixel_snapshot.py`
-- Create: `tests/fixtures/receipt_legacy_snapshot.json`, `tests/fixtures/invoice_legacy_snapshot.json`
-
-**Interfaces:**
-- Consumes: `render_receipt`, `render_invoice` — the legacy renderers, still intact.
-- Produces: `_digest(image: Image.Image) -> str` (sha256 of `image.tobytes()`), `_entries(path: Path) -> list[dict]`, `_RECEIPT_SNAPSHOT_PATH`, `_INVOICE_SNAPSHOT_PATH` in `tests/regenerate_doc_pixel_snapshot.py`, plus the two fixture files. This is the Phase A parity gate — Tasks 14 and 15 are defined as done by these tests.
-
-**Capture this before authoring a single body.** Once Tasks 14 and 15 delete the legacy renderers there is no oracle left, which is exactly the reasoning `tests/test_bank_pixel_snapshot.py`'s docstring records for the bank migration.
-
-- [ ] **Step 1: Write the capture script**
-
-Model it on `regenerate_bank_pixel_snapshot.py`. For each entry in `ground_truth/receipts.yml` and `ground_truth/invoices.yml`, render through the legacy renderer with `geometry_out={}` and record `{"hash": sha256 of image bytes, "size": [w, h], "boxes": geometry_out["boxes"]}` keyed `"{case_id}_{layout_id}"`. Require `--confirm` to write, exactly as the bank script does, so a bare run only prints a dry-run summary.
-
-- [ ] **Step 2: Capture the baseline**
-
-```bash
-conda run -n synthetic python tests/regenerate_doc_pixel_snapshot.py --confirm
-```
-
-Expected: two fixture files written, 55 receipt entries and 55 invoice entries.
-
-- [ ] **Step 3: Write the parity tests**
-
-```python
-# tests/test_receipt_pixel_snapshot.py
-"""Phase A parity gate. Renders every receipt entry and asserts the page hash
-and every recorded box match the baseline captured from the legacy renderer.
-
-This does not retire with the legacy path the way the bank equivalence harness
-did. After Task 14 it becomes the permanent regression guard for receipts, and
-it is re-blessed only when Phase B intentionally changes the rendering.
-"""
-
-import json
-from pathlib import Path
-
-import pytest
-
-from generators.loader import load_ground_truth, load_layout_registry
-from generators.receipt import render_receipt
-from regenerate_doc_pixel_snapshot import _digest
-
-BASELINE = json.loads(Path("tests/fixtures/receipt_legacy_snapshot.json").read_text())
-LAYOUTS = load_layout_registry(Path("config/layouts/receipts.yml"))
-ENTRIES = load_ground_truth(Path("ground_truth/receipts.yml"))["documents"]
-
-
-@pytest.mark.parametrize("entry", ENTRIES, ids=lambda e: f"{e['case_id']}_{e['layout']}")
-def test_receipt_render_matches_baseline(entry):
-    key = f"{entry['case_id']}_{entry['layout']}"
-    geometry: dict = {}
-    image = render_receipt(entry, LAYOUTS[entry["layout"]], geometry_out=geometry)
-    expected = BASELINE[key]
-
-    assert [image.width, image.height] == expected["size"]
-    assert _digest(image) == expected["hash"]
-    assert geometry["boxes"] == expected["boxes"]
-```
-
-Write the invoice test identically against `render_invoice` and the invoice fixture.
-
-- [ ] **Step 4: Confirm the net is green against the legacy path**
-
-Run: `conda run -n synthetic pytest tests/test_receipt_pixel_snapshot.py tests/test_invoice_pixel_snapshot.py -v`
-Expected: PASS, 110 cases. A failure here means the capture is non-deterministic — investigate before proceeding, because a flaky baseline is worse than none.
-
-- [ ] **Step 5: Commit**
-
-`tests/` is gitignored, so only note in the commit body that the net exists. There is nothing to stage; skip the commit and record completion in the plan checkbox.
-
----
-
 ## Task 14: Receipt bodies and adapter
 
 **Files:**
@@ -1308,7 +1318,7 @@ Expected: PASS, 110 cases. A failure here means the capture is non-deterministic
 - Test: `tests/test_receipt_pixel_snapshot.py`, `tests/test_receipt_fit.py`
 
 **Interfaces:**
-- Consumes: everything from Tasks 1–13.
+- Consumes: everything from Tasks 0–12.
 - Produces: `render_receipt(entry, layout, *, geometry_out=None) -> Image.Image` — unchanged signature, so `pipeline.py:51` needs no edit.
 
 Work **one layout at a time**, running the snapshot after each. Six small failures are diagnosable; one large one is not.
@@ -1441,7 +1451,7 @@ git commit -m ":fire: replace the receipt renderer with declarative layouts"
 - Test: `tests/test_invoice_pixel_snapshot.py`, `tests/test_invoice_fit.py`, `tests/layout_dsl/test_defaults.py`
 
 **Interfaces:**
-- Consumes: everything from Tasks 1–13.
+- Consumes: everything from Tasks 0–12.
 - Produces: `render_invoice(entry, layout, *, geometry_out=None) -> Image.Image` — unchanged signature.
 
 Invoices are fixed-page, so the adapter is `bank_statement.py:39-76` almost verbatim. `_normalize_layout` (`invoice.py:47-73`) is deleted outright: it exists only to supply defaults for keys the YAML should state, and every one of its `.get(key, literal)` fallbacks is the pattern this plan removes.
@@ -1473,9 +1483,28 @@ Commit after each.
 
 The whole section loop, `_parse_line_items`, and `_normalize_layout`. Repoint `tests/test_invoice_fit.py`'s `_parse_line_items` import at `pipe_fields`.
 
-- [ ] **Step 6: Remove the xfail marker from Task 3**
+- [ ] **Step 6: Widen the defaults-coverage test to all three layout files**
 
-`test_every_parameter_name_is_covered_by_the_real_layouts` now passes for all three layout files. Delete the `@pytest.mark.xfail` and confirm it passes strictly.
+All three now carry `defaults:`. Add the widened test beside Task 3's bank-scoped one:
+
+```python
+# tests/layout_dsl/test_defaults.py
+def test_all_layouts_cover_every_parameter_name():
+    """The Task 3 version was scoped to bank_statements.yml because receipts and
+    invoices had no defaults: yet. All three carry it now."""
+    from pathlib import Path
+
+    from generators.loader import load_layout_registry
+
+    for name in ("bank_statements", "receipts", "invoices"):
+        registry = load_layout_registry(Path(f"config/layouts/{name}.yml"))
+        for layout_id, layout in registry.items():
+            missing = PARAMETER_DEFAULTS - set(layout.get("defaults", {}))
+            assert not missing, f"{name}.yml -> {layout_id} missing defaults: {sorted(missing)}"
+```
+
+Run: `conda run -n synthetic pytest tests/layout_dsl/test_defaults.py -v`
+Expected: PASS, both the bank-scoped and widened tests.
 
 - [ ] **Step 7: Full suite and commit**
 
