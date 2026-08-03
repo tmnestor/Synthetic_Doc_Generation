@@ -192,6 +192,20 @@ first block that happens to need it.
 `providers.py:362`'s `"Totals at end of period"` becomes a required param of the
 `bank_transaction_totals` provider, declared in the bank layouts' `params:`.
 
+### Engine capabilities the bank migration never needed
+
+Three gaps are invisible against the 8 bank layouts and blocking for receipts. They are
+capabilities, not conveniences — no `body:` tree can work around them.
+
+| Gap | Evidence | Fix |
+|---|---|---|
+| No monospace. Every `load_font` call in `primitives_text.py` (57, 127, 153, 261) omits `mono=`, and `common.py:57` defaults it to `False`. All 6 receipt layouts declare `font_family: monospace`; bank and invoice are sans, so this never surfaced. | `receipt.py:143` sets `is_mono` and threads it through every draw | Thread `mono` from the layout's `font_family` into every font load, in text, table, and container primitives |
+| No fit budget on text primitives. Only table columns read `budget:` (`primitives_table.py:501`). Receipts fit `SUPPLIER_NAME`, `BUSINESS_ADDRESS`, `ABN_LINE`, `PHONE`, `PAYMENT_ACQUIRER`, `PAYMENT_LINE` with `shrink_then_wrap` / `max_lines: 2`, where wrapping advances the cursor a variable amount. | `receipt.py:161-213`, `invoice.py:309-342` | `budget:` key on `text` and `pair`, dispatching to `draw_fitted_left` / `draw_fitted_center` / `draw_fitted_right` and returning their wrapped advance |
+| Line advance is a hardcoded ratio. `primitives_text.py:48` returns `int(size * 1.4)`. Receipts declare `line_height: 20` against `font_size: 18` — a ratio of 1.11. | `receipts.yml:5-7`; `receipt.py:141` passes it as `line_spacing` everywhere | `line_advance` in the layout's `defaults:`, absolute pixels. The 1.4 ratio becomes each bank layout's declared value |
+
+The third is why `defaults:` must land before any body is authored: with the ratio
+hardcoded, every receipt would be silently retypeset.
+
 ### Primitive additions
 
 | Need | Today | Addition |
@@ -341,7 +355,8 @@ definition of done, and it retires when Phase B intentionally changes the pixels
 |---|---|
 | The `defaults:` conversion silently shifts bank pixels | Bank snapshot already exists and must stay byte-identical; the conversion lands as its own commit ahead of any receipt or invoice work |
 | Phase A parity unreachable for the measured inclusive-GST label | `min_gap` on `pair` reproduces `invoice.py:283-285` exactly. If it cannot, accept a documented sub-pixel delta rather than keep arithmetic in YAML |
-| The primitive gap list, derived from reading, proves incomplete | Each addition is its own commit with tests, as the bank migration was. An unforeseen gap is one more commit, not a redesign |
+| The primitive gap list, derived from reading, proves incomplete | Each addition is its own commit with tests, as the bank migration was. An unforeseen gap is one more commit, not a redesign. Three such gaps — mono, text budgets, line advance — were already found while writing the implementation plan and folded in above; expect one or two more during Phase A |
+| Threading `mono` and `line_advance` through the primitives shifts bank output | Both are seeded from the current Python literals (`mono=False`, ratio 1.4 made explicit per layout); `test_bank_pixel_snapshot.py` gates the commit |
 | Field providers become a dumping ground | Same rule as row providers: a provider may not emit a fact a `body:` tree can already state. `emits` is declared and validated, so the surface is visible in review |
 | A provider emit shadows a scored column and corrupts extraction ground truth | Validation check 4 rejects the collision at startup |
 | `defaults:` becomes a second hiding place for pixel decisions | It is YAML, versioned and diffable; the rule it satisfies is visibility, not absence. A default that varies per block belongs on the block |
