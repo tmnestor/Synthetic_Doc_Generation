@@ -106,13 +106,13 @@ from pathlib import Path
 
 import pytest
 
-from generators.loader import load_ground_truth, load_layout_registry
+from generators.loader import load_layout_registry
 from generators.receipt import render_receipt
-from regenerate_doc_pixel_snapshot import _digest
+from regenerate_doc_pixel_snapshot import _digest, _entries
 
 BASELINE = json.loads(Path("tests/fixtures/receipt_legacy_snapshot.json").read_text())
 LAYOUTS = load_layout_registry(Path("config/layouts/receipts.yml"))
-ENTRIES = load_ground_truth(Path("ground_truth/receipts.yml"))["documents"]
+ENTRIES = _entries(Path("ground_truth/receipts.yml"))
 
 
 @pytest.mark.parametrize("entry", ENTRIES, ids=lambda e: f"{e['case_id']}_{e['layout']}")
@@ -1095,12 +1095,17 @@ git commit -m ":sparkles: add the field-provider extension point"
 # tests/layout_dsl/test_field_providers.py
 import pytest
 
-from generators.layout_dsl.field_providers import get_field_provider
-from generators.loader import load_ground_truth
 from pathlib import Path
 
+from generators.layout_dsl.field_providers import get_field_provider
 
-@pytest.mark.parametrize("entry", load_ground_truth(Path("ground_truth/receipts.yml"))["documents"])
+# Task 0's capture script. `load_ground_truth` returns a flat case_id -> entry
+# mapping with no "documents" key; `_entries` is the helper that flattens it to
+# the list of entries these tests iterate, each carrying its own `case_id`.
+from regenerate_doc_pixel_snapshot import _entries
+
+
+@pytest.mark.parametrize("entry", _entries(Path("ground_truth/receipts.yml")))
 def test_receipt_pos_matches_the_legacy_derivation(entry):
     """Phase A parity: the provider must reproduce receipt.py's values exactly
     for every entry in the corpus, not just a sample."""
@@ -1181,8 +1186,12 @@ The three block variants are selected by `when:` on emitted keys, not by a Pytho
 
 - [ ] **Step 1: Write the failing parity test**
 
+Add to the same file as Task 10's tests, which already imports `_entries` from
+`regenerate_doc_pixel_snapshot` (see Task 10 Step 1 — `load_ground_truth` returns a flat
+case_id mapping, not a list).
+
 ```python
-@pytest.mark.parametrize("entry", load_ground_truth(Path("ground_truth/receipts.yml"))["documents"])
+@pytest.mark.parametrize("entry", _entries(Path("ground_truth/receipts.yml")))
 def test_receipt_payment_matches_derive_payment(entry):
     from generators.payment_block import derive_payment, load_link_index
     from generators.receipt import _derive_receipt_details
@@ -1204,7 +1213,7 @@ def test_receipt_payment_matches_derive_payment(entry):
 def test_cash_receipts_suppress_the_card_keys():
     """The three slip variants are selected by when:, so a cash payment must
     emit NOT_FOUND for every card key rather than an empty string."""
-    cash = [e for e in load_ground_truth(Path("ground_truth/receipts.yml"))["documents"]
+    cash = [e for e in _entries(Path("ground_truth/receipts.yml"))
             if get_field_provider("receipt_payment")(e, {"pools_key": "payment_terminal"})
             ["PAYMENT_KIND"] == "cash"]
     assert cash, "the corpus must contain at least one cash receipt for this test to mean anything"
