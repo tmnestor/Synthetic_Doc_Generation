@@ -19,7 +19,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap",)),
-    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header", "budget")),
+    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header")),
 }
 
 _CONTAINERS = ("panel", "split")
@@ -300,6 +300,17 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
     Raises:
         LayoutSchemaError: On any structural, reference, or geometry problem.
     """
+    for key, example in (("body", "a list of block mappings"), ("content_width", "1600")):
+        if key not in layout:
+            raise _err(
+                f"layout '{layout_id}' has no '{key}' key.",
+                layout_path=layout_path,
+                key_path=f"{layout_id}.{key}",
+                expected=f"{key}: {example}.",
+                recover=f"add a '{key}:' key to {layout_id}, or do not pass this layout "
+                f"to validate_layout.",
+            )
+
     validate_body(layout["body"], layout_id=layout_id, layout_path=layout_path, known_fields=known_fields)
     content_width = int(layout["content_width"])
     _validate_geometry(
