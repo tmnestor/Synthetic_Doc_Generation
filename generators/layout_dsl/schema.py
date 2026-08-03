@@ -348,6 +348,15 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
                     expected=f"padding below {width // 2}, e.g. padding: 10.",
                     recover="reduce the panel's padding, or widen content_width.",
                 )
+            declared = block.get("height")
+            if declared is not None and int(declared) < 2 * padding:
+                raise _err(
+                    f"panel declares height {int(declared)} but its padding alone needs {2 * padding}px.",
+                    layout_path=layout_path,
+                    key_path=f"{here}.height",
+                    expected=f"height >= {2 * padding}, or padding <= {int(declared) // 2}.",
+                    recover="raise the panel's height, or reduce its padding.",
+                )
             _validate_geometry(
                 block["children"],
                 layout=layout,
