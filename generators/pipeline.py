@@ -27,6 +27,7 @@ from generators.derive_outputs import (
 from generators.distribution_statement import render_distribution_statement
 from generators.exporters.config import load_export_config
 from generators.invoice import render_invoice
+from generators.layout_dsl.schema import LayoutSchemaError, validate_layout
 from generators.loader import (
     load_generation_config,
     load_ground_truth,
@@ -39,7 +40,7 @@ from generators.payment_block import (
     method_from_bank_description,
 )
 from generators.receipt import render_receipt
-from generators.schema import validate_entry
+from generators.schema import field_names_for, validate_entry
 from generators.trust_income_schedule import render_trust_income_schedule
 from generators.trust_return import render_trust_return
 
@@ -93,10 +94,33 @@ def validate(
                     f"Available layouts: {sorted(layouts.keys())}"
                 )
 
+        # Every layout body is structurally validated before any rendering, so a
+        # malformed primitive or unknown field reference fails here rather than
+        # part-way through a 330-image generate run.
+        layout_errors: list[str] = []
+        if layouts:
+            known = set(field_names_for(doc_type))
+            for layout_id, layout in layouts.items():
+                if "body" not in layout:
+                    continue
+                try:
+                    validate_layout(
+                        layout,
+                        layout_id=layout_id,
+                        layout_path=str(doc_cfg["layouts"]),
+                        known_fields=known,
+                    )
+                except LayoutSchemaError as exc:
+                    layout_errors.append(str(exc))
+        all_errors.extend(layout_errors)
+
         # Overflow backstop: render each entry and surface any content that
         # cannot fit its box even after lossless wrap/shrink (a real design error).
+        # Skipped when layout validation already found a structural problem —
+        # rendering against a known-broken body raises an unrelated exception
+        # (e.g. an unbound field reference) instead of a useful fit diagnostic.
         renderer = _RENDERERS.get(doc_type)
-        if renderer and layouts:
+        if renderer and layouts and not layout_errors:
             all_errors.extend(check_overflow(gt_data, layouts, renderer))
 
     # Every linked receipt's bank description must resolve to a card scheme, so a

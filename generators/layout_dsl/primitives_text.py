@@ -67,16 +67,37 @@ def _draw_line(
 def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a single line of text.
 
+    Two optional keys change how `content` resolves and whether the line
+    draws at all — both exist to let a letterhead/supplier pair share one
+    block vocabulary instead of hand-written Python (mirrors the legacy
+    renderers' `_draw_supplier_line`):
+
+    - `from_layout: true` reads `content` as a layout key (e.g. `logo_text`)
+      rather than a `{FIELD}` template, so the drawn brand genuinely comes
+      from the layout, not a Python or YAML literal that can drift from it.
+    - `suppress_if_equals: <layout_key>` skips drawing (and recording)
+      entirely when the interpolated text is empty or equals that layout
+      key's value — the content supplier line is redundant whenever it
+      already matches the letterhead already on the page.
+
     Args:
         block: The `text` block.
         ctx: Render context.
         y: Current y-cursor.
 
     Returns:
-        The advanced y-cursor.
+        The advanced y-cursor (unchanged if the block was suppressed).
     """
     size = resolve_role(ctx.layout, block.get("role", "body"))
-    text = interpolate(block["content"], ctx.entry["fields"])
+    if block.get("from_layout"):
+        text = str(ctx.layout[block["content"]])
+    else:
+        text = interpolate(block["content"], ctx.entry["fields"])
+
+    suppress_key = block.get("suppress_if_equals")
+    if suppress_key is not None and (not text or text == str(ctx.layout.get(suppress_key))):
+        return y
+
     left, right = _draw_line(
         ctx,
         text,
@@ -206,8 +227,10 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
     Args:
         block: The `banner` block, carrying `content`, `height`, `color`, and
             optional `text_color` (default white), `role` (font-size role,
-            default "header"), `bold` (default False), and `text_y` (the
-            text's absolute y from the page top, default 0).
+            default "header"), `bold` (default False), `text_y` (the text's
+            absolute y from the page top, default 0), and `from_layout`
+            (when true, `content` names a layout key read literally instead
+            of a `{FIELD}` template — see `draw_text_block`).
         ctx: Render context.
         y: Current y-cursor, returned unchanged.
 
@@ -220,7 +243,10 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
 
     size = resolve_role(ctx.layout, block.get("role", "header"))
     font = load_font(size, bold=bool(block.get("bold", False)))
-    text = interpolate(block["content"], ctx.entry["fields"])
+    if block.get("from_layout"):
+        text = str(ctx.layout[block["content"]])
+    else:
+        text = interpolate(block["content"], ctx.entry["fields"])
     ctx.draw.text(
         (ctx.region.x, int(block.get("text_y", 0))), text, font=font, fill=block.get("text_color", "white")
     )

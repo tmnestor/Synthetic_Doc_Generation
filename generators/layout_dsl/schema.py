@@ -30,14 +30,20 @@ GROUPINGS = ("none", "dedicated_row", "inline")
 
 # primitive -> (required keys, optional keys)
 PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
-    "text": (("content",), ("role", "align", "color", "field", "bold")),
+    "text": (
+        ("content",),
+        ("role", "align", "color", "field", "bold", "from_layout", "suppress_if_equals"),
+    ),
     "pair": (("label", "value"), ("role", "color", "field")),
     "block": (("lines",), ("role", "color", "heading")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
-    "banner": (("content", "height", "color"), ("text_color", "role", "text_y", "bold")),
+    "banner": (
+        ("content", "height", "color"),
+        ("text_color", "role", "text_y", "bold", "from_layout"),
+    ),
     "table": (
         ("rows", "columns", "frame", "grouping"),
         (
@@ -480,10 +486,35 @@ def _column_anchor(column: dict, width: int) -> int:
 
 
 def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: int, key_path: str) -> None:
-    """Recursively check budgets and container widths against available space."""
+    """Recursively check budgets, container widths, and layout-key references."""
     for index, block in enumerate(blocks):
         here = f"{key_path}[{index}]"
         kind = block["type"]
+
+        # `from_layout` and `suppress_if_equals` (text/banner) name a layout
+        # key to read at render time, not a `{FIELD}` template — check the
+        # key actually exists here, where the layout dict is in scope, since
+        # `_validate_references` only knows entry fields.
+        if block.get("from_layout"):
+            key = block["content"]
+            if key not in layout:
+                raise _err(
+                    f"'from_layout' names layout key '{key}', which this layout does not define.",
+                    layout_path=layout_path,
+                    key_path=f"{here}.content",
+                    expected=f"a key present in the layout, e.g. {key}: <value>.",
+                    recover=f"add '{key}:' to the layout, or fix the key name.",
+                )
+        suppress_key = block.get("suppress_if_equals")
+        if suppress_key is not None and suppress_key not in layout:
+            raise _err(
+                f"'suppress_if_equals' names layout key '{suppress_key}', which this layout "
+                "does not define.",
+                layout_path=layout_path,
+                key_path=f"{here}.suppress_if_equals",
+                expected=f"a key present in the layout, e.g. {suppress_key}: <value>.",
+                recover=f"add '{suppress_key}:' to the layout, or fix the key name.",
+            )
 
         if kind == "table":
             _validate_column_budgets(
