@@ -96,6 +96,10 @@ layouts:
       - type: table
         rows: bank_transactions
         row_style: grouped
+        # grouped rows draw no ruled header lines, but legacy CBA always ruled-lines
+        # its header (12px rule + 44px labels + 16px rule = 72px) regardless of
+        # date_grouping. Override the computed default (line_height(32)=44) to match.
+        header_height: 72
         params: {opening_balance: true}
         columns:
           - {key: date, label: Date, align: left, x: 0}

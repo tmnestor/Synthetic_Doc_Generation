@@ -19,7 +19,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap",)),
-    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header")),
+    "table": (("rows", "columns"), ("row_style", "params", "row_height", "header", "header_height")),
 }
 
 _CONTAINERS = ("panel", "split")
