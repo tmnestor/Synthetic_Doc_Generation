@@ -21,6 +21,8 @@ from generators.common import (
 )
 from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
+from generators.layout_dsl.context import Region
+from generators.layout_dsl.engine import render_body
 
 _LAYOUT_PATH = "config/layouts/bank_statements.yml"
 
@@ -319,6 +321,56 @@ def render_cba(entry: dict, layout: dict, *, geometry_out: dict | None = None) -
             y += 24
         y += 28
         draw.text((margin, y), "CommBank.com.au  |  13 2221", font=font_footer, fill="#666666")
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
+
+    return img
+
+
+# -- Declarative DSL adapter ---------------------------------------------------
+
+
+def render_via_dsl(
+    entry: dict, layout: dict, layout_id: str, *, geometry_out: dict | None = None
+) -> Image.Image:
+    """Render a bank statement through the declarative layout DSL.
+
+    A layout-agnostic counterpart to the per-bank renderers above: instead of
+    bank-specific Python, it walks the layout's `body:` tree via `render_body`.
+    Exists so the equivalence harness (`tests/test_bank_dsl_equivalence.py`)
+    can render a DSL-backed layout id with the same signature as `render_cba`
+    et al. and compare geometry directly.
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' dict.
+        layout: Layout config carrying a `body:` tree, 'page_dimensions', etc.
+        layout_id: The layout's registry id, used in diagnostics.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"} describing each captured
+            field's normalised bounding box on the rendered page.
+
+    Returns:
+        PIL Image of the rendered bank statement.
+    """
+    dims = layout["page_dimensions"]
+    width, height = dims["width"], dims["height"]
+    img = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(img)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
+
+    render_body(
+        layout,
+        entry,
+        layout_id=layout_id,
+        layout_path=_LAYOUT_PATH,
+        draw=draw,
+        region=Region(x=layout["margin"], width=layout["content_width"]),
+        y=layout["margin"],
+        recorder=recorder,
+    )
 
     if recorder is not None and geometry_out is not None:
         geometry_out["width"] = width
