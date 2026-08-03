@@ -370,7 +370,8 @@ PARAMETER_DEFAULTS: frozenset[str] = frozenset(
         "spacer_height", "pair_value_align", "pair_min_gap",
         "table_header", "table_header_rule_top", "table_header_rule_gap",
         "table_group_gap", "table_fill_inset", "table_dividers",
-        "table_offset_y", "table_capture", "banner_text_color", "banner_role",
+        "table_offset_y", "table_capture", "table_sub_line_height",
+        "banner_text_color", "banner_role", "banner_text_y",
         "panel_padding", "panel_border_color", "split_gap", "split_divider_color",
     }
 )
@@ -540,7 +541,9 @@ _dsl_defaults: &dsl_defaults
     table_dividers: []
     table_offset_y: 0
     table_capture: true
+    table_sub_line_height: 0
     banner_text_color: "white"
+    banner_text_y: 0
     banner_role: header
     panel_padding: 0
     panel_border_color: "black"
@@ -573,7 +576,20 @@ resolve_param(block, ctx.layout, "key", layout_id=ctx.layout_id, layout_path=ctx
 
 The parameter name is the `PARAMETER_DEFAULTS` name, which is namespaced where two primitives share a short key — `rule_thickness` not `thickness`, `panel_padding` not `padding`. Cast at the call site exactly as today (`int(...)`, `bool(...)`, `str(...)`).
 
-The full site list: `primitives_text.py` 99, 109, 115, 116, 144, 148, 175, 176, 206, 207, 209, 211, 226, 260, 261, 267; `primitives_table.py` 131, 163, 213, 214, 219, 220, 222, 236, 586, 591, 593, 595; `primitives_container.py` 56, 80, 103, 110. `primitives_table.py:225` (`params` → `{}`) and `:269` (`row.get("date", "")`) are **not** converted — the first is a table's own params passthrough and the second reads provider row data, neither of which is a layout parameter.
+Do not work from a line-number list — Task 1 already shifted these, and each conversion shifts them again. Instead enumerate the sites yourself and convert every one:
+
+```bash
+conda run -n synthetic grep -rn '\.get("[a-z_]*", ' generators/layout_dsl/primitives_text.py generators/layout_dsl/primitives_table.py generators/layout_dsl/primitives_container.py
+```
+
+Exactly two hits are **not** layout parameters and must NOT be converted:
+
+- `primitives_table.py`'s `block.get("params", {})` — a table's own params passthrough to its row provider, not a pixel decision.
+- `primitives_table.py`'s `row.get("date", "")` — reads provider row *data*, not layout config.
+
+Every other hit converts. Two of them have parameter names that exist only because this task added them, so they are easy to miss: `draw_banner`'s `block.get("text_y", 0)` → `banner_text_y`, and the sub-line `sub_line.get("height", 0)` → `table_sub_line_height`. Note the latter is **not** `spacer_height` — a table sub-line's extra height and a spacer block's advance are different things that happened to share a short key.
+
+When you finish, re-run the grep. Every remaining hit must be one of the two exclusions above; if anything else remains, you missed a site.
 
 - [ ] **Step 6: Run the bank snapshot — the gate for this task**
 
