@@ -6,9 +6,7 @@ _cba: &cba
   <<: *bank_base
   bank: Commonwealth Bank of Australia
   logo_text: Commonwealth Bank
-  bank_code: CBA
   margin: 100
-  bank_name_color: "#12107D"
   field_budgets:
     TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
     SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
@@ -17,9 +15,7 @@ _westpac: &westpac
   <<: *bank_base
   bank: Westpac Banking Corporation
   logo_text: Westpac
-  bank_code: WBC
   margin: 80
-  logo_color: "#C41E3A"
   field_budgets:
     TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
     SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
@@ -121,7 +117,8 @@ _anz_txn_columns: &anz_txn_columns
 # needs to reach that target differs, because nab_classic and nab_dense use
 # different font_sizes and therefore different natural line_height() advances.
 _nab_classic_body: &nab_classic_body
-  - {type: text, content: "NAB Classic Banking", role: header, color: "#003366", bold: true}
+  # Letterhead reads logo_text dynamically (legacy: draw.text(..., layout["logo_text"], ...)).
+  - {type: text, content: logo_text, from_layout: true, role: header, color: "#003366", bold: true}
   - {type: spacer, height: 11}  # line_height(44)=61 -> legacy's real 72px jump.
   - type: panel
     height: 150
@@ -129,7 +126,12 @@ _nab_classic_body: &nab_classic_body
     border_color: "#003366"
     children: *nab_account_box_children
   - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
-  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME}
+  # SUPPLIER_NAME (National Australia Bank) never equals logo_text (NAB
+  # Classic Banking) anywhere in the corpus, so suppress_if_equals never
+  # fires today — kept for the same reason CBA/Westpac/ANZ carry it: a
+  # future reseed that ever makes them equal must not duplicate the line.
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
+     suppress_if_equals: logo_text}
   - {type: spacer, height: 1}  # line_height(28)=39 -> legacy's real 40px (_draw_supplier_line's line_spacing).
   - {type: text, content: "Transaction Details (continued)", role: body, bold: true}
   - {type: spacer, height: 13}  # line_height(28)=39 -> legacy's real 52px gap before the header bar.
@@ -148,7 +150,8 @@ _nab_classic_body: &nab_classic_body
     columns: *nab_txn_columns_with_reference
 
 _nab_dense_body: &nab_dense_body
-  - {type: text, content: "NAB Classic Banking", role: header, color: "#003366", bold: true}
+  # See nab_classic_body's identical comments.
+  - {type: text, content: logo_text, from_layout: true, role: header, color: "#003366", bold: true}
   - {type: spacer, height: 16}  # line_height(40)=56 -> legacy's real 72px jump.
   - type: panel
     height: 150
@@ -156,7 +159,8 @@ _nab_dense_body: &nab_dense_body
     border_color: "#003366"
     children: *nab_account_box_children
   - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
-  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME}
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
+     suppress_if_equals: logo_text}
   - {type: spacer, height: 7}  # line_height(24)=33 -> legacy's real 40px (_draw_supplier_line's line_spacing).
   - {type: text, content: "Transaction Details (continued)", role: body, bold: true}
   - {type: spacer, height: 19}  # line_height(24)=33 -> legacy's real 52px gap before the header bar.
@@ -180,10 +184,15 @@ _nab_dense_body: &nab_dense_body
 # The bar's own height and the "ANZ" logo text underneath it never advance the
 # y-cursor (matching legacy, which draws the bar, then hard-jumps to y=140
 # rather than flowing from the bar's own height); the spacer immediately after
-# it makes up that jump explicitly. SUPPLIER_NAME is never drawn as its own
-# line: it equals `logo_text` ("ANZ") for every ANZ ground-truth entry, and
-# legacy's `_draw_supplier_line` suppresses the line whenever that holds, so
-# there is deliberately no SUPPLIER_NAME text block here to match.
+# it makes up that jump explicitly. The banner's `content` reads `logo_text`
+# via `from_layout` (rather than a literal "ANZ" string) so the letterhead
+# genuinely comes from the layout, matching legacy's
+# `draw.text((margin, 30), layout["logo_text"], ...)`. The supplier line
+# below the account-number line is suppressed via `suppress_if_equals:
+# logo_text` — it equals `logo_text` ("ANZ") for every ANZ ground-truth
+# entry today, so the block never actually draws, matching legacy's
+# `_draw_supplier_line`, but it is a real block (not omitted) so a future
+# reseed that ever makes SUPPLIER_NAME differ from "ANZ" still renders it.
 #
 # The transaction table uses `frame: ruled` with `header_rule_top: false` and
 # `header_rule_gap: 14`: legacy ANZ rules only *below* its column headers (one
@@ -214,11 +223,14 @@ _nab_dense_body: &nab_dense_body
 # either table's `description`/`balance` decoration except what the columns
 # list already declares) because legacy passes no recorder to any of them.
 _anz_standard_body: &anz_standard_body
-  - {type: banner, content: "ANZ", height: 120, color: "#0061B5", text_y: 30, role: header, bold: true}
+  - {type: banner, content: logo_text, from_layout: true, height: 120, color: "#0061B5", text_y: 30,
+     role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
   - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
      color: "#666666"}
   - {type: spacer, height: 5}  # line_height(24)=33 -> legacy's real 38px (y += 38).
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
+     suppress_if_equals: logo_text}
   - {type: text, content: "Transaction Details", role: body, bold: true}
   - {type: spacer, height: 8}  # line_height(32)=44 -> legacy's real 52px gap before the header.
   - type: table
@@ -239,11 +251,15 @@ _anz_standard_body: &anz_standard_body
     columns: *anz_txn_columns
 
 _anz_modern_body: &anz_modern_body
-  - {type: banner, content: "ANZ", height: 120, color: "#0061B5", text_y: 30, role: header, bold: true}
+  # See anz_standard_body's identical comments.
+  - {type: banner, content: logo_text, from_layout: true, height: 120, color: "#0061B5", text_y: 30,
+     role: header, bold: true}
   - {type: spacer, height: 40}  # Legacy hard-jumps to y=140 after the bar; margin(100) + 40 = 140.
   - {type: text, content: "Account number    0000-00000", role: sub_description, align: right,
      color: "#666666"}
   - {type: spacer, height: 8}  # line_height(22)=30 -> legacy's real 38px (y += 38).
+  - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
+     suppress_if_equals: logo_text}
   - {type: text, content: "Transaction Details", role: body, bold: true}
   - {type: spacer, height: 13}  # line_height(28)=39 -> legacy's real 52px gap before the header.
   - type: table
@@ -268,20 +284,18 @@ layouts:
     <<: *cba
     # Per-field pixel budget: transaction description column (= content_width-840).
     # Wrap (not shrink) to keep row font uniform; replaces the old silent char-truncation.
-    renderer: cba
-    variant: standard
     font_sizes:
       header: 48
       body: 32
       footer: 18
     row_height: 72
-    column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
-    show_opening_balance: true
-    show_footer_transaction_types: true
-    date_format: "DD/MM/YYYY"
     body:
-      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#12107D",
-         field: SUPPLIER_NAME}
+      # The letterhead reads layout['logo_text'] at render time (from_layout),
+      # matching legacy's `draw.text((margin, y), layout["logo_text"], ...)`.
+      # The content supplier is a separate, subordinate line further down,
+      # suppressed whenever it already equals the letterhead (see
+      # suppress_if_equals below) — mirrors legacy's `_draw_supplier_line`.
+      - {type: text, content: logo_text, from_layout: true, role: header, color: "#12107D"}
       - type: block
         role: footer
         color: "#666666"
@@ -294,6 +308,8 @@ layouts:
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: body,
          when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
+         field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 28}
       - type: table
         rows: bank_transactions
@@ -316,21 +332,15 @@ layouts:
 
   cba_date_grouped:
     <<: *cba
-    renderer: cba
-    variant: date_grouped
     font_sizes:
       header: 48
       body: 32
       footer: 18
     row_height: 72
-    column_headers: ["Date", "Description", "Withdrawal", "Deposit", "Balance"]
-    show_opening_balance: true
-    show_footer_transaction_types: true
-    date_grouping: true
-    date_format: "DD MMM YYYY"
     body:
-      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#12107D",
-         field: SUPPLIER_NAME}
+      # See cba_standard's identical comment: letterhead reads logo_text
+      # dynamically; the supplier line is suppressed when it matches.
+      - {type: text, content: logo_text, from_layout: true, role: header, color: "#12107D"}
       - type: block
         role: footer
         color: "#666666"
@@ -343,6 +353,8 @@ layouts:
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: body,
          when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
+         field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 28}
       - type: table
         rows: bank_transactions
@@ -369,16 +381,16 @@ layouts:
 
   westpac_standard:
     <<: *westpac
-    renderer: westpac
-    variant: standard
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
-    date_format: "DD MMM YY"
     body:
+      # Letterhead reads logo_text dynamically; the supplier line (further
+      # down) is suppressed when it matches — mirrors legacy's
+      # `_draw_supplier_line`, called right before the column header row.
       - type: split
         children:
-          - - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
-                field: SUPPLIER_NAME}
+          - - {type: text, content: logo_text, from_layout: true, role: header, color: "#C41E3A",
+                bold: true}
           - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
       - {type: text, content: "Transaction Details", role: body, bold: true}
       - {type: spacer, height: 14}
@@ -386,6 +398,8 @@ layouts:
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
          color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
+         field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 41}
       - type: table
         rows: bank_transactions
@@ -397,18 +411,14 @@ layouts:
 
   westpac_premium:
     <<: *westpac
-    renderer: westpac
-    variant: premium
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
-    show_rewards_section: true
-    date_grouping: true
-    date_format: "DD MMM YY"
     body:
+      # See westpac_standard's identical comment.
       - type: split
         children:
-          - - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
-                field: SUPPLIER_NAME}
+          - - {type: text, content: logo_text, from_layout: true, role: header, color: "#C41E3A",
+                bold: true}
           - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
       - {type: spacer, height: 37}
       - type: panel
@@ -442,6 +452,8 @@ layouts:
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
          color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
+         field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 10}
       - type: table
         rows: bank_transactions
@@ -457,9 +469,6 @@ layouts:
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
     logo_text: NAB Classic Banking
-    bank_code: NAB
-    renderer: nab
-    variant: classic
     page_dimensions:
       width: 1800
       height: 3508
@@ -471,12 +480,6 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 66
-    header_bar_color: "#E8F0FE"
-    balance_suffix: "Cr"
-    date_grouping: true
-    show_references: true
-    show_brought_forward: true
-    date_format: "DD MMM YYYY"
     body: *nab_classic_body
 
   nab_dense:
@@ -485,9 +488,6 @@ layouts:
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
     logo_text: NAB Classic Banking
-    bank_code: NAB
-    renderer: nab
-    variant: dense
     page_dimensions:
       width: 1800
       height: 3508
@@ -499,12 +499,6 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 52
-    header_bar_color: "#E8F0FE"
-    balance_suffix: "Cr"
-    date_grouping: true
-    show_references: false
-    show_brought_forward: true
-    date_format: "DD MMM YY"
     body: *nab_dense_body
 
   anz_standard:
@@ -513,9 +507,6 @@ layouts:
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
     logo_text: ANZ
-    bank_code: ANZ
-    renderer: anz
-    variant: standard
     page_dimensions:
       width: 1800
       height: 3508
@@ -527,12 +518,6 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 72
-    header_color: "#0061B5"
-    balance_suffix_debit: "DR"
-    balance_suffix_credit: "CR"
-    show_totals_row: true
-    show_brought_forward: true
-    date_format: "DD/MM/YY"
     body: *anz_standard_body
 
   anz_modern:
@@ -541,9 +526,6 @@ layouts:
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
     logo_text: ANZ
-    bank_code: ANZ
-    renderer: anz
-    variant: modern
     page_dimensions:
       width: 1800
       height: 3508
@@ -555,10 +537,4 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 62
-    header_color: "#0061B5"
-    balance_suffix_debit: "DR"
-    balance_suffix_credit: "CR"
-    show_totals_row: true
-    show_brought_forward: true
-    date_format: "DD MMM YYYY"
     body: *anz_modern_body

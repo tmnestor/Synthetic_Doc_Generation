@@ -43,6 +43,41 @@ def _doc_type_key(doc_type: str) -> str:
     return doc_type.lower()
 
 
+def field_names_for(doc_type: str) -> set[str]:
+    """Return the field names a document type's ground truth may carry.
+
+    Used by `pipeline validate` to build the `known_fields` set that DSL
+    layout-body validation checks `{FIELD}` references against, so an
+    unknown field reference fails at startup rather than part-way through
+    a generate run.
+
+    Args:
+        doc_type: A generation_config.yml `document_types` key, e.g.
+            'bank_statements' — the config's own plural convention.
+            field_definitions.yml keys are singular, so a trailing 's' is
+            stripped before lookup.
+
+    Returns:
+        The field names listed under this type's `document_fields` entry.
+
+    Raises:
+        SchemaError: If field_definitions.yml has no entry for this type.
+    """
+    defs = _load_field_defs()
+    key = doc_type[:-1] if doc_type.endswith("s") else doc_type
+    fields = defs["document_fields"].get(key)
+    if fields is None:
+        msg = (
+            f"No field definitions for document type '{doc_type}' (looked up as "
+            f"'{key}' in config/field_definitions.yml). "
+            f"Expected a 'document_fields.{key}:' list of field names. "
+            f"Add one to config/field_definitions.yml, or fix the document_types "
+            f"key in config/generation_config.yml."
+        )
+        raise SchemaError(msg)
+    return set(fields)
+
+
 _VALID_DOC_TYPES = {
     "BANK_STATEMENT",
     "RECEIPT",
