@@ -105,6 +105,27 @@ def _cell_text(row: dict, column: dict) -> str:
     return "" if text == _ABSENT else text
 
 
+def _cell_bold(row: dict, column_key: str) -> bool:
+    """Resolve whether one cell renders bold.
+
+    `row["bold"]` is `True` for a uniformly bold row — NAB's "Carried
+    forward" and ANZ's "Totals at end of period", both drawn in
+    `font_body_bold` throughout. It may instead be a collection of column
+    keys for a row bold in only some of its cells — ANZ's "BALANCE BROUGHT
+    FORWARD" row, whose legacy renderer draws the description in
+    `font_body_bold` but the balance value in the plain `font_body`, a mix
+    a single per-row flag cannot express. Anything else (absent, `False`)
+    renders every cell in the row at regular weight, the default for every
+    other provider-set and real row.
+    """
+    spec = row.get("bold", False)
+    if spec is True:
+        return True
+    if spec:
+        return column_key in spec
+    return False
+
+
 def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a table's header and rows.
 
@@ -117,7 +138,12 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             `leading`, a provider's synthetic row renders first, before any
             group header — CBA's "Opening Balance"; NAB's "Brought forward"
             instead renders *under* the first date-group header, expressed
-            as `synthetic_row_placement: after_first_group_header`).
+            as `synthetic_row_placement: after_first_group_header`). Two more
+            support `frame: ruled`: `header_rule_top` (default True, whether
+            the rule above the header labels is drawn at all — ANZ's legacy
+            header rules only *below* its labels, never above) and
+            `header_rule_gap` (default 16, the y-advance after that below
+            rule — ANZ's is 14, not CBA's 16).
         ctx: Render context.
         y: Current y-cursor.
 
@@ -136,6 +162,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     label_inset_y = block.get("label_inset_y")
     if label_inset_y is not None:
         label_inset_y = int(label_inset_y)
+    header_rule_top = bool(block.get("header_rule_top", True))
+    header_rule_gap = int(block.get("header_rule_gap", 16))
     columns = block["columns"]
     dividers = block.get("dividers", [])
     row_height = _resolve_row_height(block, ctx)
@@ -165,6 +193,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             dividers=dividers,
             fill_color=fill_color,
             label_inset_y=label_inset_y,
+            header_rule_top=header_rule_top,
+            header_rule_gap=header_rule_gap,
         )
 
     table_body_start = y
@@ -253,6 +283,8 @@ def _draw_header(
     dividers: list,
     fill_color: str | None,
     label_inset_y: int | None,
+    header_rule_top: bool,
+    header_rule_gap: int,
 ) -> int:
     """Draw the column-header row in the table's frame.
 
@@ -280,11 +312,19 @@ def _draw_header(
     reproduce. A label may contain "\\n" for a legacy-matching multi-line
     header cell (e.g. Westpac's "Date of" / "Transaction"); each line is
     positioned relative to that same start, one `line_height` apart.
+
+    `frame: ruled` draws a rule both above and below the header labels by
+    default (CBA's real header). `header_rule_top`, when False, skips the
+    rule above entirely — no line, no advance — for a legacy renderer (like
+    ANZ) whose header rules only below. `header_rule_gap` overrides the
+    below rule's own advance (default 16, CBA's real value; ANZ's is 14).
+    Both are no-ops for every other frame, which draws no rule here at all.
     """
     font = load_font(size, bold=True)
     if frame == "ruled":
-        draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
-        y += 12
+        if header_rule_top:
+            draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
+            y += 12
     elif frame == "bordered":
         ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + header_height)], outline="black")
         for divider in dividers:
@@ -313,7 +353,7 @@ def _draw_header(
     y += header_height
     if frame == "ruled":
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
-        y += 16
+        y += header_rule_gap
     return y
 
 
@@ -361,14 +401,29 @@ def _draw_row(
     A row renders bold throughout when a provider marks it `row["bold"] =
     True` — NAB's "Carried forward" row, which legacy draws in
     `font_body_bold`, unlike its "Brought forward"/"Opening Balance" leading
-    rows, which stay regular. This is provider-set row data, not a layout
+    rows, which stay regular. `row["bold"]` may instead be a collection of
+    column keys, bolding only those cells — ANZ's "BALANCE BROUGHT FORWARD"
+    row, whose description is bold but its balance value is not (see
+    `_cell_bold`). This is provider-set row data, not a layout
     YAML key: which specific row is bold is a fact about legacy's renderer
     (which row it is), not a per-layout style choice an author would toggle,
     exactly parallel to how `synthetic` itself is provider-set rather than
     YAML-configurable.
+
+    A row draws a fresh black rule above itself, with a fixed 12px gap
+    before its own content, when a provider marks it `row["rule_above"] =
+    True` — ANZ's "Totals at end of period" row, which legacy separates from
+    the transaction table with its own rule rather than continuing the flow.
+    Like `bold`, this is provider-set row data, not a layout YAML key, and —
+    unlike every other row decoration here — is drawn regardless of `frame`,
+    since it is a fact about this one row, not a frame-wide style.
     """
-    row_bold = bool(row.get("bold", False))
-    font = load_font(size, bold=row_bold)
+    if row.get("rule_above"):
+        draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
+        y += 12
+
+    regular_font = load_font(size, bold=False)
+    bold_font = load_font(size, bold=True)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
@@ -379,6 +434,8 @@ def _draw_row(
         if not text:
             continue
 
+        cell_bold = _cell_bold(row, column["key"])
+        font = bold_font if cell_bold else regular_font
         right = column.get("align") == "right"
         budget = None
         budget_name = column.get("budget")
@@ -398,7 +455,7 @@ def _draw_row(
             size=size,
             row_height=row_height,
             font=font,
-            bold=row_bold,
+            bold=cell_bold,
             recorder=recorder,
             field=record_field,
         )
@@ -420,7 +477,7 @@ def _draw_row(
                 size=size,
                 row_height=row_height,
                 font=font,
-                bold=row_bold,
+                bold=cell_bold,
                 recorder=ctx.recorder,
                 field=last_row_field,
             )
@@ -429,8 +486,6 @@ def _draw_row(
 
     if frame == "bordered" and not first_row and (grouping != "inline" or is_new_group):
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
-    elif frame == "ruled":
-        draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, bottom, color="#CCCCCC")
 
     return bottom
 
