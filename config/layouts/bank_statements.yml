@@ -60,8 +60,12 @@ _nab_txn_columns_with_reference: &nab_txn_columns_with_reference
   - {key: description, label: Particulars, align: left, x: 180,
      budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS,
      sub_line: {key: reference, role: sub_description, color: "#999999", offset_y: 34, height: 32}}
-  - {key: debit, label: Debits, align: right, x_right: -380, field: TRANSACTION_AMOUNTS_PAID}
-  - {key: credit, label: Credits, align: right, x_right: -190, field: TRANSACTION_AMOUNTS_RECEIVED}
+  # Widest actual cell per column (debit 162, credit 144, balance 213 at
+  # nab_classic's body size) plus 45px of margin; the room comes from
+  # TRANSACTION_DESC, which wraps. Legacy's -380/-190/-10 gave balance 180px for
+  # 213px of text, colliding on 222 cells.
+  - {key: debit, label: Debits, align: right, x_right: -457, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -268, field: TRANSACTION_AMOUNTS_RECEIVED}
   - {key: balance, label: Balance, align: right, x_right: -10,
      currency_suffix: "Cr", last_row_field: ACCOUNT_BALANCE}
 
@@ -69,8 +73,12 @@ _nab_txn_columns: &nab_txn_columns
   - {key: date, label: Date, align: left, x: 10}
   - {key: description, label: Particulars, align: left, x: 180,
      budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS}
-  - {key: debit, label: Debits, align: right, x_right: -380, field: TRANSACTION_AMOUNTS_PAID}
-  - {key: credit, label: Credits, align: right, x_right: -190, field: TRANSACTION_AMOUNTS_RECEIVED}
+  # Widest actual cell per column (debit 162, credit 144, balance 213 at
+  # nab_classic's body size) plus 45px of margin; the room comes from
+  # TRANSACTION_DESC, which wraps. Legacy's -380/-190/-10 gave balance 180px for
+  # 213px of text, colliding on 222 cells.
+  - {key: debit, label: Debits, align: right, x_right: -457, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -268, field: TRANSACTION_AMOUNTS_RECEIVED}
   - {key: balance, label: Balance, align: right, x_right: -10,
      currency_suffix: "Cr", last_row_field: ACCOUNT_BALANCE}
 
@@ -104,8 +112,14 @@ _anz_txn_columns: &anz_txn_columns
   - {key: date, label: Date, align: left, x: 0}
   - {key: description, label: Transaction Description, align: left, x: 200,
      budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS}
-  - {key: debit, label: Debits, align: right, x_right: -400, field: TRANSACTION_AMOUNTS_PAID}
-  - {key: credit, label: Credits, align: right, x_right: -200, field: TRANSACTION_AMOUNTS_RECEIVED}
+  # Each amount column gets the widest cell it actually renders across the corpus
+  # (debit 180, credit 160, balance 234 at anz_standard's body size) plus 45px of
+  # margin. The room comes from TRANSACTION_DESC, which wraps to two lines and so
+  # loses nothing by being narrower — unlike an amount, which simply overruns its
+  # neighbour. Legacy's -400/-200/0 gave balance 200px for 234px of text, colliding
+  # on 318 cells across both variants.
+  - {key: debit, label: Debits, align: right, x_right: -484, field: TRANSACTION_AMOUNTS_PAID}
+  - {key: credit, label: Credits, align: right, x_right: -279, field: TRANSACTION_AMOUNTS_RECEIVED}
   - {key: balance, label: Balance, align: right, x_right: 0, last_row_field: ACCOUNT_BALANCE}
 
 # Every spacer below corrects a `text` block's own computed `line_height`
@@ -306,6 +320,10 @@ layouts:
       body: 32
       footer: 18
     row_height: 72
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 19, max: 27}
     body:
       # The letterhead reads layout['logo_text'] at render time (from_layout),
       # matching legacy's `draw.text((margin, y), layout["logo_text"], ...)`.
@@ -354,6 +372,10 @@ layouts:
       body: 32
       footer: 18
     row_height: 72
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 12, max: 17}
     body:
       # See cba_standard's identical comment: letterhead reads logo_text
       # dynamically; the supplier line is suppressed when it matches.
@@ -400,6 +422,10 @@ layouts:
     <<: *westpac
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 15, max: 23}
     body:
       # Letterhead reads logo_text dynamically; the supplier line (further
       # down) is suppressed when it matches — mirrors legacy's
@@ -430,6 +456,10 @@ layouts:
     <<: *westpac
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 15, max: 23}
     body:
       # See westpac_standard's identical comment.
       - type: split
@@ -482,7 +512,7 @@ layouts:
 
   nab_classic:
     field_budgets:
-      TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
+      TRANSACTION_DESC: {width: 756, fit: wrap, min_font: 10, max_lines: 2}
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
     logo_text: NAB Classic Banking
@@ -497,11 +527,15 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 66
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 10, max: 15}
     body: *nab_classic_body
 
   nab_dense:
     field_budgets:
-      TRANSACTION_DESC: {width: 860, fit: wrap, min_font: 10, max_lines: 2}
+      TRANSACTION_DESC: {width: 756, fit: wrap, min_font: 10, max_lines: 2}
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: National Australia Bank
     logo_text: NAB Classic Banking
@@ -516,11 +550,15 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 52
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 15, max: 23}
     body: *nab_dense_body
 
   anz_standard:
     field_budgets:
-      TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
+      TRANSACTION_DESC: {width: 691, fit: wrap, min_font: 10, max_lines: 2}
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
     logo_text: ANZ
@@ -535,11 +573,15 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 72
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 15, max: 23}
     body: *anz_standard_body
 
   anz_modern:
     field_budgets:
-      TRANSACTION_DESC: {width: 780, fit: wrap, min_font: 10, max_lines: 2}
+      TRANSACTION_DESC: {width: 691, fit: wrap, min_font: 10, max_lines: 2}
       SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
     bank: Australia and New Zealand Banking Group
     logo_text: ANZ
@@ -554,4 +596,8 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 62
+    # Transactions this layout fits on one page, measured against the rendered
+    # corpus with two rows of headroom. The seeder reads this: a statement
+    # longer than its page is content the benchmark hides from the model.
+    transaction_count: {min: 17, max: 25}
     body: *anz_modern_body

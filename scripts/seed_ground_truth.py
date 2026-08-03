@@ -79,6 +79,51 @@ def _fmt_date(day: int, month: int, year: int) -> str:
     return f"{day:02d}/{month:02d}/{year}"
 
 
+def _txn_count_range(layouts: dict, layout_id: str) -> tuple[int, int]:
+    """Return the (min, max) transactions a bank layout can fit on one page.
+
+    Capacity is a property of the layout's own geometry — row height, date-group
+    rows, reference sub-lines — so it is declared alongside them in
+    config/layouts/bank_statements.yml rather than assumed here. A statement
+    longer than its page is content the benchmark hides from the model while
+    still scoring it, so this is required, never defaulted.
+
+    Args:
+        layouts: The bank layout registry.
+        layout_id: The layout this statement will be rendered with.
+
+    Returns:
+        The inclusive (min, max) transaction count for that layout.
+
+    Raises:
+        ValueError: If the layout omits `transaction_count` or it is malformed.
+    """
+    spec = layouts.get(layout_id, {}).get("transaction_count")
+    path = "config/layouts/bank_statements.yml"
+    if not isinstance(spec, dict) or "min" not in spec or "max" not in spec:
+        msg = (
+            "Missing transaction_count.\n"
+            f"  What:     layout '{layout_id}' declares no usable transaction_count.\n"
+            f"  Where:    {path} -> {layout_id}.transaction_count\n"
+            "  Expected: transaction_count: {min: <int>, max: <int>} — the "
+            "transactions this layout fits on one page.\n"
+            f"  Recover:  add a transaction_count block under {layout_id}, sized "
+            "by rendering the corpus and finding where the body leaves the page."
+        )
+        raise ValueError(msg)
+    lo, hi = int(spec["min"]), int(spec["max"])
+    if lo < 1 or hi < lo:
+        msg = (
+            "Invalid transaction_count.\n"
+            f"  What:     layout '{layout_id}' has min={lo}, max={hi}.\n"
+            f"  Where:    {path} -> {layout_id}.transaction_count\n"
+            "  Expected: 1 <= min <= max.\n"
+            f"  Recover:  correct the bounds under {layout_id}.transaction_count."
+        )
+        raise ValueError(msg)
+    return lo, hi
+
+
 def _rand_date(rng: random.Random, year_start: int = 2023, year_end: int = 2024) -> tuple[int, int, int]:
     """Generate a random date tuple (day, month, year)."""
     year = rng.randint(year_start, year_end)
@@ -143,6 +188,7 @@ def _generate_bank_entries(
     entries: dict = {}
     layout_draw = NonRepeatingSampler(rng, _BANK_LAYOUTS)
     banks_by_code = {b["code"]: b for b in engine.pools["banks"]}
+    bank_layouts = load_layout_registry(Path("config/layouts/bank_statements.yml"))
 
     for i in range(count):
         case_id = f"CASE{i + 1:03d}"
@@ -161,7 +207,7 @@ def _generate_bank_entries(
         period_end = _fmt_date(max_day, m, y)
         statement_range = f"{period_start} - {period_end}"
 
-        n_txns = rng.randint(25, 40)
+        n_txns = rng.randint(*_txn_count_range(bank_layouts, layout))
         txn_days = sorted(rng.randint(1, max_day) for _ in range(n_txns))
 
         txn_dates, txn_descs, txn_debits, txn_credits = [], [], [], []
