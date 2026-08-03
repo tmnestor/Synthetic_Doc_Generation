@@ -13,6 +13,41 @@ _cba: &cba
     TRANSACTION_DESC: {width: 760, fit: wrap, min_font: 10, max_lines: 2}
     SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
 
+_westpac: &westpac
+  <<: *bank_base
+  bank: Westpac Banking Corporation
+  logo_text: Westpac
+  bank_code: WBC
+  margin: 80
+  logo_color: "#C41E3A"
+  field_budgets:
+    TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
+    SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
+
+# Column content anchors match the legacy Westpac renderer's actual draw
+# positions exactly (col_date_right+8, col_debit_right-8, right_edge-8 —
+# see bank_statement.py:504-519), not the brief's illustrative offsets,
+# which were copied from CBA's column geometry and don't fit a 1600px-wide
+# bordered table with these divider positions. There is no balance column:
+# legacy Westpac never draws or records ACCOUNT_BALANCE.
+_westpac_txn_columns: &westpac_txn_columns
+  - {key: date, label: "Date of\nTransaction", align: left, x: 8}
+  - {key: description, label: Description, align: left, x: 208,
+     budget: TRANSACTION_DESC, field: TRANSACTION_DESCRIPTIONS}
+  - {key: debit, label: Debits, align: right, x_right: -168,
+     field: TRANSACTION_AMOUNTS_PAID, currency: plain}
+  - {key: credit, label: "Credits (-)", align: right, x_right: -8,
+     field: TRANSACTION_AMOUNTS_RECEIVED, currency: plain}
+
+# The three interior column-divider lines (col_date_right, col_desc_right,
+# col_debit_right in the legacy renderer), independent of the content
+# anchors above — legacy insets content 8px from each divider, so the
+# dividers themselves sit at different x than any column's own text.
+_westpac_txn_dividers: &westpac_txn_dividers
+  - {x: 200}
+  - {x_right: -320}
+  - {x_right: -160}
+
 layouts:
   cba_standard:
     <<: *cba
@@ -116,52 +151,82 @@ layouts:
          content: "Transaction types: EFTPOS, ATM, Direct Debit, Direct Credit, Transfer"}
 
   westpac_standard:
-    field_budgets:
-      TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
-      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
-    bank: Westpac Banking Corporation
-    logo_text: Westpac
-    bank_code: WBC
+    <<: *westpac
     renderer: westpac
     variant: standard
-    page_dimensions:
-      width: 1800
-      height: 3508
-    font_sizes:
-      header: 44
-      body: 28
-      sub_description: 22
-      footer: 16
-    margin: 80
-    content_width: 1600
+    font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
-    logo_color: "#C41E3A"
     date_format: "DD MMM YY"
+    body:
+      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
+         field: SUPPLIER_NAME}
+      - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+      - {type: text, content: "Transaction Details", role: body, bold: true}
+      - {type: spacer, height: 14}
+      - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
+         field: PAYER_NAME}
+      - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
+         when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: spacer, height: 19}
+      - type: table
+        rows: bank_transactions
+        row_style: bordered
+        header_height: 72
+        dividers: *westpac_txn_dividers
+        columns: *westpac_txn_columns
 
   westpac_premium:
-    field_budgets:
-      TRANSACTION_DESC: {width: 1064, fit: wrap, min_font: 10, max_lines: 2}
-      SUPPLIER_NAME: {width: 1600, fit: shrink, min_font: 12, max_lines: 1}
-    bank: Westpac Banking Corporation
-    logo_text: Westpac
-    bank_code: WBC
+    <<: *westpac
     renderer: westpac
     variant: premium
-    page_dimensions:
-      width: 1800
-      height: 3508
-    font_sizes:
-      header: 44
-      body: 28
-      sub_description: 22
-      footer: 16
-    margin: 80
-    content_width: 1600
+    font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
-    logo_color: "#C41E3A"
     show_rewards_section: true
     date_grouping: true
     date_format: "DD MMM YY"
+    body:
+      - {type: text, content: "{SUPPLIER_NAME}", role: header, color: "#C41E3A", bold: true,
+         field: SUPPLIER_NAME}
+      - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+      - {type: spacer, height: 15}
+      - type: panel
+        height: 260
+        padding: 10
+        children:
+          - type: split
+            gap: 30
+            divider: true
+            children:
+              - - type: block
+                  role: sub_description
+                  heading: "Rewards Points Balance Summary"
+                  lines:
+                    - "Opening Balance          345,678"
+                    - "Points Earned             12,456"
+                    - "Bonus Points Earned            0"
+                    - "Points Redeemed                0"
+                    - "Closing Balance          358,134"
+                    - "Points Status          Available"
+              - - type: block
+                  role: sub_description
+                  heading: "A message from Rewards"
+                  lines: []
+      - {type: text, role: sub_description, color: "#666666",
+         content: "To find out more about how Rewards Points are earned, go to the Rewards website."}
+      - {type: spacer, height: 24}
+      - {type: text, content: "Westpac Premium Card® transactions", role: body, bold: true}
+      - {type: spacer, height: 14}
+      - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
+         field: PAYER_NAME}
+      - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
+         when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+      - {type: spacer, height: 10}
+      - type: table
+        rows: bank_transactions
+        row_style: bordered_grouped
+        header_height: 72
+        dividers: *westpac_txn_dividers
+        columns: *westpac_txn_columns
 
   nab_classic:
     field_budgets:
