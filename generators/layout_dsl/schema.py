@@ -15,7 +15,7 @@ from generators.layout_dsl.field_providers import (
     field_provider_names,
     field_provider_param_keys,
 )
-from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
+from generators.layout_dsl.primitives_table import CELL_LINE_SPACINGS, COLUMN_ALIGNMENTS
 from generators.layout_dsl.primitives_text import ALIGNMENTS, PAIR_CURRENCIES, PAIR_VALUE_ALIGNS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
 
@@ -105,17 +105,21 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "params",
             "row_height",
             "header",
+            "header_bold",
             "header_height",
             "dividers",
             "fill_color",
             "fill_inset",
             "fill_height",
             "label_inset_y",
+            "row_inset_y",
+            "cell_line_spacing",
             "group_gap",
             "synthetic_row_placement",
             "header_rule_top",
             "header_rule_gap",
             "mono",
+            "role",
             "line_advance",
             "capture",
         ),
@@ -135,6 +139,12 @@ _COLUMN_KEYS = frozenset(
         "align",
         "x",
         "x_right",
+        # A header label whose anchor and alignment differ from its own cells'
+        # — the legacy invoice renderer left-aligns "Unit Price" at the
+        # column's left edge above amounts that right-align 200px further on.
+        # Each falls back to the column's own `x`/`align` when absent.
+        "label_x",
+        "label_align",
         "budget",
         "field",
         "last_row_field",
@@ -458,6 +468,18 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
             recover=f"set grouping: to one of {list(GROUPINGS)}.",
         )
 
+    cell_line_spacing = block.get("cell_line_spacing")
+    if cell_line_spacing is not None and cell_line_spacing not in CELL_LINE_SPACINGS:
+        raise _err(
+            f"unknown cell_line_spacing '{cell_line_spacing}'.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.cell_line_spacing",
+            expected=f"one of {list(CELL_LINE_SPACINGS)} — 'row_height' advances a budgeted "
+            "cell by the table's own row pitch, 'font' by the fitted font's own line height.",
+            recover=f"set cell_line_spacing: to one of {list(CELL_LINE_SPACINGS)}, or remove it "
+            "to use the layout's table_cell_line_spacing default.",
+        )
+
     if "capture" in block and not isinstance(block["capture"], bool):
         raise _err(
             f"capture must be a bool, got {block['capture']!r}.",
@@ -578,14 +600,26 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
                 "generators/layout_dsl/schema.py.",
             )
 
-        col_align = column.get("align")
-        if col_align is not None and col_align not in COLUMN_ALIGNMENTS:
+        for align_key in ("align", "label_align"):
+            col_align = column.get(align_key)
+            if col_align is not None and col_align not in COLUMN_ALIGNMENTS:
+                raise _err(
+                    f"column {index} has unknown {align_key} '{col_align}'.",
+                    layout_path=layout_path,
+                    key_path=f"{key_path}.columns[{index}].{align_key}",
+                    expected=f"one of {list(COLUMN_ALIGNMENTS)} (table columns do not support 'center').",
+                    recover=f"set {align_key}: to one of {list(COLUMN_ALIGNMENTS)}.",
+                )
+
+        label_x = column.get("label_x")
+        if label_x is not None and (not isinstance(label_x, int) or isinstance(label_x, bool)):
             raise _err(
-                f"column {index} has unknown align '{col_align}'.",
+                f"column {index} label_x is {label_x!r}, not an int.",
                 layout_path=layout_path,
-                key_path=f"{key_path}.columns[{index}].align",
-                expected=f"one of {list(COLUMN_ALIGNMENTS)} (table columns do not support 'center').",
-                recover=f"set align: to one of {list(COLUMN_ALIGNMENTS)}.",
+                key_path=f"{key_path}.columns[{index}].label_x",
+                expected="an integer offset from the region's left edge, e.g. label_x: 1050.",
+                recover="set label_x: to an int, or remove it so the header label sits at the "
+                "column's own anchor.",
             )
 
         for field_key in ("field", "last_row_field", "prefix_field"):
@@ -832,8 +866,9 @@ def _validate_children(
 # role when omitted) is resolved through line_advance() at render time --
 # text/pair/block draw a line and advance the y-cursor by it. A table block
 # also resolves its own advance this way (for its header row / multi-line
-# header labels), always via the layout's default role, since a table block
-# has no `role:` key of its own (PRIMITIVES["table"] does not list one).
+# header labels), through its own `role:` key when it carries one -- a table
+# draws every label and cell at that role's size -- and the layout's default
+# role otherwise.
 # banner is deliberately excluded: its own `role:` key selects banner_role's
 # font size, but draw_banner never calls line_advance() -- it always leaves
 # the y-cursor unchanged -- so a banner's role has no bearing on this check.
@@ -873,7 +908,7 @@ def _line_advance_roles(blocks: list, *, default_role: str) -> set[str]:
                 roles.add(str(block.get("role", default_role)))
         elif kind == "table":
             if "line_advance" not in block:
-                roles.add(default_role)
+                roles.add(str(block.get("role", default_role)))
             for column in block.get("columns", []):
                 sub_line = column.get("sub_line") if isinstance(column, dict) else None
                 if isinstance(sub_line, dict) and "line_advance" not in sub_line:

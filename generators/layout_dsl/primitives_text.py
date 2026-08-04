@@ -423,7 +423,9 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
       `pair_min_gap` (block key `min_gap`) then reproduces `invoice.py:283-
       285`: when the label is long enough to otherwise collide with the
       value, it is pushed left just far enough to keep `min_gap` px clear
-      between them, rather than merging into one OCR token.
+      between them, rather than merging into one OCR token. `min_gap: 0`
+      demands no gap at all and never moves the label, matching what both
+      legacy renderers do everywhere except that one invoice line.
 
     `currency: symbol|plain` formats the resolved value as an amount before
     anything is drawn or measured (see `format_currency`) -- a receipt's
@@ -531,7 +533,16 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
         # edge, unless the value (right-aligned to the region's right edge)
         # would otherwise leave less than min_gap px clear between the two,
         # in which case the label is pushed left just far enough to restore it.
-        label_x = min(ctx.region.x, ctx.region.right - value_width - label_width - min_gap)
+        # `min_gap: 0` means no gap is demanded and the label never moves,
+        # which is what both legacy renderers do by default: `draw_line_item`
+        # (receipts) and the invoice totals' "separate" branch each draw the
+        # label at a fixed x and let a long value run into it. Enforcing a
+        # zero gap instead would silently shift the label left of where legacy
+        # put it — on 1 of the 55 corpus invoices today ($19,176.69 under a
+        # 48px "Total:" needs 456px of a 400px column).
+        label_x = ctx.region.x
+        if min_gap > 0:
+            label_x = min(label_x, ctx.region.right - value_width - label_width - min_gap)
         value_x = ctx.region.right - value_width
         ctx.draw.text((label_x, y), label, font=font, fill=color)
         ctx.draw.text((value_x, y), value, font=font, fill=color)
