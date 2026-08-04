@@ -151,6 +151,17 @@ _receipt_body: &receipt_body
      budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
   # Cash variant: the provider already formats both amounts, so neither
   # carries `currency:`.
+  #
+  # No document in the corpus reaches these two blocks. Every receipt is
+  # linked to a bank transaction, so its scheme comes from the bank row rather
+  # than the weighted pool, and `Cash` carries weight 0 in that pool anyway —
+  # so `PAYMENT_KIND` is never "cash" and the pixel snapshots say nothing
+  # about them. A cash receipt also suppresses every `when: PAYMENT_AID` block
+  # above, collapsing the slip from roughly twenty lines to two, which then
+  # meets the page's crop-to-content height. That collapse is covered instead
+  # by patching the pool and rendering a whole page — see
+  # `test_a_whole_cash_receipt_page_renders_on_every_layout`. Any edit here
+  # is unprotected by the snapshots; run that test.
   - {type: pair, label: "CASH TENDERED", value: "{PAYMENT_TENDERED}",
      value_align: right, separator: "", when: PAYMENT_TENDERED}
   - {type: pair, label: "CHANGE", value: "{PAYMENT_CHANGE}", value_align: right,
