@@ -453,12 +453,15 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     path draws the label first and then fits the value into the remaining
     space via `_draw_fitted_text`, since a fit budget must know the value's
     own text to shrink or wrap it -- it cannot operate on a combined
-    "label: value" string without also constraining the label. The budgeted
-    path honours `value_align` too (an unshrunk label plus a right-aligned,
-    budget-fitted value), but does not apply `min_gap` -- a budget already
-    exists precisely to keep the value's own extent bounded, and `min_gap`'s
-    render-time label repositioning has no defined interaction with a value
-    that may still wrap across multiple lines.
+    joined "label: value" string without also constraining the label. The
+    budgeted path honours `value_align` too (an unshrunk label plus a
+    right-aligned, budget-fitted value), but does not apply `min_gap` -- a
+    budget already exists precisely to keep the value's own extent bounded,
+    and `min_gap`'s render-time label repositioning has no defined interaction
+    with a value that may still wrap across multiple lines. That is enforced
+    rather than merely documented: `_validate_text_budget` rejects a budgeted
+    right-aligned pair whose `min_gap` resolves above zero, so no layout can
+    ask for a gap this path would drop.
 
     Args:
         block: The `pair` block.
