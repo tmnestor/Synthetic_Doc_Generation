@@ -86,6 +86,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "budget",
             "value_align",
             "min_gap",
+            "separator",
             "bold",
             "currency",
         ),

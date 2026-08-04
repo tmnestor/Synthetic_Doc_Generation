@@ -26,6 +26,10 @@ _receipt_defaults_values: &receipt_defaults_values
   rule_fill_char: "-"
   pair_value_align: left
   pair_min_gap: 0
+  # The POS "Date" line's separator. Every right-aligned pair below overrides
+  # it with "": legacy's `draw_line_item` drew those labels with no
+  # punctuation, the amount alone carrying the right-hand column.
+  pair_separator: ": "
   table_header: false
   table_header_bold: true
   table_header_rule_top: true
@@ -103,11 +107,11 @@ _receipt_body: &receipt_body
   # `computed_totals` emits it only when both TOTAL and GST are present, which
   # is exactly legacy's `if gst and total:` guard.
   - {type: pair, label: "SUBTOTAL", value: "{SUBTOTAL_AMOUNT}", value_align: right,
-     currency: plain, when: SUBTOTAL_AMOUNT}
+     separator: "", currency: plain, when: SUBTOTAL_AMOUNT}
   - {type: pair, label: "GST", value: "{GST_AMOUNT}", value_align: right,
-     currency: plain, field: GST_AMOUNT, when: GST_AMOUNT}
+     separator: "", currency: plain, field: GST_AMOUNT, when: GST_AMOUNT}
   - {type: pair, label: "TOTAL", value: "{TOTAL_AMOUNT}", value_align: right,
-     currency: symbol, bold: true, field: TOTAL_AMOUNT}
+     separator: "", currency: symbol, bold: true, field: TOTAL_AMOUNT}
   - {type: rule}
   # --- EFTPOS terminal slip ----------------------------------------------
   # Three variants, selected entirely by `when:` over the receipt_payment
@@ -134,7 +138,7 @@ _receipt_body: &receipt_body
   # purchase total, so the printed amount can never drift from the scored
   # field. Three spaces in the label, as legacy printed it.
   - {type: pair, label: "Purchase   AUD", value: "{TOTAL_AMOUNT}", value_align: right,
-     currency: symbol, when: PAYMENT_AID}
+     separator: "", currency: symbol, when: PAYMENT_AID}
   - {type: text, content: "APPROVED   00", budget: PAYMENT_LINE, when: PAYMENT_AID}
   - {type: spacer, when: PAYMENT_AID}
   - {type: text, content: "Terminal ID: {PAYMENT_TERMINAL_ID}",
@@ -148,9 +152,9 @@ _receipt_body: &receipt_body
   # Cash variant: the provider already formats both amounts, so neither
   # carries `currency:`.
   - {type: pair, label: "CASH TENDERED", value: "{PAYMENT_TENDERED}",
-     value_align: right, when: PAYMENT_TENDERED}
+     value_align: right, separator: "", when: PAYMENT_TENDERED}
   - {type: pair, label: "CHANGE", value: "{PAYMENT_CHANGE}", value_align: right,
-     bold: true, when: PAYMENT_CHANGE}
+     separator: "", bold: true, when: PAYMENT_CHANGE}
   - {type: rule}
   # --- footer ------------------------------------------------------------
   - {type: spacer}

@@ -52,6 +52,10 @@ _invoice_defaults_values: &invoice_defaults_values
   spacer_height: 20               # the gap legacy left after each line-item table
   pair_value_align: left
   pair_min_gap: 0
+  # The "Date" line's separator. The right-aligned totals pairs below override
+  # it with ":" -- legacy printed "Total:" hard against its label, with no
+  # trailing space before the right-aligned amount.
+  pair_separator: ": "
   table_header: true
   table_header_bold: false        # legacy drew the column headings in font_s, unbolded
   table_header_rule_top: true
@@ -173,12 +177,13 @@ _invoice_totals_separate: &invoice_totals_separate
   widths: [1300, 400]
   children:
     - []
-    - - {type: pair, label: "Subtotal:", value: "{SUBTOTAL_AMOUNT}", value_align: right,
-         currency: symbol, line_advance: 44}
-      - {type: pair, label: "GST (10%):", value: "{GST_AMOUNT}", value_align: right,
-         currency: symbol, field: GST_AMOUNT, line_advance: 44}
-      - {type: pair, label: "Total:", value: "{TOTAL_AMOUNT}", value_align: right,
-         currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, line_advance: 64}
+    - - {type: pair, label: "Subtotal", value: "{SUBTOTAL_AMOUNT}", value_align: right,
+         separator: ":", currency: symbol, line_advance: 44}
+      - {type: pair, label: "GST (10%)", value: "{GST_AMOUNT}", value_align: right,
+         separator: ":", currency: symbol, field: GST_AMOUNT, line_advance: 44}
+      - {type: pair, label: "Total", value: "{TOTAL_AMOUNT}", value_align: right,
+         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true,
+         line_advance: 64}
 
 # GST-inclusive presentation: no subtotal, and GST is a component of the total
 # rather than an addition to it, so it is drawn *after* the total.
@@ -187,16 +192,17 @@ _invoice_totals_inclusive: &invoice_totals_inclusive
   widths: [1300, 400]
   children:
     - []
-    - - {type: pair, label: "Total:", value: "{TOTAL_AMOUNT}", value_align: right,
-         currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, line_advance: 64}
-      # This label is far longer than the separate branch's "GST (10%):" and
+    - - {type: pair, label: "Total", value: "{TOTAL_AMOUNT}", value_align: right,
+         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true,
+         line_advance: 64}
+      # This label is far longer than the separate branch's "GST (10%)" and
       # overruns the fixed 400px totals column, so it declares a 24px min_gap:
       # without one it collides with the right-aligned amount and the two merge
       # into a single OCR token. It must still carry `field:` -- GST_AMOUNT is a
       # KILE column, and the DocILE exporter raises on a present field with no
       # captured bounding box.
-      - {type: pair, label: "GST included (10%):", value: "{GST_AMOUNT}", value_align: right,
-         currency: symbol, field: GST_AMOUNT, min_gap: 24, line_advance: 40}
+      - {type: pair, label: "GST included (10%)", value: "{GST_AMOUNT}", value_align: right,
+         separator: ":", currency: symbol, field: GST_AMOUNT, min_gap: 24, line_advance: 40}
 
 _invoice_payment_terms: &invoice_payment_terms
   {type: text, content: "Payment Terms:", color: gray, line_advance: 40}
