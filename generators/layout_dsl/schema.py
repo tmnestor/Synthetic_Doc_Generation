@@ -169,6 +169,55 @@ _COLUMN_KEYS = frozenset(
 SYNTHETIC_ROW_PLACEMENTS = ("leading", "after_first_group_header")
 
 
+# Top-level layout keys the DSL itself reads off the layout dict, each named
+# with the call site that reads it. A key absent from this set, from the page
+# keys below, and from what the layout's own body references is a key nothing
+# reads -- see `known_layout_keys`.
+_ENGINE_LAYOUT_KEYS = frozenset(
+    {
+        "body",  # engine.render_body
+        "defaults",  # defaults.resolve_param
+        "field_budgets",  # layout_budgets.field_budget
+        "field_providers",  # field_providers.apply_field_providers
+        "font_sizes",  # context.resolve_role
+        "row_height",  # primitives_table._resolve_row_height (layout fallback)
+    }
+)
+
+# Page-box keys the per-document adapters (generators/{bank_statement,receipt,
+# invoice}.py) read to build the canvas and content region before handing the
+# layout to the engine. `page_dimensions` is read by the engine too, in
+# primitives_text.draw_banner, which spans the full page rather than the region.
+_PAGE_LAYOUT_KEYS = frozenset(
+    {
+        "margin",  # every adapter: Region.x and the starting y-cursor
+        "content_width",  # every adapter: Region.width
+        "page_dimensions",  # bank_statement.py, invoice.py, draw_banner
+        "width",  # receipt.py: the thermal roll's pixel width
+        "canvas_ceiling",  # receipt.py: the pre-crop canvas height
+    }
+)
+
+# Keys no render path reads, but which the corpus tooling around the renderers
+# does. They are not dead: deleting one breaks seeding or a ground-truth
+# invariant rather than a page.
+#
+#   bank               -- the full legal bank name a bank layout's letterhead
+#                         stands for. tests/test_bank_supplier_header.py holds
+#                         SUPPLIER_NAME to it, so the scored field cannot
+#                         contradict the letterhead ("bank = f(layout)").
+#   transaction_count  -- {min, max} row count scripts/seed_ground_truth.py
+#                         sizes a statement's transaction list to, so a dense
+#                         layout is seeded with enough rows to look dense.
+_CORPUS_LAYOUT_KEYS = frozenset({"bank", "transaction_count"})
+
+# Block keys whose *value* is the name of a layout key, rather than a `{FIELD}`
+# template or a literal. Both are resolved against the layout dict at render
+# time -- `from_layout` in draw_text_block/draw_banner, `suppress_if_equals` in
+# draw_text_block -- and both are checked to exist by `_validate_geometry`.
+_LAYOUT_KEY_REFERENCES = ("from_layout", "suppress_if_equals")
+
+
 class LayoutSchemaError(RuntimeError):
     """Raised when a layout body fails structural validation."""
 
@@ -923,6 +972,71 @@ def _line_advance_roles(blocks: list, *, default_role: str) -> set[str]:
     return roles
 
 
+def _layout_key_references(blocks: list) -> set[str]:
+    """Collect every layout key this subtree names through a block key.
+
+    Recurses into `panel` and `split` children -- the same reach
+    `_validate_blocks`/`_validate_children` give every other structural check
+    in this module -- so a `from_layout:` buried in a nested container is not
+    invisible to it. A `table` block is deliberately not descended into: its
+    columns hold no blocks, and a column's `sub_line: {key: ...}` names a key
+    of the *row* the provider yields, not a layout key. `_COLUMN_KEYS` admits
+    no `from_layout` at any depth below a table, so there is nothing there to
+    find.
+
+    Args:
+        blocks: A list of block dicts (a body, or one nesting level of it).
+
+    Returns:
+        Every layout key named by a `from_layout:` or `suppress_if_equals:`
+        in this subtree. Whether each key actually exists on the layout is
+        `_validate_geometry`'s job, not this one's.
+    """
+    names: set[str] = set()
+    for block in blocks:
+        if not isinstance(block, dict):
+            continue
+        for key in _LAYOUT_KEY_REFERENCES:
+            value = block.get(key)
+            if isinstance(value, str):
+                names.add(value)
+        if block.get("type") in _CONTAINERS:
+            children = block.get("children", []) or []
+            if block.get("type") == "split":
+                for column in children:
+                    if isinstance(column, list):
+                        names |= _layout_key_references(column)
+            elif isinstance(children, list):
+                names |= _layout_key_references(children)
+    return names
+
+
+def known_layout_keys(layout: dict) -> frozenset[str]:
+    """Return the top-level keys this layout is permitted to carry.
+
+    The permitted set cannot be hand-listed, because `from_layout:` (and
+    `suppress_if_equals:`) let a `text` or `banner` block name an *arbitrary*
+    layout key as its content -- `bank_statements.yml`'s `logo_text`,
+    `receipts.yml`'s `footer_text`. So it is the fixed set of keys the engine,
+    the page adapters and the corpus tooling read, widened by whatever this
+    layout's own body actually references. A layout adding a new
+    `from_layout:` target needs no change here.
+
+    Args:
+        layout: The resolved layout dict.
+
+    Returns:
+        Every key this layout may carry. Anything else it carries is read by
+        nothing, and `validate_layout` rejects it.
+    """
+    return (
+        _ENGINE_LAYOUT_KEYS
+        | _PAGE_LAYOUT_KEYS
+        | _CORPUS_LAYOUT_KEYS
+        | frozenset(_layout_key_references(layout.get("body", []) or []))
+    )
+
+
 def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fields: set[str]) -> None:
     """Validate a whole layout: its body tree plus geometry-dependent checks.
 
@@ -1000,6 +1114,26 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
                 recover=f"add a '{key}:' key to {layout_id}, or do not pass this layout "
                 f"to validate_layout.",
             )
+
+    # A layout key nothing reads is worse than no key at all: it tells an
+    # operator the document is configured a way it is not. The invoice YAML
+    # carried `minimum_amount: 10000` on tax_invoice_high_value long after
+    # layout assignment stopped consulting it, so the file read as though the
+    # corpus routed large invoices there when it round-robins them.
+    permitted = known_layout_keys(layout)
+    unread = sorted(set(layout) - permitted)
+    if unread:
+        raise _err(
+            f"layout '{layout_id}' carries key(s) {unread} that no code path reads.",
+            layout_path=layout_path,
+            key_path=layout_id,
+            expected=f"only {sorted(permitted)} — the engine's and the page adapters' own "
+            "keys, plus every layout key this body names through a 'from_layout:' or "
+            "'suppress_if_equals:'.",
+            recover=f"remove {unread} from {layout_id}; or, if something genuinely reads "
+            "one now, add it to _ENGINE_LAYOUT_KEYS / _PAGE_LAYOUT_KEYS / "
+            "_CORPUS_LAYOUT_KEYS in generators/layout_dsl/schema.py, naming the reader.",
+        )
 
     provider_emits = _validate_field_providers(layout, layout_id=layout_id, layout_path=layout_path)
     validate_body(

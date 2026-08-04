@@ -9,7 +9,6 @@
 # what `_normalize_layout` handed the legacy renderer as `font_size_small` --
 # while `body` (20) is used only for the supplier and payer *name* lines.
 _invoice_page: &invoice_page
-  format: tax_invoice
   page_dimensions:
     width: 1900
     height: 3508
@@ -19,7 +18,6 @@ _invoice_page: &invoice_page
     header: 48
     subheader: 28
     body: 20
-    footer: 16
 
 # Per-field pixel budgets: header/bill-to fields use the content box (1700px);
 # the line-item description column is 900px wide (see the table block below).
@@ -256,9 +254,6 @@ layouts:
     <<: *invoice_page
     field_budgets: *invoice_field_budgets
     field_providers: *invoice_field_providers
-    # Read by nothing today; kept as the record of which invoices this layout is
-    # meant for. See the Task 16 dead-key sweep.
-    minimum_amount: 10000
     defaults:
       <<: *invoice_defaults_values
     # Identical to tax_invoice_standard but for the trailing delivery line.
@@ -284,9 +279,6 @@ layouts:
     <<: *invoice_page
     field_budgets: *invoice_field_budgets
     field_providers: *invoice_field_providers
-    # Read by nothing today; kept as the record of what this layout is for.
-    # See the Task 16 dead-key sweep.
-    mixed_tax_mode: true
     defaults:
       <<: *invoice_defaults_values
     # tax_invoice_standard's sequence with the single line-item table replaced

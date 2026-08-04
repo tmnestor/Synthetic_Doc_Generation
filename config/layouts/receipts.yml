@@ -158,7 +158,6 @@ _receipt_body: &receipt_body
 
 layouts:
   receipt_thermal_80mm:
-    format: thermal
     width: 420
     margin: 12
     content_width: 396
@@ -183,7 +182,6 @@ layouts:
       SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 318, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 70, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
@@ -191,7 +189,6 @@ layouts:
     body: *receipt_body
 
   receipt_thermal_57mm:
-    format: thermal
     width: 310
     margin: 8
     content_width: 294
@@ -208,7 +205,6 @@ layouts:
       SUPPLIER_NAME: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 294, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 294, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 234, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 52, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 294, fit: shrink, min_font: 8, max_lines: 1}
@@ -216,7 +212,6 @@ layouts:
     body: *receipt_body
 
   receipt_retail_tax:
-    format: thermal
     width: 420
     margin: 12
     content_width: 396
@@ -233,7 +228,6 @@ layouts:
       SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
@@ -241,7 +235,6 @@ layouts:
     body: *receipt_body
 
   receipt_fuel:
-    format: thermal
     width: 420
     margin: 12
     content_width: 396
@@ -258,7 +251,6 @@ layouts:
       SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 396, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 324, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
@@ -266,7 +258,6 @@ layouts:
     body: *receipt_body
 
   receipt_professional:
-    format: thermal
     width: 440
     margin: 12
     content_width: 416
@@ -283,7 +274,6 @@ layouts:
       SUPPLIER_NAME: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
@@ -291,7 +281,6 @@ layouts:
     body: *receipt_body
 
   receipt_hospitality:
-    format: thermal
     width: 440
     margin: 12
     content_width: 416
@@ -308,7 +297,6 @@ layouts:
       SUPPLIER_NAME: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 416, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       ABN_LINE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
-      PHONE: {width: 416, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_DESC: {width: 344, fit: shrink, min_font: 10, max_lines: 1}
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 416, fit: shrink, min_font: 8, max_lines: 1}
