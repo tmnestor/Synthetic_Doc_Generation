@@ -8,6 +8,7 @@ unregistered row providers all fail here with a four-element diagnostic.
 import re
 
 from generators.layout_dsl.binding import referenced_fields
+from generators.layout_dsl.defaults import PARAMETER_DEFAULTS
 from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
 from generators.layout_dsl.primitives_text import ALIGNMENTS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
@@ -608,6 +609,18 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
     Raises:
         LayoutSchemaError: On any structural, reference, or geometry problem.
     """
+    missing = sorted(PARAMETER_DEFAULTS - set(layout.get("defaults", {})))
+    if missing:
+        raise _err(
+            f"layout '{layout_id}' declares no default for: {', '.join(missing)}.",
+            layout_path=layout_path,
+            key_path=f"{layout_id}.defaults",
+            expected="a defaults: mapping covering every parameter a primitive can read: "
+            f"{sorted(PARAMETER_DEFAULTS)}.",
+            recover=f"add the missing keys under {layout_id}.defaults, sharing a common "
+            "block through a YAML anchor as field_budgets already does.",
+        )
+
     for key, example in (("body", "a list of block mappings"), ("content_width", "1600")):
         if key not in layout:
             raise _err(
