@@ -1313,23 +1313,18 @@ def _validate_text_budget(
     value `_validate_geometry` already threads through panel/split narrowing
     for every other check at this nesting level.
 
-    A right-aligned `pair` (`value_align: right`) is a narrower case: its
-    value is drawn from `draw_fitted_right`, which is free to grow leftward
-    across the *entire* region -- checking the budget against the full
-    `width` (as the general case below does) would accept a budget wide
-    enough to draw straight through the pair's own unshrunk, unbudgeted
-    label, which sits at the region's left edge. The label's own rendered
-    width is not known at validate time (it may interpolate a `{FIELD}`, and
-    even a literal string needs a loaded font to measure), so this reserves
-    the pair's own declared `min_gap` -- the same px figure the layout
-    author already uses to say "this much space must stay clear of the
-    label" for the unbudgeted right-aligned path -- as a stand-in floor for
-    the label's footprint, and checks the budget against `width - min_gap`
-    instead. This does not guarantee the label physically fits in what is
-    left over; it is an authoring-time guard against the unambiguous case
-    (declaring a budget that leaves no gap at all), consistent with every
-    other check in this module validating declared geometry rather than
-    rendering text to measure it.
+    A right-aligned `pair` (`value_align: right`) additionally may not carry a
+    non-zero `min_gap`, and that is rejected here rather than checked. The
+    three keys have no combined meaning: `draw_pair`'s budgeted path draws the
+    label first and fits the value into whatever region is left, so it never
+    performs the render-time label repositioning `min_gap` exists to request
+    (see `draw_pair`'s own docstring, which says so). A layout declaring all
+    three would get a gap it asked for and did not receive, on a page where
+    nothing shows that it was dropped -- the same class of defect as a layout
+    key no code path reads. This was recorded as a constraint while the
+    primitive was being built and honoured by every layout since; the check is
+    that constraint made enforceable, so the next author to reach for the
+    combination is told at validate time instead of discovering it in pixels.
     """
     name = block.get("budget")
     if name is None:
@@ -1349,19 +1344,19 @@ def _validate_text_budget(
         value_align = block.get("value_align", layout["defaults"]["pair_value_align"])
         if value_align == "right":
             min_gap = int(block.get("min_gap", layout["defaults"]["pair_min_gap"]))
-            available = width - min_gap
-            if declared > available:
+            if min_gap > 0:
                 raise _err(
-                    f"budget '{name}' declares width {declared}px but a right-aligned pair "
-                    f"only leaves {available}px for the value once its {min_gap}px min_gap "
-                    f"reservation for the label is subtracted from the {width}px region.",
+                    f"pair combines budget '{name}' with value_align: right and min_gap "
+                    f"{min_gap}; the budgeted path does not apply min_gap, so the gap "
+                    "would be silently dropped.",
                     layout_path=layout_path,
-                    key_path=f"{key_path}.budget",
-                    expected=f"field_budgets.{name}.width <= {available}.",
-                    recover=f"set field_budgets.{name}.width to {available} or less, widen the "
-                    "region this block draws into, or reduce min_gap.",
+                    key_path=f"{key_path}.min_gap",
+                    expected="a budgeted right-aligned pair to resolve min_gap to 0, e.g.\n"
+                    "              {type: pair, label: 'Total', value: '{TOTAL_AMOUNT}',\n"
+                    "               value_align: right, budget: TOTALS, min_gap: 0}",
+                    recover="set min_gap: 0 on this block, or drop its budget: and let "
+                    "min_gap reposition the label, or left-align the value.",
                 )
-            return
 
     if declared > width:
         raise _err(
