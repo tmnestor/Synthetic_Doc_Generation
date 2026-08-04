@@ -392,7 +392,7 @@ def resolve_param(
     layout_id: str,
     layout_path: str,
     block_key: str | None = None,
-) -> object:
+) -> Any:
     """Resolve one primitive parameter.
 
     `key` names the `defaults:` entry; `block_key` names the block's own YAML
