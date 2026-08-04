@@ -77,7 +77,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "rule": ((), ("color", "thickness", "pad_above", "pad_below", "fill_char")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
-    "split": (("children",), ("gap", "divider", "divider_color")),
+    "split": (("children",), ("gap", "divider", "divider_color", "widths")),
     "banner": (
         ("height", "color"),
         ("content", "from_layout", "text_color", "role", "text_y", "bold", "mono"),
@@ -100,6 +100,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "header_rule_gap",
             "mono",
             "line_advance",
+            "capture",
         ),
     ),
 }
@@ -423,6 +424,16 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
             recover=f"set grouping: to one of {list(GROUPINGS)}.",
         )
 
+    if "capture" in block and not isinstance(block["capture"], bool):
+        raise _err(
+            f"capture must be a bool, got {block['capture']!r}.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.capture",
+            expected="capture: true or capture: false.",
+            recover="set capture: to true or false, or remove it to use the layout's "
+            "table_capture default.",
+        )
+
     if frame == "filled" and "fill_color" not in block:
         raise _err(
             "frame: filled requires fill_color, which this table block does not set.",
@@ -584,6 +595,45 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
             )
 
 
+def _validate_split_widths(widths: object, *, children: list, layout_path: str, key_path: str) -> None:
+    """Check a split's explicit `widths` list is a non-empty list of positive
+    ints, one per column.
+
+    `widths` replaces equal division for columns that must not be equal --
+    invoice totals' fixed 400px column at the right edge -- so a mismatch
+    with the actual column count (e.g. a column added without updating
+    widths) is an authoring error, not silently absorbed by falling back to
+    equal division.
+    """
+    if not isinstance(widths, list) or not widths:
+        raise _err(
+            f"split widths must be a non-empty list, got {widths!r}.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.widths",
+            expected="a non-empty list of positive ints, one per column, e.g. widths: [1300, 400].",
+            recover=f"set widths: to a list of {len(children)} positive ints, one per child column.",
+        )
+    non_positive = [w for w in widths if not isinstance(w, int) or isinstance(w, bool) or w <= 0]
+    if non_positive:
+        raise _err(
+            f"split widths must all be positive ints, got {widths!r}.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.widths",
+            expected="a list of positive ints, e.g. widths: [1300, 400].",
+            recover=f"fix the non-positive or non-int entr{'y' if len(non_positive) == 1 else 'ies'} "
+            "in widths.",
+        )
+    if len(widths) != len(children):
+        raise _err(
+            f"split widths has {len(widths)} entries but children has {len(children)} columns.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.widths",
+            expected=f"widths: a list of exactly {len(children)} ints, matching children's column count.",
+            recover=f"add or remove entries so widths has exactly {len(children)} values, "
+            "one per child column.",
+        )
+
+
 def _validate_children(
     block: dict, *, layout_id: str, layout_path: str, known_fields: set[str], key_path: str
 ) -> None:
@@ -601,6 +651,10 @@ def _validate_children(
                 key_path=f"{key_path}.children",
                 expected="a list of at least two lists of blocks.",
                 recover="add a second column, or use panel for a single column.",
+            )
+        if "widths" in block:
+            _validate_split_widths(
+                block["widths"], children=children, layout_path=layout_path, key_path=key_path
             )
         for index, column in enumerate(children):
             _validate_blocks(
@@ -855,22 +909,44 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
         elif kind == "split":
             columns = block["children"]
             gap = int(block.get("gap", 0))
-            inner = (width - gap * (len(columns) - 1)) // len(columns)
-            if inner < 1:
-                raise _err(
-                    f"split of {len(columns)} columns with gap {gap} leaves column "
-                    f"width {inner} inside a {width}px region.",
-                    layout_path=layout_path,
-                    key_path=f"{here}.gap",
-                    expected=f"gap below {width // max(len(columns) - 1, 1)}, e.g. gap: 30.",
-                    recover="reduce the gap or the column count.",
-                )
+            widths = block.get("widths")
+            if widths is not None:
+                # Explicit per-column widths (invoice's fixed 400px totals
+                # column) replace equal division entirely -- nested budget
+                # checks below must see each column's real width, not a
+                # fraction of the region. _validate_children (called earlier
+                # by _validate_block, from the same top-down walk) has
+                # already checked widths is a list of len(columns) positive
+                # ints, so this only re-checks the geometry fit.
+                column_widths = [int(w) for w in widths]
+                total = sum(column_widths) + gap * (len(column_widths) - 1)
+                if total > width:
+                    raise _err(
+                        f"split widths {column_widths} with gap {gap} need {total}px but "
+                        f"this region is only {width}px.",
+                        layout_path=layout_path,
+                        key_path=f"{here}.widths",
+                        expected=f"sum(widths) + gap * (n - 1) <= {width}.",
+                        recover="reduce a width in split.widths, or reduce the split's gap.",
+                    )
+            else:
+                inner = (width - gap * (len(columns) - 1)) // len(columns)
+                if inner < 1:
+                    raise _err(
+                        f"split of {len(columns)} columns with gap {gap} leaves column "
+                        f"width {inner} inside a {width}px region.",
+                        layout_path=layout_path,
+                        key_path=f"{here}.gap",
+                        expected=f"gap below {width // max(len(columns) - 1, 1)}, e.g. gap: 30.",
+                        recover="reduce the gap or the column count.",
+                    )
+                column_widths = [inner] * len(columns)
             for column_index, child_blocks in enumerate(columns):
                 _validate_geometry(
                     child_blocks,
                     layout=layout,
                     layout_path=layout_path,
-                    width=inner,
+                    width=column_widths[column_index],
                     key_path=f"{here}.children[{column_index}]",
                 )
 

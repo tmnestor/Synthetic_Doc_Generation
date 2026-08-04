@@ -5,6 +5,7 @@ positions resolve against the current region, so a table nested inside a
 container positions correctly without knowing it is nested.
 """
 
+from dataclasses import replace
 from decimal import Decimal
 
 from PIL import ImageDraw
@@ -205,7 +206,13 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             the rule above the header labels is drawn at all — ANZ's legacy
             header rules only *below* its labels, never above) and
             `header_rule_gap` (default 16, the y-advance after that below
-            rule — ANZ's is 14, not CBA's 16).
+            rule — ANZ's is 14, not CBA's 16). A third key, `capture`
+            (default True, via the `table_capture` layout default), suppresses
+            all geometry recording for this table when False — invoice's
+            `tax_invoice_mixed` draws the same `LINE_ITEM_*` list into two
+            tables (a taxable/GST-free split display), and a second recorded
+            box for the same field would collide with the first, since one
+            ground-truth value has exactly one bounding box.
         ctx: Render context.
         y: Current y-cursor.
 
@@ -217,6 +224,18 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             or a row's `bold` collection (see `_validate_bold_spec`) names a
             column this table does not have.
     """
+    if not bool(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_capture",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="capture",
+        )
+    ):
+        ctx = replace(ctx, recorder=None)
+
     frame = block["frame"]
     grouping = block["grouping"]
     fill_color = block.get("fill_color")
