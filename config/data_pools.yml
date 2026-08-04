@@ -200,26 +200,15 @@ payment_terminal:
   entry_modes:
     card: (c)
     wallet: (t)
-  contactless_label: CONTACTLESS
-  customer_copy_text: CUSTOMER COPY
-  approved_text: APPROVED
-  response_code: '00'
-  retain_text: Retain copy for your records
-  cash:
-    tendered_label: CASH TENDERED
-    change_label: CHANGE
-  # Printed terminal-slip labels, read byte-identical from
-  # generators/payment_block.py::render_payment_block -- the source of truth
-  # for what a receipt image actually shows. `psn_atc` is a template: the
-  # receipt_payment field provider (generators/layout_dsl/field_providers.py)
-  # emits PAYMENT_PSN/PAYMENT_ATC for a future DSL body to substitute in.
-  slip_labels:
-    aid: "AID: "
-    card: "Card: "
-    psn_atc: "PSN: {PAYMENT_PSN}, ATC: {PAYMENT_ATC}"
-    purchase: "Purchase   AUD"
-    terminal_id: "Terminal ID: "
-    transaction_ref: "Transaction Ref: "
+  # The slip's fixed wording -- CUSTOMER COPY, CONTACTLESS, APPROVED 00, the
+  # AID:/Card:/PSN:/Terminal ID:/Transaction Ref:/Purchase AUD labels, the
+  # cash tendered/change labels and the retain-copy footer -- is NOT config.
+  # It is page chrome, and it lives with the rest of the page's fixed text in
+  # the `body:` tree of config/layouts/receipts.yml. This file holds only the
+  # pools a receipt *samples* from; every value below varies document to
+  # document and reaches the page through the `receipt_payment` field
+  # provider (generators/layout_dsl/field_providers.py).
+  #
   # Cash-tender arithmetic: tendered is the next note of this denomination
   # above the total, plus 0..(cash_extra_notes - 1) extra notes of the same
   # denomination -- see derive_payment's _cash_tender helper.

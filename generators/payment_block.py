@@ -5,6 +5,14 @@ and the deterministic derivation of per-case terminal values. It draws nothing:
 the three slip variants (card, wallet, cash) are now a `body:` tree in
 config/layouts/receipts.yml, selected by `when:` over the keys the
 `receipt_payment` field provider emits from `derive_payment` below.
+
+The split between this module's config and that body is *sampled value* versus
+*fixed wording*. `payment_terminal` holds only what varies document to
+document — the method weights, acquirers, card schemes, wallets, entry modes
+and cash-tender arithmetic. The slip's constant text (CUSTOMER COPY, APPROVED
+00, the AID:/Card:/Terminal ID: labels, the retain-copy footer) is page chrome
+and lives in the layout body, as one copy, with the rest of the page's fixed
+text.
 """
 
 import hashlib
@@ -24,31 +32,27 @@ _ROOT_KEY = "payment_terminal"
 
 # Required sub-keys of payment_terminal, each mapped to a short description of
 # the expected shape used in the fail-fast diagnostic.
+#
+# Only pools a receipt *samples* from live here. The slip's fixed wording
+# (CUSTOMER COPY, APPROVED 00, the AID:/Card:/Terminal ID: labels, the cash
+# tendered/change labels, the retain-copy footer) used to be validated here
+# too, and was read by nothing: since the terminal slip became a `body:` tree,
+# the strings the page prints are literals in config/layouts/receipts.yml.
+# Two files declaring the same wording is a drift risk with no upside, and
+# page chrome belongs with the page.
 _REQUIRED_KEYS: dict[str, str] = {
     "receipt_method_weights": "a mapping of method name -> non-negative integer weight",
     "acquirers": "a non-empty list of acquirer display names",
     "schemes": "a mapping of scheme name -> {display, aid, pan_digits, account_types}",
     "wallets": "a mapping of wallet method name -> printed wallet label",
     "entry_modes": "a mapping with 'card' and 'wallet' entry-mode markers",
-    "contactless_label": "the printed contactless label, e.g. 'CONTACTLESS'",
-    "customer_copy_text": "the printed header text, e.g. 'CUSTOMER COPY'",
-    "approved_text": "the printed approval word, e.g. 'APPROVED'",
-    "response_code": "the printed response code as a string, e.g. '00'",
-    "retain_text": "the printed footer, e.g. 'Retain copy for your records'",
-    "cash": "a mapping with 'tendered_label' and 'change_label'",
     "bank_description_methods": "a mapping of bank-description prefix -> schemes key",
     "wallet_presentation_weights": "a mapping of 'none' plus wallet names -> non-negative weights",
-    "slip_labels": (
-        "a mapping with keys aid, card, psn_atc, purchase, terminal_id, transaction_ref -- "
-        "each a printed label string"
-    ),
     "cash_tender_step": "the cash note denomination in dollars, as a positive integer, e.g. 5",
     "cash_extra_notes": "the number of extra-note variants, as a positive integer, e.g. 3",
 }
 
 _REQUIRED_SCHEME_KEYS = ("display", "aid", "pan_digits", "account_types")
-
-_REQUIRED_SLIP_LABEL_KEYS = ("aid", "card", "psn_atc", "purchase", "terminal_id", "transaction_ref")
 
 _POSITIVE_INT_KEYS = ("cash_tender_step", "cash_extra_notes")
 
@@ -127,17 +131,6 @@ def load_terminal_pools(path: Path = _DATA_POOLS_PATH) -> dict:
                     recover=f"add '{sub}' to scheme '{name}'",
                 )
 
-    for sub in _REQUIRED_SLIP_LABEL_KEYS:
-        label = pools["slip_labels"].get(sub) if isinstance(pools["slip_labels"], dict) else None
-        if not isinstance(label, str) or not label:
-            raise _err(
-                f"slip_labels is missing '{sub}'.",
-                path=path,
-                key_path=f"{_ROOT_KEY}.slip_labels.{sub}",
-                expected="a non-empty printed label string.",
-                recover=f"add '{sub}' to {_ROOT_KEY}.slip_labels",
-            )
-
     for key in _POSITIVE_INT_KEYS:
         value = pools[key]
         if not isinstance(value, int) or isinstance(value, bool) or value < 1:
@@ -157,16 +150,6 @@ def load_terminal_pools(path: Path = _DATA_POOLS_PATH) -> dict:
                 key_path=f"{_ROOT_KEY}.entry_modes.{mode}",
                 expected="a marker string, e.g. card: (c) and wallet: (t).",
                 recover=f"add '{mode}' under {_ROOT_KEY}.entry_modes",
-            )
-
-    for label in ("tendered_label", "change_label"):
-        if label not in pools["cash"]:
-            raise _err(
-                f"cash block is missing '{label}'.",
-                path=path,
-                key_path=f"{_ROOT_KEY}.cash.{label}",
-                expected="a printed label, e.g. tendered_label: CASH TENDERED.",
-                recover=f"add '{label}' under {_ROOT_KEY}.cash",
             )
 
     known = set(pools["schemes"]) | set(pools["wallets"]) | {"Cash"}
@@ -437,11 +420,15 @@ class PaymentDetails:
         wallet_label: Printed wallet name, "" unless kind == "wallet".
         tendered: Cash tendered, None unless kind == "cash".
         change: Cash change, None unless kind == "cash".
-        purchase_total: TOTAL_AMOUNT as a Decimal. The slip's
-            'Purchase   AUD' line binds `{TOTAL_AMOUNT}` directly in the
-            layout body instead, so `receipt_payment` deliberately does not
-            emit this — a second, derived copy of a scored value could
-            silently drift from the field the benchmark scores.
+
+    There is deliberately no purchase total here. The slip's 'Purchase   AUD'
+    line binds `{TOTAL_AMOUNT}` directly in the layout body, so the printed
+    amount cannot drift from the field the benchmark scores; carrying a
+    second, derived copy on this dataclass would only invite one to. The
+    total does reach this module — `derive_payment` takes it, and the cash
+    tender/change below are computed from it — it simply never becomes a
+    slip value of its own. `receipt_payment` emits no
+    PAYMENT_PURCHASE_TOTAL for the same reason.
     """
 
     method: str
@@ -461,7 +448,6 @@ class PaymentDetails:
     wallet_label: str
     tendered: Decimal | None
     change: Decimal | None
-    purchase_total: Decimal
 
 
 def _weighted_pool(weights: dict[str, int]) -> list[str]:
@@ -573,7 +559,6 @@ def derive_payment(
             wallet_label="",
             tendered=tendered,
             change=change,
-            purchase_total=total_dec,
         )
 
     wallets = cfg["wallets"]
@@ -610,5 +595,4 @@ def derive_payment(
         wallet_label=wallets[method] if is_wallet else "",
         tendered=None,
         change=None,
-        purchase_total=total_dec,
     )
