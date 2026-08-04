@@ -49,9 +49,19 @@ _REQUIRED_KEYS: dict[str, str] = {
     "cash": "a mapping with 'tendered_label' and 'change_label'",
     "bank_description_methods": "a mapping of bank-description prefix -> schemes key",
     "wallet_presentation_weights": "a mapping of 'none' plus wallet names -> non-negative weights",
+    "slip_labels": (
+        "a mapping with keys aid, card, psn_atc, purchase, terminal_id, transaction_ref -- "
+        "each a printed label string"
+    ),
+    "cash_tender_step": "the cash note denomination in dollars, as a positive integer, e.g. 5",
+    "cash_extra_notes": "the number of extra-note variants, as a positive integer, e.g. 3",
 }
 
 _REQUIRED_SCHEME_KEYS = ("display", "aid", "pan_digits", "account_types")
+
+_REQUIRED_SLIP_LABEL_KEYS = ("aid", "card", "psn_atc", "purchase", "terminal_id", "transaction_ref")
+
+_POSITIVE_INT_KEYS = ("cash_tender_step", "cash_extra_notes")
 
 
 def _err(what: str, *, path: Path, key_path: str, expected: str, recover: str) -> ValueError:
@@ -127,6 +137,28 @@ def load_terminal_pools(path: Path = _DATA_POOLS_PATH) -> dict:
                     expected="display (str), aid (str), pan_digits (int), account_types (non-empty list).",
                     recover=f"add '{sub}' to scheme '{name}'",
                 )
+
+    for sub in _REQUIRED_SLIP_LABEL_KEYS:
+        label = pools["slip_labels"].get(sub) if isinstance(pools["slip_labels"], dict) else None
+        if not isinstance(label, str) or not label:
+            raise _err(
+                f"slip_labels is missing '{sub}'.",
+                path=path,
+                key_path=f"{_ROOT_KEY}.slip_labels.{sub}",
+                expected="a non-empty printed label string.",
+                recover=f"add '{sub}' to {_ROOT_KEY}.slip_labels",
+            )
+
+    for key in _POSITIVE_INT_KEYS:
+        value = pools[key]
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise _err(
+                f"'{_ROOT_KEY}.{key}' is not a positive integer (got {value!r}).",
+                path=path,
+                key_path=f"{_ROOT_KEY}.{key}",
+                expected=_REQUIRED_KEYS[key] + ".",
+                recover=f"set '{key}' to a positive integer",
+            )
 
     for mode in ("card", "wallet"):
         if mode not in pools["entry_modes"]:
@@ -455,16 +487,23 @@ def _format_timestamp(invoice_date: str, time_str: str) -> str:
     return stamp.strftime("%d %b %Y at %I:%M %p")
 
 
-def _cash_tender(total: Decimal, extra_index: int) -> tuple[Decimal, Decimal]:
-    """Return (tendered, change): next $5 note above `total`, plus 0/$5/$10.
+def _cash_tender(total: Decimal, extra_index: int, *, step: int) -> tuple[Decimal, Decimal]:
+    """Return (tendered, change): next `step`-dollar note above `total`, plus 0/step/2*step.
 
     Tendered always strictly exceeds the total, so a total that is already a
     round note never renders 'CHANGE 0.00'.
+
+    Args:
+        total: The purchase total.
+        extra_index: How many extra `step`-dollar notes to add, in
+            `[0, cash_extra_notes)` -- see `payment_terminal.cash_extra_notes`.
+        step: The note denomination in dollars -- `payment_terminal.cash_tender_step`.
     """
-    base = (total // Decimal("5")) * Decimal("5")
+    step_dec = Decimal(step)
+    base = (total // step_dec) * step_dec
     if base <= total:
-        base += Decimal("5")
-    tendered = base + Decimal("5") * extra_index
+        base += step_dec
+    tendered = base + step_dec * extra_index
     return tendered, tendered - total
 
 
@@ -520,7 +559,11 @@ def derive_payment(
     total_dec = Decimal(total)
 
     if method == "Cash":
-        tendered, change = _cash_tender(total_dec, int(digest[38:40], 16) % 3)
+        tendered, change = _cash_tender(
+            total_dec,
+            int(digest[38:40], 16) % cfg["cash_extra_notes"],
+            step=cfg["cash_tender_step"],
+        )
         return PaymentDetails(
             method=method,
             kind="cash",
