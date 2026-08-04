@@ -162,6 +162,24 @@ _invoice_totals_separate: &invoice_totals_separate
       - {type: pair, label: "Total:", value: "{TOTAL_AMOUNT}", value_align: right,
          currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, line_advance: 64}
 
+# GST-inclusive presentation: no subtotal, and GST is a component of the total
+# rather than an addition to it, so it is drawn *after* the total.
+_invoice_totals_inclusive: &invoice_totals_inclusive
+  type: split
+  widths: [1300, 400]
+  children:
+    - []
+    - - {type: pair, label: "Total:", value: "{TOTAL_AMOUNT}", value_align: right,
+         currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, line_advance: 64}
+      # This label is far longer than the separate branch's "GST (10%):" and
+      # overruns the fixed 400px totals column, so it declares a 24px min_gap:
+      # without one it collides with the right-aligned amount and the two merge
+      # into a single OCR token. It must still carry `field:` -- GST_AMOUNT is a
+      # KILE column, and the DocILE exporter raises on a present field with no
+      # captured bounding box.
+      - {type: pair, label: "GST included (10%):", value: "{GST_AMOUNT}", value_align: right,
+         currency: symbol, field: GST_AMOUNT, min_gap: 24, line_advance: 40}
+
 _invoice_payment_terms: &invoice_payment_terms
   {type: text, content: "Payment Terms:", color: gray, line_advance: 40}
 
@@ -191,123 +209,29 @@ layouts:
       - *invoice_payment_terms
 
   tax_invoice_gst_inclusive:
-    format: tax_invoice
-    page_dimensions:
-      width: 1900
-      height: 3508
-    margin: 100
-    content_width: 1700
-    font_family: sans-serif
-    field_budgets:
-      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
-      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
-    font_sizes:
-      header: 48
-      subheader: 28
-      body: 20
-      footer: 16
-    sections:
-      - type: header
-        name: invoice_title
-        height: 80
-        font_size: 28
-        font_weight: bold
-        text: "TAX INVOICE"
-        alignment: center
-      - type: separator
-        height: 20
-      - type: section
-        name: seller_details
-        label: "From:"
-        height: 120
-        font_size: 11
-        fields:
-          - business_name
-          - abn_number
-          - business_address
-          - business_phone
-          - business_email
-      - type: section
-        name: buyer_details
-        label: "Bill To:"
-        height: 120
-        font_size: 11
-        fields:
-          - customer_name
-          - customer_address
-          - customer_phone
-      - type: section
-        name: invoice_metadata
-        height: 80
-        font_size: 11
-        fields:
-          - invoice_number
-          - invoice_date
-          - due_date
-          - order_number
-      - type: separator
-        height: 20
-      - type: table
-        name: line_items_table
-        columns:
-          - name: item_number
-            header_text: "#"
-            width: 80
-            font_size: 10
-          - name: description
-            header_text: "Description"
-            width: 800
-            font_size: 11
-          - name: quantity
-            header_text: "Qty"
-            width: 120
-            font_size: 10
-          - name: unit_price
-            header_text: "Unit Price"
-            width: 200
-            font_size: 10
-          - name: total_price
-            header_text: "Total (inc. GST)"
-            width: 200
-            font_size: 10
-        row_height: 30
-        table_start_y: 1800
-      - type: separator
-        height: 20
-      - type: totals
-        name: totals
-        # GST-inclusive presentation: no subtotal, GST shown as a component of
-        # the total rather than added to it. The renderer branches on this key;
-        # every other invoice layout omits it and gets "separate".
-        gst_display: inclusive
-        fields:
-          - name: total_gst_inclusive
-            label: "TOTAL (inc. GST):"
-            font_size: 13
-            font_weight: bold
-          - name: gst_component
-            label: "GST included (10%):"
-            font_size: 10
-      - type: section
-        name: payment_terms
-        label: "Payment Terms:"
-        height: 60
-        font_size: 10
-        fields:
-          - payment_method
-          - bsb_number
-          - account_number
-          - account_name
-      - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
-
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets
+    field_providers: *invoice_field_providers
+    defaults:
+      <<: *invoice_defaults_values
+    # Identical to tax_invoice_standard but for its totals block.
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_seller_name
+      - *invoice_seller_address
+      - *invoice_seller_abn
+      - *invoice_bill_to
+      - *invoice_payer_name
+      - *invoice_payer_address
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_inclusive
+      - *invoice_payment_terms
   tax_invoice_high_value:
     format: tax_invoice
     page_dimensions:
