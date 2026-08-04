@@ -127,15 +127,35 @@ _nab_txn_columns: &nab_txn_columns
 # line as the account holder; this uses `pair` (a colon-joined single string)
 # in a `split` instead, which is the closest existing primitive vocabulary
 # gets. It costs nothing on the equivalence harness either way.
-_nab_account_box_children: &nab_account_box_children
+#
+# Not shared between nab_classic and nab_dense (unlike every other NAB
+# anchor): the sub_description pairs below carry an explicit `line_advance`
+# override (see draw_text_block/draw_pair -- role != body no longer resolves
+# its advance from the role's own font size, only the layout's flat default
+# does that, and that default is body-derived) so a single shared anchor
+# could not give each layout its own correct sub_description advance
+# (int(22 * 1.4)=30 for nab_classic vs int(20 * 1.4)=28 for nab_dense).
+_nab_classic_account_box_children: &nab_classic_account_box_children
   - {type: text, content: "Account Details", role: body, bold: true}
   - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body}
   - type: split
     gap: 20
     children:
-      - - {type: pair, label: "BSB Number", value: "082-456", role: sub_description, color: "#666666"}
+      - - {type: pair, label: "BSB Number", value: "082-456", role: sub_description,
+            color: "#666666", line_advance: 30}
       - - {type: pair, label: "Account Number", value: "98-765-4321", role: sub_description,
-            color: "#666666"}
+            color: "#666666", line_advance: 30}
+
+_nab_dense_account_box_children: &nab_dense_account_box_children
+  - {type: text, content: "Account Details", role: body, bold: true}
+  - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body}
+  - type: split
+    gap: 20
+    children:
+      - - {type: pair, label: "BSB Number", value: "082-456", role: sub_description,
+            color: "#666666", line_advance: 28}
+      - - {type: pair, label: "Account Number", value: "98-765-4321", role: sub_description,
+            color: "#666666", line_advance: 28}
 
 # ANZ's transaction columns (see bank_statement.py:808-980, render_anz). Shared
 # by both the transaction table and the totals table below it — the totals
@@ -169,13 +189,13 @@ _anz_txn_columns: &anz_txn_columns
 # different font_sizes and therefore different natural line_height() advances.
 _nab_classic_body: &nab_classic_body
   # Letterhead reads logo_text dynamically (legacy: draw.text(..., layout["logo_text"], ...)).
-  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true}
+  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true, line_advance: 61}
   - {type: spacer, height: 11}  # line_height(44)=61 -> legacy's real 72px jump.
   - type: panel
     height: 150
     padding: 18
     border_color: "#003366"
-    children: *nab_account_box_children
+    children: *nab_classic_account_box_children
   - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
   # SUPPLIER_NAME (National Australia Bank) never equals logo_text (NAB
   # Classic Banking) anywhere in the corpus, so suppress_if_equals never
@@ -202,13 +222,13 @@ _nab_classic_body: &nab_classic_body
 
 _nab_dense_body: &nab_dense_body
   # See nab_classic_body's identical comments.
-  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true}
+  - {type: text, from_layout: logo_text, role: header, color: "#003366", bold: true, line_advance: 56}
   - {type: spacer, height: 16}  # line_height(40)=56 -> legacy's real 72px jump.
   - type: panel
     height: 150
     padding: 18
     border_color: "#003366"
-    children: *nab_account_box_children
+    children: *nab_dense_account_box_children
   - {type: spacer, height: 20}  # legacy jumps to box_top+170, 20px past the box's own bottom.
   - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
      suppress_if_equals: logo_text}
@@ -282,12 +302,12 @@ _anz_standard_body: &anz_standard_body
   - type: split
     children:
       - - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: sub_description,
-           color: "#666666", field: PAYER_NAME}
+           color: "#666666", field: PAYER_NAME, line_advance: 33}
       - - {type: text, content: "Account number    0000-00000", role: sub_description,
-           align: right, color: "#666666"}
+           align: right, color: "#666666", line_advance: 33}
   - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}",
      role: sub_description, color: "#666666", when: STATEMENT_DATE_RANGE,
-     field: STATEMENT_DATE_RANGE}
+     field: STATEMENT_DATE_RANGE, line_advance: 33}
   - {type: spacer, height: 5}  # line_height(24)=33 -> legacy's real 38px (y += 38).
   - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
      suppress_if_equals: logo_text}
@@ -319,12 +339,12 @@ _anz_modern_body: &anz_modern_body
   - type: split
     children:
       - - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: sub_description,
-           color: "#666666", field: PAYER_NAME}
+           color: "#666666", field: PAYER_NAME, line_advance: 30}
       - - {type: text, content: "Account number    0000-00000", role: sub_description,
-           align: right, color: "#666666"}
+           align: right, color: "#666666", line_advance: 30}
   - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}",
      role: sub_description, color: "#666666", when: STATEMENT_DATE_RANGE,
-     field: STATEMENT_DATE_RANGE}
+     field: STATEMENT_DATE_RANGE, line_advance: 30}
   - {type: spacer, height: 8}  # line_height(22)=30 -> legacy's real 38px (y += 38).
   - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray, field: SUPPLIER_NAME,
      suppress_if_equals: logo_text}
@@ -371,10 +391,11 @@ layouts:
       # The content supplier is a separate, subordinate line further down,
       # suppressed whenever it already equals the letterhead (see
       # suppress_if_equals below) — mirrors legacy's `_draw_supplier_line`.
-      - {type: text, from_layout: logo_text, role: header, color: "#12107D"}
+      - {type: text, from_layout: logo_text, role: header, color: "#12107D", line_advance: 67}
       - type: block
         role: footer
         color: "#666666"
+        line_advance: 25
         lines:
           - Commonwealth Bank of Australia
           - ABN 48 123 456 789 AFSL and
@@ -403,7 +424,7 @@ layouts:
           - {key: balance, label: Balance, align: right, x_right: 0,
              last_row_field: ACCOUNT_BALANCE}
       - {type: spacer, height: 40}
-      - {type: text, role: footer, color: "#666666",
+      - {type: text, role: footer, color: "#666666", line_advance: 25,
          content: "Transaction types: EFTPOS, ATM, Direct Debit, Direct Credit, Transfer"}
 
   cba_date_grouped:
@@ -424,10 +445,11 @@ layouts:
     body:
       # See cba_standard's identical comment: letterhead reads logo_text
       # dynamically; the supplier line is suppressed when it matches.
-      - {type: text, from_layout: logo_text, role: header, color: "#12107D"}
+      - {type: text, from_layout: logo_text, role: header, color: "#12107D", line_advance: 67}
       - type: block
         role: footer
         color: "#666666"
+        line_advance: 25
         lines:
           - Commonwealth Bank of Australia
           - ABN 48 123 456 789 AFSL and
@@ -446,7 +468,7 @@ layouts:
         grouping: dedicated_row
         # plain rows draw no ruled header lines, but legacy CBA always ruled-lines
         # its header (12px rule + 44px labels + 16px rule = 72px) regardless of
-        # date_grouping. Override the computed default (line_height(32)=44) to match.
+        # date_grouping. Override the computed default (line_advance=44) to match.
         header_height: 72
         params: {opening_balance: true}
         columns:
@@ -460,7 +482,7 @@ layouts:
           - {key: balance, label: Balance, align: right, x_right: 0,
              last_row_field: ACCOUNT_BALANCE}
       - {type: spacer, height: 40}
-      - {type: text, role: footer, color: "#666666",
+      - {type: text, role: footer, color: "#666666", line_advance: 25,
          content: "Transaction types: EFTPOS, ATM, Direct Debit, Direct Credit, Transfer"}
 
   westpac_standard:
@@ -482,14 +504,15 @@ layouts:
       - type: split
         children:
           - - {type: text, from_layout: logo_text, role: header, color: "#C41E3A",
-                bold: true}
-          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+                bold: true, line_advance: 61}
+          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666",
+                line_advance: 22}
       - {type: text, content: "Transaction Details", role: body, bold: true}
       - {type: spacer, height: 14}
       - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
-         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE, line_advance: 30}
       - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
          field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 41}
@@ -518,8 +541,9 @@ layouts:
       - type: split
         children:
           - - {type: text, from_layout: logo_text, role: header, color: "#C41E3A",
-                bold: true}
-          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666"}
+                bold: true, line_advance: 61}
+          - - {type: text, content: "Page 1 of 1", role: footer, align: right, color: "#666666",
+                line_advance: 22}
       - {type: spacer, height: 37}
       - type: panel
         height: 260
@@ -531,6 +555,7 @@ layouts:
             children:
               - - type: block
                   role: sub_description
+                  line_advance: 30
                   heading: "Rewards Points Balance Summary"
                   lines:
                     - "Opening Balance          345,678"
@@ -541,9 +566,10 @@ layouts:
                     - "Points Status          Available"
               - - type: block
                   role: sub_description
+                  line_advance: 30
                   heading: "A message from Rewards"
                   lines: []
-      - {type: text, role: sub_description, color: "#666666",
+      - {type: text, role: sub_description, color: "#666666", line_advance: 30,
          content: "To find out more about how Rewards Points are earned, go to the Rewards website."}
       - {type: spacer, height: 24}
       - {type: text, content: "Westpac Premium Card® transactions", role: body, bold: true}
@@ -551,7 +577,7 @@ layouts:
       - {type: pair, label: "Account Holder", value: "{PAYER_NAME}", role: body,
          field: PAYER_NAME}
       - {type: pair, label: "Statement Period", value: "{STATEMENT_DATE_RANGE}", role: sub_description,
-         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE}
+         color: "#666666", when: STATEMENT_DATE_RANGE, field: STATEMENT_DATE_RANGE, line_advance: 30}
       - {type: text, content: "{SUPPLIER_NAME}", role: body, color: gray,
          field: SUPPLIER_NAME, suppress_if_equals: logo_text}
       - {type: spacer, height: 10}
