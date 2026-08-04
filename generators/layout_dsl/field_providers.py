@@ -344,7 +344,7 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
 
 @field_provider(
     "receipt_pos",
-    params=frozenset({"pools_key"}),
+    params=frozenset(),
     emits=("POS_TIME", "POS_REGISTER", "POS_STAFF", "RECEIPT_NUMBER"),
 )
 def receipt_pos(entry: dict, params: dict) -> dict[str, str]:
@@ -361,9 +361,11 @@ def receipt_pos(entry: dict, params: dict) -> dict[str, str]:
     Args:
         entry: The ground-truth entry. Reads `entry["case_id"]` and
             `entry["fields"]["INVOICE_DATE"]`.
-        params: Unused beyond `pools_key` (self-documenting in the layout;
-            `pos_terminal` is the only pool this provider ever loads, exactly
-            as `derive_payment` always loads `payment_terminal`).
+        params: Unused. This provider accepts no params: it always loads the
+            `pos_terminal` pool, so a `pools_key` naming it would read as a
+            switch and be none -- and a layout key no code path reads is worse
+            than no key at all, since it tells an operator the document is
+            configured a way it is not.
 
     Returns:
         `{"POS_TIME": ..., "POS_REGISTER": ..., "POS_STAFF": ..., "RECEIPT_NUMBER": ...}`.
@@ -419,7 +421,7 @@ def _amount_or_not_found(value: Decimal | None) -> str:
 
 @field_provider(
     "receipt_payment",
-    params=frozenset({"pools_key"}),
+    params=frozenset(),
     emits=(
         "PAYMENT_KIND",
         "PAYMENT_METHOD",
@@ -465,8 +467,9 @@ def receipt_payment(entry: dict, params: dict) -> dict[str, str]:
         entry: The ground-truth entry. Reads `entry["case_id"]`,
             `entry["layout"]`, `entry["fields"]["INVOICE_DATE"]`, and
             `entry["fields"]["TOTAL_AMOUNT"]`.
-        params: Unused beyond `pools_key` (self-documenting in the layout;
-            `payment_terminal` is the only pool `derive_payment` ever loads).
+        params: Unused, for the same reason as `receipt_pos` above:
+            `derive_payment` always loads the `payment_terminal` pool, so
+            nothing here could branch on a `pools_key`.
 
     Returns:
         The sixteen `PAYMENT_*` fields listed in this provider's `emits`.

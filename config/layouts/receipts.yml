@@ -54,8 +54,8 @@ _receipt_defaults_values: &receipt_defaults_values
 # detail line (time/register/staff/receipt number), the EFTPOS terminal slip,
 # and the ex-GST subtotal. See generators/layout_dsl/field_providers.py.
 _receipt_field_providers: &receipt_field_providers
-  - {name: receipt_pos, params: {pools_key: pos_terminal}}
-  - {name: receipt_payment, params: {pools_key: payment_terminal}}
+  - {name: receipt_pos, params: {}}
+  - {name: receipt_payment, params: {}}
   - {name: computed_totals, params: {}}
 
 # All six layouts drew the identical eleven-section sequence in the legacy
