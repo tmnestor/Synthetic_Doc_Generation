@@ -20,8 +20,50 @@ from generators.common import (
 )
 from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
+from generators.layout_dsl.context import Region
+from generators.layout_dsl.engine import render_body
 
 _LAYOUT_PATH = "config/layouts/invoices.yml"
+
+
+def _render_via_dsl(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
+    """Render an invoice through the declarative layout DSL.
+
+    Invoices are fixed-page, so this is page setup and nothing else: no crop,
+    no vertical rescale (contrast generators/receipt.py).
+
+    Args:
+        entry: Ground truth YAML entry with 'fields' and 'layout'.
+        layout: Layout registry entry carrying a `body:` tree, 'page_dimensions',
+            'margin' and 'content_width'.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"}.
+
+    Returns:
+        PIL Image of the rendered invoice.
+    """
+    dims = layout["page_dimensions"]
+    width, height = int(dims["width"]), int(dims["height"])
+    image = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(image)
+    recorder = BoxRecorder(width, height) if geometry_out is not None else None
+
+    render_body(
+        layout,
+        entry,
+        layout_id=str(entry.get("layout", "")),
+        layout_path=_LAYOUT_PATH,
+        draw=draw,
+        region=Region(x=int(layout["margin"]), width=int(layout["content_width"])),
+        y=int(layout["margin"]),
+        recorder=recorder,
+    )
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = recorder.as_dict()
+    return image
 
 
 def _parse_line_items(fields: dict) -> list[dict]:
@@ -86,6 +128,9 @@ def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = Non
     Returns:
         PIL Image of the rendered invoice.
     """
+    if "body" in layout:
+        return _render_via_dsl(entry, layout, geometry_out=geometry_out)
+
     layout = _normalize_layout(layout)
     fields = entry["fields"]
     layout_id = entry.get("layout", "")
