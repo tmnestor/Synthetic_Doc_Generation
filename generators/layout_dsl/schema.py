@@ -66,9 +66,10 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "suppress_if_equals",
             "mono",
             "line_advance",
+            "budget",
         ),
     ),
-    "pair": (("label", "value"), ("role", "color", "field", "mono", "line_advance")),
+    "pair": (("label", "value"), ("role", "color", "field", "mono", "line_advance", "budget")),
     "block": (("lines",), ("role", "color", "heading", "mono", "line_advance")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),
@@ -808,6 +809,8 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
             _validate_column_budgets(
                 block, layout=layout, layout_path=layout_path, width=width, key_path=here
             )
+        elif kind in ("text", "pair"):
+            _validate_text_budget(block, layout=layout, layout_path=layout_path, width=width, key_path=here)
         elif kind == "panel":
             padding = int(block.get("padding", 0))
             inner = width - 2 * padding
@@ -856,6 +859,42 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
                     width=inner,
                     key_path=f"{here}.children[{column_index}]",
                 )
+
+
+def _validate_text_budget(
+    block: dict, *, layout: dict, layout_path: str, width: int, key_path: str
+) -> None:
+    """Check a `text`/`pair` block's fit budget, if any, exists and fits its region.
+
+    The simpler counterpart to `_validate_column_budgets`: a text/pair block
+    has no column anchors to reason about (it is not one of several columns
+    sharing a row), so the only geometry question is whether the declared
+    budget width fits inside the block's own region -- `width`, the same
+    value `_validate_geometry` already threads through panel/split narrowing
+    for every other check at this nesting level.
+    """
+    name = block.get("budget")
+    if name is None:
+        return
+    budgets = layout.get("field_budgets", {})
+    if name not in budgets:
+        raise _err(
+            f"budget '{name}' is not defined by this layout.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.budget",
+            expected=f"a key present in field_budgets: {sorted(budgets)}.",
+            recover=f"add '{name}: {{width, fit, min_font, max_lines}}' to field_budgets.",
+        )
+    declared = int(budgets[name]["width"])
+    if declared > width:
+        raise _err(
+            f"budget '{name}' declares width {declared}px but this block's region is only {width}px.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.budget",
+            expected=f"field_budgets.{name}.width <= {width}.",
+            recover=f"set field_budgets.{name}.width to {width} or less, or widen the region "
+            "this block draws into.",
+        )
 
 
 def _validate_column_budgets(
