@@ -200,7 +200,43 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
     return rows
 
 
-_SYNTHETIC_LABELS = {"opening_balance": "Opening Balance", "brought_forward": "Balance Brought Forward"}
+# The two mutually-exclusive leading synthetic rows, by their boolean param
+# name. Only the names live here: each row's printed label is a
+# `<key>_label` param the layout must supply, so no description text this
+# provider returns is decided by a Python literal.
+_LEADING_SYNTHETIC_KEYS = ("opening_balance", "brought_forward")
+
+
+def _require_param(params: dict, key: str, *, because: str) -> object:
+    """Read a params key the caller has made mandatory, or fail with a diagnostic.
+
+    Args:
+        params: The table block's resolved `params:` mapping.
+        key: The params key that must be present.
+        because: The condition that made it mandatory, phrased as a clause —
+            e.g. "carried_forward is set" — so the message says which other
+            key obliged this one.
+
+    Returns:
+        The value under `key`.
+
+    Raises:
+        ProviderError: If `key` is absent from `params`.
+    """
+    if key not in params:
+        msg = (
+            f"bank_transactions provider requires a '{key}' param when {because}.\n"
+            f"  What:     {because}, but the {key} param is missing from the table's params:\n"
+            f"  Where:    config/layouts/bank_statements.yml, the transactions "
+            f"table's params: key.\n"
+            f"  Expected: params: {{{key}: <the text or number to print>}}, e.g.\n"
+            f"            params: {{brought_forward: true, "
+            f'brought_forward_label: "Balance Brought Forward"}}\n'
+            f"  Recover:  add {key}: to that table's params: block, or drop the "
+            f"key that requires it."
+        )
+        raise ProviderError(msg) from None
+    return params[key]
 
 
 @row_provider(
@@ -214,7 +250,11 @@ _SYNTHETIC_LABELS = {"opening_balance": "Opening Balance", "brought_forward": "B
             "opening_balance_bold",
             "brought_forward_bold",
             "carried_forward",
+            "carried_forward_label",
             "references",
+            "reference_prefix",
+            "reference_pad_char",
+            "reference_pad_width",
             "balance_suffix",
         }
     ),
@@ -230,27 +270,34 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         entry: The ground-truth entry.
         params: Optional `opening_balance` or `brought_forward` booleans, which
             prepend a synthetic leading balance row (mutually exclusive with
-            each other). Each may be paired with `<key>_label` (e.g.
-            `brought_forward_label`) to override the row's default
-            description text — ANZ's leading row reads "BALANCE BROUGHT
-            FORWARD" (all caps), unlike NAB's "Balance Brought Forward"; both
-            share the same computed opening-balance value, only the label
-            differs, so it is an override rather than a third label key. Each
-            may also be paired with `<key>_bold` (e.g. `brought_forward_bold:
-            ["description"]`), a collection of row keys to render bold on
-            that one row — ANZ's leading row is the one legacy draws with
-            mixed weight (its label bold, its balance value not); absent, the
-            whole row stays regular, matching every other leading row. An
-            independent optional `carried_forward` boolean appends a trailing
-            synthetic closing-balance row — it may combine with either
-            leading option, matching NAB's legacy renderer, which shows both
-            a "Brought forward" row (under the first date-group header) and a
-            "Carried forward" row (after every transaction).
+            each other). Whichever is set **must** be paired with `<key>_label`
+            (e.g. `brought_forward_label`), the row's printed description
+            text — ANZ's leading row reads "BALANCE BROUGHT FORWARD" (all
+            caps) where NAB's reads "Balance Brought Forward", and neither
+            spelling is the provider's to choose: both rows share the same
+            computed opening-balance value and differ only in what they
+            print, so the text is the layout's. Each may also be paired with
+            `<key>_bold` (e.g. `brought_forward_bold: ["description"]`), a
+            collection of row keys to render bold on that one row — ANZ's
+            leading row is the one legacy draws with mixed weight (its label
+            bold, its balance value not); absent, the whole row stays
+            regular, matching every other leading row. An independent
+            optional `carried_forward` boolean appends a trailing synthetic
+            closing-balance row, and likewise requires `carried_forward_label`
+            for its printed text — it may combine with either leading option,
+            matching NAB's legacy renderer, which shows both a "Brought
+            forward" row (under the first date-group header) and a "Carried
+            forward" row (after every transaction).
             An independent optional `references` boolean adds a `reference`
             key to every real (non-synthetic) row — NAB's dotted-leader
             reference number, computed exactly as the legacy renderer does:
             sha256 of the description, taken mod 10**10, zero-padded to 10
-            digits, prefixed "Ref: " and suffixed with 40 dots.
+            digits — then prefixed with the required `reference_prefix` and
+            suffixed with `reference_pad_width` copies of `reference_pad_char`
+            (NAB: `"Ref: "`, 40, `"."`). All three are required whenever
+            `references` is set: the leader glyph and its run length are as
+            much a printed decision as the prefix, and none of the three is a
+            property of the hash this provider computes.
             An independent optional `balance_suffix` dict — `{debit: "DR",
             credit: "CR"}` — replaces every row's Decimal `balance` with an
             already-formatted string carrying the sign-dependent suffix ANZ's
@@ -274,7 +321,7 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         ProviderError: If both leading synthetic-row options are requested, or
             the transaction lists are ragged.
     """
-    wants = [key for key in _SYNTHETIC_LABELS if params.get(key)]
+    wants = [key for key in _LEADING_SYNTHETIC_KEYS if params.get(key)]
     if len(wants) > 1:
         msg = (
             "opening_balance and brought_forward are mutually exclusive; both were set.\n"
@@ -307,10 +354,14 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
                 row[key] = _to_decimal(row[key])
 
     if params.get("references"):
+        because = "references is set"
+        prefix = str(_require_param(params, "reference_prefix", because=because))
+        pad_char = str(_require_param(params, "reference_pad_char", because=because))
+        pad_width = int(_require_param(params, "reference_pad_width", because=because))  # type: ignore[call-overload]
         for row in rows:
             digest = hashlib.sha256(row["description"].encode()).hexdigest()
             ref_num = str(int(digest, 16) % 10**10).zfill(10)
-            row["reference"] = f"Ref: {ref_num}" + "." * 40
+            row["reference"] = f"{prefix}{ref_num}" + pad_char * pad_width
 
     # The closing balance is exactly the last real row's own balance -- the
     # reversed loop above seeds it straight from ACCOUNT_BALANCE before any
@@ -326,7 +377,7 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
             0,
             {
                 "date": "",
-                "description": params.get(f"{key}_label", _SYNTHETIC_LABELS[key]),
+                "description": str(_require_param(params, f"{key}_label", because=f"{key} is set")),
                 "debit": "NOT_FOUND",
                 "credit": "NOT_FOUND",
                 "balance": opening,
@@ -346,7 +397,9 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         rows.append(
             {
                 "date": "",
-                "description": "Carried forward",
+                "description": str(
+                    _require_param(params, "carried_forward_label", because="carried_forward is set")
+                ),
                 "debit": "NOT_FOUND",
                 "credit": "NOT_FOUND",
                 "balance": closing_balance,

@@ -209,7 +209,10 @@ _nab_classic_body: &nab_classic_body
     label_inset_y: 10
     group_gap: 0
     synthetic_row_placement: after_first_group_header
-    params: {brought_forward: true, carried_forward: true, references: true}
+    params: {brought_forward: true, brought_forward_label: "Balance Brought Forward",
+             carried_forward: true, carried_forward_label: "Carried forward",
+             references: true, reference_prefix: "Ref: ",
+             reference_pad_char: ".", reference_pad_width: 40}
     columns: *nab_txn_columns_with_reference
 
 _nab_dense_body: &nab_dense_body
@@ -238,7 +241,8 @@ _nab_dense_body: &nab_dense_body
     label_inset_y: 10
     group_gap: 0
     synthetic_row_placement: after_first_group_header
-    params: {brought_forward: true, carried_forward: true}
+    params: {brought_forward: true, brought_forward_label: "Balance Brought Forward",
+             carried_forward: true, carried_forward_label: "Carried forward"}
     columns: *nab_txn_columns
 
 # ANZ draws its logo on a full-width blue bar at the very page top (:849) —
@@ -265,7 +269,7 @@ _nab_dense_body: &nab_dense_body
 # explicitly rather than relying on the computed default (which is only
 # right for anz_standard's own body size by coincidence). The leading
 # `brought_forward` row uses `brought_forward_label` to reproduce legacy's
-# all-caps "BALANCE BROUGHT FORWARD" (NAB's default label is mixed-case), and
+# all-caps "BALANCE BROUGHT FORWARD" (NAB spells the same row mixed-case), and
 # `brought_forward_bold: [description]` because legacy draws that row with
 # mixed weight — the label bold, the balance value not — unlike NAB's
 # leading row (entirely regular) or its own trailing "Carried forward" row
@@ -412,7 +416,7 @@ layouts:
         rows: bank_transactions
         frame: ruled
         grouping: none
-        params: {opening_balance: true}
+        params: {opening_balance: true, opening_balance_label: "Opening Balance"}
         columns:
           - {key: date, label: Date, align: left, x: 0}
           - {key: description, label: Description, align: left, x: 200,
@@ -470,7 +474,7 @@ layouts:
         # its header (12px rule + 44px labels + 16px rule = 72px) regardless of
         # date_grouping. Override the computed default (line_advance.body=44) to match.
         header_height: 72
-        params: {opening_balance: true}
+        params: {opening_balance: true, opening_balance_label: "Opening Balance"}
         columns:
           - {key: date, label: Date, align: left, x: 0}
           - {key: description, label: Description, align: left, x: 200,
