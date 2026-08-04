@@ -9,6 +9,7 @@ from generators.common import (
     draw_fitted_center,
     draw_fitted_left,
     draw_fitted_right,
+    draw_separator,
     draw_separator_line,
     load_font,
 )
@@ -21,6 +22,12 @@ from generators.layout_dsl.defaults import DefaultsError, resolve_param
 # a `text` block's `align:` key, so a typo (e.g. "centre") fails at validate
 # time rather than silently left-aligning (the pre-typo-check default here).
 ALIGNMENTS = ("left", "center", "right")
+
+# Public: schema.py imports this to validate a `pair` block's `value_align:`
+# key. A pair has no "center" concept -- its value either trails the label
+# inline (left) or is pinned to the region's right edge (right) -- so this is
+# deliberately narrower than ALIGNMENTS above, not a re-export of it.
+PAIR_VALUE_ALIGNS = ("left", "right")
 
 
 class RoleError(RuntimeError):
@@ -355,18 +362,36 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
 
 
 def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
-    """Draw a label and value on one line, separated by a colon and gap.
+    """Draw a label and value on one line.
+
+    `pair_value_align` (block key `value_align`) chooses between two drawing
+    styles:
+
+    - `left` (the default, and the only style bank statements use): label
+      and value draw as one `"{label}: {value}"` string, left-aligned at
+      `ctx.region.x`.
+    - `right`: mirrors the legacy `draw_line_item` -- the label draws
+      verbatim (no colon or space is added) at `ctx.region.x`, and the value
+      right-aligns to `ctx.region.right`, so the two never share one string.
+      `pair_min_gap` (block key `min_gap`) then reproduces `invoice.py:283-
+      285`: when the label is long enough to otherwise collide with the
+      value, it is pushed left just far enough to keep `min_gap` px clear
+      between them, rather than merging into one OCR token.
 
     `budget: <FIELD_BUDGET_NAME>` fits the *value* only -- the label always
     draws in full, unshrunk and unwrapped, exactly as it does today. This
     forks the drawing itself, not just the recording: the unbudgeted path
-    below draws `"{label}: {value}"` as a single string in one `draw.text`
-    call (so the two stay pixel-identical to before when no budget is
-    given), while the budgeted path draws the label first and then fits the
-    value into the space after it via `_draw_fitted_text`, since a fit
-    budget must know the value's own text to shrink or wrap it -- it cannot
-    operate on a combined "label: value" string without also constraining
-    the label.
+    below draws the label and value as described above (so both stay
+    pixel-identical to before when no budget is given), while the budgeted
+    path draws the label first and then fits the value into the remaining
+    space via `_draw_fitted_text`, since a fit budget must know the value's
+    own text to shrink or wrap it -- it cannot operate on a combined
+    "label: value" string without also constraining the label. The budgeted
+    path honours `value_align` too (an unshrunk label plus a right-aligned,
+    budget-fitted value), but does not apply `min_gap` -- a budget already
+    exists precisely to keep the value's own extent bounded, and `min_gap`'s
+    render-time label repositioning has no defined interaction with a value
+    that may still wrap across multiple lines.
 
     Args:
         block: The `pair` block.
@@ -391,6 +416,16 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     )
     font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     field = block.get("field")
+    value_align = str(
+        resolve_param(
+            block,
+            ctx.layout,
+            "pair_value_align",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="value_align",
+        )
+    )
 
     budget_name = block.get("budget")
     if budget_name is not None:
@@ -405,10 +440,40 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
             text=value,
             size=size,
             bold=False,
-            align="left",
+            align=value_align,
             color=color,
             budget_name=budget_name,
         )
+
+    if value_align == "right":
+        min_gap = int(
+            resolve_param(
+                block,
+                ctx.layout,
+                "pair_min_gap",
+                layout_id=ctx.layout_id,
+                layout_path=ctx.layout_path,
+                block_key="min_gap",
+            )
+        )
+        label_bbox = font.getbbox(label)
+        label_width = int(label_bbox[2] - label_bbox[0])
+        value_bbox = font.getbbox(value)
+        value_width = int(value_bbox[2] - value_bbox[0])
+        value_height = int(value_bbox[3] - value_bbox[1])
+        # Mirrors invoice.py:283-285: the label sits at the region's left
+        # edge, unless the value (right-aligned to the region's right edge)
+        # would otherwise leave less than min_gap px clear between the two,
+        # in which case the label is pushed left just far enough to restore it.
+        label_x = min(ctx.region.x, ctx.region.right - value_width - label_width - min_gap)
+        value_x = ctx.region.right - value_width
+        ctx.draw.text((label_x, y), label, font=font, fill=color)
+        ctx.draw.text((value_x, y), value, font=font, fill=color)
+        end = y + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+        if ctx.recorder is not None and field is not None:
+            # Record the value's own extent, not the label's.
+            ctx.recorder.record(field, (value_x, y, value_x + value_width, y + value_height))
+        return end
 
     text = f"{label}: {value}"
     left, _ = _draw_line(ctx, text, y, font=font, align="left", color=color)
@@ -470,6 +535,18 @@ def draw_block(block: dict, ctx: RenderContext, y: int) -> int:
 def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a horizontal separator across the region.
 
+    `rule_fill_char` (block key `fill_char`) chooses between two separator
+    styles:
+
+    - `none` (the default, and the only style bank statements use): a thin
+      drawn line, `rule_thickness` px tall, via `draw_separator_line`.
+    - any other string: a row of that glyph repeated to fill the region's
+      width, via `common.draw_separator` -- reused rather than
+      reimplementing its glyph-count arithmetic (`common.py:548-553`). This
+      is visually a row of *characters*, not a drawn line, so it occupies a
+      full text line: the cursor advances by `line_advance`, not by
+      `thickness` (which this style ignores entirely).
+
     Args:
         block: The `rule` block.
         ctx: Render context.
@@ -488,6 +565,54 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
             block_key="pad_above",
         )
     )
+    color = str(
+        resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    )
+    pad_below = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "rule_pad_below",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="pad_below",
+        )
+    )
+    fill_char = str(
+        resolve_param(
+            block,
+            ctx.layout,
+            "rule_fill_char",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="fill_char",
+        )
+    )
+
+    if fill_char != "none":
+        role = str(
+            resolve_param(block, ctx.layout, "role", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+        )
+        size = resolve_role(ctx.layout, role)
+        font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+        # `ctx.region.x * 2 + ctx.region.width` reconstructs the symmetric-margin
+        # page width draw_separator expects (margin=region.x on both sides) --
+        # the same reconstruction _draw_fitted_text's center alignment uses.
+        draw_separator(
+            ctx.draw,
+            y,
+            ctx.region.x * 2 + ctx.region.width,
+            ctx.region.x,
+            font,
+            fill=color,
+            char=fill_char,
+        )
+        return (
+            y
+            + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+            + pad_below
+        )
+
     thickness = int(
         resolve_param(
             block,
@@ -498,21 +623,8 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
             block_key="thickness",
         )
     )
-    color = str(
-        resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
-    )
     draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color=color, width=thickness)
-    y += thickness + int(
-        resolve_param(
-            block,
-            ctx.layout,
-            "rule_pad_below",
-            layout_id=ctx.layout_id,
-            layout_path=ctx.layout_path,
-            block_key="pad_below",
-        )
-    )
-    return y
+    return y + thickness + pad_below
 
 
 def draw_spacer(block: dict, ctx: RenderContext, y: int) -> int:

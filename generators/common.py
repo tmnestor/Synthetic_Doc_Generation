@@ -544,12 +544,13 @@ def draw_separator(
     margin: int,
     font: Font,
     fill: str = "black",
+    char: str = "-",
 ) -> None:
-    """Draw a dashed separator line."""
-    dash_bbox = font.getbbox("-")
+    """Draw a separator line made of a repeated glyph (a dash, by default)."""
+    dash_bbox = font.getbbox(char)
     dash_width = int(dash_bbox[2] - dash_bbox[0])
     count = (width - 2 * margin) // dash_width
-    dash = "-" * count
+    dash = char * count
     draw.text((margin, y), dash, font=font, fill=fill)
 
 
