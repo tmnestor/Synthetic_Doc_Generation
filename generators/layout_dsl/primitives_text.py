@@ -4,9 +4,17 @@ Each takes (block, ctx, y) and returns the advanced y-cursor, matching the
 convention the existing renderers already use.
 """
 
-from generators.common import Font, draw_separator_line, load_font
+from generators.common import (
+    Font,
+    draw_fitted_center,
+    draw_fitted_left,
+    draw_fitted_right,
+    draw_separator_line,
+    load_font,
+)
+from generators.layout_budgets import field_budget
 from generators.layout_dsl.binding import interpolate
-from generators.layout_dsl.context import RenderContext
+from generators.layout_dsl.context import Region, RenderContext
 from generators.layout_dsl.defaults import DefaultsError, resolve_param
 
 # Public: schema.py imports this as the single source of truth for validating
@@ -150,8 +158,112 @@ def _draw_line(
     return x, x + text_width
 
 
+def _draw_fitted_text(
+    block: dict,
+    ctx: RenderContext,
+    y: int,
+    *,
+    text: str,
+    size: int,
+    bold: bool,
+    align: str,
+    color: str,
+    budget_name: str,
+) -> int:
+    """Draw `text` through its declared fit budget, dispatching on alignment.
+
+    Shared by `draw_text_block` and `draw_pair` (for the value only -- see
+    there). The `draw_fitted_*` helpers in `generators.common` already return
+    the y *below* whatever they wrapped to, so that return value is the
+    advance here, not a fresh `line_advance()` computation -- a wrapped
+    budget consumes more vertical space than one line, and the whole point of
+    a budget is that the caller does not have to know in advance how much.
+
+    `draw_fitted_center` centres within a canvas width, not a region: a
+    receipt centres its header within the full page width (see
+    `receipt.py`'s legacy `draw_fitted_center(draw, text, y, width, ...)`
+    call, where `width` is the page width, not a margin-inset region).
+    `ctx.region.x * 2 + ctx.region.width` reconstructs that page width from a
+    symmetric margin -- region.x is the margin, and region.width is the page
+    width minus twice that same margin, so doubling region.x and adding it
+    back gives the page width without the region ever needing to know it.
+
+    Args:
+        block: The block requesting the budget; its own `mono`, if present,
+            wins over the layout default (the same resolution `font_for`
+            uses, preserved here since these helpers build their own font
+            internally rather than accepting a pre-built one).
+        ctx: Render context.
+        y: Current y-cursor.
+        text: The already-interpolated string to fit and draw.
+        size: The resolved role's nominal font size.
+        bold: Whether to draw bold.
+        align: "left", "center", or "right".
+        color: Fill colour.
+        budget_name: The `field_budgets` key to resolve.
+
+    Returns:
+        The y below the fitted (possibly wrapped) text.
+
+    Raises:
+        LayoutBudgetError: If `budget_name` is not a valid budget in this
+            layout's `field_budgets`.
+    """
+    budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
+    mono = bool(
+        resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    )
+    spacing = line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    field = block.get("field")
+    if align == "right":
+        return draw_fitted_right(
+            ctx.draw,
+            text,
+            ctx.region.right,
+            y,
+            budget=budget,
+            nominal_size=size,
+            mono=mono,
+            bold=bold,
+            fill=color,
+            line_spacing=spacing,
+            recorder=ctx.recorder,
+            field=field,
+        )
+    if align == "center":
+        canvas_width = ctx.region.x * 2 + ctx.region.width
+        return draw_fitted_center(
+            ctx.draw,
+            text,
+            y,
+            canvas_width,
+            budget=budget,
+            nominal_size=size,
+            mono=mono,
+            bold=bold,
+            fill=color,
+            line_spacing=spacing,
+            recorder=ctx.recorder,
+            field=field,
+        )
+    return draw_fitted_left(
+        ctx.draw,
+        text,
+        ctx.region.x,
+        y,
+        budget=budget,
+        nominal_size=size,
+        mono=mono,
+        bold=bold,
+        fill=color,
+        line_spacing=spacing,
+        recorder=ctx.recorder,
+        field=field,
+    )
+
+
 def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
-    """Draw a single line of text.
+    """Draw a single line of text, or a fitted (possibly wrapped) block.
 
     `content` and `from_layout` are mutually exclusive alternatives for
     *what* to draw (enforced at validate time, in schema.py's
@@ -170,6 +282,12 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
       entirely when the resolved text is empty or equals that layout key's
       value — the content supplier line is redundant whenever it already
       matches the letterhead already on the page.
+
+    `budget: <FIELD_BUDGET_NAME>` opts the block into a fit budget (see
+    `_draw_fitted_text`) instead of the plain, always-one-line path below --
+    the field may shrink, wrap onto up to `max_lines`, or both, per its
+    `field_budgets` entry. A block without `budget:` renders exactly as
+    before; this is an additive, opt-in engine capability.
 
     Args:
         block: The `text` block.
@@ -201,6 +319,21 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
+
+    budget_name = block.get("budget")
+    if budget_name is not None:
+        return _draw_fitted_text(
+            block,
+            ctx,
+            y,
+            text=text,
+            size=size,
+            bold=bold,
+            align=align,
+            color=color,
+            budget_name=budget_name,
+        )
+
     font = font_for(
         ctx.layout, block, size, bold=bold, layout_id=ctx.layout_id, layout_path=ctx.layout_path
     )
@@ -224,6 +357,17 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
 def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a label and value on one line, separated by a colon and gap.
 
+    `budget: <FIELD_BUDGET_NAME>` fits the *value* only -- the label always
+    draws in full, unshrunk and unwrapped, exactly as it does today. This
+    forks the drawing itself, not just the recording: the unbudgeted path
+    below draws `"{label}: {value}"` as a single string in one `draw.text`
+    call (so the two stay pixel-identical to before when no budget is
+    given), while the budgeted path draws the label first and then fits the
+    value into the space after it via `_draw_fitted_text`, since a fit
+    budget must know the value's own text to shrink or wrap it -- it cannot
+    operate on a combined "label: value" string without also constraining
+    the label.
+
     Args:
         block: The `pair` block.
         ctx: Render context.
@@ -231,6 +375,10 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
 
     Returns:
         The advanced y-cursor.
+
+    Raises:
+        LayoutBudgetError: If `budget` is present but not a valid budget in
+            this layout's `field_budgets`.
     """
     role = str(
         resolve_param(block, ctx.layout, "role", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
@@ -238,14 +386,33 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     size = resolve_role(ctx.layout, role)
     label = interpolate(block["label"], ctx.entry["fields"])
     value = interpolate(block["value"], ctx.entry["fields"])
-    text = f"{label}: {value}"
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
     font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    field = block.get("field")
+
+    budget_name = block.get("budget")
+    if budget_name is not None:
+        prefix = f"{label}: "
+        ctx.draw.text((ctx.region.x, y), prefix, font=font, fill=color)
+        label_width = int(ctx.draw.textlength(prefix, font=font))
+        value_ctx = ctx.within(Region(x=ctx.region.x + label_width, width=ctx.region.width - label_width))
+        return _draw_fitted_text(
+            block,
+            value_ctx,
+            y,
+            text=value,
+            size=size,
+            bold=False,
+            align="left",
+            color=color,
+            budget_name=budget_name,
+        )
+
+    text = f"{label}: {value}"
     left, _ = _draw_line(ctx, text, y, font=font, align="left", color=color)
     end = y + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
-    field = block.get("field")
     if ctx.recorder is not None and field is not None:
         # Record the value's own extent, not the label's.
         label_width = int(ctx.draw.textlength(f"{label}: ", font=font))
