@@ -450,12 +450,19 @@ def receipt_line_items(entry: dict, params: dict) -> list[dict]:
         row["quantity_prefix"] = prefix
         for key in ("price", "total"):
             if key in row and row[key] not in ("", "NOT_FOUND"):
-                row[key] = _to_decimal(row[key])
+                row[key] = _to_decimal(
+                    row[key], what="a receipt line item", source="ground_truth/receipts.yml"
+                )
 
     return rows
 
 
-def _to_decimal(value: str) -> Decimal:
+def _to_decimal(
+    value: str,
+    *,
+    what: str = "a bank transaction",
+    source: str = "ground_truth/bank_statements.yml",
+) -> Decimal:
     """Parse an amount, treating only the absent-value sentinels as zero.
 
     A malformed amount is a ground-truth defect and must fail loudly: coercing
@@ -464,6 +471,11 @@ def _to_decimal(value: str) -> Decimal:
 
     Args:
         value: An amount string from ground truth.
+        what: Where in the document the amount came from, for the diagnostic --
+            the two providers using this read different fields of different
+            document types, and a receipt author must not be pointed at
+            bank_statements.yml.
+        source: The ground-truth file to fix it in, for the diagnostic.
 
     Returns:
         The parsed Decimal, or Decimal("0") for the absent-value sentinels.
@@ -477,8 +489,10 @@ def _to_decimal(value: str) -> Decimal:
         return Decimal(value)
     except (ArithmeticError, TypeError) as err:
         msg = (
-            f"Malformed amount {value!r} in a bank transaction.\n"
-            f"  Remediation: fix the amount in ground_truth/bank_statements.yml; "
-            f"amounts are decimal strings without a currency sign, e.g. '137.73'."
+            f"Malformed amount in {what}.\n"
+            f"  What:     {value!r} is not a decimal amount.\n"
+            f"  Where:    {source}, the affected entry's amount fields.\n"
+            f"  Expected: a decimal string without a currency sign, e.g. '137.73'.\n"
+            f"  Recover:  fix the amount in {source}."
         )
         raise ProviderError(msg) from err
