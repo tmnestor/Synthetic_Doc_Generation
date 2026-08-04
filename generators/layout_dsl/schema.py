@@ -624,10 +624,21 @@ def _validate_field_providers(layout: dict, *, layout_id: str, layout_path: str)
         this exists to perform.
 
     Raises:
-        LayoutSchemaError: If an entry names an unregistered provider, or an
-            entry's `params` key is not among that provider's declared params.
+        LayoutSchemaError: If an entry names an unregistered provider, an
+            entry's `params` key is not among that provider's declared
+            params, or two providers on this layout declare an overlapping
+            `emits` name.
     """
     emits: list[str] = []
+    # Maps an emitted name to the provider that declared it, so a second
+    # provider on this same layout declaring the same name is caught here --
+    # statically, from the emits= declarations alone, no provider call
+    # needed. This is the primary defence against two providers silently
+    # overwriting one another's value; apply_field_providers in
+    # field_providers.py keeps a second, defensive check at merge time for
+    # callers that build a layout dict by hand and never go through
+    # validate_layout.
+    emitted_by: dict[str, str] = {}
     for index, spec in enumerate(layout["field_providers"]):
         here = f"{layout_id}.field_providers[{index}]"
         name = spec.get("name") if isinstance(spec, dict) else None
@@ -662,7 +673,24 @@ def _validate_field_providers(layout: dict, *, layout_id: str, layout_path: str)
                 "params=frozenset({...}) in generators/layout_dsl/field_providers.py.",
             )
 
-        emits.extend(field_provider_emits(name))
+        provider_emits = field_provider_emits(name)
+        collisions = sorted(set(provider_emits) & set(emitted_by))
+        if collisions:
+            detail = ", ".join(f"'{key}' (already emitted by '{emitted_by[key]}')" for key in collisions)
+            raise _err(
+                f"field provider '{name}' emits key(s) that collide with another provider on "
+                f"this layout: {detail}.",
+                layout_path=layout_path,
+                key_path=f"{here}.name",
+                expected="every field_providers: entry on one layout to emit keys disjoint "
+                "from every other provider on that same layout.",
+                recover=f"rename the colliding key(s) in one provider's emits=, or remove one "
+                f"of '{name}' / {sorted({emitted_by[k] for k in collisions})} from "
+                f"{layout_id}.field_providers.",
+            )
+        emitted_by.update(dict.fromkeys(provider_emits, str(name)))
+
+        emits.extend(provider_emits)
 
     return emits
 

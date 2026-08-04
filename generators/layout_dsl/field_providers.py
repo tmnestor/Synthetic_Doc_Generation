@@ -227,10 +227,18 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
 
     Raises:
         FieldProviderError: If a `field_providers:` entry names an unknown
-            provider, or a provider returns a key it did not declare in its
-            own `emits`.
+            provider, a provider returns a key it did not declare in its own
+            `emits`, or two providers on this layout emit the same key.
     """
     derived: dict[str, str] = {}
+    # Tracks which provider already emitted each key, so a second provider
+    # colliding on it is caught here even when validate_layout's static
+    # (emits-declaration-only) check in schema.py was skipped or bypassed --
+    # e.g. a caller that builds a layout dict by hand and calls this function
+    # directly, as several tests in this module do. A silent dict.update()
+    # overwrite here would make one provider's value vanish from the page
+    # with no error, which is worse than either provider failing loudly.
+    emitted_by: dict[str, str] = {}
     for spec in layout["field_providers"]:
         name = spec["name"]
         provider = get_field_provider(name)
@@ -251,6 +259,23 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
             )
             raise FieldProviderError(msg)
 
+        collisions = sorted(set(result) & set(emitted_by))
+        if collisions:
+            detail = ", ".join(f"'{key}' (already emitted by '{emitted_by[key]}')" for key in collisions)
+            msg = (
+                "Two field providers on one layout emit the same key.\n"
+                f"  What:     field provider '{name}' also emits {detail}.\n"
+                "  Where:    this layout's 'field_providers:' list.\n"
+                "  Expected: every provider a layout declares to emit keys disjoint from "
+                "every other provider on that same layout -- a silent overwrite here would "
+                "make one provider's value vanish from the page with no error.\n"
+                f"  Recover:  rename the colliding key(s) in one provider's emits=, or remove "
+                f"one of '{name}' / {sorted({emitted_by[k] for k in collisions})} from this "
+                "layout's field_providers:."
+            )
+            raise FieldProviderError(msg)
+
         derived.update(result)
+        emitted_by.update(dict.fromkeys(result, name))
 
     return {**entry, "fields": {**entry["fields"], **derived}}
