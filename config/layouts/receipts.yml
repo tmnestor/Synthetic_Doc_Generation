@@ -241,9 +241,16 @@ layouts:
     format: thermal
     width: 420
     margin: 12
-    line_height: 20
-    font_size: 16
-    font_family: monospace
+    content_width: 396
+    canvas_ceiling: 4000
+    row_height: 20
+    footer_text: "Drive safely"
+    font_sizes: {body: 16}
+    defaults:
+      <<: *receipt_defaults_values
+      line_advance: {body: 20}
+      spacer_height: 5              # legacy: line_h // 4
+    field_providers: *receipt_field_providers
     field_budgets:
       SUPPLIER_NAME: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 396, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
@@ -253,21 +260,7 @@ layouts:
       LINE_ITEM_AMOUNT: {width: 64, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
       PAYMENT_LINE: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
-    sections:
-      - type: header
-        name: fuel_station_header
-      - type: separator
-      - type: receipt_meta
-      - type: separator
-      - type: itemized
-        name: line_items
-      - type: separator
-      - type: totals
-      - type: separator
-      - type: payment
-      - type: separator
-      - type: footer
-        text: "Drive safely"
+    body: *receipt_body
 
   receipt_professional:
     format: thermal
