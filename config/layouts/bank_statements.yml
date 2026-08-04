@@ -2,6 +2,43 @@ _bank_base: &bank_base
   page_dimensions: {width: 1800, height: 3508}
   content_width: 1600
 
+# Every primitive parameter a bank layout must supply a default for (Task 3's
+# conversion from Python literals in generators/layout_dsl/primitives_*.py to
+# `resolve_param`). Shared across all 8 bank layouts via this one anchor +
+# merge key, so `validate_layout`'s coverage check (schema.py) still sees
+# every key explicitly on each layout once PyYAML expands `<<:` -- "every
+# config key is required" stays literally true per layout. Values below are
+# today's Python literals, transcribed verbatim: this task must not move a
+# single bank pixel.
+_dsl_defaults_values: &dsl_defaults_values
+  role: body
+  color: "black"
+  align: left
+  bold: false
+  rule_thickness: 1
+  rule_pad_above: 0
+  rule_pad_below: 0
+  rule_fill_char: none
+  spacer_height: 0
+  pair_value_align: left
+  pair_min_gap: 0
+  table_header: true
+  table_header_rule_top: true
+  table_header_rule_gap: 16
+  table_group_gap: 10
+  table_fill_inset: 0
+  table_dividers: []
+  table_offset_y: 0
+  table_capture: true
+  table_sub_line_height: 0
+  banner_text_color: "white"
+  banner_text_y: 0
+  banner_role: header
+  panel_padding: 0
+  panel_border_color: "black"
+  split_gap: 0
+  split_divider_color: "black"
+
 _cba: &cba
   <<: *bank_base
   bank: Commonwealth Bank of Australia
@@ -320,6 +357,10 @@ layouts:
       body: 32
       footer: 18
     row_height: 72
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 44  # int(32 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -372,6 +413,10 @@ layouts:
       body: 32
       footer: 18
     row_height: 72
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 44  # int(32 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -422,6 +467,10 @@ layouts:
     <<: *westpac
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 39  # int(28 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -456,6 +505,10 @@ layouts:
     <<: *westpac
     font_sizes: {header: 44, body: 28, sub_description: 22, footer: 16}
     row_height: 62
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 39  # int(28 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -527,6 +580,10 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 66
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 39  # int(28 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -550,6 +607,10 @@ layouts:
     margin: 80
     content_width: 1600
     row_height: 52
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 33  # int(24 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -573,6 +634,10 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 72
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 44  # int(32 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
@@ -596,6 +661,10 @@ layouts:
     margin: 100
     content_width: 1600
     row_height: 62
+    defaults:
+      <<: *dsl_defaults_values
+      mono: false
+      line_advance: 39  # int(28 * 1.4), the ratio line_height() hardcodes.
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.

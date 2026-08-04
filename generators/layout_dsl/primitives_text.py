@@ -4,14 +4,51 @@ Each takes (block, ctx, y) and returns the advanced y-cursor, matching the
 convention the existing renderers already use.
 """
 
+from typing import Any
+
 from generators.common import draw_separator_line, load_font
 from generators.layout_dsl.binding import interpolate
 from generators.layout_dsl.context import RenderContext
+from generators.layout_dsl.defaults import resolve_param
 
 # Public: schema.py imports this as the single source of truth for validating
 # a `text` block's `align:` key, so a typo (e.g. "centre") fails at validate
 # time rather than silently left-aligning (the pre-typo-check default here).
 ALIGNMENTS = ("left", "center", "right")
+
+
+def _resolve(block: dict, ctx: RenderContext, param: str, *, block_key: str | None = None) -> Any:
+    """Resolve one parameter honouring a block's own key before the layout default.
+
+    `resolve_param`'s single `key` argument does double duty as both the
+    block's own key and the layout `defaults:` key. Where those differ --
+    `PARAMETER_DEFAULTS` namespaces a key a primitive shares with another
+    (e.g. banner's `role:` maps to the `banner_role` default, since a bare
+    `role` default could not simultaneously be "body" for text/pair/block
+    and "header" for banner) -- this shims the block's own value under the
+    namespaced name first, so a per-block override still wins exactly as it
+    did before this parameter had a layout-level default to fall back to.
+
+    Typed `Any`, not `object` (`resolve_param`'s own return type): a block's
+    values were untyped `dict` values before this resolution existed, and
+    callers already cast the ones that need it (`int(...)`, `bool(...)`)
+    exactly as they did against the bare `.get()` call this replaces.
+
+    Args:
+        block: The block dict, whose own `block_key` wins if present.
+        ctx: Render context supplying the layout and its diagnostics.
+        param: The `PARAMETER_DEFAULTS` name, used against the layout's
+            `defaults:` mapping.
+        block_key: The block's own literal YAML key for this value, if it
+            differs from `param`. Defaults to `param` itself.
+
+    Returns:
+        The block's value if it carries `block_key`, otherwise the layout
+        default for `param`.
+    """
+    block_key = param if block_key is None else block_key
+    shimmed = {param: block[block_key]} if block_key in block else block
+    return resolve_param(shimmed, ctx.layout, param, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
 
 
 class RoleError(RuntimeError):
@@ -96,7 +133,7 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor (unchanged if the block was suppressed).
     """
-    size = resolve_role(ctx.layout, block.get("role", "body"))
+    size = resolve_role(ctx.layout, _resolve(block, ctx, "role"))
     if "from_layout" in block:
         text = str(ctx.layout[block["from_layout"]])
     else:
@@ -106,14 +143,14 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     if suppress_key is not None and (not text or text == str(ctx.layout.get(suppress_key))):
         return y
 
-    bold = bool(block.get("bold", False))
+    bold = bool(_resolve(block, ctx, "bold"))
     left, right = _draw_line(
         ctx,
         text,
         y,
         size=size,
-        align=block.get("align", "left"),
-        color=block.get("color", "black"),
+        align=_resolve(block, ctx, "align"),
+        color=_resolve(block, ctx, "color"),
         bold=bold,
     )
     end = y + line_height(size)  # Flow advance: unrelated to the recorded box below.
@@ -141,11 +178,11 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    size = resolve_role(ctx.layout, block.get("role", "body"))
+    size = resolve_role(ctx.layout, _resolve(block, ctx, "role"))
     label = interpolate(block["label"], ctx.entry["fields"])
     value = interpolate(block["value"], ctx.entry["fields"])
     text = f"{label}: {value}"
-    left, _ = _draw_line(ctx, text, y, size=size, align="left", color=block.get("color", "black"))
+    left, _ = _draw_line(ctx, text, y, size=size, align="left", color=_resolve(block, ctx, "color"))
     end = y + line_height(size)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
@@ -172,8 +209,8 @@ def draw_block(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    size = resolve_role(ctx.layout, block.get("role", "body"))
-    color = block.get("color", "black")
+    size = resolve_role(ctx.layout, _resolve(block, ctx, "role"))
+    color = _resolve(block, ctx, "color")
     heading = block.get("heading")
     if heading is not None:
         _draw_line(
@@ -203,12 +240,12 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    y += int(block.get("pad_above", 0))
-    thickness = int(block.get("thickness", 1))
+    y += int(_resolve(block, ctx, "rule_pad_above", block_key="pad_above"))
+    thickness = int(_resolve(block, ctx, "rule_thickness", block_key="thickness"))
     draw_separator_line(
-        ctx.draw, ctx.region.x, ctx.region.right, y, color=block.get("color", "black"), width=thickness
+        ctx.draw, ctx.region.x, ctx.region.right, y, color=_resolve(block, ctx, "color"), width=thickness
     )
-    y += thickness + int(block.get("pad_below", 0))
+    y += thickness + int(_resolve(block, ctx, "rule_pad_below", block_key="pad_below"))
     return y
 
 
@@ -223,7 +260,7 @@ def draw_spacer(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    return y + int(block.get("height", 0))
+    return y + int(_resolve(block, ctx, "spacer_height", block_key="height"))
 
 
 def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
@@ -257,13 +294,16 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
     height = int(block["height"])
     ctx.draw.rectangle([(0, 0), (width, height)], fill=block["color"])
 
-    size = resolve_role(ctx.layout, block.get("role", "header"))
-    font = load_font(size, bold=bool(block.get("bold", False)))
+    size = resolve_role(ctx.layout, _resolve(block, ctx, "banner_role", block_key="role"))
+    font = load_font(size, bold=bool(_resolve(block, ctx, "bold")))
     if "from_layout" in block:
         text = str(ctx.layout[block["from_layout"]])
     else:
         text = interpolate(block["content"], ctx.entry["fields"])
     ctx.draw.text(
-        (ctx.region.x, int(block.get("text_y", 0))), text, font=font, fill=block.get("text_color", "white")
+        (ctx.region.x, int(_resolve(block, ctx, "banner_text_y", block_key="text_y"))),
+        text,
+        font=font,
+        fill=_resolve(block, ctx, "banner_text_color", block_key="text_color"),
     )
     return y
