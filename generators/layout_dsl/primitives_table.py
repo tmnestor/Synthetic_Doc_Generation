@@ -298,7 +298,9 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             the invoice tables, drawn one role larger than their own page's
             name lines, cannot express), `header_bold` (the column headings'
             weight, `table_header_bold`), `row_inset_y` (the cells' ink inset
-            inside the row band, `table_row_inset_y` — see `_draw_row`) and
+            inside the row band, `table_row_inset_y` — see `_draw_row`; it
+            moves cells only, not the dedicated date sub-header row `grouping:
+            dedicated_row` draws below, which no layout combines it with) and
             `cell_line_spacing` (a budgeted cell's per-line advance,
             `table_cell_line_spacing` — see `CELL_LINE_SPACINGS`).
         ctx: Render context.
