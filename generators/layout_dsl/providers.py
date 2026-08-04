@@ -383,6 +383,50 @@ def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
     ]
 
 
+@row_provider("receipt_line_items", params=frozenset({"fields", "quantity_prefix_format"}))
+def receipt_line_items(entry: dict, params: dict) -> list[dict]:
+    """Build receipt line-item rows with quantity-prefixed descriptions.
+
+    Zips pipe-delimited list fields into row dicts, then prefixes each
+    description with its quantity when the quantity is not 1. Matches the
+    legacy receipt renderer's behaviour at lines 265-268.
+
+    Args:
+        entry: The ground-truth entry.
+        params: Must carry `fields`, a mapping of row key to source field name,
+            and `quantity_prefix_format`, a format string (e.g. "{quantity}x ")
+            to apply when the quantity is above 1.
+
+    Returns:
+        One dict per row, keyed by the `fields` mapping's keys, with the
+        description prefixed when quantity != "1".
+
+    Raises:
+        ProviderError: If `fields` or `quantity_prefix_format` is missing.
+    """
+    if "quantity_prefix_format" not in params:
+        msg = (
+            "receipt_line_items provider requires a 'quantity_prefix_format' param.\n"
+            "  What:     the quantity_prefix_format param is missing from the table's params:\n"
+            "  Where:    config/layouts/receipts.yml (or the active layout), the line-items "
+            "table's params: key.\n"
+            '  Expected: params: {quantity_prefix_format: "{quantity}x "}\n'
+            '  Recover:  add quantity_prefix_format: "{quantity}x " to the line-items table\'s '
+            "params: block."
+        )
+        raise ProviderError(msg) from None
+
+    rows = pipe_fields(entry, {"fields": params["fields"]})
+
+    for row in rows:
+        qty = row.get("quantity", "")
+        if qty and qty != "1":
+            prefix = params["quantity_prefix_format"].format(quantity=qty)
+            row["description"] = f"{prefix}{row['description']}"
+
+    return rows
+
+
 def _to_decimal(value: str) -> Decimal:
     """Parse an amount, treating only the absent-value sentinels as zero.
 
