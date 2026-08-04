@@ -9,6 +9,7 @@ returns row dicts. Providers return data only — they never draw or position.
 import hashlib
 from collections.abc import Callable
 from decimal import Decimal
+from typing import Any
 
 from generators.common import fmt_amount
 
@@ -207,7 +208,7 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
 _LEADING_SYNTHETIC_KEYS = ("opening_balance", "brought_forward")
 
 
-def _require_param(params: dict, key: str, *, because: str) -> object:
+def _require_param(params: dict, key: str, *, because: str) -> Any:
     """Read a params key the caller has made mandatory, or fail with a diagnostic.
 
     Args:
@@ -218,7 +219,11 @@ def _require_param(params: dict, key: str, *, because: str) -> object:
             key obliged this one.
 
     Returns:
-        The value under `key`.
+        The value under `key`. Typed `Any` for the same reason
+        `defaults.resolve_param` is: these are heterogeneous YAML values (a
+        label is a str, a pad width an int) that each caller immediately casts
+        to the type it needs, and `object` would only force an extra
+        intermediate local at every call site without buying any safety.
 
     Raises:
         ProviderError: If `key` is absent from `params`.
@@ -357,7 +362,7 @@ def bank_transactions(entry: dict, params: dict) -> list[dict]:
         because = "references is set"
         prefix = str(_require_param(params, "reference_prefix", because=because))
         pad_char = str(_require_param(params, "reference_pad_char", because=because))
-        pad_width = int(_require_param(params, "reference_pad_width", because=because))  # type: ignore[call-overload]
+        pad_width = int(_require_param(params, "reference_pad_width", because=because))
         for row in rows:
             digest = hashlib.sha256(row["description"].encode()).hexdigest()
             ref_num = str(int(digest, 16) % 10**10).zfill(10)
