@@ -344,8 +344,7 @@ def _validate_block(
                 f"unknown currency '{currency}'.",
                 layout_path=layout_path,
                 key_path=f"{key_path}.currency",
-                expected=f"one of {list(PAIR_CURRENCIES)} — 'symbol' keeps the $ prefix, "
-                "'plain' drops it.",
+                expected=f"one of {list(PAIR_CURRENCIES)} — 'symbol' keeps the $ prefix, 'plain' drops it.",
                 recover=f"set currency: to one of {list(PAIR_CURRENCIES)}, or remove it to "
                 "draw the value exactly as it interpolates.",
             )
