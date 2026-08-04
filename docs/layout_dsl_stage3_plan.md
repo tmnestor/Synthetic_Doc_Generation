@@ -718,6 +718,15 @@ def line_advance(layout: dict, block: dict, *, layout_id: str, layout_path: str)
 
 A block may still override with its own `line_advance:` as a bare integer, for the rare line that genuinely differs. When it does, that integer wins for that block regardless of role.
 
+**`validate_layout` must check the mapping's shape, not just its presence.** Because the resolution code cannot distinguish a block's deliberate bare-int override from a layout default mistyped as a bare int, a layout declaring `defaults: {line_advance: 25}` would otherwise validate cleanly and silently hand every block the same flat advance — the same silent-fallback failure this redesign exists to close, moved one level up. Receipts make this likely rather than theoretical: they use essentially one font size, so a flat `line_advance: 20` is the natural thing to write.
+
+Assert at startup, with a four-element diagnostic:
+
+1. `defaults.line_advance` is a mapping, not a scalar.
+2. Every role the layout's `body:` actually references — including roles reached through shared anchors and through table `sub_line` definitions — has an entry in it.
+
+Check 2 turns a render-time `DefaultsError` on one unlucky document into a startup failure naming the role and the layout.
+
 Replace every `y + line_height(size)` with `y + line_advance(...)`. Delete `line_height`.
 
 - [ ] **Step 4: Thread `mono` into every font load**
