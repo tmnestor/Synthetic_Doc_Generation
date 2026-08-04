@@ -10,7 +10,7 @@ import re
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.defaults import PARAMETER_DEFAULTS
 from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
-from generators.layout_dsl.primitives_text import ALIGNMENTS
+from generators.layout_dsl.primitives_text import ALIGNMENTS, PAIR_VALUE_ALIGNS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
 
 # Matches a `{` opened but never closed, or a `}` closed but never opened --
@@ -69,9 +69,12 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "budget",
         ),
     ),
-    "pair": (("label", "value"), ("role", "color", "field", "mono", "line_advance", "budget")),
+    "pair": (
+        ("label", "value"),
+        ("role", "color", "field", "mono", "line_advance", "budget", "value_align", "min_gap"),
+    ),
     "block": (("lines",), ("role", "color", "heading", "mono", "line_advance")),
-    "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
+    "rule": ((), ("color", "thickness", "pad_above", "pad_below", "fill_char")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
@@ -298,6 +301,17 @@ def _validate_block(
                 key_path=f"{key_path}.align",
                 expected=f"one of {list(ALIGNMENTS)}.",
                 recover=f"set align: to one of {list(ALIGNMENTS)}.",
+            )
+
+    if kind == "pair":
+        value_align = block.get("value_align")
+        if value_align is not None and value_align not in PAIR_VALUE_ALIGNS:
+            raise _err(
+                f"unknown value_align '{value_align}'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.value_align",
+                expected=f"one of {list(PAIR_VALUE_ALIGNS)}.",
+                recover=f"set value_align: to one of {list(PAIR_VALUE_ALIGNS)}.",
             )
 
     _validate_references(block, layout_path=layout_path, known_fields=known_fields, key_path=key_path)
@@ -872,6 +886,24 @@ def _validate_text_budget(
     budget width fits inside the block's own region -- `width`, the same
     value `_validate_geometry` already threads through panel/split narrowing
     for every other check at this nesting level.
+
+    A right-aligned `pair` (`value_align: right`) is a narrower case: its
+    value is drawn from `draw_fitted_right`, which is free to grow leftward
+    across the *entire* region -- checking the budget against the full
+    `width` (as the general case below does) would accept a budget wide
+    enough to draw straight through the pair's own unshrunk, unbudgeted
+    label, which sits at the region's left edge. The label's own rendered
+    width is not known at validate time (it may interpolate a `{FIELD}`, and
+    even a literal string needs a loaded font to measure), so this reserves
+    the pair's own declared `min_gap` -- the same px figure the layout
+    author already uses to say "this much space must stay clear of the
+    label" for the unbudgeted right-aligned path -- as a stand-in floor for
+    the label's footprint, and checks the budget against `width - min_gap`
+    instead. This does not guarantee the label physically fits in what is
+    left over; it is an authoring-time guard against the unambiguous case
+    (declaring a budget that leaves no gap at all), consistent with every
+    other check in this module validating declared geometry rather than
+    rendering text to measure it.
     """
     name = block.get("budget")
     if name is None:
@@ -886,6 +918,25 @@ def _validate_text_budget(
             recover=f"add '{name}: {{width, fit, min_font, max_lines}}' to field_budgets.",
         )
     declared = int(budgets[name]["width"])
+
+    if block.get("type") == "pair":
+        value_align = block.get("value_align", layout["defaults"]["pair_value_align"])
+        if value_align == "right":
+            min_gap = int(block.get("min_gap", layout["defaults"]["pair_min_gap"]))
+            available = width - min_gap
+            if declared > available:
+                raise _err(
+                    f"budget '{name}' declares width {declared}px but a right-aligned pair "
+                    f"only leaves {available}px for the value once its {min_gap}px min_gap "
+                    f"reservation for the label is subtracted from the {width}px region.",
+                    layout_path=layout_path,
+                    key_path=f"{key_path}.budget",
+                    expected=f"field_budgets.{name}.width <= {available}.",
+                    recover=f"set field_budgets.{name}.width to {available} or less, widen the "
+                    "region this block draws into, or reduce min_gap.",
+                )
+            return
+
     if declared > width:
         raise _err(
             f"budget '{name}' declares width {declared}px but this block's region is only {width}px.",
