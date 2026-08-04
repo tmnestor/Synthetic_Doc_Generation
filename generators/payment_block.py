@@ -210,6 +210,125 @@ def load_terminal_pools(path: Path = _DATA_POOLS_PATH) -> dict:
     return pools
 
 
+_POS_ROOT_KEY = "pos_terminal"
+
+# Required sub-keys of pos_terminal, each mapped to a short description of the
+# expected shape used in the fail-fast diagnostic. Mirrors _REQUIRED_KEYS above.
+_POS_REQUIRED_KEYS: dict[str, str] = {
+    "staff_names": "a non-empty list of staff-name strings",
+    "hour_min": "the earliest POS hour as a non-negative integer, e.g. 8",
+    "hour_span": "the width of the POS hour window as a positive integer, e.g. 12",
+    "register_min": "the lowest register number as a non-negative integer, e.g. 1",
+    "register_span": "the width of the register-number range as a positive integer, e.g. 8",
+    "receipt_number_prefix": "the printed receipt-number prefix, e.g. 'R-'",
+    "receipt_number_digest_length": (
+        "the number of hex digest characters consumed for the receipt number, as a positive integer, e.g. 6"
+    ),
+}
+
+_POS_NON_NEGATIVE_INT_KEYS = ("hour_min", "register_min")
+_POS_POSITIVE_INT_KEYS = ("hour_span", "register_span", "receipt_number_digest_length")
+
+
+@lru_cache(maxsize=None)
+def load_pos_pools(path: Path = _DATA_POOLS_PATH) -> dict:
+    """Load and validate the `pos_terminal` block of the data pools file.
+
+    Owns the staff-name pool, POS hour window, register-number range, and
+    receipt-number prefix/digest-length that `receipt_pos`
+    (`generators/layout_dsl/field_providers.py`) derives every receipt's POS
+    detail fields from. Mirrors `load_terminal_pools` above -- same fail-fast,
+    four-element-diagnostic shape, distinct root key.
+
+    Args:
+        path: Path to the data pools YAML file.
+
+    Returns:
+        The validated `pos_terminal` mapping.
+
+    Raises:
+        FileNotFoundError: `path` does not exist.
+        ValueError: the block or any required key is missing or malformed.
+    """
+    if not path.exists():
+        raise FileNotFoundError(
+            f"data pools file not found.\n"
+            f"  What:     {path} does not exist.\n"
+            f"  Where:    {path}\n"
+            f"  Expected: a YAML file with a top-level '{_POS_ROOT_KEY}' mapping.\n"
+            f"  Recover:  create {path} (see config/data_pools.yml in the repo)."
+        )
+
+    data = yaml.safe_load(path.read_text())
+    pools = data.get(_POS_ROOT_KEY) if isinstance(data, dict) else None
+    if not isinstance(pools, dict):
+        raise _err(
+            f"'{_POS_ROOT_KEY}' block is missing or not a mapping in {path}.",
+            path=path,
+            key_path=_POS_ROOT_KEY,
+            expected="a mapping with keys " + ", ".join(_POS_REQUIRED_KEYS) + ".",
+            recover=f"add a '{_POS_ROOT_KEY}:' block",
+        )
+
+    for key, expected in _POS_REQUIRED_KEYS.items():
+        if key not in pools:
+            raise _err(
+                f"'{_POS_ROOT_KEY}.{key}' is missing.",
+                path=path,
+                key_path=f"{_POS_ROOT_KEY}.{key}",
+                expected=expected + ".",
+                recover=f"add '{key}' under {_POS_ROOT_KEY}",
+            )
+
+    staff_names = pools["staff_names"]
+    if (
+        not isinstance(staff_names, list)
+        or not staff_names
+        or not all(isinstance(name, str) and name for name in staff_names)
+    ):
+        raise _err(
+            f"'{_POS_ROOT_KEY}.staff_names' is not a non-empty list of strings.",
+            path=path,
+            key_path=f"{_POS_ROOT_KEY}.staff_names",
+            expected=_POS_REQUIRED_KEYS["staff_names"] + ".",
+            recover="set 'staff_names' to a non-empty list of name strings",
+        )
+
+    for key in _POS_NON_NEGATIVE_INT_KEYS:
+        value = pools[key]
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise _err(
+                f"'{_POS_ROOT_KEY}.{key}' is not a non-negative integer (got {value!r}).",
+                path=path,
+                key_path=f"{_POS_ROOT_KEY}.{key}",
+                expected=_POS_REQUIRED_KEYS[key] + ".",
+                recover=f"set '{key}' to a non-negative integer",
+            )
+
+    for key in _POS_POSITIVE_INT_KEYS:
+        value = pools[key]
+        if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+            raise _err(
+                f"'{_POS_ROOT_KEY}.{key}' is not a positive integer (got {value!r}).",
+                path=path,
+                key_path=f"{_POS_ROOT_KEY}.{key}",
+                expected=_POS_REQUIRED_KEYS[key] + ".",
+                recover=f"set '{key}' to a positive integer",
+            )
+
+    prefix = pools["receipt_number_prefix"]
+    if not isinstance(prefix, str) or not prefix:
+        raise _err(
+            f"'{_POS_ROOT_KEY}.receipt_number_prefix' is not a non-empty string.",
+            path=path,
+            key_path=f"{_POS_ROOT_KEY}.receipt_number_prefix",
+            expected=_POS_REQUIRED_KEYS["receipt_number_prefix"] + ".",
+            recover="set 'receipt_number_prefix' to a non-empty string",
+        )
+
+    return pools
+
+
 def method_from_bank_description(description: str, cfg: dict) -> str:
     """Resolve a bank-statement description to the scheme the receipt must print.
 
