@@ -317,6 +317,7 @@ _anz_standard_body: &anz_standard_body
     frame: plain
     grouping: none
     header: false
+    params: {label: "Totals at end of period"}
     columns: *anz_txn_columns
 
 _anz_modern_body: &anz_modern_body
@@ -354,6 +355,7 @@ _anz_modern_body: &anz_modern_body
     frame: plain
     grouping: none
     header: false
+    params: {label: "Totals at end of period"}
     columns: *anz_txn_columns
 
 layouts:

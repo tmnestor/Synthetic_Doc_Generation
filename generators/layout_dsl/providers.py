@@ -340,7 +340,7 @@ def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
 
     Args:
         entry: The ground-truth entry.
-        params: Optional `label` (default "Totals at end of period").
+        params: Must carry `label`, the text printed in the row's description column.
 
     Returns:
         A single-row list: `date` and `balance` empty (legacy draws neither
@@ -349,7 +349,21 @@ def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
         ground-truth field of its own), `bold: True` (legacy draws it in
         `font_body_bold`), `rule_above: True` (legacy rules above it after a
         fresh 12px gap, unlike an ordinary continued row).
+
+    Raises:
+        ProviderError: If `label` is missing from params.
     """
+    if "label" not in params:
+        msg = (
+            "bank_transaction_totals provider requires a 'label' param.\n"
+            "  What:     the label param is missing from the table's params:\n"
+            "  Where:    config/layouts/bank_statements.yml, the totals table's params: key.\n"
+            '  Expected: params: {label: "Totals at end of period"}\n'
+            '  Recover:  add label: "Totals at end of period" to the totals table\'s '
+            "params: block."
+        )
+        raise ProviderError(msg) from None
+
     rows = pipe_fields(
         entry,
         {"fields": {"debit": "TRANSACTION_AMOUNTS_PAID", "credit": "TRANSACTION_AMOUNTS_RECEIVED"}},
@@ -359,7 +373,7 @@ def bank_transaction_totals(entry: dict, params: dict) -> list[dict]:
     return [
         {
             "date": "",
-            "description": params.get("label", "Totals at end of period"),
+            "description": params["label"],
             "debit": total_debits,
             "credit": total_credits,
             "synthetic": True,
