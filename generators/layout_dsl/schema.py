@@ -605,6 +605,66 @@ def _validate_children(
         )
 
 
+# Primitive kinds whose own `role:` key (explicit, or the layout's default
+# role when omitted) is resolved through line_advance() at render time --
+# text/pair/block draw a line and advance the y-cursor by it. A table block
+# also resolves its own advance this way (for its header row / multi-line
+# header labels), always via the layout's default role, since a table block
+# has no `role:` key of its own (PRIMITIVES["table"] does not list one).
+# banner is deliberately excluded: its own `role:` key selects banner_role's
+# font size, but draw_banner never calls line_advance() -- it always leaves
+# the y-cursor unchanged -- so a banner's role has no bearing on this check.
+_LINE_ADVANCE_ROLE_PRIMITIVES = ("text", "pair", "block")
+
+
+def _line_advance_roles(blocks: list, *, default_role: str) -> set[str]:
+    """Collect every role a layout's body resolves through line_advance().
+
+    Recurses into panel/split children (the same reach `_validate_blocks`/
+    `_validate_children` give every other structural check in this module)
+    and into each table column's `sub_line` spec -- a role buried inside a
+    nested container or a sub_line must not be invisible to this walk, the
+    same way `bank_statements.yml`'s `sub_line: {role: sub_description}` on
+    a table column would be to a naive top-level-only scan.
+
+    Args:
+        blocks: A list of block dicts (a body, or one nesting level of it).
+        default_role: The layout's own `defaults.role`, used wherever a
+            block (or sub_line) resolving through line_advance omits its
+            own `role:` key.
+
+    A block (or sub_line) carrying its own bare-integer `line_advance:`
+    override is skipped: `line_advance()`'s block-key-wins-over-layout
+    resolution means that block's role is never actually looked up in the
+    layout's mapping at render time, so requiring the layout to cover it
+    anyway would make this check stricter than the code it is guarding.
+
+    Returns:
+        Every role name this subtree resolves through line_advance().
+    """
+    roles: set[str] = set()
+    for block in blocks:
+        kind = block.get("type")
+        if kind in _LINE_ADVANCE_ROLE_PRIMITIVES:
+            if "line_advance" not in block:
+                roles.add(str(block.get("role", default_role)))
+        elif kind == "table":
+            if "line_advance" not in block:
+                roles.add(default_role)
+            for column in block.get("columns", []):
+                sub_line = column.get("sub_line") if isinstance(column, dict) else None
+                if isinstance(sub_line, dict) and "line_advance" not in sub_line:
+                    roles.add(str(sub_line.get("role", default_role)))
+        elif kind in _CONTAINERS:
+            children = block.get("children", [])
+            if kind == "split":
+                for column in children:
+                    roles |= _line_advance_roles(column, default_role=default_role)
+            else:
+                roles |= _line_advance_roles(children, default_role=default_role)
+    return roles
+
+
 def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fields: set[str]) -> None:
     """Validate a whole layout: its body tree plus geometry-dependent checks.
 
@@ -634,6 +694,33 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
             "block through a YAML anchor as field_budgets already does.",
         )
 
+    # line_advance replaces the old int(size * 1.4) ratio, which varied by
+    # the drawing block's own role -- a single flat number cannot express
+    # that a header-role line and a footer-role line need different
+    # advances, so `resolve_param` alone (which only checks the key is
+    # present, not its shape) cannot catch a layout that mistypes this as
+    # one number. Checked here, at validate time, rather than left for
+    # line_advance() to discover per-block at render time.
+    line_advance_defaults = layout["defaults"]["line_advance"]
+    if not isinstance(line_advance_defaults, dict):
+        raise _err(
+            f"layout '{layout_id}' declares defaults.line_advance as a single number "
+            f"({line_advance_defaults!r}), not a per-role mapping.",
+            layout_path=layout_path,
+            key_path=f"{layout_id}.defaults.line_advance",
+            expected="a mapping of role -> pixels, one entry per font_sizes role this "
+            "layout's body draws (each int(font_sizes.<role> * 1.4)), e.g.\n"
+            "              defaults:\n"
+            "                line_advance:\n"
+            "                  header: 61\n"
+            "                  body: 44\n"
+            "                  footer: 25\n"
+            "            A single number cannot express that a header-role line and a "
+            "footer-role line need different advances.",
+            recover=f"replace {layout_id}.defaults.line_advance with a role: pixels "
+            "mapping covering every role this layout's body uses.",
+        )
+
     for key, example in (("body", "a list of block mappings"), ("content_width", "1600")):
         if key not in layout:
             raise _err(
@@ -646,6 +733,29 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
             )
 
     validate_body(layout["body"], layout_id=layout_id, layout_path=layout_path, known_fields=known_fields)
+
+    # Converts a render-time DefaultsError on one unlucky document (the
+    # first entry whose body happens to reach an uncovered role) into a
+    # startup failure naming the layout and the role, for every layout, not
+    # just the ones whose sampled ground truth exercises it.
+    default_role = str(layout["defaults"]["role"])
+    used_roles = _line_advance_roles(layout["body"], default_role=default_role)
+    missing_roles = sorted(used_roles - set(line_advance_defaults))
+    if missing_roles:
+        raise _err(
+            f"layout '{layout_id}' body uses role(s) {missing_roles} that "
+            "defaults.line_advance does not cover.",
+            layout_path=layout_path,
+            key_path=f"{layout_id}.defaults.line_advance",
+            expected=f"a defaults.line_advance entry for every role in {sorted(used_roles)}, e.g.\n"
+            "              defaults:\n"
+            "                line_advance:\n"
+            + "".join(
+                f"                  {role}: <int(font_sizes.{role} * 1.4)>\n" for role in missing_roles
+            ),
+            recover=f"add {missing_roles} to {layout_id}.defaults.line_advance.",
+        )
+
     content_width = int(layout["content_width"])
     _validate_geometry(
         layout["body"],
