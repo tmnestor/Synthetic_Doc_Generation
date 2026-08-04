@@ -385,14 +385,30 @@ _SENTINEL = object()
 
 
 def resolve_param(
-    block: dict, layout: dict, key: str, *, layout_id: str, layout_path: str
+    block: dict,
+    layout: dict,
+    key: str,
+    *,
+    layout_id: str,
+    layout_path: str,
+    block_key: str | None = None,
 ) -> object:
     """Resolve one primitive parameter.
 
+    `key` names the `defaults:` entry; `block_key` names the block's own YAML
+    key when the two differ. They differ whenever `PARAMETER_DEFAULTS`
+    namespaces a short key two primitives share — a panel writes `padding:` but
+    resolves against `panel_padding`, because one flat namespace cannot carry
+    two primitives' defaults under the same short name. Without `block_key`
+    the block lookup would search for the namespaced name, never find it, and
+    silently discard every per-block override.
+
     Args:
-        block: The block dict, whose own key wins if present.
+        block: The block dict, whose own `block_key` (or `key`) wins if present.
         layout: The resolved layout dict, carrying a `defaults:` mapping.
-        key: The parameter name, e.g. "color".
+        key: The `defaults:` parameter name, e.g. "panel_padding".
+        block_key: The block's own literal YAML key, e.g. "padding". Defaults
+            to `key` when the two are the same.
         layout_id: Layout id, used in the diagnostic.
         layout_path: Path to the layout YAML, used in the diagnostic.
 
@@ -582,10 +598,13 @@ Do not work from a line-number list — Task 1 already shifted these, and each c
 conda run -n synthetic grep -rn '\.get("[a-z_]*", ' generators/layout_dsl/primitives_text.py generators/layout_dsl/primitives_table.py generators/layout_dsl/primitives_container.py
 ```
 
-Exactly two hits are **not** layout parameters and must NOT be converted:
+**The receiver decides, not the key name.** A `.get()` on `block` is a layout parameter; a `.get()` on `row` reads data the row provider produced, which has no business resolving against a layout's `defaults:`. These are NOT converted:
 
 - `primitives_table.py`'s `block.get("params", {})` — a table's own params passthrough to its row provider, not a pixel decision.
-- `primitives_table.py`'s `row.get("date", "")` — reads provider row *data*, not layout config.
+- `primitives_table.py`'s `row.get("date", "")` — provider row data.
+- `primitives_table.py`'s two `row.get("bold", False)` sites, reached via `_cell_bold` and `_validate_bold_spec` — provider row data, as that file's own docstrings state. A provider marks a row bold; the layout does not. Routing these through `defaults.bold` would mean a layout setting `bold: true` silently bolds every provider row, and would couple table row rendering to a typography default that exists for `text` and `banner` blocks.
+
+Note `bold` is genuinely a layout parameter *for blocks* — `block.get("bold", False)` in `draw_text_block` and `draw_banner` both convert. Only the `row.` receiver is exempt. Any covering test must therefore key off the receiver, not the bare key name.
 
 Every other hit converts. Two of them have parameter names that exist only because this task added them, so they are easy to miss: `draw_banner`'s `block.get("text_y", 0)` → `banner_text_y`, and the sub-line `sub_line.get("height", 0)` → `table_sub_line_height`. Note the latter is **not** `spacer_height` — a table sub-line's extra height and a spacer block's advance are different things that happened to share a short key.
 
