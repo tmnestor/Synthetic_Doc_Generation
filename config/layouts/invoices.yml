@@ -147,6 +147,21 @@ _invoice_line_items: &invoice_line_items
        label_x: 1550, label_align: left, field: LINE_ITEM_TOTAL_PRICES}
 _invoice_table_gap: &invoice_table_gap {type: spacer}
 
+# tax_invoice_mixed only: a taxable/GST-free split *display*. Both tables render
+# the identical LINE_ITEM_* list today -- the legacy renderer never split the
+# items between them, it just drew the same list twice under two headings -- so
+# the second suppresses geometry capture: one ground-truth value has exactly one
+# bounding box, and a second record for the same field would collide with the
+# first. Phase B splits the two lists for real, at which point this table gets
+# its own fields and capture goes back on.
+_invoice_taxable_label: &invoice_taxable_label
+  {type: text, content: "GST-Applicable Items", color: gray, line_advance: 24}
+_invoice_tax_free_label: &invoice_tax_free_label
+  {type: text, content: "GST-Free Items", color: gray, line_advance: 24}
+_invoice_line_items_uncaptured: &invoice_line_items_uncaptured
+  <<: *invoice_line_items
+  capture: false
+
 # --- totals ------------------------------------------------------------------
 # A fixed 400px column at the page's right edge (legacy: right_edge - 400),
 # which equal division cannot express; the left column draws nothing.
@@ -182,6 +197,11 @@ _invoice_totals_inclusive: &invoice_totals_inclusive
 
 _invoice_payment_terms: &invoice_payment_terms
   {type: text, content: "Payment Terms:", color: gray, line_advance: 40}
+
+# tax_invoice_high_value only. Legacy rendered any section it had no branch for
+# as its bare `label:`, which is all these two ever drew.
+_invoice_delivery: &invoice_delivery
+  {type: text, content: "Delivery:", color: gray, line_advance: 40}
 
 layouts:
   tax_invoice_standard:
@@ -233,292 +253,62 @@ layouts:
       - *invoice_totals_inclusive
       - *invoice_payment_terms
   tax_invoice_high_value:
-    format: tax_invoice
-    page_dimensions:
-      width: 1900
-      height: 3508
-    margin: 100
-    content_width: 1700
-    font_family: sans-serif
-    field_budgets:
-      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
-      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
-    font_sizes:
-      header: 48
-      subheader: 28
-      body: 20
-      footer: 16
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets
+    field_providers: *invoice_field_providers
+    # Read by nothing today; kept as the record of which invoices this layout is
+    # meant for. See the Task 16 dead-key sweep.
     minimum_amount: 10000
-    sections:
-      - type: header
-        name: invoice_title
-        height: 80
-        font_size: 28
-        font_weight: bold
-        text: "TAX INVOICE"
-        alignment: center
-      - type: separator
-        height: 20
-      - type: section
-        name: seller_details
-        label: "From:"
-        height: 120
-        font_size: 11
-        fields:
-          - business_name
-          - abn_number
-          - business_address
-          - business_phone
-          - business_email
-      - type: section
-        name: buyer_details
-        label: "Bill To:"
-        height: 140
-        font_size: 11
-        required: true
-        fields:
-          - customer_name
-          - customer_abn
-          - customer_address
-          - customer_phone
-          - customer_email
-      - type: section
-        name: invoice_metadata
-        height: 100
-        font_size: 11
-        fields:
-          - invoice_number
-          - invoice_date
-          - due_date
-          - order_number
-          - purchase_order_number
-      - type: separator
-        height: 20
-      - type: table
-        name: line_items_table
-        columns:
-          - name: item_number
-            header_text: "#"
-            width: 80
-            font_size: 10
-          - name: description
-            header_text: "Description"
-            width: 800
-            font_size: 11
-          - name: quantity
-            header_text: "Qty"
-            width: 120
-            font_size: 10
-          - name: unit_price
-            header_text: "Unit Price"
-            width: 200
-            font_size: 10
-          - name: tax_code
-            header_text: "Tax"
-            width: 150
-            font_size: 10
-          - name: total_price
-            header_text: "Total"
-            width: 200
-            font_size: 10
-        row_height: 30
-        table_start_y: 1900
-      - type: separator
-        height: 20
-      - type: totals
-        name: totals
-        fields:
-          - name: subtotal
-            label: "Subtotal (excl. GST):"
-            font_size: 11
-          - name: gst_amount
-            label: "GST (10%):"
-            font_size: 11
-          - name: total
-            label: "TOTAL (incl. GST):"
-            font_size: 13
-            font_weight: bold
-      - type: section
-        name: payment_terms
-        label: "Payment Terms:"
-        height: 80
-        font_size: 10
-        fields:
-          - payment_method
-          - bsb_number
-          - account_number
-          - account_name
-          - payment_notes
-      - type: section
-        name: delivery_details
-        label: "Delivery:"
-        height: 60
-        font_size: 10
-        fields:
-          - delivery_address
-          - delivery_date
-      - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
-
+    defaults:
+      <<: *invoice_defaults_values
+    # Identical to tax_invoice_standard but for the trailing delivery line.
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_seller_name
+      - *invoice_seller_address
+      - *invoice_seller_abn
+      - *invoice_bill_to
+      - *invoice_payer_name
+      - *invoice_payer_address
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_separate
+      - *invoice_payment_terms
+      - *invoice_delivery
   tax_invoice_mixed:
-    format: tax_invoice
-    page_dimensions:
-      width: 1900
-      height: 3508
-    margin: 100
-    content_width: 1700
-    font_family: sans-serif
-    field_budgets:
-      SUPPLIER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      BUSINESS_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      ABN_LINE: {width: 1700, fit: shrink, min_font: 12, max_lines: 1}
-      PAYER_NAME: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
-      LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
-    font_sizes:
-      header: 48
-      subheader: 28
-      body: 20
-      footer: 16
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets
+    field_providers: *invoice_field_providers
+    # Read by nothing today; kept as the record of what this layout is for.
+    # See the Task 16 dead-key sweep.
     mixed_tax_mode: true
-    sections:
-      - type: header
-        name: invoice_title
-        height: 80
-        font_size: 28
-        font_weight: bold
-        text: "TAX INVOICE"
-        alignment: center
-      - type: separator
-        height: 20
-      - type: section
-        name: seller_details
-        label: "From:"
-        height: 120
-        font_size: 11
-        fields:
-          - business_name
-          - abn_number
-          - business_address
-          - business_phone
-          - business_email
-      - type: section
-        name: buyer_details
-        label: "Bill To:"
-        height: 120
-        font_size: 11
-        fields:
-          - customer_name
-          - customer_address
-          - customer_phone
-      - type: section
-        name: invoice_metadata
-        height: 80
-        font_size: 11
-        fields:
-          - invoice_number
-          - invoice_date
-          - due_date
-          - order_number
-      - type: separator
-        height: 20
-      - type: label
-        text: "GST-Applicable Items"
-        height: 24
-        font_size: 12
-        font_weight: bold
-      - type: table
-        name: taxable_items_table
-        columns:
-          - name: item_number
-            header_text: "#"
-            width: 80
-            font_size: 10
-          - name: description
-            header_text: "Description"
-            width: 800
-            font_size: 11
-          - name: quantity
-            header_text: "Qty"
-            width: 120
-            font_size: 10
-          - name: unit_price
-            header_text: "Unit Price"
-            width: 200
-            font_size: 10
-          - name: total_price
-            header_text: "Total"
-            width: 200
-            font_size: 10
-        row_height: 28
-        table_start_y: 1700
-      - type: label
-        text: "GST-Free Items"
-        height: 24
-        font_size: 12
-        font_weight: bold
-      - type: table
-        name: tax_free_items_table
-        columns:
-          - name: item_number
-            header_text: "#"
-            width: 80
-            font_size: 10
-          - name: description
-            header_text: "Description"
-            width: 800
-            font_size: 11
-          - name: quantity
-            header_text: "Qty"
-            width: 120
-            font_size: 10
-          - name: unit_price
-            header_text: "Unit Price"
-            width: 200
-            font_size: 10
-          - name: total_price
-            header_text: "Total"
-            width: 200
-            font_size: 10
-        row_height: 28
-        table_start_y: 2200
-      - type: separator
-        height: 20
-      - type: totals
-        name: totals
-        fields:
-          - name: subtotal_taxable
-            label: "Subtotal (taxable, excl. GST):"
-            font_size: 11
-          - name: subtotal_tax_free
-            label: "Subtotal (tax-free):"
-            font_size: 11
-          - name: gst_amount
-            label: "GST (10% on taxable):"
-            font_size: 11
-          - name: total
-            label: "TOTAL (incl. GST):"
-            font_size: 13
-            font_weight: bold
-      - type: section
-        name: payment_terms
-        label: "Payment Terms:"
-        height: 60
-        font_size: 10
-        fields:
-          - payment_method
-          - bsb_number
-          - account_number
-          - account_name
-      - type: footer
-        name: footer_text
-        height: 40
-        font_size: 9
-        alignment: center
+    defaults:
+      <<: *invoice_defaults_values
+    # tax_invoice_standard's sequence with the single line-item table replaced
+    # by two labelled ones over the same list.
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_seller_name
+      - *invoice_seller_address
+      - *invoice_seller_abn
+      - *invoice_bill_to
+      - *invoice_payer_name
+      - *invoice_payer_address
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_taxable_label
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_tax_free_label
+      - *invoice_line_items_uncaptured
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_separate
+      - *invoice_payment_terms
