@@ -27,6 +27,7 @@ PARAMETER_DEFAULTS: frozenset[str] = frozenset(
         "spacer_height",
         "pair_value_align",
         "pair_min_gap",
+        "pair_separator",
         "table_header",
         "table_header_bold",
         "table_header_rule_top",

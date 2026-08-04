@@ -22,6 +22,7 @@ _dsl_defaults_values: &dsl_defaults_values
   spacer_height: 0
   pair_value_align: left
   pair_min_gap: 0
+  pair_separator: ": "            # legacy drew every bank pair as "Label: value".
   table_header: true
   table_header_bold: true
   table_header_rule_top: true

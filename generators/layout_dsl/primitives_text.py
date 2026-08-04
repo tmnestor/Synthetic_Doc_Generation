@@ -411,15 +411,23 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
 def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     """Draw a label and value on one line.
 
+    `pair_separator` (block key `separator`) is what the label is followed by,
+    on every path below. It is the layout's decision, not this module's: a
+    receipt's "Date" line wants `": "`, an invoice's right-aligned "Total"
+    wants `":"`, and a receipt's right-aligned "TOTAL" wants `""`, because
+    legacy drew that one with no punctuation at all. Nothing here infers it
+    from `value_align` -- doing so is how `pair` briefly came to have two
+    label conventions, with right-aligned layouts writing their own colons
+    into `label:` to work around the one they could not get.
+
     `pair_value_align` (block key `value_align`) chooses between two drawing
     styles:
 
-    - `left` (the default, and the only style bank statements use): label
-      and value draw as one `"{label}: {value}"` string, left-aligned at
-      `ctx.region.x`.
-    - `right`: mirrors the legacy `draw_line_item` -- the label draws
-      verbatim (no colon or space is added) at `ctx.region.x`, and the value
-      right-aligns to `ctx.region.right`, so the two never share one string.
+    - `left` (the default, and the only style bank statements use): label,
+      separator and value draw as one string, left-aligned at `ctx.region.x`.
+    - `right`: mirrors the legacy `draw_line_item` -- label and separator
+      draw at `ctx.region.x` and the value right-aligns to
+      `ctx.region.right`, so the two never share one string.
       `pair_min_gap` (block key `min_gap`) then reproduces `invoice.py:283-
       285`: when the label is long enough to otherwise collide with the
       value, it is pushed left just far enough to keep `min_gap` px clear
@@ -495,11 +503,27 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
         )
     )
 
+    # What sits between the label and the value -- ": " on a receipt's "Date"
+    # line, ":" on an invoice's right-aligned "Total", "" on a receipt's
+    # right-aligned "TOTAL", which legacy drew with no punctuation at all.
+    # Resolved once and applied on all three paths below, so `pair` has one
+    # label convention rather than one per `value_align`.
+    separator = str(
+        resolve_param(
+            block,
+            ctx.layout,
+            "pair_separator",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="separator",
+        )
+    )
+    label_text = f"{label}{separator}"
+
     budget_name = block.get("budget")
     if budget_name is not None:
-        prefix = f"{label}: "
-        ctx.draw.text((ctx.region.x, y), prefix, font=font, fill=color)
-        label_width = int(ctx.draw.textlength(prefix, font=font))
+        ctx.draw.text((ctx.region.x, y), label_text, font=font, fill=color)
+        label_width = int(ctx.draw.textlength(label_text, font=font))
         value_ctx = ctx.within(Region(x=ctx.region.x + label_width, width=ctx.region.width - label_width))
         return _draw_fitted_text(
             block,
@@ -524,7 +548,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
                 block_key="min_gap",
             )
         )
-        label_bbox = font.getbbox(label)
+        label_bbox = font.getbbox(label_text)
         label_width = int(label_bbox[2] - label_bbox[0])
         value_bbox = font.getbbox(value)
         value_width = int(value_bbox[2] - value_bbox[0])
@@ -544,7 +568,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
         if min_gap > 0:
             label_x = min(label_x, ctx.region.right - value_width - label_width - min_gap)
         value_x = ctx.region.right - value_width
-        ctx.draw.text((label_x, y), label, font=font, fill=color)
+        ctx.draw.text((label_x, y), label_text, font=font, fill=color)
         ctx.draw.text((value_x, y), value, font=font, fill=color)
         end = y + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
         if ctx.recorder is not None and field is not None:
@@ -552,12 +576,12 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
             ctx.recorder.record(field, (value_x, y, value_x + value_width, y + value_height))
         return end
 
-    text = f"{label}: {value}"
+    text = f"{label_text}{value}"
     left, _ = _draw_line(ctx, text, y, font=font, align="left", color=color)
     end = y + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     if ctx.recorder is not None and field is not None:
         # Record the value's own extent, not the label's.
-        label_width = int(ctx.draw.textlength(f"{label}: ", font=font))
+        label_width = int(ctx.draw.textlength(label_text, font=font))
         value_bbox = font.getbbox(value)
         value_width = int(value_bbox[2] - value_bbox[0])
         value_height = int(value_bbox[3] - value_bbox[1])
