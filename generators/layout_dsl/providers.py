@@ -168,7 +168,11 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
         raise ProviderError(msg) from None
 
     count = next(iter(lengths.values()), 0)
-    rows = [{key: columns[key][i] for key in columns} for i in range(count)]
+    # Annotated `dict`, not the inferred `dict[str, str]`: `decimal_keys` below
+    # replaces some of those strings with Decimals in place, exactly as
+    # bank_transactions and receipt_line_items already do to this same return
+    # value once they have it.
+    rows: list[dict] = [{key: columns[key][i] for key in columns} for i in range(count)]
 
     decimal_keys = params.get("decimal_keys") or []
     unknown = sorted(set(decimal_keys) - set(mapping))
