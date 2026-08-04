@@ -16,7 +16,7 @@ from generators.layout_dsl.field_providers import (
     field_provider_param_keys,
 )
 from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
-from generators.layout_dsl.primitives_text import ALIGNMENTS, PAIR_VALUE_ALIGNS
+from generators.layout_dsl.primitives_text import ALIGNMENTS, PAIR_CURRENCIES, PAIR_VALUE_ALIGNS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
 
 # Matches a `{` opened but never closed, or a `}` closed but never opened --
@@ -77,7 +77,18 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     ),
     "pair": (
         ("label", "value"),
-        ("role", "color", "field", "mono", "line_advance", "budget", "value_align", "min_gap"),
+        (
+            "role",
+            "color",
+            "field",
+            "mono",
+            "line_advance",
+            "budget",
+            "value_align",
+            "min_gap",
+            "bold",
+            "currency",
+        ),
     ),
     "block": (("lines",), ("role", "color", "heading", "mono", "line_advance")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below", "fill_char")),
@@ -130,6 +141,13 @@ _COLUMN_KEYS = frozenset(
         "currency",
         "currency_suffix",
         "sub_line",
+        # A second ground-truth value living inside this column's own cell
+        # text: `prefix_key` names the row key holding it (a line item's
+        # "2x " quantity marker), `prefix_field` the field its box is
+        # recorded against. Both or neither — see the pairing check in
+        # `_validate_table`.
+        "prefix_key",
+        "prefix_field",
     }
 )
 
@@ -319,6 +337,17 @@ def _validate_block(
                 key_path=f"{key_path}.value_align",
                 expected=f"one of {list(PAIR_VALUE_ALIGNS)}.",
                 recover=f"set value_align: to one of {list(PAIR_VALUE_ALIGNS)}.",
+            )
+        currency = block.get("currency")
+        if currency is not None and currency not in PAIR_CURRENCIES:
+            raise _err(
+                f"unknown currency '{currency}'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.currency",
+                expected=f"one of {list(PAIR_CURRENCIES)} — 'symbol' keeps the $ prefix, "
+                "'plain' drops it.",
+                recover=f"set currency: to one of {list(PAIR_CURRENCIES)}, or remove it to "
+                "draw the value exactly as it interpolates.",
             )
 
     _validate_references(block, layout_path=layout_path, known_fields=known_fields, key_path=key_path)
@@ -560,7 +589,7 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
                 recover=f"set align: to one of {list(COLUMN_ALIGNMENTS)}.",
             )
 
-        for field_key in ("field", "last_row_field"):
+        for field_key in ("field", "last_row_field", "prefix_field"):
             name = column.get(field_key)
             if name is not None and name not in known_fields:
                 raise _err(
@@ -570,6 +599,33 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
                     expected=f"a field defined for this document type: {sorted(known_fields)}.",
                     recover=f"fix the field name, or add '{name}' to config/field_definitions.yml.",
                 )
+
+        # `prefix_key`/`prefix_field` only reach a drawing path through
+        # `draw_fitted_left` (see `_draw_cell` in primitives_table.py): the
+        # right-aligned and unbudgeted helpers take no prefix at all, so a
+        # column declaring them anywhere else would silently record nothing.
+        has_prefix = [key for key in ("prefix_key", "prefix_field") if key in column]
+        if len(has_prefix) == 1:
+            missing_key = "prefix_field" if has_prefix[0] == "prefix_key" else "prefix_key"
+            raise _err(
+                f"column {index} sets '{has_prefix[0]}' without '{missing_key}'.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.columns[{index}].{has_prefix[0]}",
+                expected="both keys together, e.g. prefix_key: quantity_prefix, "
+                "prefix_field: LINE_ITEM_QUANTITIES.",
+                recover=f"add '{missing_key}:' to the column, or remove '{has_prefix[0]}'.",
+            )
+        if has_prefix and ("budget" not in column or column.get("align") == "right"):
+            raise _err(
+                f"column {index} sets prefix_key/prefix_field but is "
+                f"{'right-aligned' if column.get('align') == 'right' else 'unbudgeted'}.",
+                layout_path=layout_path,
+                key_path=f"{key_path}.columns[{index}]",
+                expected="a left-aligned column carrying a budget: — only the "
+                "left-budgeted draw path measures a prefix sub-box.",
+                recover="add a budget: to the column and leave it left-aligned, or remove "
+                "prefix_key/prefix_field.",
+            )
 
         sub_line = column.get("sub_line")
         if sub_line is not None and (not isinstance(sub_line, dict) or "key" not in sub_line):

@@ -405,10 +405,27 @@ def receipt_line_items(entry: dict, params: dict) -> list[dict]:
 
     Returns:
         One dict per row, keyed by the `fields` mapping's keys, with the
-        description prefixed when quantity != "1".
+        description prefixed when quantity != "1", plus:
+
+        - `quantity_prefix`: the prefix actually applied to this row's
+          description ("" when none). The prefix is a ground-truth value in
+          its own right -- the legacy receipt renderer recorded a separate
+          `LINE_ITEM_QUANTITIES[i]` box for it -- and once it has been
+          concatenated into `description` there is no way to recover its
+          extent, so it is re-exposed here for a column's `prefix_key` to
+          name (see `_draw_row` in primitives_table.py).
+        - `price`/`total`, when present, coerced to `Decimal` so a column
+          declaring `currency:` formats them as amounts. Mirrors
+          `bank_transactions` above, which coerces `debit`/`credit` for the
+          same reason: the legacy renderer printed `f"{Decimal(total):,.2f}"`,
+          not the raw ground-truth string, so a one-decimal-place amount would
+          otherwise render as `9.5` rather than `9.50`. The absent sentinel
+          and the empty string are left alone -- `_cell_text` maps both to a
+          cell that draws nothing.
 
     Raises:
-        ProviderError: If `fields` or `quantity_prefix_format` is missing.
+        ProviderError: If `fields` or `quantity_prefix_format` is missing, or
+            a price/total is neither a sentinel nor a valid amount.
     """
     if "quantity_prefix_format" not in params:
         msg = (
@@ -426,9 +443,14 @@ def receipt_line_items(entry: dict, params: dict) -> list[dict]:
 
     for row in rows:
         qty = row.get("quantity", "")
+        prefix = ""
         if qty and qty != "1":
             prefix = params["quantity_prefix_format"].format(quantity=qty)
             row["description"] = f"{prefix}{row['description']}"
+        row["quantity_prefix"] = prefix
+        for key in ("price", "total"):
+            if key in row and row[key] not in ("", "NOT_FOUND"):
+                row[key] = _to_decimal(row[key])
 
     return rows
 

@@ -4,6 +4,8 @@ Each takes (block, ctx, y) and returns the advanced y-cursor, matching the
 convention the existing renderers already use.
 """
 
+from decimal import Decimal, InvalidOperation
+
 from generators.common import (
     Font,
     draw_fitted_center,
@@ -11,6 +13,7 @@ from generators.common import (
     draw_fitted_right,
     draw_separator,
     draw_separator_line,
+    fmt_amount,
     load_font,
 )
 from generators.layout_budgets import field_budget
@@ -29,9 +32,53 @@ ALIGNMENTS = ("left", "center", "right")
 # deliberately narrower than ALIGNMENTS above, not a re-export of it.
 PAIR_VALUE_ALIGNS = ("left", "right")
 
+# Public: schema.py imports this to validate a `pair` block's `currency:` key.
+# A pair's value is a raw ground-truth string ("137.73"); a totals line prints
+# a formatted amount ("$137.73" for a receipt's TOTAL, "137.73" for its GST).
+# `symbol` and `plain` name exactly that difference, matching the vocabulary a
+# table column's own `currency: plain` already uses (primitives_table._cell_text).
+PAIR_CURRENCIES = ("symbol", "plain")
+
 
 class RoleError(RuntimeError):
     """Raised when a block names a typographic role the layout does not define."""
+
+
+class CurrencyError(RuntimeError):
+    """Raised when a block asks for currency formatting of a non-amount value."""
+
+
+def format_currency(value: str, style: str, *, layout_id: str, layout_path: str) -> str:
+    """Format a raw amount string the way the legacy renderers printed it.
+
+    Args:
+        value: The already-interpolated amount, e.g. "137.73".
+        style: `symbol` (keep `fmt_amount`'s `$`) or `plain` (drop it).
+        layout_id: Layout id, used in the diagnostic.
+        layout_path: Path to the layout YAML, used in the diagnostic.
+
+    Returns:
+        `"$1,234.56"` for `symbol`, `"1,234.56"` for `plain`.
+
+    Raises:
+        CurrencyError: If `value` does not parse as a decimal amount.
+    """
+    try:
+        amount = Decimal(value)
+    except (InvalidOperation, ValueError, TypeError) as err:
+        raise CurrencyError(
+            "Cannot format a value as currency.\n"
+            f"  What:     value {value!r} is not a decimal amount, but this block "
+            f"declares currency: {style}.\n"
+            f"  Where:    {layout_path} -> {layout_id}.body (a pair block's `currency` key)\n"
+            "  Expected: the block's `value:` to resolve to a bare decimal string, e.g. "
+            'value: "{TOTAL_AMOUNT}" resolving to "137.73".\n'
+            "  Recover:  drop `currency:` from the block if its value is already formatted "
+            "(e.g. a provider-formatted PAYMENT_TENDERED), or point `value:` at a raw "
+            "amount field."
+        ) from err
+    text = fmt_amount(amount)
+    return text if style == "symbol" else text.lstrip("$")
 
 
 def resolve_role(layout: dict, role: str) -> int:
@@ -378,6 +425,16 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
       value, it is pushed left just far enough to keep `min_gap` px clear
       between them, rather than merging into one OCR token.
 
+    `currency: symbol|plain` formats the resolved value as an amount before
+    anything is drawn or measured (see `format_currency`) -- a receipt's
+    `TOTAL` line prints `$137.73` and its `GST` line `137.73` from the same
+    raw `"137.73"` ground truth, a difference the value template alone cannot
+    express. Absent, the value draws exactly as it interpolates.
+
+    `bold: true` draws both the label and the value in the bold weight -- a
+    receipt's `TOTAL` and its cash `CHANGE` line, the only pairs the legacy
+    renderers drew in `font_bold`.
+
     `budget: <FIELD_BUDGET_NAME>` fits the *value* only -- the label always
     draws in full, unshrunk and unwrapped, exactly as it does today. This
     forks the drawing itself, not just the recording: the unbudgeted path
@@ -404,6 +461,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     Raises:
         LayoutBudgetError: If `budget` is present but not a valid budget in
             this layout's `field_budgets`.
+        CurrencyError: If `currency` is present but the value is not an amount.
     """
     role = str(
         resolve_param(block, ctx.layout, "role", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
@@ -411,10 +469,20 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     size = resolve_role(ctx.layout, role)
     label = interpolate(block["label"], ctx.entry["fields"])
     value = interpolate(block["value"], ctx.entry["fields"])
+    currency = block.get("currency")
+    if currency is not None and value:
+        value = format_currency(
+            value, str(currency), layout_id=ctx.layout_id, layout_path=ctx.layout_path
+        )
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
-    font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    bold = bool(
+        resolve_param(block, ctx.layout, "bold", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    )
+    font = font_for(
+        ctx.layout, block, size, bold=bold, layout_id=ctx.layout_id, layout_path=ctx.layout_path
+    )
     field = block.get("field")
     value_align = str(
         resolve_param(
@@ -439,7 +507,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
             y,
             text=value,
             size=size,
-            bold=False,
+            bold=bold,
             align=value_align,
             color=color,
             budget_name=budget_name,
