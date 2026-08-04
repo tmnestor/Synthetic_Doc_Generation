@@ -4,8 +4,6 @@ Each takes (block, ctx, y) and returns the advanced y-cursor, matching the
 convention the existing renderers already use.
 """
 
-from typing import Any
-
 from generators.common import draw_separator_line, load_font
 from generators.layout_dsl.binding import interpolate
 from generators.layout_dsl.context import RenderContext
@@ -220,37 +218,40 @@ def draw_rule(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    pad_above: Any = resolve_param(
-        block,
-        ctx.layout,
-        "rule_pad_above",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="pad_above",
+    y += int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "rule_pad_above",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="pad_above",
+        )
     )
-    y += int(pad_above)
-    thickness_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "rule_thickness",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="thickness",
+    thickness = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "rule_thickness",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="thickness",
+        )
     )
-    thickness = int(thickness_value)
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
     draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color=color, width=thickness)
-    pad_below: Any = resolve_param(
-        block,
-        ctx.layout,
-        "rule_pad_below",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="pad_below",
+    y += thickness + int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "rule_pad_below",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="pad_below",
+        )
     )
-    y += thickness + int(pad_below)
     return y
 
 
@@ -265,15 +266,16 @@ def draw_spacer(block: dict, ctx: RenderContext, y: int) -> int:
     Returns:
         The advanced y-cursor.
     """
-    spacer_height: Any = resolve_param(
-        block,
-        ctx.layout,
-        "spacer_height",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="height",
+    return y + int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "spacer_height",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="height",
+        )
     )
-    return y + int(spacer_height)
 
 
 def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
@@ -326,15 +328,16 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
         text = str(ctx.layout[block["from_layout"]])
     else:
         text = interpolate(block["content"], ctx.entry["fields"])
-    text_y_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "banner_text_y",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="text_y",
+    text_y = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "banner_text_y",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="text_y",
+        )
     )
-    text_y = int(text_y_value)
     text_color = str(
         resolve_param(
             block,

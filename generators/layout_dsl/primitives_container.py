@@ -6,8 +6,6 @@ render through `ctx.render_children` — injected by the engine — so this modu
 never imports the engine, which imports it.
 """
 
-from typing import Any
-
 from generators.layout_dsl.context import RenderContext
 from generators.layout_dsl.defaults import resolve_param
 
@@ -56,15 +54,16 @@ def draw_panel(block: dict, ctx: RenderContext, y: int) -> int:
         ContainerError: If a fixed height is given but children overflow it.
     """
     render_children = _walker(ctx)
-    padding_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "panel_padding",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="padding",
+    padding = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "panel_padding",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="padding",
+        )
     )
-    padding = int(padding_value)
     inner_ctx = ctx.within(ctx.region.indent(padding, padding))
     inner_end = render_children(block["children"], inner_ctx, y + padding)
 
@@ -120,15 +119,16 @@ def draw_split(block: dict, ctx: RenderContext, y: int) -> int:
     """
     render_children = _walker(ctx)
     columns = block["children"]
-    gap_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "split_gap",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="gap",
+    gap = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "split_gap",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="gap",
+        )
     )
-    gap = int(gap_value)
     regions = ctx.region.divide(len(columns), gap=gap)
     ends = [
         render_children(child_blocks, ctx.within(region), y)

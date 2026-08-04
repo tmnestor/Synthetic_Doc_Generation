@@ -6,7 +6,6 @@ container positions correctly without knowing it is nested.
 """
 
 from decimal import Decimal
-from typing import Any
 
 from PIL import ImageDraw
 
@@ -221,24 +220,26 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     frame = block["frame"]
     grouping = block["grouping"]
     fill_color = block.get("fill_color")
-    fill_inset_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "table_fill_inset",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="fill_inset",
+    fill_inset = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_fill_inset",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="fill_inset",
+        )
     )
-    fill_inset = int(fill_inset_value)
-    group_gap_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "table_group_gap",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="group_gap",
+    group_gap = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_group_gap",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="group_gap",
+        )
     )
-    group_gap = int(group_gap_value)
     synthetic_after_header = block.get("synthetic_row_placement") == "after_first_group_header"
     label_inset_y = block.get("label_inset_y")
     if label_inset_y is not None:
@@ -253,17 +254,18 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             block_key="header_rule_top",
         )
     )
-    header_rule_gap_value: Any = resolve_param(
-        block,
-        ctx.layout,
-        "table_header_rule_gap",
-        layout_id=ctx.layout_id,
-        layout_path=ctx.layout_path,
-        block_key="header_rule_gap",
+    header_rule_gap = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_header_rule_gap",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="header_rule_gap",
+        )
     )
-    header_rule_gap = int(header_rule_gap_value)
     columns = block["columns"]
-    dividers: Any = resolve_param(
+    dividers = resolve_param(
         block,
         ctx.layout,
         "table_dividers",
@@ -648,30 +650,32 @@ def _draw_sub_lines(row: dict, columns: list, ctx: RenderContext, y: int) -> int
             )
         )
         size = resolve_role(ctx.layout, role)
-        offset_y_value: Any = resolve_param(
-            sub_line,
-            ctx.layout,
-            "table_offset_y",
-            layout_id=ctx.layout_id,
-            layout_path=ctx.layout_path,
-            block_key="offset_y",
+        offset_y = int(
+            resolve_param(
+                sub_line,
+                ctx.layout,
+                "table_offset_y",
+                layout_id=ctx.layout_id,
+                layout_path=ctx.layout_path,
+                block_key="offset_y",
+            )
         )
-        offset_y = int(offset_y_value)
         color = str(
             resolve_param(
                 sub_line, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path
             )
         )
         draw_text_left(ctx.draw, text, x, y + offset_y, load_font(size), fill=color)
-        sub_line_height_value: Any = resolve_param(
-            sub_line,
-            ctx.layout,
-            "table_sub_line_height",
-            layout_id=ctx.layout_id,
-            layout_path=ctx.layout_path,
-            block_key="height",
+        sub_line_height = int(
+            resolve_param(
+                sub_line,
+                ctx.layout,
+                "table_sub_line_height",
+                layout_id=ctx.layout_id,
+                layout_path=ctx.layout_path,
+                block_key="height",
+            )
         )
-        sub_line_height = int(sub_line_height_value)
         extra = max(extra, sub_line_height)
     return extra
 
