@@ -24,7 +24,7 @@ _LAYOUT_PATH = "config/layouts/invoices.yml"
 
 
 def render_invoice(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
-    """Render an ATO-compliant tax invoice from ground truth and layout config.
+    """Render a compliant Australian tax invoice from ground truth and layout config.
 
     Invoices are fixed-page, so this is page setup and nothing else: no crop and
     no vertical rescale (contrast generators/receipt.py, which is
