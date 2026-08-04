@@ -236,6 +236,29 @@ def generate(
         layouts = load_layout_registry(Path(doc_cfg["layouts"]))
         subdir = doc_cfg.get("output_subdir", dtype)
 
+        # Structurally validate every DSL layout before rendering anything, on
+        # the same terms `validate` does (skip layouts with no `body:` — the
+        # trust types still draw from Python). The DSL's guarantees — required
+        # defaults, line_advance role coverage, budget geometry, provider
+        # params — are enforced at validate time, so without this a missing key
+        # surfaces as a raw traceback part-way through a 420-image run instead
+        # of a diagnostic before the first file is written.
+        known = set(field_names_for(dtype))
+        for layout_id, layout in layouts.items():
+            if "body" not in layout:
+                continue
+            try:
+                validate_layout(
+                    layout,
+                    layout_id=layout_id,
+                    layout_path=str(doc_cfg["layouts"]),
+                    known_fields=known,
+                )
+            except LayoutSchemaError as exc:
+                rprint(f"[red]{dtype}: layout '{layout_id}' is invalid.[/red]")
+                rprint(f"[red]{exc}[/red]")
+                raise typer.Exit(1) from None
+
         clean_dir = output_dir / "clean" / subdir
         degraded_dir = output_dir / "degraded" / subdir
         clean_dir.mkdir(parents=True, exist_ok=True)
