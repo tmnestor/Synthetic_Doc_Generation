@@ -687,17 +687,36 @@ Expected: FAIL — advance is 25 (18 × 1.4), and both images are identical.
 
 - [ ] **Step 3: Replace `line_height` with `line_advance`**
 
+**`line_advance` is a per-role mapping, not a single number.** The advance it replaces was `int(size * 1.4)` — a function of the *role's* font size, not the layout's. A flat per-layout value silently retypesets every block whose role is not `body`, which is a real failure: it drove `nab_classic`'s panel to need 153px against a declared 150 and raised `ContainerError`. Declaring one absolute per layout would then require a hand-computed override on every non-body block — 29 of them across the bank layouts, magic numbers with no visible derivation, and one shared anchor forced apart. That is the drift this DSL exists to remove.
+
+```yaml
+    defaults:
+      line_advance:            # absolute pixels per role; int(font_sizes.<role> * 1.4)
+        header: 61             # int(44 * 1.4)
+        body: 44               # int(32 * 1.4)
+        footer: 25             # int(18 * 1.4)
+```
+
+A receipt layout declares the same shape with its own absolutes (`body: 20` against `font_size: 18`), which no ratio can express — 18 × 1.111 floors to 19, not 20. Per-role absolutes reproduce both document types exactly and keep every value visible in the YAML with its arithmetic in a comment.
+
 ```python
 def line_advance(layout: dict, block: dict, *, layout_id: str, layout_path: str) -> int:
-    """Return the vertical advance for one line, in pixels.
+    """Return the vertical advance for one line of this block's role, in pixels.
 
-    Replaces the former `line_height(size) = int(size * 1.4)`. The 1.4 ratio was
-    a Python literal that receipts contradict: `receipts.yml` declares
-    `line_height: 20` against `font_size: 18`, a ratio of 1.11.
+    Replaces the former `line_height(size) = int(size * 1.4)`. That ratio was a
+    Python literal receipts contradict: `receipts.yml` declares `line_height: 20`
+    against `font_size: 18`, a ratio of 1.11. The advance is role-dependent, so
+    the layout declares one absolute per role rather than one per layout.
     """
-    return int(resolve_param(block, layout, "line_advance",
-                             layout_id=layout_id, layout_path=layout_path))
+    role = str(resolve_param(block, layout, "role", layout_id=layout_id, layout_path=layout_path))
+    advances = resolve_param(block, layout, "line_advance",
+                             layout_id=layout_id, layout_path=layout_path)
+    if role not in advances:
+        raise ...  # four-element diagnostic naming the layout, the role, and defaults.line_advance
+    return int(advances[role])
 ```
+
+A block may still override with its own `line_advance:` as a bare integer, for the rare line that genuinely differs. When it does, that integer wins for that block regardless of role.
 
 Replace every `y + line_height(size)` with `y + line_advance(...)`. Delete `line_height`.
 
@@ -714,7 +733,7 @@ def font_for(layout: dict, block: dict, size: int, *, bold: bool, layout_id: str
 
 - [ ] **Step 5: Verify the seeded values against the ratio they replace**
 
-Task 3 already seeded `mono` and `line_advance`. Confirm each layout's `line_advance` equals `int(font_sizes.body * 1.4)` before running the snapshot — a transcription slip here is the single most likely cause of a Step 6 failure.
+Task 3 seeded `line_advance` as a single body-derived number. Rewrite it as the per-role mapping described in Step 3, and confirm every role's entry equals `int(font_sizes.<role> * 1.4)` for that layout — including roles used only by one or two blocks. A missing role must fail fast at validate time, not fall back to `body`; a silent fallback is how the flat form went wrong in the first place.
 
 ```bash
 conda run -n synthetic python -c "
