@@ -7,7 +7,7 @@ convention the existing renderers already use.
 from generators.common import Font, draw_separator_line, load_font
 from generators.layout_dsl.binding import interpolate
 from generators.layout_dsl.context import RenderContext
-from generators.layout_dsl.defaults import resolve_param
+from generators.layout_dsl.defaults import DefaultsError, resolve_param
 
 # Public: schema.py imports this as the single source of truth for validating
 # a `text` block's `align:` key, so a typo (e.g. "centre") fails at validate
@@ -49,24 +49,63 @@ def resolve_role(layout: dict, role: str) -> int:
 def line_advance(layout: dict, block: dict, *, layout_id: str, layout_path: str) -> int:
     """Return the vertical advance for one line, in pixels.
 
-    Replaces the former `line_height(size) = int(size * 1.4)`. The 1.4 ratio
-    was a Python literal that receipts contradict: `receipts.yml` declares
-    `line_height: 20` against `font_size: 18`, a ratio of 1.11 -- so the
-    advance now resolves through `resolve_param` (block key -> layout
-    `defaults:` -> fail fast) like every other primitive parameter, rather
-    than being derived from a role's font size.
+    Replaces the former `line_height(size) = int(size * 1.4)`. That ratio
+    was a function of the drawing block's own *role* font size -- CBA's
+    header logo line advanced by a different amount than its footer ABN
+    block. A single flat number per layout cannot express that (a first
+    attempt at this tried exactly that and needed 29 hand-computed
+    per-block overrides across the 8 bank layouts to stay pixel-identical
+    -- see the plan's fix-round-1 note). Receipts also contradict the old
+    ratio outright: `receipts.yml` declares `line_height: 20` against
+    `font_size: 18`, a ratio of 1.11, not 1.4.
+
+    So a layout's `defaults.line_advance` is a mapping of role -> pixels
+    (e.g. `{header: 61, body: 44, footer: 25}`), and this resolves the
+    block's own role first, then looks that role up in the mapping. A block
+    may instead carry its own bare-integer `line_advance:` to override the
+    per-role mapping entirely, for the rare line that is not simply "this
+    role's usual advance" -- `resolve_param`'s block-key-wins-over-layout
+    resolution already gives us that for free: if the block supplies a
+    plain int, that int is what comes back below, and the `isinstance`
+    check falls through the role lookup entirely.
 
     Args:
         layout: The resolved layout dict, carrying a `defaults:` mapping.
         block: The block requesting the advance; its own `line_advance` key,
-            if present, wins over the layout default.
+            if present, wins over the layout default (and if it is a bare
+            int, wins outright, without any role lookup).
         layout_id: Layout id, used in the diagnostic.
         layout_path: Path to the layout YAML, used in the diagnostic.
 
     Returns:
         The vertical advance in pixels.
+
+    Raises:
+        DefaultsError: If the block's role is absent from a layout-level
+            `line_advance` mapping (and the block carries no override of
+            its own).
     """
-    return int(resolve_param(block, layout, "line_advance", layout_id=layout_id, layout_path=layout_path))
+    value = resolve_param(block, layout, "line_advance", layout_id=layout_id, layout_path=layout_path)
+    if not isinstance(value, dict):
+        return int(value)
+
+    role = str(resolve_param(block, layout, "role", layout_id=layout_id, layout_path=layout_path))
+    if role not in value:
+        raise DefaultsError(
+            "Missing line_advance for role.\n"
+            f"  What:     layout '{layout_id}' declares line_advance for role(s) "
+            f"{sorted(value)}, but this block's role is '{role}'.\n"
+            f"  Where:    {layout_path} -> {layout_id}.defaults.line_advance.{role}\n"
+            "  Expected: a defaults.line_advance mapping covering every role this "
+            f"layout draws, e.g.\n"
+            f"              defaults:\n"
+            f"                line_advance:\n"
+            f"                  {role}: <int(font_sizes.{role} * 1.4)>\n"
+            f"  Recover:  add '{role}:' under {layout_id}.defaults.line_advance, or "
+            "set 'line_advance: <int>' directly on the block if it needs a value "
+            "unrelated to any role."
+        )
+    return int(value[role])
 
 
 def font_for(
