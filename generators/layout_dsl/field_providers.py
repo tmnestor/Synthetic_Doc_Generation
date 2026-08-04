@@ -16,10 +16,14 @@ and every placeholder check would degrade from a startup failure to a
 render-time one.
 """
 
+import hashlib
 from collections.abc import Callable, Iterable
+from decimal import Decimal
 from pathlib import Path
 
 import yaml
+
+from generators.payment_block import load_pos_pools
 
 FieldProvider = Callable[[dict, dict], dict[str, str]]
 
@@ -335,3 +339,80 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
         emitted_by.update(dict.fromkeys(result, name))
 
     return {**entry, "fields": {**entry["fields"], **derived}}
+
+
+@field_provider(
+    "receipt_pos",
+    params=frozenset({"pools_key"}),
+    emits=("POS_TIME", "POS_REGISTER", "POS_STAFF", "RECEIPT_NUMBER"),
+)
+def receipt_pos(entry: dict, params: dict) -> dict[str, str]:
+    """Derive a receipt's POS time, register, staff name, and receipt number.
+
+    Moves the arithmetic from `generators/receipt.py`'s now-legacy
+    `_derive_receipt_details` / `_derive_receipt_number` verbatim -- same two
+    digests, same hex slices -- reading its pools from
+    `generators.payment_block.load_pos_pools()` instead of the module-level
+    `_STAFF_NAMES` list and inline hour/register ranges those functions used.
+    `payment_block.derive_payment` consumes hex chars 10-40 of the same
+    `pos:` digest this reads 0-8 of; the two must never collide.
+
+    Args:
+        entry: The ground-truth entry. Reads `entry["case_id"]` and
+            `entry["fields"]["INVOICE_DATE"]`.
+        params: Unused beyond `pools_key` (self-documenting in the layout;
+            `pos_terminal` is the only pool this provider ever loads, exactly
+            as `derive_payment` always loads `payment_terminal`).
+
+    Returns:
+        `{"POS_TIME": ..., "POS_REGISTER": ..., "POS_STAFF": ..., "RECEIPT_NUMBER": ...}`.
+    """
+    pools = load_pos_pools()
+    case_id = entry.get("case_id", "")
+    invoice_date = entry["fields"].get("INVOICE_DATE", "")
+
+    pos_digest = hashlib.sha256(f"{case_id}:pos:{invoice_date}".encode()).hexdigest()
+    hour = pools["hour_min"] + int(pos_digest[0:2], 16) % pools["hour_span"]
+    minute = int(pos_digest[2:4], 16) % 60
+    register = pools["register_min"] + int(pos_digest[4:6], 16) % pools["register_span"]
+    staff_names = pools["staff_names"]
+    staff = staff_names[int(pos_digest[6:8], 16) % len(staff_names)]
+
+    number_digest = hashlib.sha256(f"{case_id}:{invoice_date}".encode()).hexdigest()
+    digest_length = pools["receipt_number_digest_length"]
+    receipt_number = f"{pools['receipt_number_prefix']}{number_digest[:digest_length].upper()}"
+
+    return {
+        "POS_TIME": f"{hour:02d}:{minute:02d}",
+        "POS_REGISTER": f"{register:02d}",
+        "POS_STAFF": staff,
+        "RECEIPT_NUMBER": receipt_number,
+    }
+
+
+@field_provider("computed_totals", params=frozenset(), emits=("SUBTOTAL_AMOUNT",))
+def computed_totals(entry: dict, params: dict) -> dict[str, str]:
+    """Derive `SUBTOTAL_AMOUNT` as `TOTAL_AMOUNT` minus `GST_AMOUNT`.
+
+    Matches `generators/receipt.py:303`'s `str(Decimal(total) - Decimal(gst))`
+    verbatim. Emits nothing -- not even a zero -- when either input is absent
+    or `NOT_FOUND`, so a `{SUBTOTAL_AMOUNT}` placeholder is suppressed by
+    `when:` rather than rendering a fabricated value; `emits` is an upper
+    bound on what a provider may return, not a promise every call returns it
+    (see `apply_field_providers`'s undeclared-key check above, which only
+    rejects extra keys, never absent ones).
+
+    Args:
+        entry: The ground-truth entry. Reads `entry["fields"]["TOTAL_AMOUNT"]`
+            and `entry["fields"]["GST_AMOUNT"]`.
+        params: Unused; this provider derives purely from `entry["fields"]`.
+
+    Returns:
+        `{"SUBTOTAL_AMOUNT": ...}`, or `{}` when either input is missing.
+    """
+    fields = entry["fields"]
+    total = fields.get("TOTAL_AMOUNT")
+    gst = fields.get("GST_AMOUNT")
+    if not total or not gst or total == "NOT_FOUND" or gst == "NOT_FOUND":
+        return {}
+    return {"SUBTOTAL_AMOUNT": str(Decimal(total) - Decimal(gst))}

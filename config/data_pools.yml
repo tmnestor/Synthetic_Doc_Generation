@@ -209,6 +209,22 @@ payment_terminal:
     tendered_label: CASH TENDERED
     change_label: CHANGE
 
+# Deterministic POS values for receipts, derived from
+# sha256("{case_id}:pos:{invoice_date}"). Hex slices 0-8 belong to this block;
+# payment_terminal (above) consumes 10-40 of the same digest. Every key is
+# required; generators/payment_block.py's load_pos_pools fails fast on any
+# omission.
+pos_terminal:
+  staff_names:
+    [Sarah, James, Emma, Liam, Olivia, Noah, Chloe, Jack,
+     Mia, Ethan, Ava, Will, Sophie, Ben, Isla, Tom]
+  hour_min: 8
+  hour_span: 12          # 08:00-19:59
+  register_min: 1
+  register_span: 8       # 01-08
+  receipt_number_prefix: "R-"
+  receipt_number_digest_length: 6
+
 banks:
   - {code: cba, name: Commonwealth Bank, bsb_prefix: "06", header_color: "#FFD700", header_bg: "#000000"}
   - {code: westpac, name: Westpac, bsb_prefix: "03", header_color: "#FFFFFF", header_bg: "#D5002B"}
