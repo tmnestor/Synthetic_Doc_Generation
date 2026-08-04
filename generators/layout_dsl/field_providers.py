@@ -451,9 +451,10 @@ def receipt_payment(entry: dict, params: dict) -> dict[str, str]:
     scheme still comes from its bank row rather than the weighted pool.
 
     Deliberately never emits a purchase total: the slip's `Purchase   AUD`
-    line binds `{TOTAL_AMOUNT}` directly (see `PaymentDetails.purchase_total`
-    in payment_block.py), so a second, provider-derived copy of a scored value
-    could silently drift from it.
+    line binds `{TOTAL_AMOUNT}` directly, so a second, provider-derived copy
+    of a scored value could silently drift from it. `PaymentDetails` carries
+    no purchase total either, for the same reason -- see its docstring in
+    payment_block.py.
 
     The three slip variants -- card, wallet, cash -- are selected by the
     receipt body's `when:` on these emitted keys, not by a branch here: every value
