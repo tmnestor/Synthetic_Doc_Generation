@@ -300,7 +300,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             weight, `table_header_bold`), `row_inset_y` (the cells' ink inset
             inside the row band, `table_row_inset_y` — see `_draw_row`; it
             moves cells only, not the dedicated date sub-header row `grouping:
-            dedicated_row` draws below, which no layout combines it with) and
+            dedicated_row` draws below, so combining the two is rejected
+            below rather than given an arbitrary meaning) and
             `cell_line_spacing` (a budgeted cell's per-line advance,
             `table_cell_line_spacing` — see `CELL_LINE_SPACINGS`).
         ctx: Render context.
@@ -311,8 +312,9 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
 
     Raises:
         TableError: If no row height is available from the block or layout,
-            or a row's `bold` collection (see `_validate_bold_spec`) names a
-            column this table does not have.
+            a row's `bold` collection (see `_validate_bold_spec`) names a
+            column this table does not have, or `grouping: dedicated_row` is
+            combined with a non-zero `row_inset_y`.
     """
     if not bool(
         resolve_param(
@@ -407,6 +409,27 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             block_key="row_inset_y",
         )
     )
+    # `row_inset_y` insets the cells' ink inside their row band, but the bold
+    # date sub-header row `grouping: dedicated_row` inserts is drawn by this
+    # function directly and takes no inset -- so combining the two silently
+    # splits one table's vertical rhythm in half. No layout does it, and what
+    # it should mean has never been decided, so it fails here rather than
+    # rendering something nobody chose. This cannot live in schema.py's
+    # `_validate_table`: `row_inset_y` may come from the layout's `defaults:`,
+    # which that function does not see.
+    if grouping == "dedicated_row" and row_inset_y:
+        raise TableError(
+            "Undefined table row geometry.\n"
+            f"  What:     grouping: dedicated_row is combined with row_inset_y {row_inset_y}, "
+            "which moves the cells but not the bold date sub-header row grouping inserts.\n"
+            f"  Where:    {ctx.layout_path} -> {ctx.layout_id} (a table block's `row_inset_y`, "
+            "or defaults.table_row_inset_y)\n"
+            "  Expected: row_inset_y: 0 alongside grouping: dedicated_row, e.g.\n"
+            "              {type: table, grouping: dedicated_row, row_inset_y: 0, ...}\n"
+            "            — or grouping: none / inline if the cells really need an inset.\n"
+            "  Recover:  set row_inset_y: 0 on this table block (it overrides "
+            f"{ctx.layout_id}.defaults.table_row_inset_y), or change the table's grouping."
+        )
     cell_line_spacing = _resolve_cell_line_spacing(block, ctx)
     mono = bool(
         resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
