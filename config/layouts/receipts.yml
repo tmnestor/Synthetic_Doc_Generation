@@ -1,8 +1,12 @@
-# Every primitive parameter a receipt layout must supply a default for. All six
-# receipt layouts share these -- they differ only in page geometry, type size
-# and footer wording -- so the anchor carries the values and each layout merges
-# it, leaving `validate_layout`'s per-layout coverage check (schema.py) seeing
-# every key explicitly once PyYAML expands `<<:`.
+# Receipt layouts. Visual DNA lives in the shared `body:` tree below; each
+# layout supplies only what genuinely differs -- page geometry, type size, line
+# pitch, per-field budgets and footer wording.
+#
+# Every primitive parameter a receipt layout must supply a default for, minus
+# the two that are a function of the layout's own line pitch (`line_advance`
+# and `spacer_height`), which each layout declares itself. `validate_layout`'s
+# per-layout coverage check (schema.py) still sees every key explicitly once
+# PyYAML expands `<<:`.
 #
 # Values are the legacy renderer's Python literals, transcribed verbatim:
 # `mono: true` is `receipt.py`'s `is_mono` (every layout declared
@@ -20,7 +24,6 @@ _receipt_defaults_values: &receipt_defaults_values
   rule_pad_above: 0
   rule_pad_below: 0
   rule_fill_char: "-"
-  spacer_height: 0
   pair_value_align: left
   pair_min_gap: 0
   table_header: false
@@ -48,6 +51,108 @@ _receipt_field_providers: &receipt_field_providers
   - {name: receipt_payment, params: {pools_key: payment_terminal}}
   - {name: computed_totals, params: {}}
 
+# All six layouts drew the identical eleven-section sequence in the legacy
+# renderer -- they differed only in the values each layout declares below, so
+# the body itself is shared. Every spacer takes its height from the layout's
+# own `defaults.spacer_height` (legacy's `line_h // 4`), and the line-item
+# table its pitch from the layout's own `row_height` (legacy's `line_h`).
+_receipt_body: &receipt_body
+  # --- merchant header ---------------------------------------------------
+  - {type: text, content: "{SUPPLIER_NAME}", align: center, bold: true,
+     budget: SUPPLIER_NAME, field: SUPPLIER_NAME}
+  - {type: text, content: "{BUSINESS_ADDRESS}", align: center,
+     budget: BUSINESS_ADDRESS, field: BUSINESS_ADDRESS, when: BUSINESS_ADDRESS}
+  - {type: text, content: "ABN: {BUSINESS_ABN}", align: center,
+     budget: ABN_LINE, field: BUSINESS_ABN, when: BUSINESS_ABN}
+  - {type: spacer}
+  - {type: rule}
+  # --- POS detail --------------------------------------------------------
+  - type: split
+    children:
+      - [{type: pair, label: "Date", value: "{INVOICE_DATE}", field: INVOICE_DATE}]
+      - [{type: text, content: "Time: {POS_TIME}", align: right}]
+  - type: split
+    children:
+      - [{type: text, content: "Reg: {POS_REGISTER}  Staff: {POS_STAFF}"}]
+      - [{type: text, content: "#{RECEIPT_NUMBER}", align: right}]
+  - {type: rule}
+  # --- line items --------------------------------------------------------
+  # `prefix_key`/`prefix_field` record the "2x " quantity marker the row
+  # provider concatenates onto the description, which legacy captured as its
+  # own LINE_ITEM_QUANTITIES[i] box.
+  - type: table
+    rows: receipt_line_items
+    frame: plain
+    grouping: none
+    params:
+      fields: {description: LINE_ITEM_DESCRIPTIONS, quantity: LINE_ITEM_QUANTITIES,
+               price: LINE_ITEM_PRICES, total: LINE_ITEM_TOTAL_PRICES}
+      quantity_prefix_format: "{quantity}x "
+    columns:
+      - {key: description, label: Description, align: left, x: 0,
+         budget: LINE_ITEM_DESC, field: LINE_ITEM_DESCRIPTIONS,
+         prefix_key: quantity_prefix, prefix_field: LINE_ITEM_QUANTITIES}
+      - {key: total, label: Amount, align: right, x_right: 0,
+         budget: LINE_ITEM_AMOUNT, currency: plain, field: LINE_ITEM_TOTAL_PRICES}
+  - {type: rule}
+  # --- totals ------------------------------------------------------------
+  # SUBTOTAL is suppressed on its own derived key rather than GST_AMOUNT:
+  # `computed_totals` emits it only when both TOTAL and GST are present, which
+  # is exactly legacy's `if gst and total:` guard.
+  - {type: pair, label: "SUBTOTAL", value: "{SUBTOTAL_AMOUNT}", value_align: right,
+     currency: plain, when: SUBTOTAL_AMOUNT}
+  - {type: pair, label: "GST", value: "{GST_AMOUNT}", value_align: right,
+     currency: plain, field: GST_AMOUNT, when: GST_AMOUNT}
+  - {type: pair, label: "TOTAL", value: "{TOTAL_AMOUNT}", value_align: right,
+     currency: symbol, bold: true, field: TOTAL_AMOUNT}
+  - {type: rule}
+  # --- EFTPOS terminal slip ----------------------------------------------
+  # Three variants, selected entirely by `when:` over the receipt_payment
+  # provider's emits. PAYMENT_AID is the card/wallet discriminator: every
+  # scheme declares an EMV application identifier and a cash payment has none,
+  # so it is NOT_FOUND there and `is_present` treats it as absent.
+  # PAYMENT_WALLET_LABEL additionally marks the wallet variant.
+  - {type: text, content: "CUSTOMER COPY", align: center, bold: true,
+     budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
+  - {type: text, content: "{PAYMENT_ACQUIRER}", align: center,
+     budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
+  - {type: spacer, when: PAYMENT_AID}
+  - {type: text, content: "CONTACTLESS - {PAYMENT_WALLET_LABEL}",
+     budget: PAYMENT_LINE, when: PAYMENT_WALLET_LABEL}
+  - {type: text, content: "{PAYMENT_SCHEME_DISPLAY} {PAYMENT_ACCOUNT_TYPE}",
+     budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: text, content: "AID: {PAYMENT_AID}", budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: text, content: "Card: {PAYMENT_MASKED_PAN} {PAYMENT_ENTRY_MODE}",
+     budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: text, content: "PSN: {PAYMENT_PSN}, ATC: {PAYMENT_ATC}",
+     budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: spacer, when: PAYMENT_AID}
+  # Binds {TOTAL_AMOUNT} directly: receipt_payment deliberately emits no
+  # purchase total, so the printed amount can never drift from the scored
+  # field. Three spaces in the label, as legacy printed it.
+  - {type: pair, label: "Purchase   AUD", value: "{TOTAL_AMOUNT}", value_align: right,
+     currency: symbol, when: PAYMENT_AID}
+  - {type: text, content: "APPROVED   00", budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: spacer, when: PAYMENT_AID}
+  - {type: text, content: "Terminal ID: {PAYMENT_TERMINAL_ID}",
+     budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: text, content: "Transaction Ref: {PAYMENT_TRANSACTION_REF}",
+     budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: text, content: "{PAYMENT_TIMESTAMP}", budget: PAYMENT_LINE, when: PAYMENT_AID}
+  - {type: spacer, when: PAYMENT_AID}
+  - {type: text, content: "Retain copy for your records", align: center,
+     budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
+  # Cash variant: the provider already formats both amounts, so neither
+  # carries `currency:`.
+  - {type: pair, label: "CASH TENDERED", value: "{PAYMENT_TENDERED}",
+     value_align: right, when: PAYMENT_TENDERED}
+  - {type: pair, label: "CHANGE", value: "{PAYMENT_CHANGE}", value_align: right,
+     bold: true, when: PAYMENT_CHANGE}
+  - {type: rule}
+  # --- footer ------------------------------------------------------------
+  - {type: spacer}
+  - {type: text, from_layout: footer_text, align: center}
+
 layouts:
   receipt_thermal_80mm:
     format: thermal
@@ -58,6 +163,7 @@ layouts:
     # and cropped to the y the engine returns. Replaces the legacy renderer's
     # `max_h = 4000` literal.
     canvas_ceiling: 4000
+    row_height: 20
     footer_text: "Thank you for shopping with us"
     font_sizes: {body: 18}
     defaults:
@@ -65,6 +171,7 @@ layouts:
       # Absolute pixels, not int(size * 1.4): a receipt's line pitch is 20px
       # against an 18pt body, a ratio of 1.11.
       line_advance: {body: 20}
+      spacer_height: 5              # legacy: line_h // 4
     field_providers: *receipt_field_providers
     # Per-field pixel budgets (width = content box = width - 2*margin for centered
     # header fields; line-item desc/amount derived from geometry). fit_text keeps
@@ -78,111 +185,22 @@ layouts:
       LINE_ITEM_AMOUNT: {width: 70, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
       PAYMENT_LINE: {width: 396, fit: shrink, min_font: 8, max_lines: 1}
-    body:
-      # --- merchant header -------------------------------------------------
-      - {type: text, content: "{SUPPLIER_NAME}", align: center, bold: true,
-         budget: SUPPLIER_NAME, field: SUPPLIER_NAME}
-      - {type: text, content: "{BUSINESS_ADDRESS}", align: center,
-         budget: BUSINESS_ADDRESS, field: BUSINESS_ADDRESS, when: BUSINESS_ADDRESS}
-      - {type: text, content: "ABN: {BUSINESS_ABN}", align: center,
-         budget: ABN_LINE, field: BUSINESS_ABN, when: BUSINESS_ABN}
-      - {type: spacer, height: 5}            # legacy: line_h // 4
-      - {type: rule}
-      # --- POS detail ------------------------------------------------------
-      - type: split
-        children:
-          - [{type: pair, label: "Date", value: "{INVOICE_DATE}", field: INVOICE_DATE}]
-          - [{type: text, content: "Time: {POS_TIME}", align: right}]
-      - type: split
-        children:
-          - [{type: text, content: "Reg: {POS_REGISTER}  Staff: {POS_STAFF}"}]
-          - [{type: text, content: "#{RECEIPT_NUMBER}", align: right}]
-      - {type: rule}
-      # --- line items ------------------------------------------------------
-      # `prefix_key`/`prefix_field` record the "2x " quantity marker the row
-      # provider concatenates onto the description, which legacy captured as
-      # its own LINE_ITEM_QUANTITIES[i] box.
-      - type: table
-        rows: receipt_line_items
-        frame: plain
-        grouping: none
-        row_height: 20
-        params:
-          fields: {description: LINE_ITEM_DESCRIPTIONS, quantity: LINE_ITEM_QUANTITIES,
-                   price: LINE_ITEM_PRICES, total: LINE_ITEM_TOTAL_PRICES}
-          quantity_prefix_format: "{quantity}x "
-        columns:
-          - {key: description, label: Description, align: left, x: 0,
-             budget: LINE_ITEM_DESC, field: LINE_ITEM_DESCRIPTIONS,
-             prefix_key: quantity_prefix, prefix_field: LINE_ITEM_QUANTITIES}
-          - {key: total, label: Amount, align: right, x_right: 0,
-             budget: LINE_ITEM_AMOUNT, currency: plain, field: LINE_ITEM_TOTAL_PRICES}
-      - {type: rule}
-      # --- totals ----------------------------------------------------------
-      # SUBTOTAL is suppressed on its own derived key rather than GST_AMOUNT:
-      # `computed_totals` emits it only when both TOTAL and GST are present,
-      # which is exactly legacy's `if gst and total:` guard.
-      - {type: pair, label: "SUBTOTAL", value: "{SUBTOTAL_AMOUNT}", value_align: right,
-         currency: plain, when: SUBTOTAL_AMOUNT}
-      - {type: pair, label: "GST", value: "{GST_AMOUNT}", value_align: right,
-         currency: plain, field: GST_AMOUNT, when: GST_AMOUNT}
-      - {type: pair, label: "TOTAL", value: "{TOTAL_AMOUNT}", value_align: right,
-         currency: symbol, bold: true, field: TOTAL_AMOUNT}
-      - {type: rule}
-      # --- EFTPOS terminal slip --------------------------------------------
-      # Three variants, selected entirely by `when:` over the receipt_payment
-      # provider's emits. PAYMENT_AID is the card/wallet discriminator: every
-      # scheme declares an EMV application identifier, and a cash payment has
-      # none, so it is NOT_FOUND there and `is_present` treats it as absent.
-      # PAYMENT_WALLET_LABEL additionally marks the wallet variant.
-      - {type: text, content: "CUSTOMER COPY", align: center, bold: true,
-         budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
-      - {type: text, content: "{PAYMENT_ACQUIRER}", align: center,
-         budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
-      - {type: spacer, height: 5, when: PAYMENT_AID}
-      - {type: text, content: "CONTACTLESS - {PAYMENT_WALLET_LABEL}",
-         budget: PAYMENT_LINE, when: PAYMENT_WALLET_LABEL}
-      - {type: text, content: "{PAYMENT_SCHEME_DISPLAY} {PAYMENT_ACCOUNT_TYPE}",
-         budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: text, content: "AID: {PAYMENT_AID}", budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: text, content: "Card: {PAYMENT_MASKED_PAN} {PAYMENT_ENTRY_MODE}",
-         budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: text, content: "PSN: {PAYMENT_PSN}, ATC: {PAYMENT_ATC}",
-         budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: spacer, height: 5, when: PAYMENT_AID}
-      # Binds {TOTAL_AMOUNT} directly: receipt_payment deliberately emits no
-      # purchase total, so the printed amount can never drift from the scored
-      # field. Three spaces in the label, as legacy printed it.
-      - {type: pair, label: "Purchase   AUD", value: "{TOTAL_AMOUNT}", value_align: right,
-         currency: symbol, when: PAYMENT_AID}
-      - {type: text, content: "APPROVED   00", budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: spacer, height: 5, when: PAYMENT_AID}
-      - {type: text, content: "Terminal ID: {PAYMENT_TERMINAL_ID}",
-         budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: text, content: "Transaction Ref: {PAYMENT_TRANSACTION_REF}",
-         budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: text, content: "{PAYMENT_TIMESTAMP}", budget: PAYMENT_LINE, when: PAYMENT_AID}
-      - {type: spacer, height: 5, when: PAYMENT_AID}
-      - {type: text, content: "Retain copy for your records", align: center,
-         budget: PAYMENT_ACQUIRER, when: PAYMENT_AID}
-      # Cash variant: the provider already formats both amounts, so neither
-      # carries `currency:`.
-      - {type: pair, label: "CASH TENDERED", value: "{PAYMENT_TENDERED}",
-         value_align: right, when: PAYMENT_TENDERED}
-      - {type: pair, label: "CHANGE", value: "{PAYMENT_CHANGE}", value_align: right,
-         bold: true, when: PAYMENT_CHANGE}
-      - {type: rule}
-      # --- footer ----------------------------------------------------------
-      - {type: spacer, height: 5}            # legacy: line_h // 4
-      - {type: text, from_layout: footer_text, align: center}
+    body: *receipt_body
 
   receipt_thermal_57mm:
     format: thermal
     width: 310
     margin: 8
-    line_height: 16
-    font_size: 14
-    font_family: monospace
+    content_width: 294
+    canvas_ceiling: 4000
+    row_height: 16
+    footer_text: "Thank you"
+    font_sizes: {body: 14}
+    defaults:
+      <<: *receipt_defaults_values
+      line_advance: {body: 16}
+      spacer_height: 4              # legacy: line_h // 4
+    field_providers: *receipt_field_providers
     field_budgets:
       SUPPLIER_NAME: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
       BUSINESS_ADDRESS: {width: 294, fit: shrink_then_wrap, min_font: 10, max_lines: 2}
@@ -192,21 +210,7 @@ layouts:
       LINE_ITEM_AMOUNT: {width: 52, fit: shrink, min_font: 10, max_lines: 1}
       PAYMENT_ACQUIRER: {width: 294, fit: shrink, min_font: 8, max_lines: 1}
       PAYMENT_LINE: {width: 294, fit: shrink, min_font: 8, max_lines: 1}
-    sections:
-      - type: header
-        name: merchant_header
-      - type: separator
-      - type: receipt_meta
-      - type: separator
-      - type: itemized
-        name: line_items
-      - type: separator
-      - type: totals
-      - type: separator
-      - type: payment
-      - type: separator
-      - type: footer
-        text: "Thank you"
+    body: *receipt_body
 
   receipt_retail_tax:
     format: thermal
