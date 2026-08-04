@@ -106,11 +106,14 @@ def draw_split(block: dict, ctx: RenderContext, y: int) -> int:
 
     Args:
         block: The `split` block, carrying `children` (a list of block lists,
-            one per column), an optional `gap`, and an optional `divider`
-            (draws a vertical rule down the middle of each gap, e.g. Westpac's
-            rewards panel, which splits into a points summary and a message
-            column separated by a ruled line — decorative only, so unlike
-            column geometry it is never checked by the equivalence harness).
+            one per column), an optional `gap`, an optional `widths` (explicit
+            per-column pixel widths, e.g. invoice totals' fixed 400px column
+            at the right edge — equal division cannot express that), and an
+            optional `divider` (draws a vertical rule down the middle of each
+            gap, e.g. Westpac's rewards panel, which splits into a points
+            summary and a message column separated by a ruled line —
+            decorative only, so unlike column geometry it is never checked by
+            the equivalence harness).
         ctx: Render context.
         y: Current y-cursor.
 
@@ -129,7 +132,11 @@ def draw_split(block: dict, ctx: RenderContext, y: int) -> int:
             block_key="gap",
         )
     )
-    regions = ctx.region.divide(len(columns), gap=gap)
+    widths = block.get("widths")
+    if widths is not None:
+        regions = ctx.region.divide_widths([int(w) for w in widths], gap=gap)
+    else:
+        regions = ctx.region.divide(len(columns), gap=gap)
     ends = [
         render_children(child_blocks, ctx.within(region), y)
         for child_blocks, region in zip(columns, regions, strict=True)

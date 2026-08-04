@@ -102,6 +102,52 @@ class Region:
             x += width + gap
         return regions
 
+    def divide_widths(self, widths: list[int], gap: int) -> list["Region"]:
+        """Split this region into columns of explicit widths, separated by `gap` px.
+
+        Unlike `divide`, columns need not be equal: invoice totals occupy a
+        fixed 400px column at the page's right edge (`right_edge - 400`),
+        which equal division cannot express. Each column's x is the previous
+        column's right edge plus `gap` -- the same stepping `divide` uses --
+        so the two behave consistently wherever a layout mixes them.
+
+        Args:
+            widths: Column widths in pixels, left to right.
+            gap: Pixels between adjacent columns.
+
+        Returns:
+            `len(widths)` Regions, left to right.
+
+        Raises:
+            ValueError: If `sum(widths) + gap * (len(widths) - 1)` exceeds
+                `self.width`.
+        """
+        total = sum(widths) + gap * (len(widths) - 1)
+        if total > self.width:
+            raise self._divide_widths_error(widths, gap, total)
+        regions: list[Region] = []
+        x = self.x
+        for width in widths:
+            regions.append(Region(x=x, width=width))
+            x += width + gap
+        return regions
+
+    def _divide_widths_error(self, widths: list[int], gap: int, total: int) -> ValueError:
+        """Build a four-element diagnostic for divide_widths widths that overflow the region.
+
+        `split` is the only caller (see `generators/layout_dsl/primitives_container.py`),
+        so the remediation names its `widths` key.
+        """
+        return ValueError(
+            "Region.divide_widths overflows the region.\n"
+            f"  What:     widths {widths} with gap={gap} need {total}px but this region "
+            f"is only {self.width}px.\n"
+            "  Where:    config/layouts/*.yml -> a split block's `widths` key.\n"
+            f"  Expected: sum(widths) + gap * (len(widths) - 1) <= {self.width}, e.g. "
+            "shrink one or more of the declared widths.\n"
+            "  Recover:  reduce a width in split.widths, or reduce the split's gap."
+        )
+
     def _divide_error(self, n: int, gap: int, column: int) -> ValueError:
         """Build a four-element diagnostic for a divide that leaves no column width.
 
