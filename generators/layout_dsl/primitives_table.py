@@ -36,6 +36,18 @@ _ABSENT = "NOT_FOUND"
 # other value, including "center", as left; there is no third option here.
 COLUMN_ALIGNMENTS = ("left", "right")
 
+# Public: schema.py imports this to validate a table's `cell_line_spacing:` key
+# (layout default `table_cell_line_spacing`). It selects the per-line advance a
+# *budgeted* cell's fitted text draws with, which is also the height of the box
+# it records:
+#   row_height -- the table's own row pitch, what every bank and receipt table's
+#                 legacy renderer passed.
+#   font       -- the fitted font's own line height, i.e. no line_spacing at
+#                 all, which is what the legacy invoice renderer passed. Its
+#                 line-item description cells sit in a 52px band but record a
+#                 28px-tall box, so the two are genuinely independent.
+CELL_LINE_SPACINGS = ("row_height", "font")
+
 # Frames whose header label block is vertically centred within header_height
 # rather than pinned to its top: `bordered` draws an outlined box, `filled`
 # a solid one, and both need their labels centred inside it, matching the
@@ -61,6 +73,29 @@ def column_x(column: dict, ctx: RenderContext) -> int:
     if "x" in column:
         return ctx.region.x + int(column["x"])
     return ctx.region.right + int(column["x_right"])
+
+
+def _label_anchor(column: dict) -> dict:
+    """Return the anchor spec this column's *header label* positions against.
+
+    A column's header label normally sits at the same anchor as its cells. The
+    legacy invoice renderer breaks that: its "Unit Price" and "Total" labels
+    are drawn at the column's own left edge while the amounts beneath them
+    right-align 200px further along, so the label and the cells have genuinely
+    independent anchors. `label_x` declares the label's own offset from the
+    region's left edge; without it the column's own `x`/`x_right` is used
+    unchanged, which is every bank and receipt column.
+
+    Args:
+        column: The column spec.
+
+    Returns:
+        A spec `column_x` can resolve — the column itself, or a one-key
+        override carrying only the label's own offset.
+    """
+    if "label_x" in column:
+        return {"x": column["label_x"]}
+    return column
 
 
 def _resolve_row_height(block: dict, ctx: RenderContext) -> int:
@@ -89,6 +124,51 @@ def _resolve_row_height(block: dict, ctx: RenderContext) -> int:
         "  Recover:  add row_height to the layout (config/layouts/*.yml), or set "
         "it on this table block if it needs a value other than the layout's."
     )
+
+
+def _resolve_cell_line_spacing(block: dict, ctx: RenderContext) -> str:
+    """Resolve and check the per-line advance a budgeted cell draws with.
+
+    Checked here rather than only in `schema.py` because the value may come
+    from the layout's `defaults.table_cell_line_spacing` as well as from the
+    block's own `cell_line_spacing:` key, and schema.py validates the body's
+    blocks, not the values inside a `defaults:` mapping. An unrecognised
+    string would otherwise silently select the `font` branch — pixel-identical
+    for an unbudgeted table, and a wrong box height for a budgeted one.
+
+    Args:
+        block: The `table` block.
+        ctx: Render context supplying the layout.
+
+    Returns:
+        One of `CELL_LINE_SPACINGS`.
+
+    Raises:
+        TableError: If the resolved value is not one of `CELL_LINE_SPACINGS`.
+    """
+    value = str(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_cell_line_spacing",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="cell_line_spacing",
+        )
+    )
+    if value not in CELL_LINE_SPACINGS:
+        raise TableError(
+            "Unknown table cell line spacing.\n"
+            f"  What:     cell_line_spacing {value!r} is not a recognised mode.\n"
+            f"  Where:    {ctx.layout_path} -> {ctx.layout_id} (a table block's "
+            "`cell_line_spacing`, or defaults.table_cell_line_spacing)\n"
+            f"  Expected: one of {list(CELL_LINE_SPACINGS)} — 'row_height' advances a "
+            "budgeted cell by the table's own row pitch, 'font' by the fitted font's "
+            "own line height.\n"
+            f"  Recover:  set cell_line_spacing: to one of {list(CELL_LINE_SPACINGS)}, or "
+            f"fix {ctx.layout_id}.defaults.table_cell_line_spacing."
+        )
+    return value
 
 
 def _cell_text(row: dict, column: dict) -> str:
@@ -212,7 +292,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             `tax_invoice_mixed` draws the same `LINE_ITEM_*` list into two
             tables (a taxable/GST-free split display), and a second recorded
             box for the same field would collide with the first, since one
-            ground-truth value has exactly one bounding box.
+            ground-truth value has exactly one bounding box. Four more are
+            typographic: `role` (the font-size role every label and cell
+            draws at — a table used to be pinned to "body" in Python, which
+            the invoice tables, drawn one role larger than their own page's
+            name lines, cannot express), `header_bold` (the column headings'
+            weight, `table_header_bold`), `row_inset_y` (the cells' ink inset
+            inside the row band, `table_row_inset_y` — see `_draw_row`) and
+            `cell_line_spacing` (a budgeted cell's per-line advance,
+            `table_cell_line_spacing` — see `CELL_LINE_SPACINGS`).
         ctx: Render context.
         y: Current y-cursor.
 
@@ -293,7 +381,31 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
         block_key="dividers",
     )
     row_height = _resolve_row_height(block, ctx)
-    body_size = resolve_role(ctx.layout, "body")
+    role = str(
+        resolve_param(block, ctx.layout, "role", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    )
+    text_size = resolve_role(ctx.layout, role)
+    header_bold = bool(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_header_bold",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="header_bold",
+        )
+    )
+    row_inset_y = int(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_row_inset_y",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="row_inset_y",
+        )
+    )
+    cell_line_spacing = _resolve_cell_line_spacing(block, ctx)
     mono = bool(
         resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
@@ -323,7 +435,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             columns,
             ctx,
             y,
-            size=body_size,
+            size=text_size,
+            bold=header_bold,
             frame=frame,
             header_height=header_height,
             fill_height=fill_height,
@@ -355,7 +468,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                 str(row.get("date", "")),
                 ctx.region.x,
                 y,
-                load_font(body_size, mono=mono, bold=True),
+                load_font(text_size, mono=mono, bold=True),
             )
             previous_date = row.get("date")
             y += row_height
@@ -366,13 +479,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                     columns,
                     ctx,
                     y,
-                    size=body_size,
+                    size=text_size,
                     frame=frame,
                     grouping=grouping,
                     row_height=row_height,
                     index=None,
                     is_last=False,
                     mono=mono,
+                    inset_y=row_inset_y,
+                    cell_line_spacing=cell_line_spacing,
                     first_row=first_row,
                     is_new_group=False,
                 )
@@ -385,13 +500,15 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             columns,
             ctx,
             y,
-            size=body_size,
+            size=text_size,
             frame=frame,
             grouping=grouping,
             row_height=row_height,
             index=None if synthetic else index,
             is_last=(position == total_rows - 1),
             mono=mono,
+            inset_y=row_inset_y,
+            cell_line_spacing=cell_line_spacing,
             first_row=first_row,
             is_new_group=is_new_group,
         )
@@ -422,6 +539,7 @@ def _draw_header(
     y: int,
     *,
     size: int,
+    bold: bool,
     frame: str,
     header_height: int,
     fill_height: int,
@@ -466,8 +584,17 @@ def _draw_header(
     ANZ) whose header rules only below. `header_rule_gap` overrides the
     below rule's own advance (default 16, CBA's real value; ANZ's is 14).
     Both are no-ops for every other frame, which draws no rule here at all.
+
+    `bold` is the label row's own weight (layout default `table_header_bold`,
+    block key `header_bold`), not the layout-wide `bold` default: every bank
+    and receipt layout sets `bold: false` layout-wide yet draws its column
+    headings bold, while the legacy invoice renderer draws its headings at
+    regular weight, so the two cannot share one key.
+
+    A column may position its label independently of its own cells with
+    `label_x`/`label_align` — see `_label_anchor`.
     """
-    font = load_font(size, mono=mono, bold=True)
+    font = load_font(size, mono=mono, bold=bold)
     if frame == "ruled":
         if header_rule_top:
             draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
@@ -481,7 +608,7 @@ def _draw_header(
         ctx.draw.rectangle([(ctx.region.x, y), (ctx.region.right, y + fill_height)], fill=fill_color)
 
     for column in columns:
-        x = column_x(column, ctx)
+        x = column_x(_label_anchor(column), ctx)
         lines = str(column["label"]).split("\n")
         if label_inset_y is not None:
             start = y + label_inset_y
@@ -490,9 +617,10 @@ def _draw_header(
             start = y + max(0, (header_height - block_height) // 2)
         else:
             start = y
+        label_align = column.get("label_align", column.get("align"))
         for position, text in enumerate(lines):
             line_y = start + position * advance
-            if column.get("align") == "right":
+            if label_align == "right":
                 draw_text_right(ctx.draw, text, x_right=x, y=line_y, font=font)
             else:
                 draw_text_left(ctx.draw, text, x, line_y, font)
@@ -517,6 +645,8 @@ def _draw_row(
     index: int | None,
     is_last: bool,
     mono: bool,
+    inset_y: int,
+    cell_line_spacing: str,
     first_row: bool = False,
     is_new_group: bool = True,
 ) -> int:
@@ -570,6 +700,15 @@ def _draw_row(
     Like `bold`, this is provider-set row data, not a layout YAML key, and —
     unlike every other row decoration here — is drawn regardless of `frame`,
     since it is a fact about this one row, not a frame-wide style.
+
+    `inset_y` (layout default `table_row_inset_y`, block key `row_inset_y`)
+    insets every cell's *ink* inside the row's own band without changing the
+    band: the legacy invoice renderer draws each cell at `y + 12` inside a
+    52px row and still advances exactly 52, so `_draw_cell` subtracts the
+    inset back off whatever bottom it reports (see there). It is the row
+    counterpart of the header's `label_inset_y`, and deliberately does not
+    move a column's `sub_line`, whose `offset_y` is already measured from the
+    row's own start.
     """
     _validate_bold_spec(row, columns)
 
@@ -644,6 +783,8 @@ def _draw_row(
             font=font,
             bold=cell_bold,
             mono=mono,
+            inset_y=inset_y,
+            cell_line_spacing=cell_line_spacing,
             recorder=recorder,
             field=record_field,
             prefix=prefix or None,
@@ -746,6 +887,8 @@ def _draw_cell(
     font: Font,
     bold: bool = False,
     mono: bool,
+    inset_y: int,
+    cell_line_spacing: str,
     recorder: BoxRecorder | None,
     field: str | None,
     prefix: str | None = None,
@@ -768,43 +911,59 @@ def _draw_cell(
     else, so an unreachable combination fails at startup rather than
     silently recording nothing.
 
+    `inset_y` shifts the ink down inside the row's band and is then subtracted
+    back off the reported bottom, so an inset never changes the table's pitch
+    -- the legacy invoice renderer draws its cells at `y + 12` and still
+    advances exactly one `row_height`. `cell_line_spacing` selects what a
+    *budgeted* cell advances per fitted line, and therefore how tall a box it
+    records: `row_height` (every bank and receipt table) or `font`, the fitted
+    font's own line height, which is what the legacy invoice renderer used --
+    it passed no `line_spacing` at all.
+
     Returns:
-        The cell's own bottom y: the wrapped advance from `draw_fitted_left`/
-        `draw_fitted_right` for a budgeted cell, or `y + row_height` for an
-        unbudgeted (always single-line) cell.
+        The cell's own bottom y, net of `inset_y`: the wrapped advance from
+        `draw_fitted_left`/`draw_fitted_right` for a budgeted cell, or
+        `y + row_height` for an unbudgeted (always single-line) cell.
     """
     if budget is not None:
+        line_spacing = row_height if cell_line_spacing == "row_height" else None
         if right:
-            return draw_fitted_right(
+            return (
+                draw_fitted_right(
+                    draw,
+                    text,
+                    x,
+                    y + inset_y,
+                    budget=budget,
+                    nominal_size=size,
+                    mono=mono,
+                    bold=bold,
+                    line_spacing=line_spacing,
+                    recorder=recorder,
+                    field=field,
+                )
+                - inset_y
+            )
+        return (
+            draw_fitted_left(
                 draw,
                 text,
                 x,
-                y,
+                y + inset_y,
                 budget=budget,
                 nominal_size=size,
                 mono=mono,
                 bold=bold,
-                line_spacing=row_height,
+                line_spacing=line_spacing,
                 recorder=recorder,
                 field=field,
+                prefix=prefix,
+                prefix_field=prefix_field,
             )
-        return draw_fitted_left(
-            draw,
-            text,
-            x,
-            y,
-            budget=budget,
-            nominal_size=size,
-            mono=mono,
-            bold=bold,
-            line_spacing=row_height,
-            recorder=recorder,
-            field=field,
-            prefix=prefix,
-            prefix_field=prefix_field,
+            - inset_y
         )
     if right:
-        draw_text_right(draw, text, x_right=x, y=y, font=font, recorder=recorder, field=field)
+        draw_text_right(draw, text, x_right=x, y=y + inset_y, font=font, recorder=recorder, field=field)
     else:
-        draw_text_left(draw, text, x, y, font, recorder=recorder, field=field)
+        draw_text_left(draw, text, x, y + inset_y, font, recorder=recorder, field=field)
     return y + row_height

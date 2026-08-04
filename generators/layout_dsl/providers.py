@@ -108,7 +108,7 @@ def provider_param_keys(name: str) -> frozenset[str]:
     return _PARAM_KEYS.get(name, frozenset())
 
 
-@row_provider("pipe_fields", params=frozenset({"fields"}))
+@row_provider("pipe_fields", params=frozenset({"fields", "decimal_keys"}))
 def pipe_fields(entry: dict, params: dict) -> list[dict]:
     """Zip pipe-delimited list fields into row dicts.
 
@@ -117,12 +117,25 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
     Args:
         entry: The ground-truth entry.
         params: Must carry `fields`, a mapping of row key to source field name.
+            May also carry `decimal_keys`, a list of those row keys whose values
+            are amounts and should be coerced to `Decimal`, so the table formats
+            them as currency (`_cell_text`) rather than drawing the raw
+            ground-truth string — the legacy invoice renderer printed
+            `fmt_amount(Decimal(price))`, so a one-decimal-place amount must
+            render `$9.50`, not `9.5`. Mirrors the coercion `bank_transactions`
+            and `receipt_line_items` each do for their own fixed key names; this
+            is the same thing for a table with no provider of its own. The
+            absent sentinel and the empty string are left alone — `_cell_text`
+            maps both to a cell that draws nothing.
 
     Returns:
         One dict per row, keyed by the `fields` mapping's keys.
 
     Raises:
-        ProviderError: If `fields` is missing or the source lists differ in length.
+        ProviderError: If `fields` is missing, the source lists differ in
+            length, `decimal_keys` names a key absent from `fields`, or a
+            value under one of those keys is neither a sentinel nor a valid
+            amount.
     """
     mapping = params.get("fields")
     if not isinstance(mapping, dict) or not mapping:
@@ -155,7 +168,32 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
         raise ProviderError(msg) from None
 
     count = next(iter(lengths.values()), 0)
-    return [{key: columns[key][i] for key in columns} for i in range(count)]
+    rows = [{key: columns[key][i] for key in columns} for i in range(count)]
+
+    decimal_keys = params.get("decimal_keys") or []
+    unknown = sorted(set(decimal_keys) - set(mapping))
+    if unknown:
+        msg = (
+            f"pipe_fields decimal_keys names row key(s) {unknown} that its fields mapping "
+            "does not define.\n"
+            f"  What:     decimal_keys {sorted(decimal_keys)} must all appear in "
+            f"fields, which defines {sorted(mapping)}.\n"
+            "  Where:    config/layouts/*.yml, a table block's params.decimal_keys key.\n"
+            "  Expected: params: {fields: {price: LINE_ITEM_PRICES}, decimal_keys: [price]}\n"
+            f"  Recover:  fix the typo in decimal_keys, or add {unknown} to the table's "
+            "params.fields mapping."
+        )
+        raise ProviderError(msg) from None
+
+    for key in decimal_keys:
+        for row in rows:
+            if row[key] not in ("", "NOT_FOUND"):
+                row[key] = _to_decimal(
+                    row[key],
+                    what=f"the {mapping[key]} list",
+                    source="the entry's ground_truth/*.yml file",
+                )
+    return rows
 
 
 _SYNTHETIC_LABELS = {"opening_balance": "Opening Balance", "brought_forward": "Balance Brought Forward"}

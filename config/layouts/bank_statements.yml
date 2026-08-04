@@ -23,8 +23,11 @@ _dsl_defaults_values: &dsl_defaults_values
   pair_value_align: left
   pair_min_gap: 0
   table_header: true
+  table_header_bold: true
   table_header_rule_top: true
   table_header_rule_gap: 16
+  table_row_inset_y: 0
+  table_cell_line_spacing: row_height
   table_group_gap: 10
   table_fill_inset: 0
   table_dividers: []
