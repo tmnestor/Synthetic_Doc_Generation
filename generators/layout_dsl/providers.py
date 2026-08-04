@@ -416,7 +416,7 @@ def receipt_line_items(entry: dict, params: dict) -> list[dict]:
         )
         raise ProviderError(msg) from None
 
-    rows = pipe_fields(entry, {"fields": params["fields"]})
+    rows = pipe_fields(entry, {"fields": params.get("fields")})
 
     for row in rows:
         qty = row.get("quantity", "")
