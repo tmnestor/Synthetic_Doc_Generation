@@ -17,7 +17,7 @@
 - Every commit must pass, in order: `pytest tests/`, `ruff check --fix --ignore ARG001,ARG002,F841 *.py`, `ruff format .`, `mypy . --ignore-missing-imports`. Never `--no-verify`.
 - Line length 108. Google-style docstrings. `pathlib.Path` for paths. Python 3.12 types (`X | Y`, no `from __future__ import annotations`, no `TYPE_CHECKING` guards for runtime-evaluated annotations).
 - In `except` blocks always `raise ... from err` or `from None` (B904).
-- No commit attribution to Claude. Never write "ATO" — use "PROD".
+- No commit attribution to Claude. The Australian tax authority's three-letter acronym must never appear anywhere — code, comments, docstrings, docs, config, commit messages. Write "PROD" where the production environment is meant, and name the document type directly otherwise ("a compliant Australian tax invoice").
 - **Every config key is required.** No Python literal may supply a value YAML omitted. A missing key raises a four-element diagnostic: WHAT is wrong, WHERE (absolute path + dotted key), WHAT IT SHOULD LOOK LIKE (concrete YAML + allowed values), HOW TO RECOVER (one line).
 - Every fail-fast test asserts all four elements via `assert_diagnostic_error` from `tests/conftest.py`.
 - **`tests/test_bank_pixel_snapshot.py` must stay green on every task in this plan.** Bank output does not change. If a task turns it red, the task is wrong — do not re-bless the fixture.
