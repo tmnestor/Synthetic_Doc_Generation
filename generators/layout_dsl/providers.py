@@ -128,10 +128,12 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
     if not isinstance(mapping, dict) or not mapping:
         msg = (
             "pipe_fields provider needs a 'fields' mapping.\n"
-            "  Expected: fields: {row_key: SOURCE_FIELD, ...}\n"
-            "  Remediation: add a fields: mapping under the table's params:."
+            "  What:     the fields param is missing or empty in the table's params:\n"
+            "  Where:    config/layouts/*.yml, a table block's params.fields key.\n"
+            "  Expected: params: {fields: {row_key: SOURCE_FIELD, ...}}\n"
+            "  Recover:  add a fields: mapping under the table's params: block."
         )
-        raise ProviderError(msg)
+        raise ProviderError(msg) from None
 
     entry_fields = entry["fields"]
     columns: dict[str, list[str]] = {}
@@ -143,10 +145,14 @@ def pipe_fields(entry: dict, params: dict) -> list[dict]:
     if len(set(lengths.values())) > 1:
         msg = (
             f"pipe_fields source lists differ in length: {lengths}.\n"
-            f"  Remediation: every pipe-delimited field in one table must have "
-            f"the same number of entries; fix the entry in ground_truth/."
+            f"  What:     pipe-delimited fields in one table have mismatched lengths.\n"
+            f"  Where:    ground_truth/*.yml, the affected entry's "
+            f"LINE_ITEM_* or TRANSACTION_* fields.\n"
+            f"  Expected: all pipe-delimited fields to have the same count; "
+            f"e.g. if DESCRIPTIONS has 3 entries, QUANTITIES must also have 3.\n"
+            f"  Recover:  edit the entry in ground_truth/ to make all lists equal length."
         )
-        raise ProviderError(msg)
+        raise ProviderError(msg) from None
 
     count = next(iter(lengths.values()), 0)
     return [{key: columns[key][i] for key in columns} for i in range(count)]
