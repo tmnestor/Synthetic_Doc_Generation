@@ -16,7 +16,7 @@ and every placeholder check would degrade from a startup failure to a
 render-time one.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 import yaml
@@ -195,6 +195,66 @@ def field_provider_emits(name: str) -> tuple[str, ...]:
     return _EMITS.get(name, ())
 
 
+def collect_emit_collisions(
+    emitted_by: dict[str, str], name: str, keys: Iterable[str]
+) -> tuple[str, str, str] | None:
+    """Check `keys` against every key an earlier provider on this layout already claimed.
+
+    Shared by two callers so their diagnostics cannot drift apart the way an
+    earlier round of this task found them doing when the same
+    build-the-map/set-intersect/format-the-detail logic was hand-copied into
+    both places:
+
+    - `generators/layout_dsl/schema.py`'s `_validate_field_providers`, the
+      primary, validate-time check -- called with each provider's *declared*
+      `emits`, so a whole layout is checked statically, before any provider
+      ever runs.
+    - `apply_field_providers` below, a defensive, merge-time check for a
+      caller that builds a layout dict by hand and never calls
+      `validate_layout` first -- called with a provider's *actual* returned
+      keys, always a subset of its declared emits by the point this runs
+      (the undeclared-emit check above already enforced that).
+
+    Args:
+        emitted_by: Accumulated key -> provider-name map for providers
+            already checked on this layout. Not mutated -- the caller
+            updates it once it has decided whether to raise, so a call about
+            to raise leaves the map exactly as it was.
+        name: The provider currently being checked.
+        keys: The keys to check `name` against -- declared `emits` or actual
+            output, per caller (see above).
+
+    Returns:
+        `None` if `keys` is disjoint from `emitted_by` -- no collision.
+        Otherwise a `(what, expected, recover)` string triple: the three
+        diagnostic elements common to both callers' four-element errors.
+        Deliberately excludes WHERE: `_validate_field_providers` knows the
+        offending layout's id and a dotted YAML key path;
+        `apply_field_providers` is given neither (its own signature carries
+        only `layout` and `entry`, no id or path), so each caller supplies
+        its own WHERE around this shared text rather than being forced to
+        fabricate one it does not have.
+    """
+    collisions = sorted(set(keys) & set(emitted_by))
+    if not collisions:
+        return None
+
+    detail = ", ".join(f"'{key}' (already emitted by '{emitted_by[key]}')" for key in collisions)
+    other_names = sorted({emitted_by[key] for key in collisions})
+    what = (
+        f"field provider '{name}' emits key(s) that collide with another provider on this layout: {detail}."
+    )
+    expected = (
+        "every field_providers: entry on one layout to emit keys disjoint from every other "
+        "provider on that same layout."
+    )
+    recover = (
+        f"rename the colliding key(s) in one provider's emits=, or remove one of '{name}' / "
+        f"{other_names} from this layout's field_providers:."
+    )
+    return what, expected, recover
+
+
 def field_provider_param_keys(name: str) -> frozenset[str]:
     """Return the top-level `params:` keys a registered field provider accepts.
 
@@ -259,19 +319,15 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
             )
             raise FieldProviderError(msg)
 
-        collisions = sorted(set(result) & set(emitted_by))
-        if collisions:
-            detail = ", ".join(f"'{key}' (already emitted by '{emitted_by[key]}')" for key in collisions)
+        collision = collect_emit_collisions(emitted_by, name, result)
+        if collision is not None:
+            what, expected, recover = collision
             msg = (
                 "Two field providers on one layout emit the same key.\n"
-                f"  What:     field provider '{name}' also emits {detail}.\n"
+                f"  What:     {what}\n"
                 "  Where:    this layout's 'field_providers:' list.\n"
-                "  Expected: every provider a layout declares to emit keys disjoint from "
-                "every other provider on that same layout -- a silent overwrite here would "
-                "make one provider's value vanish from the page with no error.\n"
-                f"  Recover:  rename the colliding key(s) in one provider's emits=, or remove "
-                f"one of '{name}' / {sorted({emitted_by[k] for k in collisions})} from this "
-                "layout's field_providers:."
+                f"  Expected: {expected}\n"
+                f"  Recover:  {recover}"
             )
             raise FieldProviderError(msg)
 

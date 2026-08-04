@@ -10,6 +10,7 @@ import re
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.defaults import PARAMETER_DEFAULTS
 from generators.layout_dsl.field_providers import (
+    collect_emit_collisions,
     field_provider_emits,
     field_provider_names,
     field_provider_param_keys,
@@ -637,7 +638,9 @@ def _validate_field_providers(layout: dict, *, layout_id: str, layout_path: str)
     # overwriting one another's value; apply_field_providers in
     # field_providers.py keeps a second, defensive check at merge time for
     # callers that build a layout dict by hand and never go through
-    # validate_layout.
+    # validate_layout -- both call the shared collect_emit_collisions() so
+    # the two diagnostics cannot drift apart the way an earlier round of
+    # this task found them doing.
     emitted_by: dict[str, str] = {}
     for index, spec in enumerate(layout["field_providers"]):
         here = f"{layout_id}.field_providers[{index}]"
@@ -674,19 +677,15 @@ def _validate_field_providers(layout: dict, *, layout_id: str, layout_path: str)
             )
 
         provider_emits = field_provider_emits(name)
-        collisions = sorted(set(provider_emits) & set(emitted_by))
-        if collisions:
-            detail = ", ".join(f"'{key}' (already emitted by '{emitted_by[key]}')" for key in collisions)
+        collision = collect_emit_collisions(emitted_by, str(name), provider_emits)
+        if collision is not None:
+            what, expected, recover = collision
             raise _err(
-                f"field provider '{name}' emits key(s) that collide with another provider on "
-                f"this layout: {detail}.",
+                what,
                 layout_path=layout_path,
                 key_path=f"{here}.name",
-                expected="every field_providers: entry on one layout to emit keys disjoint "
-                "from every other provider on that same layout.",
-                recover=f"rename the colliding key(s) in one provider's emits=, or remove one "
-                f"of '{name}' / {sorted({emitted_by[k] for k in collisions})} from "
-                f"{layout_id}.field_providers.",
+                expected=expected,
+                recover=recover,
             )
         emitted_by.update(dict.fromkeys(provider_emits, str(name)))
 
