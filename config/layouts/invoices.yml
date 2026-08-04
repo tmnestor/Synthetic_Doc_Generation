@@ -143,6 +143,11 @@ _invoice_line_items: &invoice_line_items
        label_x: 1050, label_align: left, field: LINE_ITEM_PRICES}
     - {key: total, label: "Total", align: right, x: 1750,
        label_x: 1550, label_align: left, field: LINE_ITEM_TOTAL_PRICES}
+# Deliberately bare: a plain spacer means "this layout's standard gap", which
+# is `defaults.spacer_height` (20px, legacy's gap after each line-item table).
+# Pinning the 20 inline would put a second copy of that number in the file and
+# leave `defaults.spacer_height` declared but read by nothing -- `_invoice_
+# buyer_gap` states `height:` precisely because its 28px *differs*.
 _invoice_table_gap: &invoice_table_gap {type: spacer}
 
 # tax_invoice_mixed only: a taxable/GST-free split *display*. Both tables render
