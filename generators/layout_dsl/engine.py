@@ -9,6 +9,7 @@ from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import LayoutBudgetError
 from generators.layout_dsl.binding import BindingError, is_present
 from generators.layout_dsl.context import Region, RenderContext
+from generators.layout_dsl.defaults import DefaultsError
 from generators.layout_dsl.field_providers import apply_field_providers
 from generators.layout_dsl.primitives_container import ContainerError, draw_panel, draw_split
 from generators.layout_dsl.primitives_table import TableError, draw_table
@@ -46,6 +47,19 @@ class EngineError(RuntimeError):
 # render_blocks tags each with the failing block's path as it unwinds through
 # nested containers, so render_body can report exactly which block failed rather
 # than just which layout.
+#
+# `DefaultsError` belongs here as much as any of the others: every primitive
+# parameter resolves through `resolve_param`, so a missing default is the
+# likeliest render-time DSL failure there is, and its own message cannot name
+# the block that asked -- `resolve_param` sees a block dict, not its position
+# in the body. Without it, the failure most likely to reach an author was the
+# one escaping without the `At: <layout_id>.body[3].children[1]` suffix.
+#
+# `FieldProviderError` deliberately is *not* here. `apply_field_providers`
+# runs once in `render_body` before the walk begins, outside its try, so no
+# field-provider failure ever passes through `render_blocks` to be tagged.
+# Listing it would promise a block path that cannot exist; its own diagnostic
+# names the provider and the layout's `field_providers:` entry instead.
 _DSL_ERRORS: tuple[type[RuntimeError], ...] = (
     EngineError,
     ContainerError,
@@ -55,6 +69,7 @@ _DSL_ERRORS: tuple[type[RuntimeError], ...] = (
     BindingError,
     LayoutBudgetError,
     FitError,
+    DefaultsError,
 )
 
 
@@ -86,9 +101,10 @@ def render_blocks(blocks: list, ctx: RenderContext, y: int) -> int:
 
     Raises:
         EngineError: If a block names a primitive with no registered drawer.
-        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError |
-        FitError: Propagated from a primitive, tagged with the failing block's
-            path so render_body can report exactly where it happened.
+        ContainerError | TableError | RoleError | CurrencyError | BindingError |
+        LayoutBudgetError | FitError | DefaultsError: Propagated from a
+            primitive, tagged with the failing block's path so render_body can
+            report exactly where it happened.
     """
     for position, block in enumerate(blocks):
         when = block.get("when")
@@ -148,11 +164,13 @@ def render_body(
     Raises:
         EngineError: If the layout has no `body` key.
         FieldProviderError: If a `field_providers:` entry names an unknown
-            provider, or a provider returns a key it did not declare.
-        ContainerError | TableError | RoleError | BindingError | LayoutBudgetError |
-        FitError: Propagated from a primitive, re-raised with the failing
-            block's path appended to the message so the author knows exactly
-            where to look, not just which layout.
+            provider, or a provider returns a key it did not declare. Raised
+            before the walk starts, so it carries no block path.
+        ContainerError | TableError | RoleError | CurrencyError | BindingError |
+        LayoutBudgetError | FitError | DefaultsError: Propagated from a
+            primitive, re-raised with the failing block's path appended to the
+            message so the author knows exactly where to look, not just which
+            layout.
     """
     if "body" not in layout:
         raise EngineError(
