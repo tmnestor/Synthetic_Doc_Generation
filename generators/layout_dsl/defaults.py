@@ -7,6 +7,8 @@ how `role`, `color`, `align` and 28 other pixel decisions came to live in Python
 rather than in the layout files.
 """
 
+from typing import Any
+
 # Every parameter a primitive may read. schema.py asserts a layout's `defaults:`
 # covers all of them, so an omission fails at startup rather than at whichever
 # block first happens to need it.
@@ -60,7 +62,7 @@ def resolve_param(
     layout_id: str,
     layout_path: str,
     block_key: str | None = None,
-) -> object:
+) -> Any:
     """Resolve one primitive parameter.
 
     Resolution order is `block[block_key]` -> `layout["defaults"][key]` -> fail
@@ -90,7 +92,14 @@ def resolve_param(
 
     Returns:
         The block's value if it carries `block_key`, otherwise the layout
-        default for `key`.
+        default for `key`. Typed `Any`, not `object`: this resolves
+        heterogeneous YAML values (str, int, bool, list) that every caller
+        immediately casts to the concrete type it needs (`int(...)`,
+        `bool(...)`, `str(...)`) -- `object` buys no real type safety here
+        (a caller's own cast is what actually enforces the type) and only
+        forces every call site to route the result through an extra
+        `Any`-typed local variable first, since `object` alone does not
+        satisfy `int()`'s overloads.
 
     Raises:
         DefaultsError: If neither supplies a value.
