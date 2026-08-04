@@ -614,13 +614,13 @@ def fmt_amount(amount: Decimal | float | int) -> str:
     return f"${d:,.2f}"
 
 
-# --- ABN Validation (ATO algorithm) ---
+# --- ABN Validation (Australian Business Number checksum) ---
 
 _ABN_WEIGHTS = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
 
 
 def validate_abn(abn: str) -> bool:
-    """Validate an Australian Business Number using the ATO checksum algorithm.
+    """Validate an Australian Business Number using the official checksum algorithm.
 
     Args:
         abn: ABN string, with or without spaces (e.g. "53 004 085 616" or "53004085616").
@@ -632,7 +632,7 @@ def validate_abn(abn: str) -> bool:
     if len(digits_str) != 11 or not digits_str.isdigit():
         return False
     digits = [int(d) for d in digits_str]
-    digits[0] -= 1  # Subtract 1 from first digit per ATO algorithm
+    digits[0] -= 1  # Subtract 1 from first digit, per the published algorithm
     total = sum(d * w for d, w in zip(digits, _ABN_WEIGHTS, strict=True))
     return total % 89 == 0
 
@@ -657,13 +657,13 @@ def generate_abn() -> str:
     raise RuntimeError(msg)
 
 
-# --- TFN Validation (ATO algorithm) ---
+# --- TFN Validation (Tax File Number checksum) ---
 
 _TFN_WEIGHTS = [1, 4, 3, 7, 5, 8, 6, 9, 10]
 
 
 def validate_tfn(tfn: str) -> bool:
-    """Validate an Australian Tax File Number using the ATO checksum algorithm.
+    """Validate an Australian Tax File Number using the official checksum algorithm.
 
     Args:
         tfn: TFN string, with or without spaces (e.g. "123 456 789" or "123456789").
