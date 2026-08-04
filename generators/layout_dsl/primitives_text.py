@@ -471,9 +471,7 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     value = interpolate(block["value"], ctx.entry["fields"])
     currency = block.get("currency")
     if currency is not None and value:
-        value = format_currency(
-            value, str(currency), layout_id=ctx.layout_id, layout_path=ctx.layout_path
-        )
+        value = format_currency(value, str(currency), layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )

@@ -350,11 +350,11 @@ def apply_field_providers(layout: dict, entry: dict) -> dict:
 def receipt_pos(entry: dict, params: dict) -> dict[str, str]:
     """Derive a receipt's POS time, register, staff name, and receipt number.
 
-    Moves the arithmetic from `generators/receipt.py`'s now-legacy
-    `_derive_receipt_details` / `_derive_receipt_number` verbatim -- same two
-    digests, same hex slices -- reading its pools from
+    Moved the arithmetic here verbatim from the receipt renderer's since-deleted
+    `_derive_receipt_details` / `_derive_receipt_number` -- same two digests,
+    same hex slices -- reading its pools from
     `generators.payment_block.load_pos_pools()` instead of the module-level
-    `_STAFF_NAMES` list and inline hour/register ranges those functions used.
+    staff-name list and inline hour/register ranges those functions used.
     `payment_block.derive_payment` consumes hex chars 10-40 of the same
     `pos:` digest this reads 0-8 of; the two must never collide.
 
@@ -405,7 +405,12 @@ def _or_not_found(value: str) -> str:
 
 
 def _amount_or_not_found(value: Decimal | None) -> str:
-    """Format a cash Decimal as `render_payment_block` prints it, or `NOT_FOUND`.
+    """Format a cash Decimal as the slip prints it, or `NOT_FOUND`.
+
+    Already carries `fmt_amount`'s `$` and thousands separators, so the cash
+    `pair` blocks in config/layouts/receipts.yml deliberately declare no
+    `currency:` of their own -- formatting an already-formatted string twice
+    would raise `CurrencyError`.
 
     `tendered`/`change` are `None` unless `PaymentDetails.kind == "cash"`.
     """
@@ -437,21 +442,21 @@ def _amount_or_not_found(value: Decimal | None) -> str:
 def receipt_payment(entry: dict, params: dict) -> dict[str, str]:
     """Derive a receipt's EFTPOS terminal-slip values.
 
-    Wraps `generators.payment_block.derive_payment` exactly as
-    `generators/receipt.py`'s now-legacy `payment` section does -- same POS
-    time (reusing `receipt_pos`'s derivation, hex chars 0-8 of the
+    Wraps `generators.payment_block.derive_payment` exactly as the receipt
+    renderer's since-deleted `payment` section did -- same POS time (reusing
+    `receipt_pos`'s derivation, hex chars 0-8 of the
     `{case_id}:pos:{invoice_date}` digest, so this never duplicates that
     arithmetic) and the same linked-receipt lookup keyed
     `f"{case_id}_{layout_id}"` into `load_link_index()`, so a linked receipt's
     scheme still comes from its bank row rather than the weighted pool.
 
     Deliberately never emits a purchase total: the slip's `Purchase   AUD`
-    line binds `{TOTAL_AMOUNT}` directly (see `payment_block.py:300-303`'s
-    invariant), so a second, provider-derived copy of a scored value could
-    silently drift from it.
+    line binds `{TOTAL_AMOUNT}` directly (see `PaymentDetails.purchase_total`
+    in payment_block.py), so a second, provider-derived copy of a scored value
+    could silently drift from it.
 
-    The three slip variants -- card, wallet, cash -- are selected by a future
-    body's `when:` on these emitted keys, not by a branch here: every value
+    The three slip variants -- card, wallet, cash -- are selected by the
+    receipt body's `when:` on these emitted keys, not by a branch here: every value
     `PaymentDetails` leaves as `""` or `None` for the current `kind` becomes
     the literal `"NOT_FOUND"`, which `is_present` already treats as absent.
 
@@ -503,8 +508,10 @@ def receipt_payment(entry: dict, params: dict) -> dict[str, str]:
 def computed_totals(entry: dict, params: dict) -> dict[str, str]:
     """Derive `SUBTOTAL_AMOUNT` as `TOTAL_AMOUNT` minus `GST_AMOUNT`.
 
-    Matches `generators/receipt.py:303`'s `str(Decimal(total) - Decimal(gst))`
-    verbatim. Emits nothing -- not even a zero -- when either input is absent
+    Matches the receipt renderer's since-deleted totals section, which computed
+    `str(Decimal(total) - Decimal(gst))` and printed it with `,.2f` (the body's
+    SUBTOTAL pair now declares `currency: plain` for that half).
+    Emits nothing -- not even a zero -- when either input is absent
     or `NOT_FOUND`, so a `{SUBTOTAL_AMOUNT}` placeholder is suppressed by
     `when:` rather than rendering a fabricated value; `emits` is an upper
     bound on what a provider may return, not a promise every call returns it
