@@ -23,9 +23,61 @@ from generators.common import (
 )
 from generators.exporters.geometry import BoxRecorder, rescale_vertical
 from generators.layout_budgets import field_budget
+from generators.layout_dsl.context import Region
+from generators.layout_dsl.engine import render_body
 from generators.payment_block import derive_payment, load_link_index, render_payment_block
 
 _LAYOUT_PATH = "config/layouts/receipts.yml"
+
+
+def render_via_dsl(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image:
+    """Render a receipt through the declarative layout engine.
+
+    Receipts are variable-height: the body is drawn onto a tall canvas, then
+    cropped to the y the engine returns plus the bottom margin. `render_body`
+    is canvas-agnostic, so this needs no engine support -- it is the same
+    crop-and-rescale the legacy renderer does below.
+
+    Args:
+        entry: Ground truth YAML entry with 'fields', 'case_id' and 'layout'.
+        layout: Layout config carrying a `body:` tree, `width`, `margin`,
+            `content_width` and `canvas_ceiling`.
+        geometry_out: Optional dict (opt-in); when given, populated in place
+            with {"width", "height", "boxes"}.
+
+    Returns:
+        PIL Image of the rendered receipt, cropped to its content.
+    """
+    layout_id = str(entry.get("layout", ""))
+    width = int(layout["width"])
+    ceiling = int(layout["canvas_ceiling"])
+    margin = int(layout["margin"])
+
+    image = Image.new("RGB", (width, ceiling), "white")
+    draw = ImageDraw.Draw(image)
+    recorder = BoxRecorder(width, ceiling) if geometry_out is not None else None
+
+    end_y = render_body(
+        layout,
+        entry,
+        layout_id=layout_id,
+        layout_path=_LAYOUT_PATH,
+        draw=draw,
+        region=Region(x=margin, width=int(layout["content_width"])),
+        y=margin,
+        recorder=recorder,
+    )
+
+    height = min(end_y + margin, ceiling)
+    image = image.crop((0, 0, width, height))
+
+    if recorder is not None and geometry_out is not None:
+        geometry_out["width"] = width
+        geometry_out["height"] = height
+        geometry_out["boxes"] = rescale_vertical(
+            recorder.as_dict(), old_height=ceiling, new_height=height
+        )
+    return image
 
 _STAFF_NAMES = [
     "Sarah",
@@ -133,6 +185,12 @@ def render_receipt(entry: dict, layout: dict, *, geometry_out: dict | None = Non
     Returns:
         PIL Image of the rendered receipt.
     """
+    # Transitional: layouts already carrying a `body:` tree render through the
+    # DSL, the rest through the section loop below. Removed once all six are
+    # migrated.
+    if "body" in layout:
+        return render_via_dsl(entry, layout, geometry_out=geometry_out)
+
     fields = entry["fields"]
     case_id = entry.get("case_id", "")
     layout_id = entry.get("layout", "")

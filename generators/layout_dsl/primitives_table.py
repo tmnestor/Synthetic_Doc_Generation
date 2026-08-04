@@ -617,6 +617,21 @@ def _draw_row(
             record_field = f"{field}[{index}]" if field is not None and index is not None else None
             recorder = ctx.recorder if index is not None else None
 
+        # A `prefix_key` column carries a second, narrower ground-truth value
+        # inside its own cell text — a receipt line item's "2x " quantity
+        # marker, which the `receipt_line_items` provider concatenates onto
+        # the description and re-exposes under its own row key. Recording it
+        # measures the already-drawn prefix (see `draw_fitted_left`); it never
+        # draws anything extra. Indexed like `field`, and only on real rows.
+        prefix_key = column.get("prefix_key")
+        prefix = str(row.get(prefix_key, "")) if prefix_key is not None else ""
+        prefix_field = column.get("prefix_field")
+        record_prefix = (
+            f"{prefix_field}[{index}]"
+            if prefix and prefix_field is not None and index is not None
+            else None
+        )
+
         cell_bottom = _draw_cell(
             ctx.draw,
             text,
@@ -628,8 +643,11 @@ def _draw_row(
             row_height=row_height,
             font=font,
             bold=cell_bold,
+            mono=mono,
             recorder=recorder,
             field=record_field,
+            prefix=prefix or None,
+            prefix_field=record_prefix,
         )
         bottom = max(bottom, cell_bottom)
 
@@ -727,15 +745,28 @@ def _draw_cell(
     row_height: int,
     font: Font,
     bold: bool = False,
+    mono: bool,
     recorder: BoxRecorder | None,
     field: str | None,
+    prefix: str | None = None,
+    prefix_field: str | None = None,
 ) -> int:
     """Draw one cell, dispatching on alignment and whether it has a fit budget.
 
-    `font` already carries the row's weight (see `_draw_row`) for the
-    unbudgeted path below; `bold` is threaded separately to `draw_fitted_left`/
-    `draw_fitted_right`, which build their own font internally from
-    `nominal_size` and do not accept a pre-built `Font`.
+    `font` already carries the row's weight and face (see `_draw_row`) for the
+    unbudgeted path below; `bold` and `mono` are threaded separately to
+    `draw_fitted_left`/`draw_fitted_right`, which build their own font
+    internally from `nominal_size` and do not accept a pre-built `Font`.
+    Omitting `mono` there silently drew every budgeted cell of a
+    `font_family: monospace` layout in the sans face -- invisible for the
+    eight sans bank layouts, but wrong for all six receipt layouts.
+
+    `prefix`/`prefix_field` record a sub-box for a leading run of the cell's
+    own text (a line item's "2x " quantity marker) -- see `draw_fitted_left`,
+    the only helper that supports it, hence the left-budgeted path only.
+    `_validate_table` (schema.py) rejects a column declaring them anywhere
+    else, so an unreachable combination fails at startup rather than
+    silently recording nothing.
 
     Returns:
         The cell's own bottom y: the wrapped advance from `draw_fitted_left`/
@@ -751,6 +782,7 @@ def _draw_cell(
                 y,
                 budget=budget,
                 nominal_size=size,
+                mono=mono,
                 bold=bold,
                 line_spacing=row_height,
                 recorder=recorder,
@@ -763,10 +795,13 @@ def _draw_cell(
             y,
             budget=budget,
             nominal_size=size,
+            mono=mono,
             bold=bold,
             line_spacing=row_height,
             recorder=recorder,
             field=field,
+            prefix=prefix,
+            prefix_field=prefix_field,
         )
     if right:
         draw_text_right(draw, text, x_right=x, y=y, font=font, recorder=recorder, field=field)

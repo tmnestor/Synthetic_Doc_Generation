@@ -13,6 +13,7 @@ from generators.layout_dsl.field_providers import apply_field_providers
 from generators.layout_dsl.primitives_container import ContainerError, draw_panel, draw_split
 from generators.layout_dsl.primitives_table import TableError, draw_table
 from generators.layout_dsl.primitives_text import (
+    CurrencyError,
     RoleError,
     draw_banner,
     draw_block,
@@ -50,6 +51,7 @@ _DSL_ERRORS: tuple[type[RuntimeError], ...] = (
     ContainerError,
     TableError,
     RoleError,
+    CurrencyError,
     BindingError,
     LayoutBudgetError,
     FitError,
