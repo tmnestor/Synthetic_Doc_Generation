@@ -9,6 +9,11 @@ import re
 
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.defaults import PARAMETER_DEFAULTS
+from generators.layout_dsl.field_providers import (
+    field_provider_emits,
+    field_provider_names,
+    field_provider_param_keys,
+)
 from generators.layout_dsl.primitives_table import COLUMN_ALIGNMENTS
 from generators.layout_dsl.primitives_text import ALIGNMENTS, PAIR_VALUE_ALIGNS
 from generators.layout_dsl.providers import provider_names, provider_param_keys
@@ -595,6 +600,73 @@ def _validate_table(block: dict, *, known_fields: set[str], layout_path: str, ke
             )
 
 
+def _validate_field_providers(layout: dict, *, layout_id: str, layout_path: str) -> list[str]:
+    """Check a layout's `field_providers:` entries and return their combined emits.
+
+    Presence of the `field_providers` key itself is checked by the caller
+    (`validate_layout`, alongside `body` and `content_width`) -- this assumes
+    the key exists and validates each entry's shape and content.
+
+    Args:
+        layout: The resolved layout dict, carrying `field_providers`.
+        layout_id: Layout id, used in diagnostics.
+        layout_path: Path to the layout YAML, used in diagnostics.
+
+    Returns:
+        Every `emits` name from every provider this layout's
+        `field_providers:` references -- the derived-field vocabulary
+        `validate_body`'s `known_fields` must additionally accept for this
+        one layout. Deliberately scoped to providers *this* layout actually
+        references, not every provider ever registered: unioning in every
+        registered provider's emits regardless of whether this layout uses it
+        would let a `{FIELD}` typo that happens to collide with some other
+        layout's derived field silently resolve, weakening the very check
+        this exists to perform.
+
+    Raises:
+        LayoutSchemaError: If an entry names an unregistered provider, or an
+            entry's `params` key is not among that provider's declared params.
+    """
+    emits: list[str] = []
+    for index, spec in enumerate(layout["field_providers"]):
+        here = f"{layout_id}.field_providers[{index}]"
+        name = spec.get("name") if isinstance(spec, dict) else None
+        if name is None:
+            raise _err(
+                "field_providers entry has no 'name' key.",
+                layout_path=layout_path,
+                key_path=here,
+                expected="{name: <registered field provider>, params: {...}}.",
+                recover=f"add a name: key to {here}.",
+            )
+        if name not in field_provider_names():
+            raise _err(
+                f"unknown field provider '{name}'.",
+                layout_path=layout_path,
+                key_path=f"{here}.name",
+                expected=f"one of {field_provider_names()}.",
+                recover="set name: to a registered field provider, or register one with "
+                "@field_provider in generators/layout_dsl/field_providers.py.",
+            )
+
+        params = spec.get("params", {})
+        accepted_params = field_provider_param_keys(name)
+        unknown_params = sorted(set(params) - accepted_params)
+        if unknown_params:
+            raise _err(
+                f"field_providers entry names unknown param(s) {unknown_params} for provider '{name}'.",
+                layout_path=layout_path,
+                key_path=f"{here}.params",
+                expected=f"one of {sorted(accepted_params)} for provider '{name}'.",
+                recover=f"fix the typo, or add {unknown_params} to provider '{name}''s "
+                "params=frozenset({...}) in generators/layout_dsl/field_providers.py.",
+            )
+
+        emits.extend(field_provider_emits(name))
+
+    return emits
+
+
 def _validate_split_widths(widths: object, *, children: list, layout_path: str, key_path: str) -> None:
     """Check a split's explicit `widths` list is a non-empty list of positive
     ints, one per column.
@@ -737,13 +809,17 @@ def _line_advance_roles(blocks: list, *, default_role: str) -> set[str]:
 def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fields: set[str]) -> None:
     """Validate a whole layout: its body tree plus geometry-dependent checks.
 
-    Adds the two checks that need the surrounding layout and cannot be made
-    from the body alone — column budgets against column geometry, and nested
-    container widths against their parent.
+    Adds the checks that need the surrounding layout and cannot be made from
+    the body alone — column budgets against column geometry, nested container
+    widths against their parent, and each `field_providers:` entry against the
+    field-provider registry. `known_fields` is widened by the emits of every
+    provider this layout actually references before `validate_body` runs, so
+    a `{FIELD}` naming a derived value resolves while a typo still fails.
 
     Args:
         layout: The resolved layout dict, carrying `body`, `content_width`,
-            and `field_budgets`.
+            `field_budgets`, and `field_providers` (required — a layout that
+            derives no fields must set `field_providers: []` explicitly).
         layout_id: Layout id, used in diagnostics.
         layout_path: Path to the layout YAML, used in diagnostics.
         known_fields: Field names the document type may reference.
@@ -790,7 +866,14 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
             "mapping covering every role this layout's body uses.",
         )
 
-    for key, example in (("body", "a list of block mappings"), ("content_width", "1600")):
+    for key, example in (
+        ("body", "a list of block mappings"),
+        ("content_width", "1600"),
+        (
+            "field_providers",
+            "a list of {name, params} mappings, or field_providers: [] if this layout derives no fields",
+        ),
+    ):
         if key not in layout:
             raise _err(
                 f"layout '{layout_id}' has no '{key}' key.",
@@ -801,7 +884,13 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
                 f"to validate_layout.",
             )
 
-    validate_body(layout["body"], layout_id=layout_id, layout_path=layout_path, known_fields=known_fields)
+    provider_emits = _validate_field_providers(layout, layout_id=layout_id, layout_path=layout_path)
+    validate_body(
+        layout["body"],
+        layout_id=layout_id,
+        layout_path=layout_path,
+        known_fields=known_fields | set(provider_emits),
+    )
 
     # Converts a render-time DefaultsError on one unlucky document (the
     # first entry whose body happens to reach an uncovered role) into a

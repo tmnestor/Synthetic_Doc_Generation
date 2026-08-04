@@ -379,6 +379,10 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 19, max: 27}
+    # No derived fields on a bank statement -- every value it draws is
+    # recorded ground truth. Required key: see validate_layout in
+    # generators/layout_dsl/schema.py.
+    field_providers: []
     body:
       # The letterhead reads layout['logo_text'] at render time (from_layout),
       # matching legacy's `draw.text((margin, y), layout["logo_text"], ...)`.
@@ -435,6 +439,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 12, max: 17}
+    field_providers: []  # See cba_standard's identical comment.
     body:
       # See cba_standard's identical comment: letterhead reads logo_text
       # dynamically; the supplier line is suppressed when it matches.
@@ -489,6 +494,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 15, max: 23}
+    field_providers: []  # See cba_standard's identical comment.
     body:
       # Letterhead reads logo_text dynamically; the supplier line (further
       # down) is suppressed when it matches — mirrors legacy's
@@ -527,6 +533,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 15, max: 23}
+    field_providers: []  # See cba_standard's identical comment.
     body:
       # See westpac_standard's identical comment.
       - type: split
@@ -602,6 +609,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 10, max: 15}
+    field_providers: []  # See cba_standard's identical comment.
     body: *nab_classic_body
 
   nab_dense:
@@ -629,6 +637,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 15, max: 23}
+    field_providers: []  # See cba_standard's identical comment.
     body: *nab_dense_body
 
   anz_standard:
@@ -656,6 +665,7 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 15, max: 23}
+    field_providers: []  # See cba_standard's identical comment.
     body: *anz_standard_body
 
   anz_modern:
@@ -683,4 +693,5 @@ layouts:
     # corpus with two rows of headroom. The seeder reads this: a statement
     # longer than its page is content the benchmark hides from the model.
     transaction_count: {min: 17, max: 25}
+    field_providers: []  # See cba_standard's identical comment.
     body: *anz_modern_body
