@@ -23,7 +23,7 @@ from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 from generators.layout_dsl.context import RenderContext
 from generators.layout_dsl.defaults import resolve_param
-from generators.layout_dsl.primitives_text import line_height, resolve_role
+from generators.layout_dsl.primitives_text import font_for, line_advance, resolve_role
 from generators.layout_dsl.providers import get_provider
 
 _ABSENT = "NOT_FOUND"
@@ -275,6 +275,10 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     )
     row_height = _resolve_row_height(block, ctx)
     body_size = resolve_role(ctx.layout, "body")
+    mono = bool(
+        resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    )
+    advance = line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
 
     # A leading synthetic row normally renders first, ahead of any group
@@ -294,7 +298,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
         layout_path=ctx.layout_path,
         block_key="header",
     ):
-        header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
+        header_height = int(block["header_height"]) if "header_height" in block else advance
         fill_height = int(block["fill_height"]) if "fill_height" in block else header_height
         y = _draw_header(
             columns,
@@ -309,6 +313,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             label_inset_y=label_inset_y,
             header_rule_top=header_rule_top,
             header_rule_gap=header_rule_gap,
+            mono=mono,
+            advance=advance,
         )
 
     table_body_start = y
@@ -326,7 +332,11 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                     [(ctx.region.x, y), (ctx.region.right, y + row_height - fill_inset)], fill=fill_color
                 )
             draw_text_left(
-                ctx.draw, str(row.get("date", "")), ctx.region.x, y, load_font(body_size, bold=True)
+                ctx.draw,
+                str(row.get("date", "")),
+                ctx.region.x,
+                y,
+                load_font(body_size, mono=mono, bold=True),
             )
             previous_date = row.get("date")
             y += row_height
@@ -343,6 +353,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                     row_height=row_height,
                     index=None,
                     is_last=False,
+                    mono=mono,
                     first_row=first_row,
                     is_new_group=False,
                 )
@@ -361,6 +372,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             row_height=row_height,
             index=None if synthetic else index,
             is_last=(position == total_rows - 1),
+            mono=mono,
             first_row=first_row,
             is_new_group=is_new_group,
         )
@@ -399,6 +411,8 @@ def _draw_header(
     label_inset_y: int | None,
     header_rule_top: bool,
     header_rule_gap: int,
+    mono: bool,
+    advance: int,
 ) -> int:
     """Draw the column-header row in the table's frame.
 
@@ -425,7 +439,7 @@ def _draw_header(
     inside a 44px bar) whose real offset the centring formula does not
     reproduce. A label may contain "\\n" for a legacy-matching multi-line
     header cell (e.g. Westpac's "Date of" / "Transaction"); each line is
-    positioned relative to that same start, one `line_height` apart.
+    positioned relative to that same start, one `advance` apart.
 
     `frame: ruled` draws a rule both above and below the header labels by
     default (CBA's real header). `header_rule_top`, when False, skips the
@@ -434,7 +448,7 @@ def _draw_header(
     below rule's own advance (default 16, CBA's real value; ANZ's is 14).
     Both are no-ops for every other frame, which draws no rule here at all.
     """
-    font = load_font(size, bold=True)
+    font = load_font(size, mono=mono, bold=True)
     if frame == "ruled":
         if header_rule_top:
             draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
@@ -453,12 +467,12 @@ def _draw_header(
         if label_inset_y is not None:
             start = y + label_inset_y
         elif frame in _BOXED_FRAMES:
-            block_height = line_height(size) * len(lines)
+            block_height = advance * len(lines)
             start = y + max(0, (header_height - block_height) // 2)
         else:
             start = y
         for position, text in enumerate(lines):
-            line_y = start + position * line_height(size)
+            line_y = start + position * advance
             if column.get("align") == "right":
                 draw_text_right(ctx.draw, text, x_right=x, y=line_y, font=font)
             else:
@@ -483,6 +497,7 @@ def _draw_row(
     row_height: int,
     index: int | None,
     is_last: bool,
+    mono: bool,
     first_row: bool = False,
     is_new_group: bool = True,
 ) -> int:
@@ -543,8 +558,8 @@ def _draw_row(
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 12
 
-    regular_font = load_font(size, bold=False)
-    bold_font = load_font(size, bold=True)
+    regular_font = load_font(size, mono=mono, bold=False)
+    bold_font = load_font(size, mono=mono, bold=True)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
@@ -665,7 +680,8 @@ def _draw_sub_lines(row: dict, columns: list, ctx: RenderContext, y: int) -> int
                 sub_line, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path
             )
         )
-        draw_text_left(ctx.draw, text, x, y + offset_y, load_font(size), fill=color)
+        font = font_for(ctx.layout, sub_line, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+        draw_text_left(ctx.draw, text, x, y + offset_y, font, fill=color)
         sub_line_height = int(
             resolve_param(
                 sub_line,

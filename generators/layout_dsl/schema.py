@@ -55,17 +55,28 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     # them is validated there, with a diagnostic naming both options.
     "text": (
         (),
-        ("content", "from_layout", "role", "align", "color", "field", "bold", "suppress_if_equals"),
+        (
+            "content",
+            "from_layout",
+            "role",
+            "align",
+            "color",
+            "field",
+            "bold",
+            "suppress_if_equals",
+            "mono",
+            "line_advance",
+        ),
     ),
-    "pair": (("label", "value"), ("role", "color", "field")),
-    "block": (("lines",), ("role", "color", "heading")),
+    "pair": (("label", "value"), ("role", "color", "field", "mono", "line_advance")),
+    "block": (("lines",), ("role", "color", "heading", "mono", "line_advance")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color")),
     "banner": (
         ("height", "color"),
-        ("content", "from_layout", "text_color", "role", "text_y", "bold"),
+        ("content", "from_layout", "text_color", "role", "text_y", "bold", "mono"),
     ),
     "table": (
         ("rows", "columns", "frame", "grouping"),
@@ -83,6 +94,8 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "synthetic_row_placement",
             "header_rule_top",
             "header_rule_gap",
+            "mono",
+            "line_advance",
         ),
     ),
 }

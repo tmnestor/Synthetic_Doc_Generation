@@ -4,7 +4,7 @@ Each takes (block, ctx, y) and returns the advanced y-cursor, matching the
 convention the existing renderers already use.
 """
 
-from generators.common import draw_separator_line, load_font
+from generators.common import Font, draw_separator_line, load_font
 from generators.layout_dsl.binding import interpolate
 from generators.layout_dsl.context import RenderContext
 from generators.layout_dsl.defaults import resolve_param
@@ -46,16 +46,59 @@ def resolve_role(layout: dict, role: str) -> int:
     return int(sizes[role])
 
 
-def line_height(size: int) -> int:
-    """Return the vertical advance for a font size."""
-    return int(size * 1.4)
+def line_advance(layout: dict, block: dict, *, layout_id: str, layout_path: str) -> int:
+    """Return the vertical advance for one line, in pixels.
+
+    Replaces the former `line_height(size) = int(size * 1.4)`. The 1.4 ratio
+    was a Python literal that receipts contradict: `receipts.yml` declares
+    `line_height: 20` against `font_size: 18`, a ratio of 1.11 -- so the
+    advance now resolves through `resolve_param` (block key -> layout
+    `defaults:` -> fail fast) like every other primitive parameter, rather
+    than being derived from a role's font size.
+
+    Args:
+        layout: The resolved layout dict, carrying a `defaults:` mapping.
+        block: The block requesting the advance; its own `line_advance` key,
+            if present, wins over the layout default.
+        layout_id: Layout id, used in the diagnostic.
+        layout_path: Path to the layout YAML, used in the diagnostic.
+
+    Returns:
+        The vertical advance in pixels.
+    """
+    return int(resolve_param(block, layout, "line_advance", layout_id=layout_id, layout_path=layout_path))
+
+
+def font_for(
+    layout: dict, block: dict, size: int, *, bold: bool = False, layout_id: str, layout_path: str
+) -> Font:
+    """Load a font honouring the layout's declared face.
+
+    Every `load_font` call in the primitives used to omit `mono=`, silently
+    defaulting to the sans face even for layouts (e.g. receipts) declaring
+    `font_family: monospace`. This resolves `mono` the same way every other
+    primitive parameter resolves -- block key, then layout `defaults:`.
+
+    Args:
+        layout: The resolved layout dict, carrying a `defaults:` mapping.
+        block: The block requesting the font; its own `mono` key, if
+            present, wins over the layout default.
+        size: Font size in points.
+        bold: Whether to load the bold weight.
+        layout_id: Layout id, used in the diagnostic.
+        layout_path: Path to the layout YAML, used in the diagnostic.
+
+    Returns:
+        The loaded font.
+    """
+    mono = bool(resolve_param(block, layout, "mono", layout_id=layout_id, layout_path=layout_path))
+    return load_font(size, mono=mono, bold=bold)
 
 
 def _draw_line(
-    ctx: RenderContext, text: str, y: int, *, size: int, align: str, color: str, bold: bool = False
+    ctx: RenderContext, text: str, y: int, *, font: Font, align: str, color: str
 ) -> tuple[int, int]:
     """Draw one line honouring alignment; return (left, right) pixel extent."""
-    font = load_font(size, bold=bold)
     bbox = font.getbbox(text)
     text_width = int(bbox[2] - bbox[0])
     if align == "right":
@@ -119,16 +162,21 @@ def draw_text_block(block: dict, ctx: RenderContext, y: int) -> int:
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
-    left, right = _draw_line(ctx, text, y, size=size, align=align, color=color, bold=bold)
-    end = y + line_height(size)  # Flow advance: unrelated to the recorded box below.
+    font = font_for(
+        ctx.layout, block, size, bold=bold, layout_id=ctx.layout_id, layout_path=ctx.layout_path
+    )
+    left, right = _draw_line(ctx, text, y, font=font, align=align, color=color)
+    end = y + line_advance(
+        ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path
+    )  # Flow advance: unrelated to the recorded box below.
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
-        # Ink extent, not the line-height advance `end` -- matches draw_pair
-        # and four of common.py's five text recorders (draw_text_left/right/
+        # Ink extent, not the line-advance `end` -- matches draw_pair and
+        # four of common.py's five text recorders (draw_text_left/right/
         # center, capture_label_prefixed_value); the advance box is 1.43-
         # 1.70x too tall for a single line, which systematically depresses
         # IoU against a localisation benchmark's ground truth.
-        bbox = load_font(size, bold=bold).getbbox(text)
+        bbox = font.getbbox(text)
         text_height = int(bbox[3] - bbox[1])
         ctx.recorder.record(field, (left, y, right, y + text_height))
     return end
@@ -155,12 +203,12 @@ def draw_pair(block: dict, ctx: RenderContext, y: int) -> int:
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
-    left, _ = _draw_line(ctx, text, y, size=size, align="left", color=color)
-    end = y + line_height(size)
+    font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    left, _ = _draw_line(ctx, text, y, font=font, align="left", color=color)
+    end = y + line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     field = block.get("field")
     if ctx.recorder is not None and field is not None:
         # Record the value's own extent, not the label's.
-        font = load_font(size)
         label_width = int(ctx.draw.textlength(f"{label}: ", font=font))
         value_bbox = font.getbbox(value)
         value_width = int(value_bbox[2] - value_bbox[0])
@@ -189,21 +237,27 @@ def draw_block(block: dict, ctx: RenderContext, y: int) -> int:
     color = str(
         resolve_param(block, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
+    advance = line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     heading = block.get("heading")
     if heading is not None:
+        heading_font = font_for(
+            ctx.layout, block, size, bold=True, layout_id=ctx.layout_id, layout_path=ctx.layout_path
+        )
         _draw_line(
             ctx,
             interpolate(heading, ctx.entry["fields"]),
             y,
-            size=size,
+            font=heading_font,
             align="left",
             color=color,
-            bold=True,
         )
-        y += line_height(size)
+        y += advance
+    line_font = font_for(ctx.layout, block, size, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     for line in block["lines"]:
-        _draw_line(ctx, interpolate(line, ctx.entry["fields"]), y, size=size, align="left", color=color)
-        y += line_height(size)
+        _draw_line(
+            ctx, interpolate(line, ctx.entry["fields"]), y, font=line_font, align="left", color=color
+        )
+        y += advance
     return y
 
 
@@ -323,7 +377,9 @@ def draw_banner(block: dict, ctx: RenderContext, y: int) -> int:
     bold = bool(
         resolve_param(block, ctx.layout, "bold", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
-    font = load_font(size, bold=bold)
+    font = font_for(
+        ctx.layout, block, size, bold=bold, layout_id=ctx.layout_id, layout_path=ctx.layout_path
+    )
     if "from_layout" in block:
         text = str(ctx.layout[block["from_layout"]])
     else:
