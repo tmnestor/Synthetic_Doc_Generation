@@ -9,6 +9,7 @@ from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import LayoutBudgetError
 from generators.layout_dsl.binding import BindingError, is_present
 from generators.layout_dsl.context import Region, RenderContext
+from generators.layout_dsl.field_providers import apply_field_providers
 from generators.layout_dsl.primitives_container import ContainerError, draw_panel, draw_split
 from generators.layout_dsl.primitives_table import TableError, draw_table
 from generators.layout_dsl.primitives_text import (
@@ -144,6 +145,8 @@ def render_body(
 
     Raises:
         EngineError: If the layout has no `body` key.
+        FieldProviderError: If a `field_providers:` entry names an unknown
+            provider, or a provider returns a key it did not declare.
         ContainerError | TableError | RoleError | BindingError | LayoutBudgetError |
         FitError: Propagated from a primitive, re-raised with the failing
             block's path appended to the message so the author knows exactly
@@ -158,6 +161,8 @@ def render_body(
             f"  Recover:  add a 'body:' list to {layout_id}, or run "
             "`python -m generators.pipeline validate` to see the full diagnostic."
         )
+
+    entry = apply_field_providers(layout, entry)
 
     ctx = RenderContext(
         draw=draw,
