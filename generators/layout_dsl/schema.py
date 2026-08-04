@@ -1221,7 +1221,14 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
         elif kind in ("text", "pair"):
             _validate_text_budget(block, layout=layout, layout_path=layout_path, width=width, key_path=here)
         elif kind == "panel":
-            padding = int(block.get("padding", 0))
+            # Resolved the way draw_panel resolves it (primitives_container.py):
+            # the block's own `padding:` if it has one, else the layout's
+            # `defaults.panel_padding`. Reading `block.get("padding", 0)`
+            # instead would check a layout declaring `panel_padding: 40`
+            # against a padding of 0 and pass a budget the renderer cannot
+            # honour. Same reasoning as `_validate_text_budget` below, which
+            # already reads `defaults.pair_value_align` this way.
+            padding = int(block.get("padding", layout["defaults"]["panel_padding"]))
             inner = width - 2 * padding
             if inner < 1:
                 raise _err(
@@ -1249,7 +1256,9 @@ def _validate_geometry(blocks: list, *, layout: dict, layout_path: str, width: i
             )
         elif kind == "split":
             columns = block["children"]
-            gap = int(block.get("gap", 0))
+            # As with panel padding above: draw_split resolves `gap:` against
+            # `defaults.split_gap`, so validation must too.
+            gap = int(block.get("gap", layout["defaults"]["split_gap"]))
             widths = block.get("widths")
             if widths is not None:
                 # Explicit per-column widths (invoice's fixed 400px totals
