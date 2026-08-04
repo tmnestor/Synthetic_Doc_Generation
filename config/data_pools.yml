@@ -208,6 +208,23 @@ payment_terminal:
   cash:
     tendered_label: CASH TENDERED
     change_label: CHANGE
+  # Printed terminal-slip labels, read byte-identical from
+  # generators/payment_block.py::render_payment_block -- the source of truth
+  # for what a receipt image actually shows. `psn_atc` is a template: the
+  # receipt_payment field provider (generators/layout_dsl/field_providers.py)
+  # emits PAYMENT_PSN/PAYMENT_ATC for a future DSL body to substitute in.
+  slip_labels:
+    aid: "AID: "
+    card: "Card: "
+    psn_atc: "PSN: {PAYMENT_PSN}, ATC: {PAYMENT_ATC}"
+    purchase: "Purchase   AUD"
+    terminal_id: "Terminal ID: "
+    transaction_ref: "Transaction Ref: "
+  # Cash-tender arithmetic: tendered is the next note of this denomination
+  # above the total, plus 0..(cash_extra_notes - 1) extra notes of the same
+  # denomination -- see derive_payment's _cash_tender helper.
+  cash_tender_step: 5
+  cash_extra_notes: 3
 
 # Deterministic POS values for receipts, derived from
 # sha256("{case_id}:pos:{invoice_date}"). Hex slices 0-8 belong to this block;

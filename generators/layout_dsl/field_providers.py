@@ -1,7 +1,7 @@
 """Field providers -- the DSL's other sanctioned escape hatch.
 
 Some values a receipt or invoice draws exist nowhere in ground truth: a
-receipt number, POS time, register and staff name, and the seventeen EFTPOS
+receipt number, POS time, register and staff name, and the sixteen EFTPOS
 terminal-slip values -- today derived by SHA-256 inside `generators/receipt.py`
 and `generators/payment_block.py`. A field provider is a registered Python
 function returning a flat `dict[str, str]` that is merged into `entry["fields"]`
@@ -23,7 +23,8 @@ from pathlib import Path
 
 import yaml
 
-from generators.payment_block import load_pos_pools
+from generators.common import fmt_amount
+from generators.payment_block import derive_payment, load_link_index, load_pos_pools
 
 FieldProvider = Callable[[dict, dict], dict[str, str]]
 
@@ -387,6 +388,114 @@ def receipt_pos(entry: dict, params: dict) -> dict[str, str]:
         "POS_REGISTER": f"{register:02d}",
         "POS_STAFF": staff,
         "RECEIPT_NUMBER": receipt_number,
+    }
+
+
+def _or_not_found(value: str) -> str:
+    """Convert an empty PaymentDetails string into the `NOT_FOUND` sentinel.
+
+    `is_present` (`generators/layout_dsl/binding.py`) already treats
+    `NOT_FOUND` and empty string as absent -- that's the mechanism a future
+    receipt body uses to pick its card/wallet/cash variant via `when:` -- but
+    `derive_payment` itself returns `""` for a field that does not apply to a
+    given `PaymentDetails.kind` (e.g. `aid` for cash), never the sentinel. This
+    normalises every such gap to the one spelling `when:` checks for.
+    """
+    return value if value else "NOT_FOUND"
+
+
+def _amount_or_not_found(value: Decimal | None) -> str:
+    """Format a cash Decimal as `render_payment_block` prints it, or `NOT_FOUND`.
+
+    `tendered`/`change` are `None` unless `PaymentDetails.kind == "cash"`.
+    """
+    return fmt_amount(value) if value is not None else "NOT_FOUND"
+
+
+@field_provider(
+    "receipt_payment",
+    params=frozenset({"pools_key"}),
+    emits=(
+        "PAYMENT_KIND",
+        "PAYMENT_METHOD",
+        "PAYMENT_SCHEME_DISPLAY",
+        "PAYMENT_ACCOUNT_TYPE",
+        "PAYMENT_ACQUIRER",
+        "PAYMENT_AID",
+        "PAYMENT_MASKED_PAN",
+        "PAYMENT_ENTRY_MODE",
+        "PAYMENT_PSN",
+        "PAYMENT_ATC",
+        "PAYMENT_TERMINAL_ID",
+        "PAYMENT_TRANSACTION_REF",
+        "PAYMENT_TIMESTAMP",
+        "PAYMENT_WALLET_LABEL",
+        "PAYMENT_TENDERED",
+        "PAYMENT_CHANGE",
+    ),
+)
+def receipt_payment(entry: dict, params: dict) -> dict[str, str]:
+    """Derive a receipt's EFTPOS terminal-slip values.
+
+    Wraps `generators.payment_block.derive_payment` exactly as
+    `generators/receipt.py`'s now-legacy `payment` section does -- same POS
+    time (reusing `receipt_pos`'s derivation, hex chars 0-8 of the
+    `{case_id}:pos:{invoice_date}` digest, so this never duplicates that
+    arithmetic) and the same linked-receipt lookup keyed
+    `f"{case_id}_{layout_id}"` into `load_link_index()`, so a linked receipt's
+    scheme still comes from its bank row rather than the weighted pool.
+
+    Deliberately never emits a purchase total: the slip's `Purchase   AUD`
+    line binds `{TOTAL_AMOUNT}` directly (see `payment_block.py:300-303`'s
+    invariant), so a second, provider-derived copy of a scored value could
+    silently drift from it.
+
+    The three slip variants -- card, wallet, cash -- are selected by a future
+    body's `when:` on these emitted keys, not by a branch here: every value
+    `PaymentDetails` leaves as `""` or `None` for the current `kind` becomes
+    the literal `"NOT_FOUND"`, which `is_present` already treats as absent.
+
+    Args:
+        entry: The ground-truth entry. Reads `entry["case_id"]`,
+            `entry["layout"]`, `entry["fields"]["INVOICE_DATE"]`, and
+            `entry["fields"]["TOTAL_AMOUNT"]`.
+        params: Unused beyond `pools_key` (self-documenting in the layout;
+            `payment_terminal` is the only pool `derive_payment` ever loads).
+
+    Returns:
+        The sixteen `PAYMENT_*` fields listed in this provider's `emits`.
+    """
+    case_id = entry.get("case_id", "")
+    layout_id = entry.get("layout", "")
+    fields = entry["fields"]
+    invoice_date = fields.get("INVOICE_DATE", "")
+    time_str = receipt_pos(entry, {})["POS_TIME"]
+
+    details = derive_payment(
+        case_id,
+        invoice_date,
+        fields.get("TOTAL_AMOUNT", "0"),
+        time_str,
+        bank_description=load_link_index().get(f"{case_id}_{layout_id}"),
+    )
+
+    return {
+        "PAYMENT_KIND": details.kind,
+        "PAYMENT_METHOD": details.method,
+        "PAYMENT_SCHEME_DISPLAY": _or_not_found(details.scheme_display),
+        "PAYMENT_ACCOUNT_TYPE": _or_not_found(details.account_type),
+        "PAYMENT_ACQUIRER": _or_not_found(details.acquirer),
+        "PAYMENT_AID": _or_not_found(details.aid),
+        "PAYMENT_MASKED_PAN": _or_not_found(details.masked_pan),
+        "PAYMENT_ENTRY_MODE": _or_not_found(details.entry_mode),
+        "PAYMENT_PSN": _or_not_found(details.psn),
+        "PAYMENT_ATC": _or_not_found(details.atc),
+        "PAYMENT_TERMINAL_ID": _or_not_found(details.terminal_id),
+        "PAYMENT_TRANSACTION_REF": _or_not_found(details.transaction_ref),
+        "PAYMENT_TIMESTAMP": _or_not_found(details.timestamp),
+        "PAYMENT_WALLET_LABEL": _or_not_found(details.wallet_label),
+        "PAYMENT_TENDERED": _amount_or_not_found(details.tendered),
+        "PAYMENT_CHANGE": _amount_or_not_found(details.change),
     }
 
 
