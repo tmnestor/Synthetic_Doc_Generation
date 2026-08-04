@@ -179,7 +179,7 @@ _ENGINE_LAYOUT_KEYS = frozenset(
         "defaults",  # defaults.resolve_param
         "field_budgets",  # layout_budgets.field_budget
         "field_providers",  # field_providers.apply_field_providers
-        "font_sizes",  # context.resolve_role
+        "font_sizes",  # primitives_text.resolve_role
         "row_height",  # primitives_table._resolve_row_height (layout fallback)
     }
 )
