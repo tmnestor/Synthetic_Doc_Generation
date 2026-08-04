@@ -6,6 +6,7 @@ container positions correctly without knowing it is nested.
 """
 
 from decimal import Decimal
+from typing import Any
 
 from PIL import ImageDraw
 
@@ -19,8 +20,6 @@ from generators.common import (
     fmt_amount,
     load_font,
 )
-from typing import Any
-
 from generators.exporters.geometry import BoxRecorder
 from generators.layout_budgets import field_budget
 from generators.layout_dsl.context import RenderContext
@@ -29,43 +28,6 @@ from generators.layout_dsl.primitives_text import line_height, resolve_role
 from generators.layout_dsl.providers import get_provider
 
 _ABSENT = "NOT_FOUND"
-
-
-def _resolve(block: dict, ctx: RenderContext, param: str, *, block_key: str | None = None) -> Any:
-    """Resolve one parameter honouring a block's own key before the layout default.
-
-    `resolve_param`'s single `key` argument does double duty as both the
-    block's own key and the layout `defaults:` key. Where those differ --
-    `PARAMETER_DEFAULTS` namespaces a key this primitive shares with another
-    (e.g. a table's `group_gap:` maps to the `table_group_gap` default) --
-    this shims the block's own value under the namespaced name first, so a
-    per-block override still wins exactly as it did before this parameter
-    had a layout-level default to fall back to. `block` need not be a
-    `<type: table>` block dict: `_cell_bold`/`_validate_bold_spec` pass a
-    provider row, and `_draw_sub_lines` passes a column's `sub_line` mapping
-    -- both are just dicts resolve_param reads a key off.
-
-    Typed `Any`, not `object` (`resolve_param`'s own return type): a block's
-    values were untyped `dict` values before this resolution existed, and
-    callers already cast the ones that need it (`int(...)`, `bool(...)`)
-    exactly as they did against the bare `.get()` call this replaces.
-
-    Args:
-        block: The dict whose own `block_key` wins if present.
-        ctx: Render context supplying the layout and its diagnostics.
-        param: The `PARAMETER_DEFAULTS` name, used against the layout's
-            `defaults:` mapping.
-        block_key: The block's own literal key for this value, if it differs
-            from `param`. Defaults to `param` itself.
-
-    Returns:
-        The block's value if it carries `block_key`, otherwise the layout
-        default for `param`.
-    """
-    block_key = param if block_key is None else block_key
-    shimmed = {param: block[block_key]} if block_key in block else block
-    return resolve_param(shimmed, ctx.layout, param, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
-
 
 # Public: schema.py imports this as the single source of truth for validating
 # a table column's `align:` key. Deliberately narrower than
@@ -152,7 +114,7 @@ def _cell_text(row: dict, column: dict) -> str:
     return "" if text == _ABSENT else text
 
 
-def _cell_bold(row: dict, column_key: str, ctx: RenderContext) -> bool:
+def _cell_bold(row: dict, column_key: str) -> bool:
     """Resolve whether one cell renders bold.
 
     `row["bold"]` is `True` for a uniformly bold row — NAB's "Carried
@@ -167,8 +129,17 @@ def _cell_bold(row: dict, column_key: str, ctx: RenderContext) -> bool:
     naming a column this table does not have is a caller error, not a silent
     no-op — `_validate_bold_spec` rejects it before any cell in the row is
     drawn (see there for why that check lives here rather than in schema.py).
+
+    `row["bold"]` is provider-set row *data*, not layout configuration —
+    unlike a block's own `bold` key (see `draw_text_block`/`draw_banner`),
+    which is a real `PARAMETER_DEFAULTS` entry, this one must never resolve
+    through the layout's `defaults:`: which row a provider marks bold is a
+    fact about the row, not a per-layout style an author would toggle, and
+    every bank layout happening to seed `bold: false` would otherwise mask a
+    genuine provider bug (a row nobody meant to bold, silently un-bolding
+    the moment a layout picked a different default).
     """
-    spec = _resolve(row, ctx, "bold")
+    spec = row.get("bold", False)
     if spec is True:
         return True
     if spec:
@@ -176,7 +147,7 @@ def _cell_bold(row: dict, column_key: str, ctx: RenderContext) -> bool:
     return False
 
 
-def _validate_bold_spec(row: dict, columns: list, ctx: RenderContext) -> None:
+def _validate_bold_spec(row: dict, columns: list) -> None:
     """Fail fast if a row's `bold` collection names a column the table lacks.
 
     `row["bold"]` is provider-set data (see `_cell_bold`), not a layout YAML
@@ -195,13 +166,12 @@ def _validate_bold_spec(row: dict, columns: list, ctx: RenderContext) -> None:
     Args:
         row: The row dict about to be drawn.
         columns: The table's column specs.
-        ctx: Render context supplying the layout and its diagnostics.
 
     Raises:
         TableError: If `row["bold"]` is a non-empty collection containing a
             key absent from every column.
     """
-    spec = _resolve(row, ctx, "bold")
+    spec = row.get("bold", False)
     if spec is True or not spec:
         return
     known = {column["key"] for column in columns}
@@ -251,16 +221,56 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
     frame = block["frame"]
     grouping = block["grouping"]
     fill_color = block.get("fill_color")
-    fill_inset = int(_resolve(block, ctx, "table_fill_inset", block_key="fill_inset"))
-    group_gap = int(_resolve(block, ctx, "table_group_gap", block_key="group_gap"))
+    fill_inset_value: Any = resolve_param(
+        block,
+        ctx.layout,
+        "table_fill_inset",
+        layout_id=ctx.layout_id,
+        layout_path=ctx.layout_path,
+        block_key="fill_inset",
+    )
+    fill_inset = int(fill_inset_value)
+    group_gap_value: Any = resolve_param(
+        block,
+        ctx.layout,
+        "table_group_gap",
+        layout_id=ctx.layout_id,
+        layout_path=ctx.layout_path,
+        block_key="group_gap",
+    )
+    group_gap = int(group_gap_value)
     synthetic_after_header = block.get("synthetic_row_placement") == "after_first_group_header"
     label_inset_y = block.get("label_inset_y")
     if label_inset_y is not None:
         label_inset_y = int(label_inset_y)
-    header_rule_top = bool(_resolve(block, ctx, "table_header_rule_top", block_key="header_rule_top"))
-    header_rule_gap = int(_resolve(block, ctx, "table_header_rule_gap", block_key="header_rule_gap"))
+    header_rule_top = bool(
+        resolve_param(
+            block,
+            ctx.layout,
+            "table_header_rule_top",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="header_rule_top",
+        )
+    )
+    header_rule_gap_value: Any = resolve_param(
+        block,
+        ctx.layout,
+        "table_header_rule_gap",
+        layout_id=ctx.layout_id,
+        layout_path=ctx.layout_path,
+        block_key="header_rule_gap",
+    )
+    header_rule_gap = int(header_rule_gap_value)
     columns = block["columns"]
-    dividers = _resolve(block, ctx, "table_dividers", block_key="dividers")
+    dividers: Any = resolve_param(
+        block,
+        ctx.layout,
+        "table_dividers",
+        layout_id=ctx.layout_id,
+        layout_path=ctx.layout_path,
+        block_key="dividers",
+    )
     row_height = _resolve_row_height(block, ctx)
     body_size = resolve_role(ctx.layout, "body")
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
@@ -274,7 +284,14 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
         deferred_synthetic = rows[0]
         rows = rows[1:]
 
-    if _resolve(block, ctx, "table_header", block_key="header"):
+    if resolve_param(
+        block,
+        ctx.layout,
+        "table_header",
+        layout_id=ctx.layout_id,
+        layout_path=ctx.layout_path,
+        block_key="header",
+    ):
         header_height = int(block["header_height"]) if "header_height" in block else line_height(body_size)
         fill_height = int(block["fill_height"]) if "fill_height" in block else header_height
         y = _draw_header(
@@ -518,7 +535,7 @@ def _draw_row(
     unlike every other row decoration here — is drawn regardless of `frame`,
     since it is a fact about this one row, not a frame-wide style.
     """
-    _validate_bold_spec(row, columns, ctx)
+    _validate_bold_spec(row, columns)
 
     if row.get("rule_above"):
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
@@ -536,7 +553,7 @@ def _draw_row(
         if not text:
             continue
 
-        cell_bold = _cell_bold(row, column["key"], ctx)
+        cell_bold = _cell_bold(row, column["key"])
         font = bold_font if cell_bold else regular_font
         right = column.get("align") == "right"
         budget = None
@@ -625,16 +642,37 @@ def _draw_sub_lines(row: dict, columns: list, ctx: RenderContext, y: int) -> int
         if not text or text == _ABSENT:
             continue
         x = column_x(column, ctx)
-        size = resolve_role(ctx.layout, str(_resolve(sub_line, ctx, "role")))
-        draw_text_left(
-            ctx.draw,
-            text,
-            x,
-            y + int(_resolve(sub_line, ctx, "table_offset_y", block_key="offset_y")),
-            load_font(size),
-            fill=_resolve(sub_line, ctx, "color"),
+        role = str(
+            resolve_param(
+                sub_line, ctx.layout, "role", layout_id=ctx.layout_id, layout_path=ctx.layout_path
+            )
         )
-        extra = max(extra, int(_resolve(sub_line, ctx, "table_sub_line_height", block_key="height")))
+        size = resolve_role(ctx.layout, role)
+        offset_y_value: Any = resolve_param(
+            sub_line,
+            ctx.layout,
+            "table_offset_y",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="offset_y",
+        )
+        offset_y = int(offset_y_value)
+        color = str(
+            resolve_param(
+                sub_line, ctx.layout, "color", layout_id=ctx.layout_id, layout_path=ctx.layout_path
+            )
+        )
+        draw_text_left(ctx.draw, text, x, y + offset_y, load_font(size), fill=color)
+        sub_line_height_value: Any = resolve_param(
+            sub_line,
+            ctx.layout,
+            "table_sub_line_height",
+            layout_id=ctx.layout_id,
+            layout_path=ctx.layout_path,
+            block_key="height",
+        )
+        sub_line_height = int(sub_line_height_value)
+        extra = max(extra, sub_line_height)
     return extra
 
 
