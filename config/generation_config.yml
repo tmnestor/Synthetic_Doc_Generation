@@ -35,16 +35,18 @@ derived_formats:
   csv: true
   jsonl: true
 
-# Flat evaluation-set export consumed by the LMM_POC extraction pipeline.
-# `python -m generators.pipeline eval-set --out <dir>` renders one clean image
-# per document for the listed types into a single directory, writes the raw
-# synthetic.yml those documents describe, then hands the directory to
-# LMM_POC's relabel_evaluation_set.py, which owns schema projection.
+# Evaluation-set export consumed by the extraction benchmark.
+# `python -m generators.pipeline eval-set --out <dir>` renders every document
+# of the listed types once, saving a clean copy into <out>/<clean_dir_prefix>_<date>/
+# and a degraded copy into <out>/<degraded_dir_prefix>_<date>/ under the same
+# generic {case}_{document_type}.png name, then writes the schema-projected
+# ground truth into both directories so each is self-contained.
 # Every key is required — the export fails fast on any omission.
 eval_set:
-  # The relabel script maps exactly these three DOCUMENT_TYPEs to filename
-  # suffixes — the whole surviving corpus.
+  # config/extraction_schema.yml declares exactly these three document types —
+  # the whole surviving corpus.
   document_types: [bank_statements, invoices, receipts]
-  relabel_script: /Users/tod/Desktop/LMM_POC/scripts/relabel_evaluation_set.py
-  relabel_repo_root: /Users/tod/Desktop/LMM_POC
+  clean_dir_prefix: synthetic
+  degraded_dir_prefix: degraded
   csv_name: ground_truth.csv
+  jsonl_name: ground_truth.jsonl

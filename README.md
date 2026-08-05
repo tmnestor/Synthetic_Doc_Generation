@@ -116,7 +116,7 @@ python -m generators.pipeline <command> [OPTIONS]
 | `validate` | Validate ground truth YAML against schema + layout registries |
 | `generate` | Render document images from ground truth + layouts |
 | `derive` | Regenerate CSV/JSONL from ground truth YAML |
-| `eval-set` | Export a flat evaluation set (one clean image per document) for LMM_POC |
+| `eval-set` | Export the clean and degraded evaluation sets as dated sibling directories |
 
 | Flag | Default | Applies To | Description |
 |------|---------|------------|-------------|
@@ -391,7 +391,7 @@ generators/
 ├── schema.py                  # Ground truth schema validation
 ├── loader.py                  # YAML loaders with fail-fast diagnostics
 ├── derive_outputs.py          # YAML → CSV/JSONL + CORD/DocILE/native/doc_refs derivation
-├── eval_set.py                # Flat evaluation-set export for LMM_POC (hands off to relabel_evaluation_set.py)
+├── eval_set.py                # Evaluation-set export — clean + degraded dated sets, schema-projected ground truth
 ├── pipeline.py                # Typer CLI (validate, generate, derive, eval-set)
 ├── bank_statement.py          # Bank statement renderer — draws its layout's declarative `body:` tree
 ├── receipt.py                 # Receipt renderer (thermal/letterhead) — same
