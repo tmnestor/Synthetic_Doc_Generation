@@ -378,7 +378,7 @@ layouts:
     row_height: 72
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: carlito   # CBA's house face across its layouts
       # Per-role advance (int(font_sizes.<role> * 1.4), the ratio the old
       # line_height() hardcoded, now looked up by the drawing block's own
       # role -- see primitives_text.py's line_advance()).
@@ -441,7 +441,7 @@ layouts:
     row_height: 72
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: carlito   # CBA's house face across its layouts
       line_advance: {header: 67, body: 44, footer: 25}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -496,7 +496,7 @@ layouts:
     row_height: 62
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: liberation_sans   # Westpac's house face across its layouts
       line_advance: {header: 61, body: 39, sub_description: 30, footer: 22}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -535,7 +535,7 @@ layouts:
     row_height: 62
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: liberation_sans   # Westpac's house face across its layouts
       line_advance: {header: 61, body: 39, sub_description: 30, footer: 22}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -611,7 +611,7 @@ layouts:
     row_height: 66
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: carlito   # NAB's house face across its layouts
       line_advance: {header: 61, body: 39, sub_description: 30, footer: 22}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -639,7 +639,7 @@ layouts:
     row_height: 52
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: carlito   # NAB's house face across its layouts
       line_advance: {header: 56, body: 33, sub_description: 28, footer: 19}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -667,7 +667,7 @@ layouts:
     row_height: 72
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: liberation_sans   # ANZ's house face across its layouts
       line_advance: {header: 67, body: 44, sub_description: 33, footer: 25}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement
@@ -695,7 +695,7 @@ layouts:
     row_height: 62
     defaults:
       <<: *dsl_defaults_values
-      mono: false
+      family: liberation_sans   # ANZ's house face across its layouts
       line_advance: {header: 61, body: 39, sub_description: 30, footer: 22}
     # Transactions this layout fits on one page, measured against the rendered
     # corpus with two rows of headroom. The seeder reads this: a statement

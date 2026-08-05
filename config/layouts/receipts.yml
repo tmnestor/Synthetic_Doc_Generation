@@ -9,17 +9,30 @@
 # PyYAML expands `<<:`.
 #
 # Values are the legacy renderer's Python literals, transcribed verbatim:
-# `mono: true` is `receipt.py`'s `is_mono` (every layout declared
+# `family: liberation_mono` is `receipt.py`'s `is_mono` (every layout declared
 # `font_family: monospace`), `rule_fill_char: "-"` is `draw_separator`'s
 # default glyph, and `table_header: false` is the fact that the legacy
 # line-item loop drew no column header row at all (receipt.py:259-296),
 # unlike every bank table.
+#
+# Every receipt layout stays monospace. That is not inertia: these layouts are
+# built around a fixed advance width -- `rule_fill_char: "-"` draws separators
+# by repeating a glyph to fill the width, and the narrow thermal pages are
+# sized to a monospace column count. A proportional face would desynchronise
+# both. Liberation Mono is also advance-identical to the DejaVu Sans Mono it
+# replaces, so receipt geometry is unchanged by the swap; only glyph shapes and
+# line height move.
+#
+# Follow-up worth considering separately: `receipt_retail_tax` and
+# `receipt_professional` are not thermal-printer documents in reality and would
+# be more realistic in a proportional face. That is a layout redesign (widths
+# and separators both assume monospace), not a one-line family change.
 _receipt_defaults_values: &receipt_defaults_values
   role: body
   color: "black"
   align: left
   bold: false
-  mono: true
+  family: liberation_mono
   rule_thickness: 1
   rule_pad_above: 0
   rule_pad_below: 0

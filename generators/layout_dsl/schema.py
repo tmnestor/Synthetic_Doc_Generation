@@ -7,6 +7,7 @@ unregistered row providers all fail here with a four-element diagnostic.
 
 import re
 
+from generators.common import FONT_FAMILIES
 from generators.layout_dsl.binding import referenced_fields
 from generators.layout_dsl.defaults import PARAMETER_DEFAULTS
 from generators.layout_dsl.field_providers import (
@@ -70,7 +71,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "field",
             "bold",
             "suppress_if_equals",
-            "mono",
+            "family",
             "line_advance",
             "budget",
         ),
@@ -81,7 +82,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "role",
             "color",
             "field",
-            "mono",
+            "family",
             "line_advance",
             "budget",
             "value_align",
@@ -91,14 +92,14 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "currency",
         ),
     ),
-    "block": (("lines",), ("role", "color", "heading", "mono", "line_advance")),
+    "block": (("lines",), ("role", "color", "heading", "family", "line_advance")),
     "rule": ((), ("color", "thickness", "pad_above", "pad_below", "fill_char")),
     "spacer": ((), ("height",)),
     "panel": (("children",), ("border_color", "padding", "height")),
     "split": (("children",), ("gap", "divider", "divider_color", "widths")),
     "banner": (
         ("height", "color"),
-        ("content", "from_layout", "text_color", "role", "text_y", "bold", "mono"),
+        ("content", "from_layout", "text_color", "role", "text_y", "bold", "family"),
     ),
     "table": (
         ("rows", "columns", "frame", "grouping"),
@@ -119,7 +120,7 @@ PRIMITIVES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "synthetic_row_placement",
             "header_rule_top",
             "header_rule_gap",
-            "mono",
+            "family",
             "role",
             "line_advance",
             "capture",
@@ -357,6 +358,21 @@ def _validate_block(
             key_path=key_path,
             expected=f"only {sorted(allowed)}.",
             recover=f"remove {unknown}, or add them to PRIMITIVES in generators/layout_dsl/schema.py.",
+        )
+
+    # A block-level `family:` override is caught here rather than at render
+    # time: load_font would raise FontFamilyError on the first block that
+    # happens to draw, which is both later than startup and harder to trace
+    # back to the YAML that caused it.
+    family = block.get("family")
+    if family is not None and family not in FONT_FAMILIES:
+        raise _err(
+            f"unknown font family '{family}'.",
+            layout_path=layout_path,
+            key_path=f"{key_path}.family",
+            expected=f"one of {sorted(FONT_FAMILIES)}.",
+            recover=f"set family: to one of {sorted(FONT_FAMILIES)}, or vendor the new "
+            "face in fonts/ and register it in FONT_FAMILIES in generators/common.py.",
         )
 
     if kind in ("text", "banner"):
@@ -1069,6 +1085,24 @@ def validate_layout(layout: dict, *, layout_id: str, layout_path: str, known_fie
             f"{sorted(PARAMETER_DEFAULTS)}.",
             recover=f"add the missing keys under {layout_id}.defaults, sharing a common "
             "block through a YAML anchor as field_budgets already does.",
+        )
+
+    # `defaults:` only has to *carry* every key; nothing above checks the
+    # values are meaningful. A bad family is worth catching here for the same
+    # reason line_advance's shape is: load_font would otherwise raise on the
+    # first block that draws, long after startup.
+    default_family = layout["defaults"]["family"]
+    if default_family not in FONT_FAMILIES:
+        raise _err(
+            f"layout '{layout_id}' declares an unknown defaults.family ({default_family!r}).",
+            layout_path=layout_path,
+            key_path=f"{layout_id}.defaults.family",
+            expected=f"one of {sorted(FONT_FAMILIES)}, e.g.\n"
+            "              defaults:\n"
+            "                family: carlito",
+            recover=f"set {layout_id}.defaults.family to one of {sorted(FONT_FAMILIES)}, "
+            "or vendor the new face in fonts/ and register it in FONT_FAMILIES in "
+            "generators/common.py.",
         )
 
     # line_advance replaces the old int(size * 1.4) ratio, which varied by

@@ -16,96 +16,118 @@ from generators.exporters.geometry import BoxRecorder
 
 Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
 
-_FONT_CACHE: dict[tuple[int, bool, bool, bool], Font] = {}
+_FONT_CACHE: dict[tuple[int, str, bool], Font] = {}
 
 # Maps id(font) -> Path it was loaded from, so fit measurement can assert it is
-# using the bundled DejaVu face rather than a silent system fallback.
+# using a vendored face rather than something the caller built itself.
 _FONT_SOURCE: dict[int, Path] = {}
 
 
 class FontSourceError(RuntimeError):
-    """Raised when a font used for measurement is not the bundled DejaVu face."""
+    """Raised when a font used for measurement is not a vendored face."""
+
+
+class FontFamilyError(RuntimeError):
+    """Raised when a layout names a font family that is not vendored."""
 
 
 # Bundled fonts directory (committed to repo for cross-platform consistency)
 _BUNDLED_FONTS_DIR = Path(__file__).resolve().parent.parent / "fonts"
 
-# Font search paths — bundled first, then platform-specific fallbacks
-_SANS_PATHS = [
-    _BUNDLED_FONTS_DIR / "DejaVuSans.ttf",
-    Path("/System/Library/Fonts/Helvetica.ttc"),  # macOS
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),  # Linux
-]
-_SANS_BOLD_PATHS = [
-    _BUNDLED_FONTS_DIR / "DejaVuSans-Bold.ttf",
-    Path("/System/Library/Fonts/Helvetica.ttc"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
-]
-_MONO_PATHS = [
-    _BUNDLED_FONTS_DIR / "DejaVuSansMono.ttf",
-    Path("/System/Library/Fonts/Menlo.ttc"),  # macOS
-    Path("/System/Library/Fonts/SFMono-Regular.otf"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"),
-]
-_MONO_BOLD_PATHS = [
-    _BUNDLED_FONTS_DIR / "DejaVuSansMono-Bold.ttf",
-    Path("/System/Library/Fonts/Menlo.ttc"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"),
-]
+# The vendored font families, as {family: (regular, bold)} filenames.
+#
+# There is deliberately NO system-font fallback. A fallback cannot be a
+# reproducibility-neutral convenience here: a missing face would silently swap
+# glyph metrics, which re-runs every `fit_text()` decision and diverges the
+# rendered pixels Mac<->PROD without erroring. Since these files are vendored
+# and tracked in git, a missing one means a broken checkout, and the only safe
+# response is to fail loudly. This is the single-path guarantee `fit_text` and
+# `derived/geometry.jsonl` both rest on.
+#
+# All three families are metric-compatible substitutes for the proprietary
+# fonts real Australian business documents actually use, so they are both
+# redistributable (OFL) and closer to the target distribution than a generic
+# face would be:
+#   carlito         -> Calibri  (the modern invoice/statement register)
+#   liberation_sans -> Arial    (the older, more conservative register)
+#   liberation_mono -> Courier  (thermal/dot-matrix receipts)
+FONT_FAMILIES: dict[str, tuple[str, str]] = {
+    "carlito": ("Carlito-Regular.ttf", "Carlito-Bold.ttf"),
+    "liberation_sans": ("LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf"),
+    "liberation_mono": ("LiberationMono-Regular.ttf", "LiberationMono-Bold.ttf"),
+}
 
 
-def load_font(
-    size: int,
-    *,
-    mono: bool = False,
-    bold: bool = False,
-    italic: bool = False,
-) -> Font:
-    """Load a font with bundled-first fallbacks and caching.
+def font_path(family: str, *, bold: bool = False) -> Path:
+    """Resolve a family+weight to its single vendored file path.
 
-    Searches bundled fonts/ directory first for cross-platform consistency,
-    then falls back to platform-specific system fonts.
+    Args:
+        family: A key of `FONT_FAMILIES`.
+        bold: Select the bold face rather than the regular one.
+
+    Returns:
+        Path to the vendored TTF. The path is not checked for existence here;
+        `load_font` reports a missing file with its own diagnostic.
+
+    Raises:
+        FontFamilyError: `family` is not a vendored family.
+    """
+    faces = FONT_FAMILIES.get(family)
+    if faces is None:
+        raise FontFamilyError(
+            "Unknown font family.\n"
+            f"  What:     '{family}' is not a vendored font family.\n"
+            f"  Where:    the `family:` key on a block, or `defaults.family` in "
+            f"config/layouts/*.yml\n"
+            f"  Expected: one of {sorted(FONT_FAMILIES)}, e.g.\n"
+            f"              defaults:\n"
+            f"                family: carlito\n"
+            f"  Recover:  set `family:` to a vendored family, or vendor the new "
+            f"face in fonts/ and register it in FONT_FAMILIES in generators/common.py."
+        )
+    return _BUNDLED_FONTS_DIR / (faces[1] if bold else faces[0])
+
+
+def load_font(size: int, *, family: str, bold: bool = False) -> Font:
+    """Load a vendored font face, cached.
+
+    Resolves to exactly one file per (family, weight) — see `FONT_FAMILIES` for
+    why there is no system fallback.
 
     Args:
         size: Font size in points.
-        mono: Use monospace font family.
+        family: A key of `FONT_FAMILIES`, e.g. "carlito".
         bold: Use bold weight.
-        italic: Use italic style (best-effort).
 
     Returns:
         Loaded PIL font object.
 
     Raises:
-        FileNotFoundError: No usable font found in bundled or system paths.
+        FontFamilyError: `family` is not a vendored family.
+        FileNotFoundError: The vendored file for this family/weight is missing
+            or unreadable.
     """
-    key = (size, mono, bold, italic)
+    key = (size, family, bold)
     if key in _FONT_CACHE:
         return _FONT_CACHE[key]
 
-    if mono:
-        paths = _MONO_BOLD_PATHS if bold else _MONO_PATHS
-    else:
-        paths = _SANS_BOLD_PATHS if bold else _SANS_PATHS
-
-    font: Font | None = None
-    for p in paths:
-        if p.exists():
-            try:
-                font = ImageFont.truetype(str(p), size)
-                _FONT_SOURCE[id(font)] = p
-                break
-            except OSError:
-                continue
-
-    if font is None:
-        searched = "\n  ".join(str(p) for p in paths)
+    path = font_path(family, bold=bold)
+    try:
+        font: Font = ImageFont.truetype(str(path), size)
+    except OSError as err:
         raise FileNotFoundError(
-            f"No usable font found (mono={mono}, bold={bold}).\n"
-            f"Searched paths:\n  {searched}\n"
-            f"Fix: ensure the fonts/ directory exists at {_BUNDLED_FONTS_DIR} "
-            f"with DejaVuSans*.ttf files."
+            "Vendored font file is missing or unreadable.\n"
+            f"  What:     cannot load {path.name} for family '{family}' "
+            f"(bold={bold}): {err}.\n"
+            f"  Where:    {path}\n"
+            f"  Expected: the vendored face present in {_BUNDLED_FONTS_DIR}, "
+            f"tracked in git alongside its OFL license file.\n"
+            "  Recover:  restore the fonts/ directory from the repo "
+            "(`git checkout -- fonts/`); never substitute a system font, which "
+            "would silently change fit decisions and rendered pixels."
         ) from None
 
+    _FONT_SOURCE[id(font)] = path
     _FONT_CACHE[key] = font
     return font
 
@@ -116,25 +138,27 @@ def font_source_path(font: Font) -> Path | None:
 
 
 def assert_bundled_font(font: Font) -> None:
-    """Fail loud if `font` was not loaded from the bundled fonts/ directory.
+    """Fail loud if `font` did not come from the vendored fonts/ directory.
 
-    load_font() silently falls back to system fonts when a bundled file is
-    missing; measuring against a system font would diverge Mac<->PROD and
-    silently corrupt fit decisions. This enforces the bundled-first guarantee.
+    `load_font` can no longer return a system font, so this now guards the
+    remaining way an unvendored face could reach measurement: a caller that
+    builds an `ImageFont` itself and passes it in. Measuring against such a
+    font would diverge Mac<->PROD and silently corrupt fit decisions.
 
     Raises:
-        FontSourceError: the font is not a bundled DejaVu face.
+        FontSourceError: the font is not a vendored face.
     """
     src = font_source_path(font)
     if src is not None and _BUNDLED_FONTS_DIR in src.parents:
         return
     raise FontSourceError(
         "Font used for measurement is not a bundled font.\n"
-        f"  What:     fit measurement requires a bundled DejaVu face; got {src}.\n"
+        f"  What:     fit measurement requires a vendored face; got {src}.\n"
         f"  Where:    bundled fonts directory {_BUNDLED_FONTS_DIR}\n"
-        "  Expected: fonts/DejaVuSans.ttf (and -Bold / Mono variants) present so\n"
-        "            load_font() resolves bundled-first, not a system fallback.\n"
-        "  Recover:  restore/reinstall the fonts/ directory from the repo, then rerun."
+        f"  Expected: a face loaded via load_font(family=...) from one of "
+        f"{sorted(FONT_FAMILIES)}, e.g. fonts/Carlito-Regular.ttf.\n"
+        "  Recover:  load the font with load_font(size, family=..., bold=...) "
+        "instead of constructing an ImageFont directly."
     )
 
 
@@ -155,9 +179,9 @@ class FitError(RuntimeError):
     """Raised when a string cannot fit its box even at the font floor / max lines."""
 
 
-def _text_width(text: str, size: int, *, mono: bool, bold: bool) -> int:
+def _text_width(text: str, size: int, *, family: str, bold: bool) -> int:
     """Pixel width of `text` at `size`, measured against the bundled font."""
-    font = load_font(size, mono=mono, bold=bold)
+    font = load_font(size, family=family, bold=bold)
     assert_bundled_font(font)
     bbox = font.getbbox(text)
     return int(bbox[2] - bbox[0])
@@ -177,7 +201,7 @@ def _fit_error_message(text: str, *, width: int, min_font: int, max_lines: int, 
     )
 
 
-def _wrap_to_width(text: str, *, width: int, size: int, mono: bool, bold: bool) -> list[str] | None:
+def _wrap_to_width(text: str, *, width: int, size: int, family: str, bold: bool) -> list[str] | None:
     """Greedy word-wrap at `size`.
 
     Returns lines each within `width`, or None if a single word cannot fit
@@ -187,10 +211,10 @@ def _wrap_to_width(text: str, *, width: int, size: int, mono: bool, bold: bool) 
     lines: list[str] = []
     current = ""
     for word in words:
-        if _text_width(word, size, mono=mono, bold=bold) > width:
+        if _text_width(word, size, family=family, bold=bold) > width:
             return None  # unbreakable word wider than the box
         candidate = word if not current else f"{current} {word}"
-        if _text_width(candidate, size, mono=mono, bold=bold) <= width:
+        if _text_width(candidate, size, family=family, bold=bold) <= width:
             current = candidate
         else:
             lines.append(current)
@@ -208,7 +232,7 @@ def fit_text(
     min_font: int,
     max_lines: int,
     nominal_size: int,
-    mono: bool = False,
+    family: str,
     bold: bool = False,
 ) -> FitResult:
     """Compute a lossless layout of `text` fitting within `width` px.
@@ -223,7 +247,10 @@ def fit_text(
         min_font: Smallest font size shrinking may reach.
         max_lines: Lines the field may occupy.
         nominal_size: The field's default font size.
-        mono: Measure with the monospace family.
+        family: Vendored font family to measure against, a key of
+            `FONT_FAMILIES`. Required — there is no Python-side default,
+            because the family is a layout decision that must be visible in
+            the layout YAML.
         bold: Measure with the bold weight.
 
     Returns:
@@ -237,23 +264,23 @@ def fit_text(
         raise ValueError(f"unknown fit strategy {fit!r}; allowed: {_FIT_STRATEGIES}")
 
     def line_height(size: int) -> int:
-        fnt = load_font(size, mono=mono, bold=bold)
+        fnt = load_font(size, family=family, bold=bold)
         return int(fnt.size) if isinstance(fnt, ImageFont.FreeTypeFont) else size
 
     # Fits as-is at nominal size on one line -> unchanged (day-one path).
-    if _text_width(text, nominal_size, mono=mono, bold=bold) <= width:
+    if _text_width(text, nominal_size, family=family, bold=bold) <= width:
         return FitResult(lines=[text], size=nominal_size, line_height=line_height(nominal_size))
 
     if fit == "shrink":
         for size in range(nominal_size - 1, min_font - 1, -1):
-            if _text_width(text, size, mono=mono, bold=bold) <= width:
+            if _text_width(text, size, family=family, bold=bold) <= width:
                 return FitResult(lines=[text], size=size, line_height=line_height(size))
         raise FitError(
             _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
         )
 
     if fit == "wrap":
-        lines = _wrap_to_width(text, width=width, size=nominal_size, mono=mono, bold=bold)
+        lines = _wrap_to_width(text, width=width, size=nominal_size, family=family, bold=bold)
         if lines is None or len(lines) > max_lines:
             raise FitError(
                 _fit_error_message(text, width=width, min_font=min_font, max_lines=max_lines, fit=fit)
@@ -262,9 +289,9 @@ def fit_text(
 
     if fit == "shrink_then_wrap":
         for size in range(nominal_size, min_font - 1, -1):
-            if _text_width(text, size, mono=mono, bold=bold) <= width:
+            if _text_width(text, size, family=family, bold=bold) <= width:
                 return FitResult(lines=[text], size=size, line_height=line_height(size))
-            wrapped = _wrap_to_width(text, width=width, size=size, mono=mono, bold=bold)
+            wrapped = _wrap_to_width(text, width=width, size=size, family=family, bold=bold)
             if wrapped is not None and len(wrapped) <= max_lines:
                 return FitResult(lines=wrapped, size=size, line_height=line_height(size))
         raise FitError(
@@ -274,7 +301,7 @@ def fit_text(
     raise ValueError(f"unhandled fit strategy {fit!r}")
 
 
-def _fit_from_budget(text: str, budget: dict, nominal_size: int, *, mono: bool, bold: bool) -> FitResult:
+def _fit_from_budget(text: str, budget: dict, nominal_size: int, *, family: str, bold: bool) -> FitResult:
     """Run fit_text using a field's budget dict (width/fit/min_font/max_lines)."""
     return fit_text(
         text,
@@ -283,7 +310,7 @@ def _fit_from_budget(text: str, budget: dict, nominal_size: int, *, mono: bool, 
         min_font=budget["min_font"],
         max_lines=budget["max_lines"],
         nominal_size=nominal_size,
-        mono=mono,
+        family=family,
         bold=bold,
     )
 
@@ -296,7 +323,7 @@ def draw_fitted_left(
     *,
     budget: dict,
     nominal_size: int,
-    mono: bool = False,
+    family: str,
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
@@ -326,8 +353,8 @@ def draw_fitted_left(
     word-wrap never splits an unspaced prefix away from its own first word,
     but a future caller passing a prefix containing a space could hit it.
     """
-    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
-    font = load_font(r.size, mono=mono, bold=bold)
+    r = _fit_from_budget(text, budget, nominal_size, family=family, bold=bold)
+    font = load_font(r.size, family=family, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
     top = y
     max_width = 0
@@ -355,7 +382,7 @@ def draw_fitted_center(
     *,
     budget: dict,
     nominal_size: int,
-    mono: bool = False,
+    family: str,
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
@@ -367,8 +394,8 @@ def draw_fitted_center(
     See draw_fitted_left for `line_spacing` semantics and the optional
     `recorder`/`field` draw-time bounding-box capture.
     """
-    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
-    font = load_font(r.size, mono=mono, bold=bold)
+    r = _fit_from_budget(text, budget, nominal_size, family=family, bold=bold)
+    font = load_font(r.size, family=family, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
     top = y
     left = canvas_width
@@ -394,7 +421,7 @@ def draw_fitted_right(
     *,
     budget: dict,
     nominal_size: int,
-    mono: bool = False,
+    family: str,
     bold: bool = False,
     fill: str = "black",
     line_spacing: int | None = None,
@@ -406,8 +433,8 @@ def draw_fitted_right(
     See draw_fitted_left for `line_spacing` semantics and the optional
     `recorder`/`field` draw-time bounding-box capture.
     """
-    r = _fit_from_budget(text, budget, nominal_size, mono=mono, bold=bold)
-    font = load_font(r.size, mono=mono, bold=bold)
+    r = _fit_from_budget(text, budget, nominal_size, family=family, bold=bold)
+    font = load_font(r.size, family=family, bold=bold)
     spacing = line_spacing if line_spacing is not None else r.line_height
     top = y
     left = x_right

@@ -175,14 +175,14 @@ def font_for(
 ) -> Font:
     """Load a font honouring the layout's declared face.
 
-    Every `load_font` call in the primitives used to omit `mono=`, silently
-    defaulting to the sans face even for layouts (e.g. receipts) declaring
-    `font_family: monospace`. This resolves `mono` the same way every other
-    primitive parameter resolves -- block key, then layout `defaults:`.
+    Every `load_font` call in the primitives used to omit the face entirely,
+    silently defaulting to the sans face even for layouts (e.g. receipts)
+    declaring a monospace family. This resolves `family` the same way every
+    other primitive parameter resolves -- block key, then layout `defaults:`.
 
     Args:
         layout: The resolved layout dict, carrying a `defaults:` mapping.
-        block: The block requesting the font; its own `mono` key, if
+        block: The block requesting the font; its own `family` key, if
             present, wins over the layout default.
         size: Font size in points.
         bold: Whether to load the bold weight.
@@ -191,9 +191,12 @@ def font_for(
 
     Returns:
         The loaded font.
+
+    Raises:
+        FontFamilyError: The resolved `family` is not a vendored family.
     """
-    mono = bool(resolve_param(block, layout, "mono", layout_id=layout_id, layout_path=layout_path))
-    return load_font(size, mono=mono, bold=bold)
+    family = str(resolve_param(block, layout, "family", layout_id=layout_id, layout_path=layout_path))
+    return load_font(size, family=family, bold=bold)
 
 
 def _draw_line(
@@ -243,7 +246,7 @@ def _draw_fitted_text(
     back gives the page width without the region ever needing to know it.
 
     Args:
-        block: The block requesting the budget; its own `mono`, if present,
+        block: The block requesting the budget; its own `family`, if present,
             wins over the layout default (the same resolution `font_for`
             uses, preserved here since these helpers build their own font
             internally rather than accepting a pre-built one).
@@ -264,8 +267,8 @@ def _draw_fitted_text(
             layout's `field_budgets`.
     """
     budget = field_budget(ctx.layout, ctx.layout_id, budget_name, layout_path=ctx.layout_path)
-    mono = bool(
-        resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    family = str(
+        resolve_param(block, ctx.layout, "family", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
     spacing = line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     field = block.get("field")
@@ -277,7 +280,7 @@ def _draw_fitted_text(
             y,
             budget=budget,
             nominal_size=size,
-            mono=mono,
+            family=family,
             bold=bold,
             fill=color,
             line_spacing=spacing,
@@ -293,7 +296,7 @@ def _draw_fitted_text(
             canvas_width,
             budget=budget,
             nominal_size=size,
-            mono=mono,
+            family=family,
             bold=bold,
             fill=color,
             line_spacing=spacing,
@@ -307,7 +310,7 @@ def _draw_fitted_text(
         y,
         budget=budget,
         nominal_size=size,
-        mono=mono,
+        family=family,
         bold=bold,
         fill=color,
         line_spacing=spacing,
