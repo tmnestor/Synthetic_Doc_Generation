@@ -1,12 +1,19 @@
 # Layout DSL — carry-forward notes for Stage 4
 
+**Stage 4 is now complete and merged to `main`.** This file was written as carry-forward
+notes going into Stage 4; it is kept as a historical record of what the whole-plan review
+triaged, so it is not rediscovered. See `docs/layout_dsl_stage4_plan.md` for the executed
+plan and `.superpowers/sdd/layout_dsl_stage4_plan/task-6-report.md` for the final sweep.
+
 Stage 3 is complete: receipts and invoices render from declarative `body:` trees, the
 imperative renderers are deleted, and all three document types are pinned byte-identical by
 pixel snapshots. This file records what the whole-plan review triaged as carrying forward,
 so it is not rediscovered.
 
-Stage 4 is: narrow the corpus to three document types, drop transaction linking,
-re-baseline and re-export.
+Stage 4 was: narrow the corpus to three document types, drop the trust-distribution half of
+linking (receipt↔bank transaction linking was retained — see below), re-baseline and
+re-export. Done: the corpus now renders 165 entries / 330 images across bank statements,
+receipts and invoices only.
 
 ## What Stage 3 actually delivered
 
@@ -21,9 +28,10 @@ to baselines captured from the legacy renderers before deletion), `pipeline vali
 full suite 1122 passed / 1 skipped, `generate --clean-only` producing 420 documents across
 all eight document types.
 
-## Fix before Stage 4
+## Fix before Stage 4 (unresolved; not addressed by Stage 4)
 
-Nothing blocks Stage 4. The items below are live but narrow.
+Nothing blocked Stage 4. The items below are live but narrow, and Stage 4's sweep did not
+touch them — they are unrelated to the trust/cc deletion.
 
 | Item | Why it matters |
 |---|---|
@@ -69,10 +77,11 @@ scheme from the linked bank row's description via `method_from_bank_description`
 the receipt and the statement agree on how a purchase was paid for, and a transaction-linking
 benchmark is only scoreable because they do.
 
-Stage 4 therefore **keeps** `ground_truth/transaction_links.yml`,
+Stage 4 therefore **kept** `ground_truth/transaction_links.yml`,
 `scripts/seed_transaction_links.py`, `load_link_index`, `linking/`,
 `generators/exporters/links.py`, and the `doc_refs` derived output. Only the
-trust-distribution half of the linking machinery goes.
+trust-distribution half of the linking machinery went (including the now-dead
+`normalize_tfn` in `linking/transaction_matcher.py`, removed in the final sweep).
 
 **No receipt re-baseline is required on this account.** The scheme-selection mechanism is
 unchanged, so the printed schemes — and the pixels — stay as they are.
@@ -80,15 +89,19 @@ unchanged, so the printed schemes — and the pixels — stay as they are.
 Had linking been dropped, every one of the 55 receipts would have fallen through to the
 weighted pool and printed a different scheme. That is the failure this decision avoids.
 
-## Two config keys kept deliberately, pending a decision
+## Two config keys kept deliberately, pending a decision — RESOLVED
+
+Both resolved before Stage 4's final sweep, by commit `d74e184` ("reject layout keys no
+code path reads"), which added `known_layout_keys(layout)` / `validate_layout` rejection of
+unread keys:
 
 - **`minimum_amount: 10000` and `mixed_tax_mode: true`** in `config/layouts/invoices.yml`
-  are read by nothing — not renderers, not `scripts/seed_ground_truth.py`, not any test.
-  They are the only record of which invoices each layout is *for*. Either wire them into
-  layout assignment or drop them.
-- **`format:`** is unread for receipts and invoices, but `tests/test_layout_assignment.py`
-  reads it for other document types, so the key has a live contract elsewhere. Confirm that
-  contract before removing it anywhere.
+  were read by nothing — not renderers, not `scripts/seed_ground_truth.py`, not any test.
+  Dropped rather than wired in: layout assignment is a round-robin over a Python list,
+  never amount- or mode-driven.
+- **`format:`** was unread for receipts and invoices. `tests/test_layout_assignment.py`,
+  the test that gave it a live contract for the trust document types, was itself deleted
+  with those types, so the key is now dropped everywhere.
 
 ## The architectural rule that held
 
