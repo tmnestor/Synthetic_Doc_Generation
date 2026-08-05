@@ -24,7 +24,9 @@ dependencies:
       # drive every fit_text() shrink/wrap decision and the rendered pixels.
       # Pinning keeps images and fit results byte-stable across rebuilds / Mac<->PROD.
       - pillow==12.2.0
-      - numpy
+      # Capped at <=2.4 by numba, which augraphy imports unconditionally.
+      # Pinned exactly so the cap is visible rather than resolved silently.
+      - numpy==2.3.5
       - pyyaml
       - typer
       - rich
@@ -36,6 +38,27 @@ dependencies:
       # rectify_camera_scan.py. Not used by the core generators pipeline.
       # Pinned so camera-scan output stays byte-stable across rebuilds.
       - opencv-python-headless==4.13.0.92
+      # Document-image degradation for receipts (generators/degradation/).
+      # MUST be installed with --no-deps: augraphy declares `opencv-python`
+      # (the full GUI build), which would displace the headless build pinned
+      # above and pull GUI system libraries into locked-down PROD. Its real
+      # transitive requirements are therefore listed explicitly below.
+      - augraphy==8.2.6
+      - numba
+      - llvmlite
+      - scikit-image
+      - scikit-learn
+      - lazy_loader
+      - imageio
+      - tifffile
+      - networkx
+      - joblib
+      - threadpoolctl
+      - narwhals
+      - requests
+      - urllib3
+      - idna
+      - certifi
       # Tree-edit-distance backend for the vendored CORD evaluator
       # (generators/exporters/cord_eval.py). MIT-licensed; used in place of
       # zss (non-SPDX/historically GPL) per docs/GroundTruth_Export_Spec.md.
