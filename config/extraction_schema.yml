@@ -24,8 +24,8 @@
 # legitimate answer rather than a gap.
 #
 # Fields listed under evaluation.field_types but absent from every document_fields
-# list (RECEIPT_TOTAL, BANK_TRANSACTION_DEBIT, the trust-distribution amounts) are
-# formatting declarations for other pipelines; they add no CSV columns here.
+# list (RECEIPT_TOTAL, BANK_TRANSACTION_DEBIT) are formatting declarations for
+# other pipelines; they add no CSV columns here.
 
 document_fields:
   invoice:
@@ -88,9 +88,6 @@ evaluation:
       - ACCOUNT_BALANCE
       - RECEIPT_TOTAL
       - BANK_TRANSACTION_DEBIT
-      - SHARE_OF_NET_INCOME
-      - FRANKING_CREDIT
-      - CAPITAL_GAIN_COMPONENT
 
     boolean:
       - IS_GST_INCLUDED
