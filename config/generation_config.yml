@@ -27,30 +27,6 @@ document_types:
     output_subdir: cc_statements
     generate_clean: true
     generate_degraded: true
-  trust_returns:
-    ground_truth: ground_truth/trust_returns.yml
-    layouts: config/layouts/trust_returns.yml
-    output_subdir: trust_returns
-    generate_clean: true
-    generate_degraded: true
-  distribution_statements:
-    ground_truth: ground_truth/distribution_statements.yml
-    layouts: config/layouts/distribution_statements.yml
-    output_subdir: distribution_statements
-    generate_clean: true
-    generate_degraded: true
-  trust_income_schedules:
-    ground_truth: ground_truth/trust_income_schedules.yml
-    layouts: config/layouts/trust_income_schedules.yml
-    output_subdir: trust_income_schedules
-    generate_clean: true
-    generate_degraded: true
-  beneficiary_itrs:
-    ground_truth: ground_truth/beneficiary_itrs.yml
-    layouts: config/layouts/beneficiary_itrs.yml
-    output_subdir: beneficiary_itrs
-    generate_clean: true
-    generate_degraded: true
 
 degradation:
   paper_tint_alpha: [0.03, 0.08]
@@ -72,8 +48,8 @@ derived_formats:
 # LMM_POC's relabel_evaluation_set.py, which owns schema projection.
 # Every key is required — the export fails fast on any omission.
 eval_set:
-  # Deliberately excludes cc_statements and the four trust types: the relabel
-  # script maps exactly these three DOCUMENT_TYPEs to filename suffixes.
+  # Deliberately excludes cc_statements: the relabel script maps exactly
+  # these three DOCUMENT_TYPEs to filename suffixes.
   document_types: [bank_statements, invoices, receipts]
   relabel_script: /Users/tod/Desktop/LMM_POC/scripts/relabel_evaluation_set.py
   relabel_repo_root: /Users/tod/Desktop/LMM_POC
