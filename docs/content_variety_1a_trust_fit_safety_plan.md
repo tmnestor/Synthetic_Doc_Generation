@@ -20,7 +20,7 @@ Copied from the spec and project CLAUDE.md — implicit in every task:
 - **B904:** in `except`, `raise ... from err`/`from None`.
 - **Never silently truncate/ellipsize** — descriptions/text values **wrap** (never shrink) to keep font uniform; amounts/columns `shrink`.
 - **Determinism:** measure with the bundled DejaVu font; `pillow==12.2.0` (PROD mirror); the bundled-font guard already fails loud on a system-font fallback.
-- **Do NOT write the term "ATO"** anywhere (use "PROD"). Existing trust code/docstrings may contain it; do not copy those strings into new code.
+- **Do NOT write the Australian tax authority's three-letter acronym** anywhere (use "PROD"). Some existing code and docstrings may contain it; do not copy those strings into new code.
 - **Tests:** `conda run -n synthetic pytest tests/`; `tests/` is gitignored (local-only); ≥80% coverage. Baselines live under `tests/fixtures/` (local-only).
 - **Gate before every commit:** `ruff check --fix --ignore ARG001,ARG002,F841 *.py generators/*.py` → `ruff format .` → `mypy . --ignore-missing-imports` → `pytest tests/`. Never bypass the pre-commit hook. No Claude attribution in commits.
 
