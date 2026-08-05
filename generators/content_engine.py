@@ -1,13 +1,12 @@
-"""Shared content-generation engine for seed scripts (core + trust).
+"""Shared content-generation engine for scripts/seed_ground_truth.py.
 
 Loads config/data_pools.yml once, owns a seeded Faker("en_AU"), and exposes
-the primitives both scripts/seed_ground_truth.py and
-scripts/seed_trust_distributions.py call in place of in-script constants and
-`pool[i % len(pool)]` cycling: person/location/address (Faker + curated
-locations), fictional_business / fictional_trust (invented AU entities
-screened against a real-name blocklist), and sample / NonRepeatingSampler
-(seeded pool draws). Every primitive is driven by an injected
-`random.Random`, so a reseed is reproducible and diffable run-to-run.
+the primitives scripts/seed_ground_truth.py calls in place of in-script
+constants and `pool[i % len(pool)]` cycling: person/location/address (Faker +
+curated locations), fictional_business (invented AU entities screened
+against a real-name blocklist), and sample / NonRepeatingSampler (seeded pool
+draws). Every primitive is driven by an injected `random.Random`, so a
+reseed is reproducible and diffable run-to-run.
 """
 
 import random
@@ -16,7 +15,7 @@ from pathlib import Path
 import yaml
 from faker import Faker
 
-from generators.common import generate_abn, generate_tfn
+from generators.common import generate_abn
 
 _DATA_POOLS_PATH = Path(__file__).resolve().parent.parent / "config" / "data_pools.yml"
 
@@ -27,7 +26,6 @@ _REQUIRED_KEYS: dict[str, list[str]] = {
     "locations": [],
     "street_types": [],
     "business_name_parts": ["surnames", "suburb_prefixes", "category_nouns"],
-    "trust_name_parts": ["surnames", "trust_kinds", "trustee_suffixes"],
     "product_catalog": [],
     "service_catalog": [],
     "payment_methods": [],
@@ -114,7 +112,7 @@ def load_pools(path: Path = _DATA_POOLS_PATH) -> dict:
 
 
 class ContentEngine:
-    """Seeded generator for fictional AU business/trust/person/address content."""
+    """Seeded generator for fictional AU business/person/address content."""
 
     def __init__(self, pools: dict) -> None:
         self.pools = pools
@@ -215,40 +213,6 @@ class ContentEngine:
             "abn": generate_abn(),
             "category": category,
         }
-
-    def fictional_trust(self, rng: random.Random) -> dict:
-        """Invented trust + trustee (blocklist-screened) + ABN + TFN.
-
-        Returns:
-            {trust_name, trustee_name, abn, tfn}.
-
-        Raises:
-            RuntimeError: the retry budget was exhausted without a clean name.
-        """
-        parts = self.pools["trust_name_parts"]
-        max_attempts = 20
-        for _ in range(max_attempts):
-            surname = sample(rng, parts["surnames"])
-            kind = sample(rng, parts["trust_kinds"])
-            trust_name = f"{surname} {kind}"
-            if trust_name.lower() not in self._blocklist:
-                trustee_name = (
-                    f"{surname} {sample(rng, parts['trustee_suffixes'])} Pty Ltd ATF {trust_name}"
-                )
-                return {
-                    "trust_name": trust_name,
-                    "trustee_name": trustee_name,
-                    "abn": generate_abn(),
-                    "tfn": generate_tfn(),
-                }
-        raise RuntimeError(
-            "content_engine.fictional_trust: exhausted retry budget without a clean name.\n"
-            f"  What:     {max_attempts} draws all collided with the real-name blocklist.\n"
-            f"  Where:    {_DATA_POOLS_PATH} -> 'trust_name_parts.surnames' / 'trust_kinds'.\n"
-            "  Expected: enough surname/trust_kind combinations to clear the blocklist "
-            f"within {max_attempts} attempts.\n"
-            f"  Recover:  widen 'trust_name_parts.surnames' or 'trust_kinds' in {_DATA_POOLS_PATH}."
-        )
 
 
 def sample(rng: random.Random, pool: list):
