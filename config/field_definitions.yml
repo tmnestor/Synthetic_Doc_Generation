@@ -73,6 +73,10 @@ document_type_values:
   - RECEIPT
   - INVOICE
 
+# Documentation only — no code reads this block. The formats it describes
+# are enforced by generators/schema.py's regexes (sourced from field_types
+# below) and generators/derive_outputs.py's NOT_FOUND fill; this exists so a
+# human reading this file doesn't have to go find the code to learn them.
 field_formats:
   date: "DD/MM/YYYY"
   amount: "decimal without $ prefix"
