@@ -1,7 +1,7 @@
 # Declarative Layout DSL — Design
 
-Status: approved, pending implementation plan
-Branch: `feat/declarative-layouts`
+Status: implemented — Stages 1-4 complete and merged to `main`
+Branch: `feat/declarative-layouts` (merged)
 
 ## Problem
 
@@ -63,8 +63,11 @@ Nothing checks that they still agree.
   risk: control flow in templates is not schema-validatable, which would have required
   rewriting CLAUDE.md's fail-fast rule and would move failures to render time.
 - Changing what the documents look like. Visual redesign is out of scope.
-- Any change to `main`. Trust document types, credit-card statements, and transaction
-  linking remain intact there.
+- At the time this was written, the branch's work (including the Stage 4 corpus
+  narrowing below) was scoped to stay off `main`, which still carried trust document
+  types, credit-card statements, and their linking. That has since changed: Stage 4
+  completed and the branch is merged, so `main` now carries the narrowed, three-type
+  corpus described below.
 
 ## Scope decisions
 
@@ -76,7 +79,7 @@ This branch generates `bank_statements`, `receipts`, and `invoices` only —
 This aligns the repo with what it already ships: `config/generation_config.yml:74-77`
 already restricts the eval-set export to exactly these three types.
 
-Deleted on this branch:
+**Done as of Stage 4** — deleted on this branch:
 
 | Category | Items |
 |---|---|
@@ -318,11 +321,11 @@ call them now. The Pillow 12.2.0 pin remains load-bearing and unchanged.
 
 Each stage is independently revertible.
 
-**Stage 1 — engine and schema, no pipeline changes.**
+**Stage 1 — engine and schema, no pipeline changes. DONE.**
 New `generators/layout_engine.py`, primitive schema, row-provider registry. Tested
 standalone against hand-written specs. Nothing in the pipeline calls it yet.
 
-**Stage 2 — migrate bank statements. This is the go/no-go.**
+**Stage 2 — migrate bank statements. This is the go/no-go. DONE.**
 All 8 bank layouts expressed in the DSL; `bank_statement.py`'s four hardcoded renderers
 deleted. Bank is the hardest case in the corpus — four row styles, a nested rewards
 panel, computed balances — so an under-powered vocabulary surfaces here, with seven
@@ -331,13 +334,15 @@ renderers still on the old path.
 *If the primitives cannot express all 8 bank layouts cleanly, stop and reconsider,
 having spent one stage rather than the whole build.*
 
-**Stage 3 — migrate receipts and invoices.**
+**Stage 3 — migrate receipts and invoices. DONE.**
 Both already iterate sections; largely mechanical translation from semantic sections to
 structural primitives.
 
-**Stage 4 — narrow and re-baseline.**
-Delete the old rendering path, the five out-of-scope document types, and linking.
-Regenerate the corpus and re-export the eval set.
+**Stage 4 — narrow and re-baseline. DONE.**
+Deleted the old rendering path, the five out-of-scope document types, and the
+trust-distribution half of linking. Regenerated the corpus (330 images) and re-exported
+the eval set. Receipt↔bank transaction linking was retained throughout, per the scope
+reversal above.
 
 ## Testing
 
