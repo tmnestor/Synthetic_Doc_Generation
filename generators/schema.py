@@ -78,11 +78,22 @@ def field_names_for(doc_type: str) -> set[str]:
     return set(fields)
 
 
-_VALID_DOC_TYPES = {
-    "BANK_STATEMENT",
-    "RECEIPT",
-    "INVOICE",
-}
+def _valid_doc_types() -> set[str]:
+    """DOCUMENT_TYPE values allowed, from field_definitions.yml's document_type_values."""
+    return set(_load_field_defs()["document_type_values"])
+
+
+def _field_type_group(group: str) -> set[str]:
+    """Field names in a config/field_definitions.yml `field_types.<group>` list.
+
+    Args:
+        group: A key under `field_types:`, e.g. 'date', 'abn', 'amount'.
+
+    Returns:
+        The field names in that group, or an empty set if the group is absent.
+    """
+    return set(_load_field_defs()["field_types"].get(group, []))
+
 
 _PIPE_GROUPS = {
     "RECEIPT": [
@@ -95,13 +106,6 @@ _PIPE_GROUPS = {
         ["TRANSACTION_DATES", "TRANSACTION_DESCRIPTIONS", "TRANSACTION_AMOUNTS_PAID"],
     ],
 }
-
-# Format-checked field names, each a column config/field_definitions.yml
-# declares. No TFN group: no surviving document type carries a TFN field.
-_DATE_FIELDS = {"INVOICE_DATE"}
-_DATE_RANGE_FIELDS = {"STATEMENT_DATE_RANGE"}
-_ABN_FIELDS = {"BUSINESS_ABN"}
-_AMOUNT_FIELDS = {"GST_AMOUNT", "TOTAL_AMOUNT", "ACCOUNT_BALANCE"}
 
 
 def validate_entry(case_id: str, entry: dict) -> list[str]:
@@ -129,9 +133,10 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
     fields = entry["fields"]
 
     doc_type = fields.get("DOCUMENT_TYPE")
-    if doc_type not in _VALID_DOC_TYPES:
+    valid_doc_types = _valid_doc_types()
+    if doc_type not in valid_doc_types:
         errors.append(
-            f"{case_id}: DOCUMENT_TYPE is '{doc_type}', expected one of {sorted(_VALID_DOC_TYPES)}."
+            f"{case_id}: DOCUMENT_TYPE is '{doc_type}', expected one of {sorted(valid_doc_types)}."
         )
         return errors
 
@@ -151,7 +156,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                 f"Add '{field_name}: <value>' under 'fields:'."
             )
 
-    for field_name in _DATE_FIELDS:
+    for field_name in _field_type_group("date"):
         if field_name in fields:
             val = str(fields[field_name])
             if not _DATE_RE.match(val):
@@ -160,7 +165,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"expected DD/MM/YYYY format (e.g. '15/03/2024')."
                 )
 
-    for field_name in _DATE_RANGE_FIELDS:
+    for field_name in _field_type_group("date_range"):
         if field_name in fields:
             val = str(fields[field_name])
             if not _DATE_RANGE_RE.match(val):
@@ -169,7 +174,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"expected 'DD/MM/YYYY - DD/MM/YYYY' format."
                 )
 
-    for field_name in _ABN_FIELDS:
+    for field_name in _field_type_group("abn"):
         if field_name in fields:
             val = str(fields[field_name])
             if not validate_abn(val):
@@ -179,7 +184,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"Use generators.common.generate_abn() to create valid ABNs."
                 )
 
-    for field_name in _AMOUNT_FIELDS:
+    for field_name in _field_type_group("amount"):
         if field_name in fields:
             val = str(fields[field_name])
             if not _AMOUNT_RE.match(val):
