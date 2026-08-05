@@ -411,8 +411,8 @@ def build_all_entries() -> dict[str, dict]:
     that need the generated entries without touching the filesystem call this.
     """
     rng = random.Random(_SEED)
-    # generate_abn()/generate_tfn() draw from the module-global RNG; seed it too
-    # so ABN/TFN digit fields are reproducible run-to-run, not just content selection.
+    # generate_abn() draws from the module-global RNG; seed it too so ABN
+    # digit fields are reproducible run-to-run, not just content selection.
     random.seed(_SEED)
     engine = build_engine()
     case_entities = _generate_case_entities(engine, rng, _COUNT)
