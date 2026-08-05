@@ -56,14 +56,29 @@ covered only by targeted tests:
 - **`pair.min_gap` with a budget.** Now rejected at validate time rather than silently
   dropped.
 
-## Stage 4 will change receipt payment schemes
+## Receipt↔bank linking is retained — do not drop it
 
-All 55 receipts are currently linked, so `derive_payment` always takes the card scheme from
-the linked bank row and the weighted pool never runs. Dropping transaction linking makes
-every receipt unlinked, so **every receipt's printed card scheme changes**. This is the
-accepted consequence recorded in `docs/layout_dsl_design.md:93`, but note it affects 55 of
-55 rather than some subset, and it will move every receipt's pixel snapshot. Re-baselining
-receipts is therefore mandatory in Stage 4, not optional.
+**Decided 2026-08-05 by the repo owner**, reversing an earlier draft of
+`docs/layout_dsl_design.md` that had Stage 4 delete transaction linking entirely.
+
+All 55 receipts are linked — verified: 55 ground-truth entries, 55 keys in
+`load_link_index()`, zero unlinked. For a linked receipt, `derive_payment` takes the card
+scheme from the linked bank row's description via `method_from_bank_description`, and the
+`receipt_method_weights` pool is never consulted for the method (only
+`wallet_presentation_weights`, which 90% of the time changes nothing). That is what makes
+the receipt and the statement agree on how a purchase was paid for, and a transaction-linking
+benchmark is only scoreable because they do.
+
+Stage 4 therefore **keeps** `ground_truth/transaction_links.yml`,
+`scripts/seed_transaction_links.py`, `load_link_index`, `linking/`,
+`generators/exporters/links.py`, and the `doc_refs` derived output. Only the
+trust-distribution half of the linking machinery goes.
+
+**No receipt re-baseline is required on this account.** The scheme-selection mechanism is
+unchanged, so the printed schemes — and the pixels — stay as they are.
+
+Had linking been dropped, every one of the 55 receipts would have fallen through to the
+weighted pool and printed a different scheme. That is the failure this decision avoids.
 
 ## Two config keys kept deliberately, pending a decision
 

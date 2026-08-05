@@ -82,24 +82,32 @@ Deleted on this branch:
 |---|---|
 | Renderers | `cc_statement.py`, `trust_return.py`, `distribution_statement.py`, `trust_income_schedule.py`, `beneficiary_itr.py` |
 | Layouts | the matching five `config/layouts/*.yml` |
-| Ground truth | the matching five, plus `transaction_links.yml` and `trust_distribution_links.yml` |
-| Linking | `linking/`, `generators/exporters/links.py`, the `doc_refs` derived output |
-| Scripts | `seed_transaction_links.py`, `seed_trust_distribution_links.py`, `seed_trust_distributions.py`, `generate_trust_classification_gt.py`, `migrate_distribution_layouts.py` |
+| Ground truth | the matching five, plus `trust_distribution_links.yml`. **`transaction_links.yml` is retained** — see below |
+| Linking | the trust-distribution half only. `linking/`, `generators/exporters/links.py` and the `doc_refs` output are **retained** for receipt↔bank linking |
+| Scripts | `seed_trust_distribution_links.py`, `seed_trust_distributions.py`, `generate_trust_classification_gt.py`, `migrate_distribution_layouts.py`. **`seed_transaction_links.py` is retained** |
 | Config | five `document_types` entries; the trust half of `field_definitions.yml` (46 columns → 23) |
 
 Coupling was checked. References to cc/trust from surviving files are comments only
 (`bank_statement.py:44`, `common.py:775`) or an error string (`exporters/native.py:57`).
 
-### Transaction linking is dropped entirely
+### Receipt↔bank transaction linking is retained
 
-`generators/payment_block.py:30` currently loads `ground_truth/transaction_links.yml` and
-forces each receipt's card scheme from its linked bank transaction, so the two documents
-agree. With linking removed, receipts draw payment method independently from
-`config/data_pools.yml`.
+**Reversed 2026-08-05 by the repo owner.** An earlier draft of this section had Stage 4
+delete transaction linking entirely, on the grounds that a three-document-type corpus did
+not need it. That is wrong and the decision is withdrawn.
 
-**Accepted consequence:** receipts and bank statements will no longer agree on payment
-method. This reverts the intent of commits `b03401d`, `7621054`, and `200cfa7` on this
-branch. `main` retains that behaviour.
+`generators/payment_block.py` loads `ground_truth/transaction_links.yml` and forces each
+receipt's card scheme from its linked bank transaction, so the receipt and the statement
+agree on how the purchase was paid for. All 55 receipts are linked (verified: 55 entries,
+55 index keys, zero unlinked). That agreement is the point of the pairing — a
+transaction-linking benchmark is only scoreable if the two documents genuinely correspond,
+and dropping it would have silently destroyed the property commits `b03401d`, `7621054`
+and `200cfa7` were written to establish.
+
+Retaining it means Stage 4 keeps `ground_truth/transaction_links.yml`,
+`scripts/seed_transaction_links.py`, `load_link_index`, and the `doc_refs` derived output.
+It also means **no receipt re-baseline is required on this account** — the card schemes
+stay exactly as they are, because the mechanism that chooses them is unchanged.
 
 ### Output is re-baselined
 
