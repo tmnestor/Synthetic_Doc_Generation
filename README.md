@@ -21,13 +21,42 @@ python -m generators.pipeline generate --clean-only
 
 # Regenerate derived CSV/JSONL from YAML ground truth
 python -m generators.pipeline derive
+
+# Export the evaluation datasets — the deliverable models are scored against
+python -m generators.pipeline eval_set --out /path/to/evaluation_data
 ```
 
-### Extraction ground truth for LMM_POC
+### The evaluation datasets
 
-`derive` emits this repo's own 165-row `derived/ground_truth.csv`. To build the
-equivalent **extraction CSV** that LMM_POC's `evaluate` stage consumes — columns and
-formatting taken from LMM_POC's schema — use:
+`eval_set` is the whole procedure. One command renders every document once and writes
+two sibling directories, stamped with today's date:
+
+```
+<out>/synthetic_<YYYYMMDD>/        <out>/degraded_<YYYYMMDD>/
+  CASE001_bank_statement.png         CASE001_bank_statement.png
+  CASE001_invoice.png                CASE001_invoice.png
+  ...  165 images                    ...  165 images
+  ground_truth.csv                   ground_truth.csv     ← identical copy
+  ground_truth.jsonl                 ground_truth.jsonl   ← identical copy
+```
+
+No prior `generate` is needed, and no other checkout: the clean and degraded copies come
+from a single render pass, which is why the same filename means the same underlying
+document in both directories. One ground truth therefore scores both, so comparing a
+model's accuracy across them isolates image quality as the only variable.
+
+Filenames are deliberately generic — `CASE001_bank_statement.png`, never
+`CASE001_cba_standard.png`. A model must not be able to infer which layout template it
+is looking at before reading a pixel.
+
+The command creates new directories and deletes nothing; retiring an older dated set is
+a manual choice.
+
+### Extraction ground truth as a standalone CSV
+
+`derive` emits this repo's own 165-row `derived/ground_truth.csv`. To build an
+**extraction CSV** separately from a full `eval_set` export — against an existing image
+directory, say — use:
 
 ```bash
 python scripts/generate_extraction_gt.py \
