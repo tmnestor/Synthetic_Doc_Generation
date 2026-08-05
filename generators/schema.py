@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-from generators.common import validate_abn, validate_tfn
+from generators.common import validate_abn
 
 _DATE_RE = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 _DATE_RANGE_RE = re.compile(r"^\d{2}/\d{2}/\d{4}\s*-\s*\d{2}/\d{2}/\d{4}$")
@@ -96,26 +96,12 @@ _PIPE_GROUPS = {
     ],
 }
 
-_DATE_FIELDS = {"INVOICE_DATE", "PAYMENT_DUE_DATE", "DATE_OF_BIRTH", "DATE_OF_DISTRIBUTION"}
+# Format-checked field names, each a column config/field_definitions.yml
+# declares. No TFN group: no surviving document type carries a TFN field.
+_DATE_FIELDS = {"INVOICE_DATE"}
 _DATE_RANGE_FIELDS = {"STATEMENT_DATE_RANGE"}
-_ABN_FIELDS = {"BUSINESS_ABN", "TRUST_ABN"}
-_TFN_FIELDS = {"TRUST_TFN", "BENEFICIARY_TFN", "INDIVIDUAL_TFN"}
-_AMOUNT_FIELDS = {
-    "GST_AMOUNT",
-    "TOTAL_AMOUNT",
-    "ACCOUNT_BALANCE",
-    "CREDIT_LIMIT",
-    "MINIMUM_PAYMENT",
-    "TOTAL_NET_INCOME",
-    "SHARE_OF_NET_INCOME",
-    "FRANKING_CREDIT",
-    "CAPITAL_GAIN_COMPONENT",
-    "FOREIGN_INCOME",
-    "TAX_FREE_AMOUNT",
-    "TAX_DEFERRED_AMOUNT",
-    "TOTAL_TRUST_INCOME",
-    "TRUST_FRANKING_CREDIT",
-}
+_ABN_FIELDS = {"BUSINESS_ABN"}
+_AMOUNT_FIELDS = {"GST_AMOUNT", "TOTAL_AMOUNT", "ACCOUNT_BALANCE"}
 
 
 def validate_entry(case_id: str, entry: dict) -> list[str]:
@@ -191,16 +177,6 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"{case_id}: field '{field_name}' has value '{val}' "
                     f"which fails ABN checksum validation. "
                     f"Use generators.common.generate_abn() to create valid ABNs."
-                )
-
-    for field_name in _TFN_FIELDS:
-        if field_name in fields:
-            val = str(fields[field_name])
-            if not validate_tfn(val):
-                errors.append(
-                    f"{case_id}: field '{field_name}' has value '{val}' "
-                    f"which fails TFN checksum validation. "
-                    f"Use generators.common.generate_tfn() to create valid TFNs."
                 )
 
     for field_name in _AMOUNT_FIELDS:

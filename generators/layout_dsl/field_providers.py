@@ -59,8 +59,8 @@ def _scored_columns() -> set[str]:
 
     Returns:
         Every name in field_definitions.yml's `all_columns` list -- the same
-        46-name schema `derive_outputs.py` uses as the CSV header, i.e. every
-        column this corpus scores as extraction ground truth.
+        schema `derive_outputs.py` uses as the CSV header, i.e. every column
+        this corpus scores as extraction ground truth.
 
     Raises:
         FieldProviderError: If the file is missing or has no `all_columns` list.

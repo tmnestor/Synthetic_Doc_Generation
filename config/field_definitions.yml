@@ -1,5 +1,5 @@
 # Field definitions for synthetic business document benchmark.
-# 23 base columns + trust distribution columns.
+# 20 columns across the three document types: bank statements, receipts, invoices.
 
 document_fields:
   bank_statement:
@@ -43,72 +43,9 @@ document_fields:
     - PAYER_NAME
     - PAYER_ADDRESS
 
-  cc_statement:
-    - DOCUMENT_TYPE
-    - SUPPLIER_NAME
-    - STATEMENT_DATE_RANGE
-    - TRANSACTION_DATES
-    - TRANSACTION_DESCRIPTIONS
-    - TRANSACTION_AMOUNTS_PAID
-    - ACCOUNT_BALANCE
-    - CREDIT_LIMIT
-    - MINIMUM_PAYMENT
-    - PAYMENT_DUE_DATE
-    - PAYER_NAME
-
-  trust_return:
-    - DOCUMENT_TYPE
-    - TRUST_NAME
-    - TRUST_TFN
-    - TRUST_ABN
-    - TRUSTEE_NAME
-    - TRUST_ADDRESS
-    - INCOME_YEAR
-    - TOTAL_NET_INCOME
-    - BENEFICIARY_NAME
-    - BENEFICIARY_TFN
-    - SHARE_OF_NET_INCOME
-    - FRANKING_CREDIT
-    - CAPITAL_GAIN_COMPONENT
-    - FOREIGN_INCOME
-
-  distribution_statement:
-    - DOCUMENT_TYPE
-    - TRUST_NAME
-    - TRUST_ABN
-    - TRUST_ADDRESS
-    - DATE_OF_DISTRIBUTION
-    - INCOME_YEAR
-    - BENEFICIARY_NAME
-    - BENEFICIARY_TFN
-    - BENEFICIARY_ADDRESS
-    - SHARE_OF_NET_INCOME
-    - FRANKING_CREDIT
-    - CAPITAL_GAIN_COMPONENT
-    - FOREIGN_INCOME
-    - TAX_FREE_AMOUNT
-    - TAX_DEFERRED_AMOUNT
-
-  trust_income_schedule:
-    - DOCUMENT_TYPE
-    - TRUST_NAME
-    - TRUST_ABN
-    - BENEFICIARY_NAME
-    - BENEFICIARY_TFN
-    - SHARE_OF_NET_INCOME
-    - FRANKING_CREDIT
-    - CAPITAL_GAIN_COMPONENT
-    - FOREIGN_INCOME
-
-  beneficiary_itr:
-    - DOCUMENT_TYPE
-    - INDIVIDUAL_NAME
-    - INDIVIDUAL_TFN
-    - DATE_OF_BIRTH
-    - INDIVIDUAL_ADDRESS
-    - TOTAL_TRUST_INCOME
-    - TRUST_FRANKING_CREDIT
-
+# The union of the three document_fields lists above, in the order the
+# derived CSV writes them. Nothing else belongs here: a column no surviving
+# type declares would be a NOT_FOUND column on every row of the corpus.
 all_columns:
   - DOCUMENT_TYPE
   - SUPPLIER_NAME
@@ -130,43 +67,11 @@ all_columns:
   - TRANSACTION_DESCRIPTIONS
   - TRANSACTION_AMOUNTS_RECEIVED
   - ACCOUNT_BALANCE
-  - CREDIT_LIMIT
-  - MINIMUM_PAYMENT
-  - PAYMENT_DUE_DATE
-  # Trust distribution fields
-  - TRUST_NAME
-  - TRUST_TFN
-  - TRUST_ABN
-  - TRUSTEE_NAME
-  - TRUST_ADDRESS
-  - INCOME_YEAR
-  - TOTAL_NET_INCOME
-  - BENEFICIARY_NAME
-  - BENEFICIARY_TFN
-  - BENEFICIARY_ADDRESS
-  - SHARE_OF_NET_INCOME
-  - FRANKING_CREDIT
-  - CAPITAL_GAIN_COMPONENT
-  - FOREIGN_INCOME
-  - TAX_FREE_AMOUNT
-  - TAX_DEFERRED_AMOUNT
-  - DATE_OF_DISTRIBUTION
-  - INDIVIDUAL_NAME
-  - INDIVIDUAL_TFN
-  - DATE_OF_BIRTH
-  - INDIVIDUAL_ADDRESS
-  - TOTAL_TRUST_INCOME
-  - TRUST_FRANKING_CREDIT
 
 document_type_values:
   - BANK_STATEMENT
   - RECEIPT
   - INVOICE
-  - CC_STATEMENT
-  - TRUST_RETURN
-  - DISTRIBUTION_STATEMENT
-  - TRUST_INCOME_SCHEDULE
-  - BENEFICIARY_ITR
 
 field_formats:
   date: "DD/MM/YYYY"
@@ -178,26 +83,12 @@ field_formats:
 field_types:
   date:
     - INVOICE_DATE
-    - PAYMENT_DUE_DATE
-    - DATE_OF_BIRTH
-    - DATE_OF_DISTRIBUTION
   date_range:
     - STATEMENT_DATE_RANGE
   amount:
     - GST_AMOUNT
     - TOTAL_AMOUNT
     - ACCOUNT_BALANCE
-    - CREDIT_LIMIT
-    - MINIMUM_PAYMENT
-    - TOTAL_NET_INCOME
-    - SHARE_OF_NET_INCOME
-    - FRANKING_CREDIT
-    - CAPITAL_GAIN_COMPONENT
-    - FOREIGN_INCOME
-    - TAX_FREE_AMOUNT
-    - TAX_DEFERRED_AMOUNT
-    - TOTAL_TRUST_INCOME
-    - TRUST_FRANKING_CREDIT
   amount_list:
     - TRANSACTION_AMOUNTS_PAID
     - TRANSACTION_AMOUNTS_RECEIVED
@@ -213,10 +104,3 @@ field_types:
     - IS_GST_INCLUDED
   abn:
     - BUSINESS_ABN
-    - TRUST_ABN
-  tfn:
-    - TRUST_TFN
-    - BENEFICIARY_TFN
-    - INDIVIDUAL_TFN
-  income_year:
-    - INCOME_YEAR
