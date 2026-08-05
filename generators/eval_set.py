@@ -48,7 +48,7 @@ from typing import Any
 
 import yaml
 
-from generators.common import FitError, degrade_image
+from generators.common import FitError
 from generators.exporters.eval_projection import ExtractionSchema, load_extraction_schema
 from generators.loader import load_ground_truth, load_layout_registry
 from generators.overflow_check import build_overflow_error
@@ -332,18 +332,9 @@ def _render_documents(
         ValueError: any missing renderer, layout, seed, document type, or
             duplicate output filename.
     """
+    # Kept despite the degradation params moving out: the loop below reads
+    # `doc_cfg = data["document_types"][dtype]` from this same load.
     data = yaml.safe_load(config_path.read_text())
-    degradation_params = data.get("degradation")
-    if not isinstance(degradation_params, dict) or not degradation_params:
-        raise _err(
-            "the top-level 'degradation' block is missing or empty, so the degraded "
-            "half of the evaluation set cannot be produced.",
-            path=config_path,
-            key_path="degradation",
-            expected="a mapping of parameter name to [min, max], e.g. "
-            "'degradation:\\n  blur_radius: [0.3, 0.8]'.",
-            recover="restore the 'degradation:' block",
-        )
 
     documents: list[dict] = []
     seen: dict[str, str] = {}
@@ -412,7 +403,7 @@ def _render_documents(
                 ) from None
 
             img.save(clean_dir / filename)
-            degrade_image(img, seed=seed, params=degradation_params).save(degraded_dir / filename)
+            img.save(degraded_dir / filename)  # placeholder — Task 6 renders tiered variants
 
             documents.append({"filename": filename, "fields": projected})
 
