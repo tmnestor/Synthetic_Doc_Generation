@@ -13,7 +13,7 @@ import typer
 from rich import print as rprint
 
 from generators.bank_statement import render_bank_statement
-from generators.common import FitError, degrade_image
+from generators.common import FitError
 from generators.derive_outputs import (
     derive_cord,
     derive_csv,
@@ -195,14 +195,17 @@ def derive(
 def generate(
     config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
     doc_type: str | None = typer.Option(None, "--type", help="Generate only this document type"),
-    clean_only: bool = typer.Option(False, "--clean-only", help="Skip degraded variants"),
 ) -> None:
-    """Generate synthetic document images from ground truth YAML."""
+    """Generate clean synthetic document images from ground truth YAML.
+
+    Degradation is not part of this command. It applies to receipts only, at
+    three severity tiers, and is produced by the `eval-set` export -- see
+    generators/degradation/.
+    """
     cfg = load_generation_config(config)
 
     output_dir = Path(cfg["output_dir"])
     derived_dir = Path(cfg["derived_dir"])
-    degradation_params = cfg.get("degradation", None)
 
     doc_types = cfg.get("document_types", {})
     if doc_type:
@@ -248,13 +251,9 @@ def generate(
                 raise typer.Exit(1) from None
 
         clean_dir = output_dir / "clean" / subdir
-        degraded_dir = output_dir / "degraded" / subdir
         clean_dir.mkdir(parents=True, exist_ok=True)
-        if not clean_only:
-            degraded_dir.mkdir(parents=True, exist_ok=True)
 
         generate_clean = doc_cfg.get("generate_clean", True)
-        generate_degraded = doc_cfg.get("generate_degraded", True) and not clean_only
 
         count = 0
         for case_id, entry in gt_data.items():
@@ -276,12 +275,6 @@ def generate(
 
             if generate_clean:
                 img.save(clean_dir / filename)
-
-            if generate_degraded:
-                seed = entry.get("degradation_seed", hash(case_id) % 10000)
-                degraded = degrade_image(img, seed=seed, params=degradation_params)
-                degraded_filename = f"{case_id}_{layout_ref}_degraded.png"
-                degraded.save(degraded_dir / degraded_filename)
 
             if geometry_out:
                 geometry_records.append(

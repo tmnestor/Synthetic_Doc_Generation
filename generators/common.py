@@ -1,16 +1,17 @@
 """Shared utilities for synthetic document generation.
 
-Font loading, text drawing helpers, ABN/GST validation, and image degradation.
+Font loading, text drawing helpers, and ABN/GST validation.
+
+Image degradation lives in `generators/degradation/`, not here: it applies to
+receipts only and is a pipeline of its own rather than a shared helper.
 """
 
-import io
 import random
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
-import numpy as np
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from PIL import ImageDraw, ImageFont
 
 from generators.exporters.geometry import BoxRecorder
 
@@ -719,81 +720,3 @@ def calculate_gst_exclusive(subtotal: Decimal) -> tuple[Decimal, Decimal]:
     gst = (subtotal * Decimal("0.10")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     total = subtotal + gst
     return gst, total
-
-
-# --- Default degradation parameters ---
-
-DEFAULT_DEGRADATION_PARAMS: dict[str, list[float]] = {
-    "paper_tint_alpha": [0.03, 0.08],
-    "contrast_factor": [0.85, 0.95],
-    "brightness_factor": [0.90, 1.00],
-    "blur_radius": [0.3, 0.8],
-    "rotation_degrees": [0.5, 2.0],
-    "noise_density": [0.001, 0.005],
-    "jpeg_quality": [70, 85],
-}
-
-
-def degrade_image(
-    img: Image.Image,
-    seed: int,
-    params: dict[str, list[float]] | None = None,
-) -> Image.Image:
-    """Apply deterministic degradation to simulate a phone photo of a printed document.
-
-    Pipeline: paper tint -> contrast -> brightness -> blur -> rotation -> noise -> JPEG.
-
-    Args:
-        img: Source PIL image.
-        seed: Random seed for deterministic degradation.
-        params: Override degradation parameter ranges. Each key maps to [min, max].
-
-    Returns:
-        Degraded PIL image.
-    """
-    rng = random.Random(seed)
-    p = {**DEFAULT_DEGRADATION_PARAMS, **(params or {})}
-
-    result = img.convert("RGB")
-
-    # 1. Paper tint (off-white / yellowed overlay)
-    alpha = rng.uniform(p["paper_tint_alpha"][0], p["paper_tint_alpha"][1])
-    tint = Image.new("RGB", result.size, (245, 240, 220))
-    result = Image.blend(result, tint, alpha)
-
-    # 2. Contrast reduction
-    factor = rng.uniform(p["contrast_factor"][0], p["contrast_factor"][1])
-    result = ImageEnhance.Contrast(result).enhance(factor)
-
-    # 3. Brightness variation
-    factor = rng.uniform(p["brightness_factor"][0], p["brightness_factor"][1])
-    result = ImageEnhance.Brightness(result).enhance(factor)
-
-    # 4. Gaussian blur
-    radius = rng.uniform(p["blur_radius"][0], p["blur_radius"][1])
-    result = result.filter(ImageFilter.GaussianBlur(radius=radius))
-
-    # 5. Rotation
-    angle = rng.uniform(p["rotation_degrees"][0], p["rotation_degrees"][1])
-    angle = angle if rng.random() > 0.5 else -angle
-    result = result.rotate(
-        angle, resample=Image.Resampling.BICUBIC, expand=False, fillcolor=(255, 255, 255)
-    )
-
-    # 6. Salt-and-pepper noise
-    density = rng.uniform(p["noise_density"][0], p["noise_density"][1])
-    arr = np.array(result)
-    np_rng = np.random.default_rng(seed)
-    mask = np_rng.random(arr.shape[:2])
-    arr[mask < density / 2] = 0  # salt
-    arr[mask > 1 - density / 2] = 255  # pepper
-    result = Image.fromarray(arr)
-
-    # 7. JPEG compression artifacts
-    quality = int(rng.uniform(p["jpeg_quality"][0], p["jpeg_quality"][1]))
-    buf = io.BytesIO()
-    result.save(buf, format="JPEG", quality=quality)
-    buf.seek(0)
-    result = Image.open(buf).copy()
-
-    return result
