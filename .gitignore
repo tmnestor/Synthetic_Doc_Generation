@@ -21,3 +21,6 @@ CLAUDE.md
 
 # Superpowers plans/specs — local workflow docs, not for the tracked repo
 docs/superpowers/
+
+# Augraphy scratch output — written during augmentation runs, never source.
+augraphy_cache/
