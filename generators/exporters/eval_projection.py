@@ -143,7 +143,7 @@ class ExtractionSchema:
                     f"Known document types: {sorted(self.document_fields)}.",
                     "fields",
                     f"correct the document type, or add '{canonical}:' under 'document_fields' in "
-                    f"{self.source_path}.",
+                    f"{self.source_path.resolve()}.",
                 )
             )
         return list(fields)
@@ -249,29 +249,23 @@ def load_extraction_schema(path: Path = _SCHEMA_PATH) -> ExtractionSchema:
             )
         )
 
-    monetary = field_types.get("monetary")
-    if not isinstance(monetary, list) or not all(isinstance(f, str) for f in monetary):
-        raise ValueError(
-            _msg(
-                f"'evaluation.field_types.monetary' is missing or not a list of strings in {path.resolve()}.",
-                "monetary",
-                "add a 'monetary:' list under 'evaluation.field_types'.",
+    classified: dict[str, list[str]] = {}
+    for kind in ("monetary", "boolean"):
+        names = field_types.get(kind)
+        if not isinstance(names, list) or not all(isinstance(f, str) for f in names):
+            raise ValueError(
+                _msg(
+                    f"'evaluation.field_types.{kind}' is missing or not a list of strings "
+                    f"in {path.resolve()}.",
+                    kind,
+                    f"add a '{kind}:' list under 'evaluation.field_types'.",
+                )
             )
-        )
-
-    boolean = field_types.get("boolean")
-    if not isinstance(boolean, list) or not all(isinstance(f, str) for f in boolean):
-        raise ValueError(
-            _msg(
-                f"'evaluation.field_types.boolean' is missing or not a list of strings in {path.resolve()}.",
-                "boolean",
-                "add a 'boolean:' list under 'evaluation.field_types'.",
-            )
-        )
+        classified[kind] = names
 
     return ExtractionSchema(
         document_fields=document_fields,
-        monetary_fields=frozenset(monetary),
-        boolean_fields=frozenset(boolean),
+        monetary_fields=frozenset(classified["monetary"]),
+        boolean_fields=frozenset(classified["boolean"]),
         source_path=path,
     )
