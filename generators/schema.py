@@ -16,6 +16,7 @@ _DATE_RANGE_RE = re.compile(r"^\d{2}/\d{2}/\d{4}\s*-\s*\d{2}/\d{2}/\d{4}$")
 _AMOUNT_RE = re.compile(r"^\d+(\.\d{1,2})?$")
 
 _FIELD_DEFS: dict | None = None
+_FIELD_DEFS_PATH = Path("config/field_definitions.yml")
 
 
 class SchemaError(Exception):
@@ -27,7 +28,7 @@ def _load_field_defs() -> dict:
     global _FIELD_DEFS  # noqa: PLW0603
     if _FIELD_DEFS is not None:
         return _FIELD_DEFS
-    path = Path("config/field_definitions.yml")
+    path = _FIELD_DEFS_PATH
     if not path.exists():
         msg = (
             f"Field definitions not found at {path.resolve()}. "
@@ -79,8 +80,24 @@ def field_names_for(doc_type: str) -> set[str]:
 
 
 def _valid_doc_types() -> set[str]:
-    """DOCUMENT_TYPE values allowed, from field_definitions.yml's document_type_values."""
-    return set(_load_field_defs()["document_type_values"])
+    """DOCUMENT_TYPE values allowed, from field_definitions.yml's document_type_values.
+
+    Raises:
+        SchemaError: If field_definitions.yml has no 'document_type_values' key.
+    """
+    defs = _load_field_defs()
+    if "document_type_values" not in defs:
+        msg = (
+            f"  What:     'document_type_values' key not found in {_FIELD_DEFS_PATH}.\n"
+            f"  Where:    {_FIELD_DEFS_PATH.resolve()} -> 'document_type_values'.\n"
+            "  Expected: a top-level list of allowed DOCUMENT_TYPE values, e.g.\n"
+            "            document_type_values:\n"
+            "              - BANK_STATEMENT\n"
+            "              - RECEIPT\n"
+            f"  Recover:  add a 'document_type_values:' list to {_FIELD_DEFS_PATH}."
+        )
+        raise SchemaError(msg)
+    return set(defs["document_type_values"])
 
 
 def _field_type_group(group: str) -> set[str]:
@@ -90,9 +107,28 @@ def _field_type_group(group: str) -> set[str]:
         group: A key under `field_types:`, e.g. 'date', 'abn', 'amount'.
 
     Returns:
-        The field names in that group, or an empty set if the group is absent.
+        The field names in that group, or an empty set if the group is absent
+        (this is deliberate: not every field type is used by every document
+        type, so an absent group is not a schema error).
+
+    Raises:
+        SchemaError: If field_definitions.yml has no 'field_types' key at all.
     """
-    return set(_load_field_defs()["field_types"].get(group, []))
+    defs = _load_field_defs()
+    if "field_types" not in defs:
+        msg = (
+            f"  What:     'field_types' key not found in {_FIELD_DEFS_PATH}.\n"
+            f"  Where:    {_FIELD_DEFS_PATH.resolve()} -> 'field_types'.\n"
+            "  Expected: a top-level mapping of field-type groups to field-name lists, e.g.\n"
+            "            field_types:\n"
+            "              date:\n"
+            "                - STATEMENT_DATE\n"
+            "              abn:\n"
+            "                - SUPPLIER_ABN\n"
+            f"  Recover:  add a 'field_types:' mapping to {_FIELD_DEFS_PATH}."
+        )
+        raise SchemaError(msg)
+    return set(defs["field_types"].get(group, []))
 
 
 _PIPE_GROUPS = {
@@ -133,7 +169,11 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
     fields = entry["fields"]
 
     doc_type = fields.get("DOCUMENT_TYPE")
-    valid_doc_types = _valid_doc_types()
+    try:
+        valid_doc_types = _valid_doc_types()
+    except SchemaError as exc:
+        errors.append(str(exc))
+        return errors
     if doc_type not in valid_doc_types:
         errors.append(
             f"{case_id}: DOCUMENT_TYPE is '{doc_type}', expected one of {sorted(valid_doc_types)}."
@@ -156,7 +196,16 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                 f"Add '{field_name}: <value>' under 'fields:'."
             )
 
-    for field_name in _field_type_group("date"):
+    try:
+        date_fields = _field_type_group("date")
+        date_range_fields = _field_type_group("date_range")
+        abn_fields = _field_type_group("abn")
+        amount_fields = _field_type_group("amount")
+    except SchemaError as exc:
+        errors.append(str(exc))
+        return errors
+
+    for field_name in date_fields:
         if field_name in fields:
             val = str(fields[field_name])
             if not _DATE_RE.match(val):
@@ -165,7 +214,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"expected DD/MM/YYYY format (e.g. '15/03/2024')."
                 )
 
-    for field_name in _field_type_group("date_range"):
+    for field_name in date_range_fields:
         if field_name in fields:
             val = str(fields[field_name])
             if not _DATE_RANGE_RE.match(val):
@@ -174,7 +223,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"expected 'DD/MM/YYYY - DD/MM/YYYY' format."
                 )
 
-    for field_name in _field_type_group("abn"):
+    for field_name in abn_fields:
         if field_name in fields:
             val = str(fields[field_name])
             if not validate_abn(val):
@@ -184,7 +233,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"Use generators.common.generate_abn() to create valid ABNs."
                 )
 
-    for field_name in _field_type_group("amount"):
+    for field_name in amount_fields:
         if field_name in fields:
             val = str(fields[field_name])
             if not _AMOUNT_RE.match(val):
