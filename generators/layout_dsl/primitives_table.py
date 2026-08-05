@@ -657,6 +657,31 @@ def _draw_header(
     return y
 
 
+def _date_is_redundant(grouping: str, is_new_group: bool) -> bool:
+    """Report whether a row's own date cell would repeat its group's date.
+
+    No bank prints the date twice on one grouped line. Both grouping modes
+    carry the date somewhere else, so the cell is dropped:
+
+    - `dedicated_row` puts the date on a header row of its own, so *every*
+      row beneath it repeats — the cell is always redundant.
+    - `inline` has no header row; the first row of a group carries the date
+      itself, so only the rows after it repeat.
+
+    `none` has nothing to repeat: the date belongs in every row.
+
+    Args:
+        grouping: The table's grouping mode.
+        is_new_group: Whether this row opens a new date group.
+
+    Returns:
+        True when the date cell should be left blank.
+    """
+    if grouping == "dedicated_row":
+        return True
+    return grouping == "inline" and not is_new_group
+
+
 def _draw_row(
     row: dict,
     columns: list,
@@ -746,8 +771,8 @@ def _draw_row(
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
-        if grouping == "inline" and column["key"] == "date" and not is_new_group:
-            continue  # Blank the repeated date cell within a date group.
+        if column["key"] == "date" and _date_is_redundant(grouping, is_new_group):
+            continue
         x = column_x(column, ctx)
         text = _cell_text(row, column)
         if not text:
