@@ -12,7 +12,7 @@ import yaml
 
 from generators.exporters.cord import to_cord
 from generators.exporters.docile import to_docile
-from generators.exporters.links import transaction_links_to_doc_refs, trust_quads_to_doc_refs
+from generators.exporters.links import transaction_links_to_doc_refs
 from generators.exporters.native import to_native
 
 
@@ -142,15 +142,14 @@ def derive_cord(
 
 
 def derive_links(
-    link_files: dict[str, Path],
+    transactions_path: Path,
     export_config: dict,
     output_path: Path,
 ) -> Path:
-    """Derive doc_refs JSONL from the two link ground truth files.
+    """Derive doc_refs JSONL from the receipt/invoice-to-bank link ground truth.
 
     Args:
-        link_files: Mapping with keys 'transactions' and 'trust_quads' to
-            their YAML paths.
+        transactions_path: Path to transaction_links.yml.
         export_config: The validated export config mapping.
         output_path: Where to write the JSONL.
 
@@ -158,14 +157,8 @@ def derive_links(
         Path to the written JSONL file.
     """
     identifier_form = export_config["abn_tfn_canonical_form"]
-    equality_form = export_config["abn_tfn_equality_form"]
-    records: list[dict] = []
-
-    transactions = yaml.safe_load(link_files["transactions"].read_text())
-    records.extend(transaction_links_to_doc_refs(transactions, identifier_form))
-
-    quads = yaml.safe_load(link_files["trust_quads"].read_text())
-    records.extend(trust_quads_to_doc_refs(quads, identifier_form, equality_form))
+    transactions = yaml.safe_load(transactions_path.read_text())
+    records = transaction_links_to_doc_refs(transactions, identifier_form)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w") as f:
@@ -259,20 +252,11 @@ def derive_docile(
     return output_path
 
 
-# Bank/CC statements and the four trust-distribution types have no CORD or
-# DocILE equivalent (spec section 7) and are emitted in a project-defined
-# schema instead. Together with CORD_DOCUMENT_TYPES this partitions the whole
-# corpus: every document type lands in exactly one of the two sets.
-NATIVE_DOCUMENT_TYPES: frozenset[str] = frozenset(
-    {
-        "BANK_STATEMENT",
-        "CC_STATEMENT",
-        "TRUST_RETURN",
-        "DISTRIBUTION_STATEMENT",
-        "TRUST_INCOME_SCHEDULE",
-        "BENEFICIARY_ITR",
-    }
-)
+# Bank/CC statements have no CORD or DocILE equivalent (spec section 7) and
+# are emitted in a project-defined schema instead. Together with
+# CORD_DOCUMENT_TYPES this partitions the whole corpus: every document type
+# lands in exactly one of the two sets.
+NATIVE_DOCUMENT_TYPES: frozenset[str] = frozenset({"BANK_STATEMENT", "CC_STATEMENT"})
 
 
 def derive_native(gt_files: list[Path], output_path: Path) -> Path:

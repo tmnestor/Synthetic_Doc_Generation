@@ -1,8 +1,8 @@
 """Native export for document types with no public-schema equivalent.
 
-Implements section 7 of docs/GroundTruth_Export_Spec.md. Bank statements,
-credit-card statements and the four trust-distribution types are emitted in a
-project-defined schema rather than force-fitted into CORD or DocILE.
+Implements section 7 of docs/GroundTruth_Export_Spec.md. Bank statements and
+credit-card statements are emitted in a project-defined schema rather than
+force-fitted into CORD or DocILE.
 """
 
 from generators.exporters.normalise import is_present, present_fields, split_pipe_list
@@ -18,7 +18,7 @@ TRANSACTION_COLUMNS: dict[str, str] = {
 
 
 def to_native(fields: dict[str, str]) -> dict:
-    """Build the native record for one statement or trust document.
+    """Build the native record for one statement document.
 
     Args:
         fields: The document's field mapping from ground_truth/*.yml.

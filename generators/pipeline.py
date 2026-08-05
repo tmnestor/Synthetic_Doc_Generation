@@ -13,7 +13,6 @@ import typer
 from rich import print as rprint
 
 from generators.bank_statement import render_bank_statement
-from generators.beneficiary_itr import render_beneficiary_itr
 from generators.cc_statement import render_cc_statement
 from generators.common import FitError, degrade_image
 from generators.derive_outputs import (
@@ -24,7 +23,6 @@ from generators.derive_outputs import (
     derive_links,
     derive_native,
 )
-from generators.distribution_statement import render_distribution_statement
 from generators.exporters.config import load_export_config
 from generators.invoice import render_invoice
 from generators.layout_dsl.schema import LayoutSchemaError, validate_layout
@@ -41,8 +39,6 @@ from generators.payment_block import (
 )
 from generators.receipt import render_receipt
 from generators.schema import field_names_for, validate_entry
-from generators.trust_income_schedule import render_trust_income_schedule
-from generators.trust_return import render_trust_return
 
 app = typer.Typer(help="Synthetic Australian business document generator.")
 
@@ -51,10 +47,6 @@ _RENDERERS = {
     "receipts": render_receipt,
     "invoices": render_invoice,
     "cc_statements": render_cc_statement,
-    "trust_returns": render_trust_return,
-    "distribution_statements": render_distribution_statement,
-    "trust_income_schedules": render_trust_income_schedule,
-    "beneficiary_itrs": render_beneficiary_itr,
 }
 
 _DEFAULT_CONFIG = Path("config/generation_config.yml")
@@ -181,10 +173,7 @@ def derive(
     if "doc_refs" in export_cfg["export_targets"]:
         gt_dir = Path(cfg["ground_truth_dir"])
         links_path = derive_links(
-            {
-                "transactions": gt_dir / "transaction_links.yml",
-                "trust_quads": gt_dir / "trust_distribution_links.yml",
-            },
+            gt_dir / "transaction_links.yml",
             export_cfg,
             derived_dir / "doc_refs.jsonl",
         )
@@ -237,8 +226,8 @@ def generate(
         subdir = doc_cfg.get("output_subdir", dtype)
 
         # Structurally validate every DSL layout before rendering anything, on
-        # the same terms `validate` does (skip layouts with no `body:` — the
-        # trust types still draw from Python). The DSL's guarantees — required
+        # the same terms `validate` does (skip layouts with no `body:` — cc
+        # statements still draw from Python). The DSL's guarantees — required
         # defaults, line_advance role coverage, budget geometry, provider
         # params — are enforced at validate time, so without this a missing key
         # surfaces as a raw traceback part-way through a 420-image run instead
