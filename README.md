@@ -116,6 +116,7 @@ python -m generators.pipeline <command> [OPTIONS]
 | `validate` | Validate ground truth YAML against schema + layout registries |
 | `generate` | Render document images from ground truth + layouts |
 | `derive` | Regenerate CSV/JSONL from ground truth YAML |
+| `eval-set` | Export a flat evaluation set (one clean image per document) for LMM_POC |
 
 | Flag | Default | Applies To | Description |
 |------|---------|------------|-------------|
@@ -200,7 +201,7 @@ The seed scripts run at `seed=42`, seeding the local RNG, Faker, and the module-
 
 Every variable field is drawn through `fit_text` against per-layout pixel budgets (`config/layouts/*.yml` `field_budgets:`, loaded by `generators/layout_budgets.py`): text that doesn't fit **wraps or shrinks losslessly**, and a genuinely impossible fit raises `FitError`. The `validate` command runs an overflow backstop (`generators/overflow_check.py`) across all 3 document types, so no rendered field can silently truncate — a benchmark-corrupting failure fails loudly instead.
 
-`config/data_pools.yml` is the single source of content (fictional business name-parts, Faker config, product/service catalogs, bank-description grammar, street types, income years, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
+`config/data_pools.yml` is the single source of content (fictional business name-parts, Faker config, product/service catalogs, bank-description grammar, street types, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
 
 ---
 
@@ -386,13 +387,16 @@ generators/
 ├── content_engine.py          # Shared content generator (Faker en_AU, fictional business, blocklist, seeded sampling)
 ├── layout_budgets.py          # Per-field pixel-budget loader (fit-safety)
 ├── overflow_check.py          # Fail-fast overflow backstop — catches text that cannot fit its box (fit-safety)
+├── payment_block.py           # EFTPOS terminal-slip data + receipt↔bank linking (load_link_index, derive_payment)
 ├── schema.py                  # Ground truth schema validation
 ├── loader.py                  # YAML loaders with fail-fast diagnostics
 ├── derive_outputs.py          # YAML → CSV/JSONL + CORD/DocILE/native/doc_refs derivation
-├── pipeline.py                # Typer CLI (validate, generate, derive)
-├── bank_statement.py          # Bank statement renderer
-├── receipt.py                 # Receipt renderer (thermal/letterhead)
-├── invoice.py                 # Tax-compliant invoice renderer
+├── eval_set.py                # Flat evaluation-set export for LMM_POC (hands off to relabel_evaluation_set.py)
+├── pipeline.py                # Typer CLI (validate, generate, derive, eval-set)
+├── bank_statement.py          # Bank statement renderer — draws its layout's declarative `body:` tree
+├── receipt.py                 # Receipt renderer (thermal/letterhead) — same
+├── invoice.py                 # Tax-compliant invoice renderer — same
+├── layout_dsl/                 # Declarative layout engine: walks body: trees, dispatches blocks to primitive drawers
 └── exporters/                 # Benchmark-schema export layer
     ├── config.py              # Load + fail-fast-validate export_config.yml
     ├── normalise.py           # Shared normalisation rules (pure functions)
