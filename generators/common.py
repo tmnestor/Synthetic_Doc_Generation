@@ -773,9 +773,8 @@ def draw_table(
     """Draw a bordered component table and return the new y coordinate.
 
     Fit-safe: each row's description wraps within its column and grows the row
-    height (matching cc_statement.py's `_draw_transactions` row-growth), keeping
-    the label code and amount on the first line and never colliding downward; the
-    amount cell shrinks to fit its column. Presentation-only: callers pass
+    height, keeping the label code and amount on the first line and never
+    colliding downward; the amount cell shrinks to fit its column. Presentation-only: callers pass
     pre-formatted string values plus the description/amount pixel budgets.
 
     Args:

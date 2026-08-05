@@ -62,17 +62,6 @@ _INVOICE_LAYOUTS = [
     "tax_invoice_mixed",
 ]
 
-_CC_LAYOUTS = [
-    "cba_cc_standard",
-    "cba_cc_rewards",
-    "westpac_cc_standard",
-    "westpac_cc_altitude",
-    "nab_cc_standard",
-    "nab_cc_low_rate",
-    "anz_cc_standard",
-    "anz_cc_platinum",
-]
-
 
 def _fmt_date(day: int, month: int, year: int) -> str:
     """Format date as DD/MM/YYYY."""
@@ -380,92 +369,9 @@ def _generate_invoice_entries(
     return entries
 
 
-def _generate_cc_entries(
-    engine: ContentEngine, rng: random.Random, case_entities: list[dict], count: int
-) -> dict:
-    """Generate credit card statement ground truth entries."""
-    entries: dict = {}
-    layout_draw = NonRepeatingSampler(rng, _CC_LAYOUTS)
-    banks_by_code = {b["code"]: b for b in engine.pools["banks"]}
-
-    for i in range(count):
-        case_id = f"CASE{i + 1:03d}"
-        layout = layout_draw.draw()
-
-        # The bank is a function of the layout, never an independent draw (see
-        # _generate_bank_entries). The layout-id prefix is the banks-pool code.
-        bank = banks_by_code[layout.split("_")[0]]
-        holder = case_entities[i]["holder"]
-        suburb = case_entities[i]["location"]["suburb"]
-
-        d, m, y = _rand_date(rng)
-        period_start = _fmt_date(1, m, y)
-        max_day = 28 if m == 2 else 30 if m in (4, 6, 9, 11) else 31
-        period_end = _fmt_date(max_day, m, y)
-        statement_range = f"{period_start} - {period_end}"
-
-        due_d = min(max_day + 21, 28)
-        due_m = m + 1 if due_d <= max_day else m
-        if due_m > 12:
-            due_m = 1
-            due_y = y + 1
-        else:
-            due_y = y
-        payment_due_date = _fmt_date(due_d, due_m, due_y)
-
-        credit_limit = _rand_amount(rng, 2000, 20000)
-        credit_limit = Decimal(str(round(float(credit_limit) / 500) * 500))
-
-        n_txns = rng.randint(5, 12)
-        txns: list[tuple[int, str, str]] = []
-        total_charges = Decimal("0")
-
-        for _j in range(n_txns):
-            txn_day = rng.randint(1, max_day)
-            desc = _draw_bank_description(engine, rng, suburb=suburb, holder_first=holder["first_name"])
-            amt = _rand_amount(rng, 10, 800)
-            txns.append((txn_day, desc, _fmt_decimal(amt)))
-            total_charges += amt
-
-        # A real statement lists transactions chronologically; sort by day (all
-        # in the one statement month) and derive the period from the date column.
-        txns.sort(key=lambda t: t[0])
-        txn_dates = [_fmt_date(day, m, y) for day, _, _ in txns]
-        txn_descs = [desc for _, desc, _ in txns]
-        txn_amounts = [amt for _, _, amt in txns]
-        statement_range = f"{txn_dates[0]} - {txn_dates[-1]}" if txns else statement_range
-
-        closing_balance = total_charges
-        min_payment_pct = (closing_balance * Decimal("0.02")).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        minimum_payment = max(Decimal("25.00"), min_payment_pct)
-
-        entries[case_id] = {
-            "layout": layout,
-            "degradation_seed": rng.randint(1000, 9999),
-            "fields": {
-                "DOCUMENT_TYPE": "CC_STATEMENT",
-                "SUPPLIER_NAME": bank["name"],
-                "STATEMENT_DATE_RANGE": statement_range,
-                "TRANSACTION_DATES": "|".join(txn_dates),
-                "TRANSACTION_DESCRIPTIONS": "|".join(txn_descs),
-                "TRANSACTION_AMOUNTS_PAID": "|".join(txn_amounts),
-                "ACCOUNT_BALANCE": _fmt_decimal(closing_balance),
-                "CREDIT_LIMIT": _fmt_decimal(credit_limit),
-                "MINIMUM_PAYMENT": _fmt_decimal(minimum_payment),
-                "PAYMENT_DUE_DATE": payment_due_date,
-                "PAYER_NAME": holder["full_name"],
-            },
-        }
-
-    return entries
-
-
 def _validate_dry_run(all_entries: dict[str, dict]) -> None:
     """Validate generated entries in-memory (schema + overflow) without writing YAML."""
     from generators.bank_statement import render_bank_statement
-    from generators.cc_statement import render_cc_statement
     from generators.invoice import render_invoice
     from generators.receipt import render_receipt
 
@@ -473,7 +379,6 @@ def _validate_dry_run(all_entries: dict[str, dict]) -> None:
         "bank_statements.yml": (render_bank_statement, "config/layouts/bank_statements.yml"),
         "receipts.yml": (render_receipt, "config/layouts/receipts.yml"),
         "invoices.yml": (render_invoice, "config/layouts/invoices.yml"),
-        "cc_statements.yml": (render_cc_statement, "config/layouts/cc_statements.yml"),
     }
 
     errors: list[str] = []
@@ -516,7 +421,6 @@ def build_all_entries() -> dict[str, dict]:
         ("bank_statements", _generate_bank_entries),
         ("receipts", _generate_receipt_entries),
         ("invoices", _generate_invoice_entries),
-        ("cc_statements", _generate_cc_entries),
     ]
 
     all_entries: dict[str, dict] = {}

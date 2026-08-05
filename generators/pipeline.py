@@ -13,7 +13,6 @@ import typer
 from rich import print as rprint
 
 from generators.bank_statement import render_bank_statement
-from generators.cc_statement import render_cc_statement
 from generators.common import FitError, degrade_image
 from generators.derive_outputs import (
     derive_cord,
@@ -46,7 +45,6 @@ _RENDERERS = {
     "bank_statements": render_bank_statement,
     "receipts": render_receipt,
     "invoices": render_invoice,
-    "cc_statements": render_cc_statement,
 }
 
 _DEFAULT_CONFIG = Path("config/generation_config.yml")
@@ -226,12 +224,13 @@ def generate(
         subdir = doc_cfg.get("output_subdir", dtype)
 
         # Structurally validate every DSL layout before rendering anything, on
-        # the same terms `validate` does (skip layouts with no `body:` — cc
-        # statements still draw from Python). The DSL's guarantees — required
-        # defaults, line_advance role coverage, budget geometry, provider
-        # params — are enforced at validate time, so without this a missing key
-        # surfaces as a raw traceback part-way through a 420-image run instead
-        # of a diagnostic before the first file is written.
+        # the same terms `validate` does (skip layouts with no `body:` — a
+        # defensive guard for any future non-DSL type; every surviving layout
+        # is DSL-driven today). The DSL's guarantees — required defaults,
+        # line_advance role coverage, budget geometry, provider params — are
+        # enforced at validate time, so without this a missing key surfaces as
+        # a raw traceback part-way through a 165-image run instead of a
+        # diagnostic before the first file is written.
         known = set(field_names_for(dtype))
         for layout_id, layout in layouts.items():
             if "body" not in layout:

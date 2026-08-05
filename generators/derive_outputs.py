@@ -252,11 +252,11 @@ def derive_docile(
     return output_path
 
 
-# Bank/CC statements have no CORD or DocILE equivalent (spec section 7) and
-# are emitted in a project-defined schema instead. Together with
+# Bank statements have no CORD or DocILE equivalent (spec section 7) and are
+# emitted in a project-defined schema instead. Together with
 # CORD_DOCUMENT_TYPES this partitions the whole corpus: every document type
 # lands in exactly one of the two sets.
-NATIVE_DOCUMENT_TYPES: frozenset[str] = frozenset({"BANK_STATEMENT", "CC_STATEMENT"})
+NATIVE_DOCUMENT_TYPES: frozenset[str] = frozenset({"BANK_STATEMENT"})
 
 
 def derive_native(gt_files: list[Path], output_path: Path) -> Path:

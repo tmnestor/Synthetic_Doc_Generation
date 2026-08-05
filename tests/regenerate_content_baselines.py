@@ -23,7 +23,6 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-from generators.cc_statement import render_cc_statement  # noqa: E402
 from generators.invoice import render_invoice  # noqa: E402
 from generators.loader import load_ground_truth, load_layout_registry  # noqa: E402
 from generators.receipt import render_receipt  # noqa: E402
@@ -34,7 +33,6 @@ _FIXTURES = Path(__file__).parent / "fixtures"
 _TARGETS = {
     "receipts": (render_receipt, "receipt_baseline_hashes.json"),
     "invoices": (render_invoice, "invoice_baseline_hashes.json"),
-    "cc_statements": (render_cc_statement, "cc_baseline_hashes.json"),
 }
 
 

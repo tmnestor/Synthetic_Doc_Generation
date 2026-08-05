@@ -1,13 +1,13 @@
 """Native export for document types with no public-schema equivalent.
 
-Implements section 7 of docs/GroundTruth_Export_Spec.md. Bank statements and
-credit-card statements are emitted in a project-defined schema rather than
-force-fitted into CORD or DocILE.
+Implements section 7 of docs/GroundTruth_Export_Spec.md. Bank statements are
+emitted in a project-defined schema rather than force-fitted into CORD or
+DocILE.
 """
 
 from generators.exporters.normalise import is_present, present_fields, split_pipe_list
 
-STATEMENT_TYPES: frozenset[str] = frozenset({"BANK_STATEMENT", "CC_STATEMENT"})
+STATEMENT_TYPES: frozenset[str] = frozenset({"BANK_STATEMENT"})
 
 TRANSACTION_COLUMNS: dict[str, str] = {
     "TRANSACTION_DATES": "date",
@@ -54,7 +54,7 @@ def to_native(fields: dict[str, str]) -> dict:
         msg = (
             f"What: Transaction register list lengths disagree: {counts}.\n"
             f"Where: The TRANSACTION_* fields of the offending entry in "
-            f"ground_truth/bank_statements.yml or ground_truth/cc_statements.yml.\n"
+            f"ground_truth/bank_statements.yml.\n"
             f"Expected: Every present TRANSACTION_* list is an index-aligned "
             f"column and must have the same number of pipe-delimited members, "
             f"e.g. TRANSACTION_DATES: '02/03/2023|05/03/2023' paired with "
