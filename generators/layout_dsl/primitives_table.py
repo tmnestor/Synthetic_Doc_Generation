@@ -431,8 +431,8 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             f"{ctx.layout_id}.defaults.table_row_inset_y), or change the table's grouping."
         )
     cell_line_spacing = _resolve_cell_line_spacing(block, ctx)
-    mono = bool(
-        resolve_param(block, ctx.layout, "mono", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
+    family = str(
+        resolve_param(block, ctx.layout, "family", layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     )
     advance = line_advance(ctx.layout, block, layout_id=ctx.layout_id, layout_path=ctx.layout_path)
     rows = get_provider(block["rows"])(ctx.entry, block.get("params", {}))
@@ -470,7 +470,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             label_inset_y=label_inset_y,
             header_rule_top=header_rule_top,
             header_rule_gap=header_rule_gap,
-            mono=mono,
+            family=family,
             advance=advance,
         )
 
@@ -493,7 +493,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                 str(row.get("date", "")),
                 ctx.region.x,
                 y,
-                load_font(text_size, mono=mono, bold=True),
+                load_font(text_size, family=family, bold=True),
             )
             previous_date = row.get("date")
             y += row_height
@@ -510,7 +510,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
                     row_height=row_height,
                     index=None,
                     is_last=False,
-                    mono=mono,
+                    family=family,
                     inset_y=row_inset_y,
                     cell_line_spacing=cell_line_spacing,
                     first_row=first_row,
@@ -531,7 +531,7 @@ def draw_table(block: dict, ctx: RenderContext, y: int) -> int:
             row_height=row_height,
             index=None if synthetic else index,
             is_last=(position == total_rows - 1),
-            mono=mono,
+            family=family,
             inset_y=row_inset_y,
             cell_line_spacing=cell_line_spacing,
             first_row=first_row,
@@ -573,7 +573,7 @@ def _draw_header(
     label_inset_y: int | None,
     header_rule_top: bool,
     header_rule_gap: int,
-    mono: bool,
+    family: str,
     advance: int,
 ) -> int:
     """Draw the column-header row in the table's frame.
@@ -619,7 +619,7 @@ def _draw_header(
     A column may position its label independently of its own cells with
     `label_x`/`label_align` — see `_label_anchor`.
     """
-    font = load_font(size, mono=mono, bold=bold)
+    font = load_font(size, family=family, bold=bold)
     if frame == "ruled":
         if header_rule_top:
             draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
@@ -694,7 +694,7 @@ def _draw_row(
     row_height: int,
     index: int | None,
     is_last: bool,
-    mono: bool,
+    family: str,
     inset_y: int,
     cell_line_spacing: str,
     first_row: bool = False,
@@ -766,8 +766,8 @@ def _draw_row(
         draw_separator_line(ctx.draw, ctx.region.x, ctx.region.right, y, color="black")
         y += 12
 
-    regular_font = load_font(size, mono=mono, bold=False)
-    bold_font = load_font(size, mono=mono, bold=True)
+    regular_font = load_font(size, family=family, bold=False)
+    bold_font = load_font(size, family=family, bold=True)
     bottom = y + row_height  # Floor: every unbudgeted cell is exactly one row tall.
 
     for column in columns:
@@ -832,7 +832,7 @@ def _draw_row(
             row_height=row_height,
             font=font,
             bold=cell_bold,
-            mono=mono,
+            family=family,
             inset_y=inset_y,
             cell_line_spacing=cell_line_spacing,
             recorder=recorder,
@@ -936,7 +936,7 @@ def _draw_cell(
     row_height: int,
     font: Font,
     bold: bool = False,
-    mono: bool,
+    family: str,
     inset_y: int,
     cell_line_spacing: str,
     recorder: BoxRecorder | None,
@@ -947,12 +947,12 @@ def _draw_cell(
     """Draw one cell, dispatching on alignment and whether it has a fit budget.
 
     `font` already carries the row's weight and face (see `_draw_row`) for the
-    unbudgeted path below; `bold` and `mono` are threaded separately to
+    unbudgeted path below; `bold` and `family` are threaded separately to
     `draw_fitted_left`/`draw_fitted_right`, which build their own font
     internally from `nominal_size` and do not accept a pre-built `Font`.
-    Omitting `mono` there silently drew every budgeted cell of a
-    `font_family: monospace` layout in the sans face -- invisible for the
-    eight sans bank layouts, but wrong for all six receipt layouts.
+    Omitting the face there silently drew every budgeted cell of a
+    monospace layout in the sans face -- invisible for the eight sans bank
+    layouts, but wrong for all six receipt layouts.
 
     `prefix`/`prefix_field` record a sub-box for a leading run of the cell's
     own text (a line item's "2x " quantity marker) -- see `draw_fitted_left`,
@@ -986,7 +986,7 @@ def _draw_cell(
                     y + inset_y,
                     budget=budget,
                     nominal_size=size,
-                    mono=mono,
+                    family=family,
                     bold=bold,
                     line_spacing=line_spacing,
                     recorder=recorder,
@@ -1002,7 +1002,7 @@ def _draw_cell(
                 y + inset_y,
                 budget=budget,
                 nominal_size=size,
-                mono=mono,
+                family=family,
                 bold=bold,
                 line_spacing=line_spacing,
                 recorder=recorder,

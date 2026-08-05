@@ -42,7 +42,11 @@ _invoice_defaults_values: &invoice_defaults_values
   color: "black"
   align: left
   bold: false
-  mono: false                     # legacy: font_family: sans-serif
+  # legacy: font_family: sans-serif. Carlito is the shared baseline (it is
+  # metric-compatible with Calibri, the modern AU invoice register); the two
+  # layouts below override it to liberation_sans so the corpus carries both
+  # typographic registers rather than one.
+  family: carlito
   # Every separator the legacy renderer drew was the same one: a 1px #CCCCCC
   # line 8px below the cursor, with the cursor advancing 20px in total.
   rule_thickness: 1
@@ -239,6 +243,7 @@ layouts:
     field_providers: *invoice_field_providers
     defaults:
       <<: *invoice_defaults_values
+      family: liberation_sans     # Arial register, against carlito elsewhere
     # Identical to tax_invoice_standard but for its totals block.
     body:
       - *invoice_title
@@ -288,6 +293,7 @@ layouts:
     field_providers: *invoice_field_providers
     defaults:
       <<: *invoice_defaults_values
+      family: liberation_sans     # Arial register, against carlito elsewhere
     # tax_invoice_standard's sequence with the single line-item table replaced
     # by two labelled ones over the same list.
     body:
