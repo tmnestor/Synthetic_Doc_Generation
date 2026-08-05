@@ -21,12 +21,6 @@ document_types:
     output_subdir: invoices
     generate_clean: true
     generate_degraded: true
-  cc_statements:
-    ground_truth: ground_truth/cc_statements.yml
-    layouts: config/layouts/cc_statements.yml
-    output_subdir: cc_statements
-    generate_clean: true
-    generate_degraded: true
 
 degradation:
   paper_tint_alpha: [0.03, 0.08]
@@ -48,8 +42,8 @@ derived_formats:
 # LMM_POC's relabel_evaluation_set.py, which owns schema projection.
 # Every key is required — the export fails fast on any omission.
 eval_set:
-  # Deliberately excludes cc_statements: the relabel script maps exactly
-  # these three DOCUMENT_TYPEs to filename suffixes.
+  # The relabel script maps exactly these three DOCUMENT_TYPEs to filename
+  # suffixes — the whole surviving corpus.
   document_types: [bank_statements, invoices, receipts]
   relabel_script: /Users/tod/Desktop/LMM_POC/scripts/relabel_evaluation_set.py
   relabel_repo_root: /Users/tod/Desktop/LMM_POC
