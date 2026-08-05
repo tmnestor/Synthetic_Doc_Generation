@@ -183,7 +183,9 @@ Three snapshots, `validate`, `generate --clean-only`.
 
 `evaluation_data/synthetic_20260731` was shared with the team. Do **not** overwrite it without instruction — report what changed and what a re-export would need, and stop.
 
-- [ ] **Step 4: Commit the regenerated corpus**
+- [ ] **Step 4: Nothing to commit**
+
+`output/` and `derived/` are both gitignored (`.gitignore:10` and `:13`), so the regenerated corpus and derived artefacts leave no diff. Say so in the report rather than reporting BLOCKED for want of a commit. The verification results are this task's deliverable.
 
 ---
 
