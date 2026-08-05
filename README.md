@@ -1,6 +1,6 @@
 # Synthetic Business Document Generator
 
-YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 840 benchmark images (420 clean + 420 degraded) across 8 document types with transaction linking and trust distribution compliance ground truth.
+YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 330 benchmark images (165 clean + 165 degraded) across 3 document types — bank statements, receipts, invoices — with transaction-linking ground truth.
 
 ---
 
@@ -10,7 +10,7 @@ YAML-driven pipeline for generating synthetic Australian business documents with
 # Validate ground truth against schema and layout registries
 python -m generators.pipeline validate
 
-# Generate all 840 images (420 clean + 420 degraded)
+# Generate all 330 images (165 clean + 165 degraded)
 python -m generators.pipeline generate
 
 # Generate only one document type
@@ -25,9 +25,9 @@ python -m generators.pipeline derive
 
 ### Extraction ground truth for LMM_POC
 
-`derive` emits this repo's own 420-row `derived/ground_truth.csv`. To build the
-**165-row extraction CSV** that LMM_POC's `evaluate` stage consumes — bank statements,
-invoices and receipts only, columns and formatting taken from LMM_POC's schema — use:
+`derive` emits this repo's own 165-row `derived/ground_truth.csv`. To build the
+equivalent **extraction CSV** that LMM_POC's `evaluate` stage consumes — columns and
+formatting taken from LMM_POC's schema — use:
 
 ```bash
 python scripts/generate_extraction_gt.py \
@@ -83,48 +83,25 @@ All dependencies are pinned in `environment.yml` (conda env `synthetic`).
 
 | Output | Count | Description |
 |--------|-------|-------------|
-| Clean PNGs | 420 | Pixel-perfect rendered documents |
-| Degraded PNGs | 420 | Simulated phone photos with noise, blur, rotation, JPEG artifacts |
-| Ground truth YAML | 8 files | Field-level truth for all 420 documents |
+| Clean PNGs | 165 | Pixel-perfect rendered documents |
+| Degraded PNGs | 165 | Simulated phone photos with noise, blur, rotation, JPEG artifacts |
+| Ground truth YAML | 3 files | Field-level truth for all 165 documents |
 | Transaction links YAML | 1 file | 110 receipt/invoice-to-bank-statement links at 3 difficulty levels |
-| Trust distribution links YAML | 1 file | 50 four-document quads with compliance ground truth |
-| Derived CSV | 1 file | Flat CSV with all 47 columns (image_file + 46 fields; NOT_FOUND for inapplicable fields) |
+| Derived CSV | 1 file | Flat CSV with all 21 columns (image_file + 20 fields; NOT_FOUND for inapplicable fields) |
 | Derived JSONL | 1 file | One JSON object per document with all field values |
-| Geometry JSONL | 1 file | Per-document field bounding boxes (relative coords), captured at draw time during `generate` |
+| Geometry JSONL | 165 records | Per-document field bounding boxes (relative coords), captured at draw time during `generate` |
 | CORD JSONL | 110 records | Receipts + invoices as CORD Donut-style `gt_parse` value trees |
 | DocILE JSONL | 55 records | Invoices as DocILE KILE + LIR fields with bounding boxes |
-| Native JSONL | 310 records | Bank/CC statements + 4 trust types in a project-defined schema |
-| doc_refs JSONL | 160 records | Cross-document links (110 transaction + 50 trust quads) in FinBalance-style `doc_refs` |
+| Native JSONL | 55 records | Bank statements in a project-defined schema |
+| doc_refs JSONL | 110 records | Receipt/invoice-to-bank transaction links in FinBalance-style `doc_refs` |
 
-## Document Types
-
-### Business Documents (220 entries)
+## Document Types (165 entries)
 
 | Type | Count | Layouts | Fields | Example Layouts |
 |------|-------|---------|--------|-----------------|
 | Bank Statement | 55 | 8 | 9 | 2 per bank (CBA, Westpac, NAB, ANZ) |
 | Receipt | 55 | 6 | 12 | Thermal 80mm/57mm, retail tax, fuel, professional, hospitality |
 | Invoice | 55 | 4 | 14 | Standard, GST-inclusive, high-value, mixed |
-| CC Statement | 55 | 8 | 11 | 2 per bank (CBA, Westpac, NAB, ANZ) |
-
-### Trust Distribution Documents (200 entries)
-
-| Type | Count | Layouts | Fields | Description |
-|------|-------|---------|--------|-------------|
-| Trust Tax Return | 50 | 1 | 14 | ATO NAT 0660-inspired, Items 55/57/58 |
-| Distribution Statement | 50 | 6 | 15 | Software navy/teal, table plain/ruled, letter formal/compact |
-| Trust Income Schedule | 50 | 1 | 9 | ATO-style grid with label codes (U, Q, M, C) |
-| Beneficiary ITR | 50 | 1 | 7 | ATO NAT 2541-inspired, Item 13 |
-
-Each trust distribution case generates a **quad** of 4 linked documents that share 5 scalar linking fields:
-
-| Linking Field | Trust Return | Distribution Statement | Trust Income Schedule | Beneficiary ITR |
-|---------------|-------------|----------------------|----------------------|-----------------|
-| Trust ABN | TRUST_ABN | TRUST_ABN | TRUST_ABN | -- |
-| Beneficiary TFN | BENEFICIARY_TFN | BENEFICIARY_TFN | BENEFICIARY_TFN | INDIVIDUAL_TFN |
-| Share of Net Income | SHARE_OF_NET_INCOME | SHARE_OF_NET_INCOME | SHARE_OF_NET_INCOME | TOTAL_TRUST_INCOME |
-| Franking Credit | FRANKING_CREDIT | FRANKING_CREDIT | FRANKING_CREDIT | TRUST_FRANKING_CREDIT |
-| Capital Gain Component | CAPITAL_GAIN_COMPONENT | CAPITAL_GAIN_COMPONENT | CAPITAL_GAIN_COMPONENT | -- |
 
 ---
 
@@ -152,10 +129,10 @@ python -m generators.pipeline <command> [OPTIONS]
 
 ```mermaid
 graph TD
-    GT["ground_truth/*.yml<br/>Field values (420 entries)"]
-    LR["config/layouts/*.yml<br/>Visual rendering specs (35 layouts)"]
+    GT["ground_truth/*.yml<br/>Field values (165 entries)"]
+    LR["config/layouts/*.yml<br/>Visual rendering specs (18 layouts)"]
     GC["config/generation_config.yml<br/>Pipeline configuration"]
-    FD["config/field_definitions.yml<br/>46-column schema"]
+    FD["config/field_definitions.yml<br/>20-column schema"]
 
     GT --> V["validate<br/>Schema + layout checks"]
     LR --> V
@@ -165,8 +142,8 @@ graph TD
     LR --> G
     GC --> G
 
-    G --> CLEAN["output/clean/<br/>420 PNGs"]
-    G --> DEG["output/degraded/<br/>420 PNGs"]
+    G --> CLEAN["output/clean/<br/>165 PNGs"]
+    G --> DEG["output/degraded/<br/>165 PNGs"]
 
     GT --> D["derive<br/>YAML → CSV/JSONL"]
     FD --> D
@@ -209,11 +186,11 @@ CASE001:
 
 ## Content Generation & Guarantees
 
-All ground-truth content is generated from `config/data_pools.yml` through a shared engine (`generators/content_engine.py`), driven by the four seed scripts. The corpus carries three guarantees **by construction**:
+All ground-truth content is generated from `config/data_pools.yml` through a shared engine (`generators/content_engine.py`), driven by the two seed scripts. The corpus carries three guarantees **by construction**:
 
 ### Fully fictional — no real entities
 
-People and addresses come from Faker (`en_AU`); businesses and trusts are invented from curated name-parts and paired with generated ABNs/TFNs (valid checksums, never real). Every generated name is screened against a **real-name blocklist** — the real retailers/professional services listed in `data_pools.yml` plus a curated list — so no real business, person, ABN, or TFN is ever emitted (the real names exist only to seed the blocklist). Entity selection uses seeded non-repeating sampling, so entities vary and de-correlate across documents instead of repeating in lockstep.
+People and addresses come from Faker (`en_AU`); businesses are invented from curated name-parts and paired with generated ABNs (valid checksums, never real). Every generated name is screened against a **real-name blocklist** — the real retailers/professional services listed in `data_pools.yml` plus a curated list — so no real business, person, or ABN is ever emitted (the real names exist only to seed the blocklist). Entity selection uses seeded non-repeating sampling, so entities vary and de-correlate across documents instead of repeating in lockstep.
 
 ### Deterministic & reproducible
 
@@ -221,9 +198,9 @@ The seed scripts run at `seed=42`, seeding the local RNG, Faker, and the module-
 
 ### Fit-safe — no silent clipping
 
-Every variable field is drawn through `fit_text` against per-layout pixel budgets (`config/layouts/*.yml` `field_budgets:`, loaded by `generators/layout_budgets.py`): text that doesn't fit **wraps or shrinks losslessly**, and a genuinely impossible fit raises `FitError`. The `validate` command runs an overflow backstop (`generators/overflow_check.py`) across all 8 document types, so no rendered field can silently truncate — a benchmark-corrupting failure fails loudly instead.
+Every variable field is drawn through `fit_text` against per-layout pixel budgets (`config/layouts/*.yml` `field_budgets:`, loaded by `generators/layout_budgets.py`): text that doesn't fit **wraps or shrinks losslessly**, and a genuinely impossible fit raises `FitError`. The `validate` command runs an overflow backstop (`generators/overflow_check.py`) across all 3 document types, so no rendered field can silently truncate — a benchmark-corrupting failure fails loudly instead.
 
-`config/data_pools.yml` is the single source of content (fictional business/trust name-parts, Faker config, product/service catalogs, bank-description grammar, street types, income years, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
+`config/data_pools.yml` is the single source of content (fictional business name-parts, Faker config, product/service catalogs, bank-description grammar, street types, income years, category partitions, and the real-name blocklist). Python holds no content constants; a missing pool key fails fast with a diagnostic.
 
 ---
 
@@ -237,8 +214,8 @@ The authoritative field maps and worked examples are in [`docs/GroundTruth_Expor
 |--------|------|-------|--------|
 | `cord` | `derived/cord.jsonl` | Receipts + invoices (110) | CORD Donut-style `gt_parse` value trees. Fields with no CORD slot (supplier, ABN, address, date, payer) go under an `extension` subtree |
 | `docile` | `derived/docile.jsonl` | Invoices only (55) | DocILE KILE + LIR fields, each with a bounding box from `geometry.jsonl` |
-| `native` | `derived/native.jsonl` | Bank/CC statements + 4 trust types (310) | Project-defined schema for types with no public equivalent |
-| `doc_refs` | `derived/doc_refs.jsonl` | Transaction links + trust quads (160) | FinBalance-style cross-document `doc_refs` |
+| `native` | `derived/native.jsonl` | Bank statements (55) | Project-defined schema for types with no public equivalent |
+| `doc_refs` | `derived/doc_refs.jsonl` | Transaction links (110) | FinBalance-style cross-document `doc_refs` |
 
 Which targets are emitted is controlled by `export_targets:` in `config/export_config.yml`. To ship a target as a no-op, remove it from that list. Do not delete the key.
 
@@ -288,47 +265,6 @@ CASE001_receipt_fuel.png:
 
 ---
 
-## Trust Distribution Links
-
-`ground_truth/trust_distribution_links.yml` maps each distribution statement to its corresponding trust return, trust income schedule, and beneficiary ITR, forming a 4-document quad with compliance ground truth.
-
-### Compliance Split
-
-| Category | Count | Description |
-|----------|-------|-------------|
-| Compliant | 35 | All 5 linking fields reconcile across all 4 documents |
-| Non-compliant | 15 | Deliberate amount discrepancies between documents |
-
-### Non-Compliance Types
-
-| Discrepancy Type | Count | Description |
-|------------------|-------|-------------|
-| `under_reported_income` | 5 | Beneficiary ITR reports 60-90% of actual share of net income |
-| `over_claimed_franking` | 4 | Beneficiary ITR claims 110-150% of actual franking credit |
-| `missing_cgt` | 3 | Trust Income Schedule shows $0 CGT despite Distribution Statement having a non-zero amount |
-| `trust_return_mismatch` | 3 | Trust Return share of income differs from Distribution Statement by 5-20% |
-
-### Link Format
-
-```yaml
-CASE201_dist_table_plain.png:
-  trust_return: CASE201_trust_return_standard.png
-  trust_income_schedule: CASE201_trust_income_schedule_standard.png
-  beneficiary_itr: CASE201_beneficiary_itr_standard.png
-  linking_fields:
-    trust_abn: '79 104 332 181'
-    beneficiary_tfn: '890 838 614'
-    share_of_net_income: '73078.48'
-    franking_credit: '20985.50'
-    capital_gain_component: '6026.13'
-  compliance_status: compliant    # or "non_compliant"
-  discrepancy_type: null          # or one of the 4 types above
-  discrepancy_details: null       # human-readable description
-  match_status: FOUND
-```
-
----
-
 ## Linking Validation API
 
 ### Transaction Linking (2-document pairs)
@@ -349,28 +285,6 @@ score = description_score("RAVENSDALE HEALTH STORE", "Ravensdale Hlth Store")  #
 # Score predictions against ground truth
 result: LinkScore = validate_links(ground_truth_dict, predictions_dict)
 print(f"F1: {result.f1:.2f}, by difficulty: {result.by_difficulty}")
-```
-
-### Trust Distribution Linking (4-document quads)
-
-```python
-from linking.link_validator import (
-    validate_trust_distribution_links,
-    TrustDistributionScore,
-)
-
-# Score quad linking + compliance detection
-result: TrustDistributionScore = validate_trust_distribution_links(
-    ground_truth_dict, predictions_dict
-)
-
-# Linking accuracy: fraction of quads where all 5 fields match across all 4 docs
-print(f"Link accuracy: {result.link_accuracy:.2f} ({result.correct_quads}/{result.total_quads})")
-
-# Compliance detection metrics
-print(f"Detection rate: {result.compliance.detection_rate:.2f}")
-print(f"False positive rate: {result.compliance.false_positive_rate:.2f}")
-print(f"Classification accuracy: {result.compliance.classification_accuracy:.2f}")
 ```
 
 ---
@@ -435,24 +349,14 @@ On the 55 camera-scan receipts the quad is detected 55/55 (100%), recovering clo
 
 ## Regenerating the Dataset
 
-### Business Documents (CASE001-CASE220)
+### Document Generation (CASE001-CASE055)
 
 ```bash
-# Re-seed ground truth (220 entries, deterministic with seed=42)
+# Re-seed ground truth (165 entries, deterministic with seed=42)
 python scripts/seed_ground_truth.py
 
 # Re-seed transaction links (110 links across 3 difficulty levels)
 python scripts/seed_transaction_links.py
-```
-
-### Trust Distribution Documents (CASE201-CASE250)
-
-```bash
-# Re-seed trust distribution ground truth (50 quads = 200 entries, seed=42)
-python scripts/seed_trust_distributions.py
-
-# Re-seed trust distribution links (50 quad links with compliance labels)
-python scripts/seed_trust_distribution_links.py
 ```
 
 ### Generate and Validate
@@ -461,104 +365,11 @@ python scripts/seed_trust_distribution_links.py
 # Validate all ground truth against schema
 python -m generators.pipeline validate
 
-# Generate all 840 images
+# Generate all 330 images
 python -m generators.pipeline generate
-
-# Generate only trust distribution images
-python -m generators.pipeline generate --type trust_returns
-python -m generators.pipeline generate --type distribution_statements
-python -m generators.pipeline generate --type trust_income_schedules
-python -m generators.pipeline generate --type beneficiary_itrs
 
 # Regenerate derived CSV/JSONL
 python -m generators.pipeline derive
-```
-
----
-
-## Remote Image Generation
-
-The image generation pipeline runs on any machine with the `synthetic` conda environment. To generate the trust distribution linking images on a remote GPU server (where LMM inference will run):
-
-### 1. Sync the repo to the remote server
-
-```bash
-rsync -avz --exclude='output/' --exclude='.git/' \
-    . remote_host:/path/to/Synthetic_Doc_Generation/
-```
-
-### 2. Generate images on the remote server
-
-```bash
-ssh remote_host
-
-cd /path/to/Synthetic_Doc_Generation
-
-# Build the `synthetic` env from environment.yml (first time only).
-# On hosts without public conda/PyPI access, point conda and pip at your
-# internal mirrors first (channel in ~/.condarc, index in pip.conf);
-# environment.yml itself carries no channel/index URLs.
-conda env create -n synthetic -f environment.yml
-# or update an existing environment
-conda env update -n synthetic -f environment.yml --prune
-
-# Validate ground truth
-conda run -n synthetic python -m generators.pipeline validate
-
-# Generate clean images only (recommended for LMM evaluation)
-conda run -n synthetic python -m generators.pipeline generate --clean-only
-
-# Or generate only the trust distribution types
-conda run -n synthetic python -m generators.pipeline generate --type trust_returns --clean-only
-conda run -n synthetic python -m generators.pipeline generate --type distribution_statements --clean-only
-conda run -n synthetic python -m generators.pipeline generate --type trust_income_schedules --clean-only
-conda run -n synthetic python -m generators.pipeline generate --type beneficiary_itrs --clean-only
-```
-
-### 3. Verify the generated images
-
-After generation, the output directory contains:
-
-```
-output/
-├── clean/
-│   ├── trust_returns/           # 50 PNGs (CASE201-CASE250)
-│   ├── distribution_statements/ # 50 PNGs
-│   ├── trust_income_schedules/  # 50 PNGs
-│   └── beneficiary_itrs/       # 50 PNGs
-└── degraded/                    # Same structure (if not using --clean-only)
-```
-
-The linking ground truth at `ground_truth/trust_distribution_links.yml` references these filenames directly. Each entry keys on the distribution statement filename and maps to the other 3 documents in the quad, with the 5 linking field values and compliance labels needed for evaluation.
-
-### 4. Run LMM evaluation
-
-Use the linking ground truth to evaluate an LMM's ability to:
-
-1. **Cross-document linking** -- given 4 documents, identify the 5 shared linking fields
-2. **Compliance detection** -- flag cases where amounts don't reconcile across documents
-3. **Discrepancy classification** -- identify the specific type of non-compliance
-
-```python
-import yaml
-from linking.link_validator import validate_trust_distribution_links
-
-# Load ground truth
-with open("ground_truth/trust_distribution_links.yml") as f:
-    ground_truth = yaml.safe_load(f)
-
-# predictions: dict mapping distribution_statement filename -> {
-#     trust_return, trust_income_schedule, beneficiary_itr,
-#     linking_fields: {trust_abn, beneficiary_tfn, share_of_net_income,
-#                      franking_credit, capital_gain_component},
-#     compliance_status, discrepancy_type
-# }
-predictions = your_lmm_extraction_function(ground_truth)
-
-result = validate_trust_distribution_links(ground_truth, predictions)
-print(f"Link accuracy: {result.link_accuracy:.2%}")
-print(f"Compliance detection rate: {result.compliance.detection_rate:.2%}")
-print(f"False positive rate: {result.compliance.false_positive_rate:.2%}")
 ```
 
 ---
@@ -571,8 +382,8 @@ rectify_camera_scan.py         # Offline rectification: detect quad + 4-point tr
 
 generators/
 ├── __init__.py
-├── common.py                  # Fonts, text helpers, ABN/TFN validation, GST, degradation, fit_text
-├── content_engine.py          # Shared content generator (Faker en_AU, fictional business/trust, blocklist, seeded sampling)
+├── common.py                  # Fonts, text helpers, ABN validation, GST, degradation, fit_text
+├── content_engine.py          # Shared content generator (Faker en_AU, fictional business, blocklist, seeded sampling)
 ├── layout_budgets.py          # Per-field pixel-budget loader (fit-safety)
 ├── overflow_check.py          # Fail-fast overflow backstop — catches text that cannot fit its box (fit-safety)
 ├── schema.py                  # Ground truth schema validation
@@ -582,11 +393,6 @@ generators/
 ├── bank_statement.py          # Bank statement renderer
 ├── receipt.py                 # Receipt renderer (thermal/letterhead)
 ├── invoice.py                 # Tax-compliant invoice renderer
-├── cc_statement.py            # Credit card statement renderer
-├── trust_return.py            # Trust tax return renderer (NAT 0660-inspired)
-├── distribution_statement.py  # Distribution statement renderer
-├── trust_income_schedule.py   # Trust income schedule renderer
-├── beneficiary_itr.py         # Beneficiary ITR renderer (NAT 2541-inspired)
 └── exporters/                 # Benchmark-schema export layer
     ├── config.py              # Load + fail-fast-validate export_config.yml
     ├── normalise.py           # Shared normalisation rules (pure functions)
@@ -596,54 +402,41 @@ generators/
     ├── docile.py              # Ground truth + geometry → DocILE KILE/LIR
     ├── geometry.py            # Draw-time bounding-box recorder (relative coords)
     ├── links.py               # Link ground truth → doc_refs records
-    └── native.py              # Statements + trust types → native schema
+    └── native.py              # Bank statements → native schema
 
 linking/
 ├── __init__.py
-├── transaction_matcher.py     # parse_amount, normalize_date, normalize_tfn
-└── link_validator.py          # validate_links, validate_trust_distribution_links
+├── transaction_matcher.py     # parse_amount, normalize_date, description_score
+└── link_validator.py          # validate_links
 
 scripts/
-├── seed_ground_truth.py              # Generate 220 business document entries (seed=42)
-├── seed_transaction_links.py         # Generate 110 transaction links
-├── seed_trust_distributions.py       # Generate 200 trust distribution entries (seed=42)
-└── seed_trust_distribution_links.py  # Generate 50 quad links with compliance labels
+├── seed_ground_truth.py              # Generate 165 document entries (seed=42)
+└── seed_transaction_links.py         # Generate 110 transaction links
 
 ground_truth/
 ├── bank_statements.yml               # 55 entries
-├── receipts.yml                       # 55 entries
-├── invoices.yml                       # 55 entries
-├── cc_statements.yml                  # 55 entries
-├── trust_returns.yml                  # 50 entries
-├── distribution_statements.yml        # 50 entries
-├── trust_income_schedules.yml         # 50 entries
-├── beneficiary_itrs.yml               # 50 entries
-├── transaction_links.yml              # 110 receipt/invoice-to-bank links
-└── trust_distribution_links.yml       # 50 quad links with compliance ground truth
+├── receipts.yml                      # 55 entries
+├── invoices.yml                      # 55 entries
+└── transaction_links.yml             # 110 receipt/invoice-to-bank links
 
 config/
-├── generation_config.yml      # Pipeline configuration (8 document types)
-├── field_definitions.yml      # 46-column schema for 8 document types
+├── generation_config.yml      # Pipeline configuration (3 document types)
+├── field_definitions.yml      # 20-column schema for 3 document types
 ├── export_config.yml          # Benchmark-export policy (targets, ID form, CORD/DocILE field maps)
-├── data_pools.yml             # Content pools: fictional business/trust name-parts, Faker config, product/service catalogs, real-name blocklist
+├── data_pools.yml             # Content pools: fictional business name-parts, Faker config, product/service catalogs, real-name blocklist
 └── layouts/
     ├── bank_statements.yml          # 8 layouts
     ├── receipts.yml                 # 6 layouts
-    ├── invoices.yml                 # 4 layouts
-    ├── cc_statements.yml            # 8 layouts
-    ├── trust_returns.yml            # 1 layout
-    ├── distribution_statements.yml  # 6 layouts
-    ├── trust_income_schedules.yml   # 1 layout
-    └── beneficiary_itrs.yml         # 1 layout
+    └── invoices.yml                 # 4 layouts
 
 derived/                            # Regenerated by `generate` (geometry) and `derive` (the rest)
-├── ground_truth.csv                # Flat 47-column CSV
+├── ground_truth.csv                # Flat 21-column CSV
 ├── ground_truth.jsonl              # One JSON object per document
 ├── geometry.jsonl                  # Per-document field bounding boxes (written by generate)
 ├── cord.jsonl                      # 110 receipt/invoice CORD gt_parse trees
 ├── docile.jsonl                    # 55 invoice DocILE KILE/LIR records
-├── native.jsonl                    # 310 statement/trust native records
-└── doc_refs.jsonl                  # 160 cross-document link records
+├── native.jsonl                    # 55 bank statement native records
+└── doc_refs.jsonl                  # 110 cross-document link records
 
 docs/
 ├── GroundTruth_Export_Spec.md      # Authoritative export schema: field maps, worked examples (§3-7)
