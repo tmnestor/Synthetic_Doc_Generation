@@ -88,7 +88,7 @@ already restricts the eval-set export to exactly these three types.
 | Ground truth | the matching five, plus `trust_distribution_links.yml`. **`transaction_links.yml` is retained** — see below |
 | Linking | the trust-distribution half only. `linking/`, `generators/exporters/links.py` and the `doc_refs` output are **retained** for receipt↔bank linking |
 | Scripts | `seed_trust_distribution_links.py`, `seed_trust_distributions.py`, `generate_trust_classification_gt.py`, `migrate_distribution_layouts.py`. **`seed_transaction_links.py` is retained** |
-| Config | five `document_types` entries; the trust half of `field_definitions.yml` (46 columns → 23) |
+| Config | five `document_types` entries; the trust and credit-card halves of `field_definitions.yml` (46 columns → 20) |
 
 Coupling was checked. References to cc/trust from surviving files are comments only
 (`bank_statement.py:44`, `common.py:775`) or an error string (`exporters/native.py:57`).
