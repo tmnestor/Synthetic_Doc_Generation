@@ -1,24 +1,55 @@
-"""Flat evaluation-set export for the LMM_POC extraction pipeline.
+"""Self-contained evaluation-set export, owned entirely by this repo.
 
-Renders one clean image per document for the configured document types into a
-single directory, writes the raw ``synthetic.yml`` describing them (duplicate
-``CASE###`` keys, one block per document), then hands the directory to
-LMM_POC's ``relabel_evaluation_set.py``. That script owns schema projection —
-nothing here duplicates it — and renames each image to ``{case}_{suffix}.png``,
-emitting the projected ``synthetic.yml``, ``ground_truth.jsonl`` and
-``relabel_mapping.csv``. The final ``ground_truth.csv`` is a transposition of
-that JSONL, so CSV, JSONL and YAML always carry identical fields.
+`export_eval_set` produces two sibling directories under one output root::
+
+    <out>/synthetic_<YYYYMMDD>/     <out>/degraded_<YYYYMMDD>/
+      CASE001_bank_statement.png      CASE001_bank_statement.png
+      CASE001_invoice.png             CASE001_invoice.png
+      ...  165 images                 ...  165 images
+      ground_truth.csv                ground_truth.csv     <- byte-identical copy
+      ground_truth.jsonl              ground_truth.jsonl   <- byte-identical copy
+
+Three properties are load-bearing, and each is a deliberate decision rather
+than an accident of implementation:
+
+* **Filenames are identical across both directories.** A degraded image
+  carries the same ground truth as its clean counterpart, so one ground
+  truth scores both and a clean-vs-degraded comparison isolates image
+  quality as the only variable.
+* **Filenames are generic** -- ``CASE001_bank_statement.png``, never
+  ``CASE001_cba_standard.png``. The layout variant must not leak, or a model
+  could infer the template before reading a pixel. The suffix is the
+  canonical document-type key from ``config/extraction_schema.yml``, so the
+  schema is the single source of that name.
+* **Each directory is self-contained**, carrying its own copy of both
+  ground-truth files, so a model run points at one path and finds
+  everything. The degraded copies are produced with ``shutil.copy2`` from
+  the files written into the clean directory, which is what makes them
+  byte-identical rather than merely equivalent.
+
+The schema projection this export needs -- which fields a document type is
+scored on, in what order, and which are monetary or boolean -- comes from
+`generators.exporters.eval_projection`, reading
+``config/extraction_schema.yml``. Nothing here shells out to, or imports
+from, another repository.
+
+Record order is the CSV's column order: records are emitted sorted by
+filename, so the first record is a bank statement and its five fields lead
+the header, exactly as the pinned format requires. Nothing is sorted or
+set-ified anywhere order is observable.
 """
 
 import csv
 import json
 import shutil
-import subprocess
+from datetime import date
 from pathlib import Path
+from typing import Any
 
 import yaml
 
-from generators.common import FitError
+from generators.common import FitError, degrade_image
+from generators.exporters.eval_projection import ExtractionSchema, load_extraction_schema
 from generators.loader import load_ground_truth, load_layout_registry
 from generators.overflow_check import build_overflow_error
 
@@ -29,14 +60,24 @@ _ROOT_KEY = "eval_set"
 # Required sub-keys of eval_set, mapped to the expected shape used in diagnostics.
 _REQUIRED_KEYS: dict[str, str] = {
     "document_types": "a non-empty list of keys from the top-level document_types block",
-    "relabel_script": "an absolute path to LMM_POC's scripts/relabel_evaluation_set.py",
-    "relabel_repo_root": "an absolute path to the LMM_POC repo root (its import root)",
-    "csv_name": "the CSV filename to write, e.g. 'ground_truth.csv'",
+    "clean_dir_prefix": "the clean output directory's name before the date stamp, e.g. 'synthetic'",
+    "degraded_dir_prefix": "the degraded output directory's name before the date stamp, e.g. 'degraded'",
+    "csv_name": "the CSV filename to write into both directories, e.g. 'ground_truth.csv'",
+    "jsonl_name": "the JSONL filename to write into both directories, e.g. 'ground_truth.jsonl'",
 }
 
-# Generator metadata that must not reach the exported set: the relabel script
-# reads `layout` and `fields` only, and drops everything else on projection.
-_GENERATOR_ONLY_KEYS = ("degradation_seed",)
+# Date stamp appended to both directory names. Not configurable: the format is
+# part of the pinned export contract, not an operator choice.
+_DATE_FORMAT = "%Y%m%d"
+
+# Generator field name -> canonical extraction-schema field name (only where they
+# differ). The generation contract (config/field_definitions.yml) and the
+# extraction contract (config/extraction_schema.yml) name the same bank-statement
+# column differently; this bridges them. Mirrors ``_FIELD_ALIASES`` in
+# scripts/generate_extraction_gt.py.
+FIELD_ALIASES: dict[str, str] = {
+    "TRANSACTION_DESCRIPTIONS": "LINE_ITEM_DESCRIPTIONS",  # bank statements
+}
 
 
 def _err(what: str, *, path: Path, key_path: str, expected: str, recover: str) -> ValueError:
@@ -108,28 +149,108 @@ def load_eval_set_config(config_path: Path) -> dict:
     return cfg
 
 
-def write_raw_synthetic_yaml(blocks: list[tuple[str, dict]], out_path: Path) -> Path:
-    """Write blocks as YAML, preserving duplicate top-level case keys.
+def format_value(field_name: str, raw: Any, schema: ExtractionSchema) -> str:
+    """Format one generator value to the model-output convention.
 
-    A Python dict cannot hold three blocks under one ``CASE###`` key, so each
-    block is dumped on its own and the text concatenated. This is the shape
-    LMM_POC's ``load_blocks()`` parses with ``yaml.compose``.
+    Multi-value fields are re-joined with `` | ``, monetary fields get a ``$``
+    per item (``NOT_FOUND`` items untouched), booleans are lowercased.
 
     Args:
-        blocks: (case_id, block) pairs; block carries `layout` and `fields`.
-        out_path: Where to write synthetic.yml.
+        field_name: The extraction-schema field name being formatted.
+        raw: The ground-truth value, of whatever type the YAML produced.
+        schema: The loaded extraction schema, for the monetary/boolean sets.
+
+    Returns:
+        The formatted value, or NOT_FOUND when `raw` is blank.
+    """
+    text = str(raw).strip()
+    if not text:
+        return NOT_FOUND
+
+    items = [item.strip() for item in text.split("|")]
+
+    if field_name in schema.monetary_fields:
+        items = [it if it.upper() == NOT_FOUND or it.startswith("$") else f"${it}" for it in items]
+    elif field_name in schema.boolean_fields:
+        items = [it.lower() for it in items]
+
+    return " | ".join(items)
+
+
+def project_fields(
+    case_id: str,
+    raw_fields: dict,
+    doc_type: str,
+    schema: ExtractionSchema,
+    source_path: Path,
+) -> dict[str, str]:
+    """Cut one entry's fields down to its document type's extraction fields.
+
+    Applies :data:`FIELD_ALIASES`, emits the schema's field order, fills absent
+    schema fields with NOT_FOUND, and formats every value.
+
+    The document type is checked for membership here rather than relying on
+    `get_extraction_fields`'s own raise, because this is the only place that
+    knows the offending case id and the ground-truth file it came from --
+    which is where an operator would actually fix it.
+
+    Args:
+        case_id: The ground-truth case id, named in the diagnostic.
+        raw_fields: The entry's `fields` mapping, in generation-contract names.
+        doc_type: The entry's DOCUMENT_TYPE value.
+        schema: The loaded extraction schema.
+        source_path: The ground-truth YAML the entry came from.
+
+    Returns:
+        Field name -> formatted value, in extraction-schema declaration order.
+
+    Raises:
+        ValueError: `doc_type` is not a document type the schema declares.
+    """
+    canonical = schema.resolve_doc_type(doc_type)
+    known_types = schema.get_all_doc_type_fields()
+    if canonical not in known_types:
+        raise _err(
+            f"{case_id} has DOCUMENT_TYPE '{doc_type}', which is not an extraction document type.",
+            path=source_path,
+            key_path=f"{case_id}.fields.DOCUMENT_TYPE",
+            expected=f"one of: {sorted(known_types)} (or a name resolving to one).",
+            recover=(
+                f"correct DOCUMENT_TYPE for {case_id}, or add '{canonical}:' under "
+                f"'document_fields:' in config/extraction_schema.yml"
+            ),
+        )
+
+    aliased = {FIELD_ALIASES.get(name, name): value for name, value in raw_fields.items()}
+
+    projected: dict[str, str] = {}
+    for name in schema.get_extraction_fields(canonical):
+        value = aliased.get(name)
+        projected[name] = (
+            format_value(name, value, schema) if value is not None and str(value).strip() else NOT_FOUND
+        )
+    return projected
+
+
+def write_jsonl(documents: list[dict], jsonl_path: Path) -> Path:
+    """Write the projected ground truth as one JSON object per line.
+
+    Each record is `filename` followed by the document type's extraction
+    fields in schema order -- the key order is the contract, so the fields
+    dict is spread as built and never re-sorted.
+
+    Args:
+        documents: `{"filename": str, "fields": dict}` records, in output order.
+        jsonl_path: Where to write the JSONL.
 
     Returns:
         The written path.
     """
-    chunks: list[str] = []
-    for case_id, block in blocks:
-        payload = {k: v for k, v in block.items() if k not in _GENERATOR_ONLY_KEYS}
-        body = yaml.safe_dump({case_id: payload}, sort_keys=False, allow_unicode=True)
-        chunks.append(body)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text("".join(chunks))
-    return out_path
+    lines = [
+        json.dumps({"filename": doc["filename"], **doc["fields"]}, ensure_ascii=False) for doc in documents
+    ]
+    jsonl_path.write_text("\n".join(lines) + "\n")
+    return jsonl_path
 
 
 def csv_from_jsonl(jsonl_path: Path, csv_path: Path) -> Path:
@@ -140,7 +261,7 @@ def csv_from_jsonl(jsonl_path: Path, csv_path: Path) -> Path:
     A field absent from a record is filled with NOT_FOUND, never left blank.
 
     Args:
-        jsonl_path: The relabel script's ground_truth.jsonl.
+        jsonl_path: The projected ground_truth.jsonl.
         csv_path: Where to write the CSV.
 
     Returns:
@@ -182,15 +303,50 @@ def _prepare_dir(out_dir: Path, *, force: bool) -> None:
 
 
 def _render_documents(
-    config_path: Path, eval_cfg: dict, out_dir: Path, renderers: dict
-) -> list[tuple[str, dict]]:
-    """Render one clean image per document into `out_dir`, flat.
+    config_path: Path,
+    eval_cfg: dict,
+    schema: ExtractionSchema,
+    clean_dir: Path,
+    degraded_dir: Path,
+    renderers: dict,
+) -> list[dict]:
+    """Render every document once, saving a clean and a degraded copy of each.
+
+    Both copies are written under the same generic ``{case}_{doc_type}.png``
+    name, in their respective directories, from a single render -- which is
+    what makes the two filename sets identical by construction rather than by
+    a later reconciliation step.
+
+    Args:
+        config_path: Path to generation_config.yml, for the degradation params.
+        eval_cfg: The validated `eval_set` block.
+        schema: The loaded extraction schema.
+        clean_dir: Directory to save clean images into.
+        degraded_dir: Directory to save degraded images into.
+        renderers: Document type -> renderer callable.
 
     Returns:
-        (case_id, block) pairs in document-type order, for synthetic.yml.
+        `{"filename": str, "fields": dict}` records sorted by filename.
+
+    Raises:
+        ValueError: any missing renderer, layout, seed, document type, or
+            duplicate output filename.
     """
     data = yaml.safe_load(config_path.read_text())
-    blocks: list[tuple[str, dict]] = []
+    degradation_params = data.get("degradation")
+    if not isinstance(degradation_params, dict) or not degradation_params:
+        raise _err(
+            "the top-level 'degradation' block is missing or empty, so the degraded "
+            "half of the evaluation set cannot be produced.",
+            path=config_path,
+            key_path="degradation",
+            expected="a mapping of parameter name to [min, max], e.g. "
+            "'degradation:\\n  blur_radius: [0.3, 0.8]'.",
+            recover="restore the 'degradation:' block",
+        )
+
+    documents: list[dict] = []
+    seen: dict[str, str] = {}
 
     for dtype in eval_cfg["document_types"]:
         doc_cfg = data["document_types"][dtype]
@@ -204,7 +360,8 @@ def _render_documents(
                 recover=f"remove '{dtype}' from {_ROOT_KEY}.document_types",
             )
 
-        gt_data = load_ground_truth(Path(doc_cfg["ground_truth"]))
+        gt_path = Path(doc_cfg["ground_truth"])
+        gt_data = load_ground_truth(gt_path)
         layouts = load_layout_registry(Path(doc_cfg["layouts"]))
 
         for case_id, entry in gt_data.items():
@@ -218,6 +375,34 @@ def _render_documents(
                     expected="every ground-truth entry's layout to exist in its layout registry.",
                     recover=f"add '{layout_ref}' to the registry or fix {case_id}'s layout",
                 )
+
+            fields = entry.get("fields", {}) or {}
+            doc_type = fields.get("DOCUMENT_TYPE", "")
+            projected = project_fields(str(case_id), fields, str(doc_type), schema, gt_path)
+            filename = f"{case_id}_{schema.resolve_doc_type(str(doc_type))}.png"
+
+            if filename in seen:
+                raise _err(
+                    f"two documents would both be exported as '{filename}' "
+                    f"({seen[filename]} and {case_id} / {layout_ref}).",
+                    path=gt_path,
+                    key_path=f"{case_id}.fields.DOCUMENT_TYPE",
+                    expected="exactly one document per case per extraction document type.",
+                    recover=f"remove or re-type the duplicate entry for {case_id}",
+                )
+            seen[filename] = f"{case_id} / {layout_ref}"
+
+            seed = entry.get("degradation_seed")
+            if not isinstance(seed, int):
+                raise _err(
+                    f"{case_id} has no integer 'degradation_seed', so its degraded image "
+                    f"would not be reproducible.",
+                    path=gt_path,
+                    key_path=f"{case_id}.degradation_seed",
+                    expected="an integer, e.g. 'degradation_seed: 9821'.",
+                    recover=f"add a 'degradation_seed:' to {case_id}",
+                )
+
             entry["case_id"] = str(case_id)
             try:
                 img = renderer(entry, layout)
@@ -225,106 +410,74 @@ def _render_documents(
                 raise build_overflow_error(
                     [f"{case_id} / {layout_ref}: {str(exc).splitlines()[0]}"]
                 ) from None
-            img.save(out_dir / f"{case_id}_{layout_ref}.png")
-            blocks.append((str(case_id), entry))
 
-    return blocks
+            img.save(clean_dir / filename)
+            degrade_image(img, seed=seed, params=degradation_params).save(degraded_dir / filename)
 
+            documents.append({"filename": filename, "fields": projected})
 
-def _run_relabel(eval_cfg: dict, out_dir: Path, config_path: Path) -> None:
-    """Run LMM_POC's relabel script over `out_dir`, surfacing its output."""
-    script = Path(eval_cfg["relabel_script"])
-    repo_root = Path(eval_cfg["relabel_repo_root"])
-
-    for label, path in (("relabel_script", script), ("relabel_repo_root", repo_root)):
-        if not path.exists():
-            raise _err(
-                f"{label} path {path} does not exist.",
-                path=config_path,
-                key_path=f"{_ROOT_KEY}.{label}",
-                expected="an existing path to LMM_POC's relabel script and repo root.",
-                recover=f"correct '{label}' under {_ROOT_KEY}",
-            )
-
-    result = subprocess.run(  # noqa: S603
-        ["python", str(script), "--apply", "--dir", str(out_dir)],
-        cwd=str(repo_root),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if result.returncode != 0:
-        raise _err(
-            f"relabel script exited {result.returncode}.",
-            path=script,
-            key_path=f"{_ROOT_KEY}.relabel_script",
-            expected="a clean --apply run over the exported directory. Its output was:\n"
-            f"{result.stdout.strip()}\n{result.stderr.strip()}",
-            recover="fix the reported problem and re-run the export",
-        )
+    documents.sort(key=lambda doc: doc["filename"])
+    return documents
 
 
 def export_eval_set(
     config_path: Path,
     out_dir: Path,
     *,
-    relabel: bool = True,
     force: bool = False,
     renderers: dict | None = None,
+    today: date | None = None,
 ) -> dict:
-    """Export a flat evaluation set, optionally relabelled and projected.
+    """Export a clean and a degraded evaluation set as sibling directories.
 
     Args:
         config_path: Path to generation_config.yml.
-        out_dir: Directory to write the set into.
-        relabel: Run LMM_POC's relabel script and write the CSV afterwards.
-            With False, the raw set (images + synthetic.yml) is written and
-            nothing is projected — no JSONL and no CSV.
-        force: Replace `out_dir` if it exists and is non-empty.
+        out_dir: Parent directory the two dated directories are created under.
+        force: Replace either target directory if it exists and is non-empty.
         renderers: Document type -> renderer callable; defaults to the
             pipeline's registry. Injectable so tests can render a subset.
+        today: Date to stamp the directory names with; defaults to today.
 
     Returns:
-        Summary dict with `images`, `out_dir`, `relabelled`, and — when
-        relabelled — `csv`.
+        Summary dict with `images`, `clean_dir`, `degraded_dir`, `csv` and
+        `jsonl` -- the latter two naming the copies in the clean directory,
+        which the degraded directory's are byte-identical copies of.
 
     Raises:
-        ValueError: any configuration, directory, or relabel failure.
+        ValueError: any configuration, directory, layout or projection failure.
+        FileNotFoundError: the generation config or a ground-truth file is missing.
     """
     eval_cfg = load_eval_set_config(config_path)
+    schema = load_extraction_schema()
 
     if renderers is None:
         from generators.pipeline import _RENDERERS
 
         renderers = _RENDERERS
 
-    if relabel:
-        # Validate the external dependency before rendering 165 images.
-        _run_relabel_preflight(eval_cfg, config_path)
+    stamp = (today or date.today()).strftime(_DATE_FORMAT)
+    clean_dir = out_dir / f"{eval_cfg['clean_dir_prefix']}_{stamp}"
+    degraded_dir = out_dir / f"{eval_cfg['degraded_dir_prefix']}_{stamp}"
 
-    _prepare_dir(out_dir, force=force)
-    blocks = _render_documents(config_path, eval_cfg, out_dir, renderers)
-    write_raw_synthetic_yaml(blocks, out_dir / "synthetic.yml")
+    # Both directories are cleared before anything is rendered, so a refusal
+    # never leaves half an export behind.
+    _prepare_dir(clean_dir, force=force)
+    _prepare_dir(degraded_dir, force=force)
 
-    summary = {"images": len(blocks), "out_dir": str(out_dir), "relabelled": relabel}
-    if not relabel:
-        return summary
+    documents = _render_documents(config_path, eval_cfg, schema, clean_dir, degraded_dir, renderers)
 
-    _run_relabel(eval_cfg, out_dir, config_path)
-    csv_path = csv_from_jsonl(out_dir / "ground_truth.jsonl", out_dir / eval_cfg["csv_name"])
-    summary["csv"] = str(csv_path)
-    return summary
+    jsonl_path = write_jsonl(documents, clean_dir / eval_cfg["jsonl_name"])
+    csv_path = csv_from_jsonl(jsonl_path, clean_dir / eval_cfg["csv_name"])
 
+    # Copied, not re-derived: a copy is byte-identical by construction, whereas
+    # two independent writes could drift without anything noticing.
+    for source in (jsonl_path, csv_path):
+        shutil.copy2(source, degraded_dir / source.name)
 
-def _run_relabel_preflight(eval_cfg: dict, config_path: Path) -> None:
-    """Fail fast on a missing relabel script or repo root before any rendering."""
-    for label in ("relabel_script", "relabel_repo_root"):
-        path = Path(eval_cfg[label])
-        if not path.exists():
-            raise _err(
-                f"{label} path {path} does not exist.",
-                path=config_path,
-                key_path=f"{_ROOT_KEY}.{label}",
-                expected="an existing path to LMM_POC's relabel script and repo root.",
-                recover=f"correct '{label}' under {_ROOT_KEY}",
-            )
+    return {
+        "images": len(documents),
+        "clean_dir": str(clean_dir),
+        "degraded_dir": str(degraded_dir),
+        "csv": str(csv_path),
+        "jsonl": str(jsonl_path),
+    }

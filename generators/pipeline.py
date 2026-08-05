@@ -307,29 +307,30 @@ def generate(
         rprint(f"[green]Geometry written: {geometry_path} ({len(geometry_records)} documents)[/green]")
 
 
+# Registered under both spellings: `eval-set` matches Typer's own convention and
+# the other commands, `eval_set` matches how the plan and the module are named.
 @app.command("eval-set")
+@app.command("eval_set", hidden=True)
 def eval_set(
-    out: Path = typer.Option(..., "--out", help="Directory to write the evaluation set into"),
+    out: Path = typer.Option(..., "--out", help="Parent directory to write both dated sets into"),
     config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
-    relabel: bool = typer.Option(
-        True, "--relabel/--no-relabel", help="Run LMM_POC's relabel script after export"
-    ),
     force: bool = typer.Option(False, "--force", help="Replace a non-empty output directory"),
 ) -> None:
-    """Export a flat evaluation set for the LMM_POC extraction pipeline."""
+    """Export the clean and degraded evaluation sets as sibling directories."""
     from generators.eval_set import export_eval_set
 
     try:
-        summary = export_eval_set(config, out, relabel=relabel, force=force)
+        summary = export_eval_set(config, out, force=force)
     except (ValueError, FileNotFoundError) as exc:
         rprint(f"[red]{exc}[/red]")
         raise typer.Exit(1) from None
 
-    rprint(f"[green]Exported {summary['images']} images to {summary['out_dir']}.[/green]")
-    if summary["relabelled"]:
-        rprint(f"[green]Relabelled and projected. CSV: {summary['csv']}[/green]")
-    else:
-        rprint("[yellow]Raw set only (--no-relabel): no ground_truth.jsonl, no CSV.[/yellow]")
+    rprint(f"[green]Clean:    {summary['images']} images in {summary['clean_dir']}[/green]")
+    rprint(f"[green]Degraded: {summary['images']} images in {summary['degraded_dir']}[/green]")
+    rprint(
+        f"[green]Ground truth written into both: {Path(summary['csv']).name}, "
+        f"{Path(summary['jsonl']).name}[/green]"
+    )
 
 
 if __name__ == "__main__":
