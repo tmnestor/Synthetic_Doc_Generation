@@ -27,7 +27,7 @@
 - Commit messages use gitmoji. **No Claude attribution, ever.**
 - Import the shared test helper as `from conftest import assert_diagnostic_error` — bare, not `from tests.conftest import ...`. This is the repo's existing convention and works from test subdirectories (see `tests/exporters/test_config.py:8`).
 - A `.git/hooks/pre-commit` hook runs `ruff check --fix` on staged Python files. Never bypass it.
-- Never write the term "ATO" anywhere. Use "PROD".
+- Never write the Australian tax authority's three-letter acronym anywhere. Use "PROD".
 - Branch: `feat/declarative-layouts`.
 
 **Known pre-existing mypy failures** (not introduced by this work, do not fix here): 8 `call-overload` errors in `degrade_camera_scan.py`, 2 `return-value` errors in `tests/test_fitted_helpers.py` and `tests/test_fit_text.py`. mypy is green for the purposes of this plan if the count stays at 10 and none are in `generators/layout_dsl/`.

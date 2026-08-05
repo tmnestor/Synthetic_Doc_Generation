@@ -18,7 +18,7 @@
 - Every fail-fast diagnostic must contain all four elements as literal labelled lines: `What:`, `Where:`, `Expected:`, `Recover:` (asserted by `tests/conftest.py::assert_diagnostic_error`).
 - Line length max 108. Type hints are Python 3.12 style (`X | Y`). Google-style docstrings. `pathlib.Path` for paths.
 - In `except` blocks always `raise ... from err` or `from None` (B904).
-- Never write the term "ATO" anywhere; use "PROD".
+- Never write the Australian tax authority's three-letter acronym anywhere; use "PROD".
 - No Claude attribution in commit messages.
 - Pre-commit gate, all four must pass before every commit:
   1. `conda run -n synthetic pytest tests/`

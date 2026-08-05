@@ -20,7 +20,7 @@ Copied verbatim from the spec and project CLAUDE.md — every task's requirement
 - **B904:** in `except` blocks, `raise ... from err` or `from None` — never bare re-raise.
 - **Never silently truncate/ellipsize** rendered text. Only outcomes: fits losslessly, or fail loud.
 - **Determinism:** measure only against the bundled DejaVu faces; identical Mac↔PROD.
-- **Do NOT write the term "ATO"** anywhere (use "PROD" if a substitute is ever needed). Existing `common.py` docstrings contain it; do not copy those strings into new code — refer to it as the "ABN checksum algorithm".
+- **Do NOT write the Australian tax authority's three-letter acronym** anywhere (use "PROD" if a substitute is ever needed). Some existing docstrings contain it; do not copy those strings into new code — refer to it as the "ABN checksum algorithm".
 - **Tests:** `conda run -n synthetic pytest tests/`; `tests/` is gitignored (local-only); min 80% coverage. Mirror source layout under `tests/`.
 - **Lint/type before every commit:** `conda run -n synthetic ruff check --fix --ignore ARG001,ARG002,F841 *.py` → `ruff format .` → `mypy . --ignore-missing-imports`. Never bypass pre-commit hooks. No Claude attribution in commits.
 

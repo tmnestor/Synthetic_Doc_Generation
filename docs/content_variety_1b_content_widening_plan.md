@@ -14,7 +14,7 @@
 - **YAML single source of truth:** all content lives in `config/data_pools.yml`; Python holds no content constants; every key required; a missing key fails fast (no silent default).
 - **Fail-fast four-element diagnostics** (what / where — absolute path + dotted YAML key / valid example / how to recover); fail-fast tests assert all four via `tests/conftest.py::assert_diagnostic_error`.
 - **B904** in except (`raise ... from err`/`from None`).
-- **NEVER write the term "ATO"** anywhere (use "PROD"); existing code may contain it — do not copy into new lines. (The existing `"Salary ATO PAYROLL {ref}"` bank-description template is rewritten to `"Salary PAYROLL {ref}"` for this reason — see Task 2.)
+- **NEVER write the Australian tax authority's three-letter acronym** anywhere (use "PROD"); existing code may contain it — do not copy into new lines. (The bank-description template that once embedded it was rewritten to `"Salary PAYROLL {ref}"` for this reason — see Task 2.)
 - **Determinism:** seeded `random.Random` + `Faker.seed(n)` on the per-case scheme; `faker==40.8.0`, `pillow==12.2.0` pins (both already in `environment.yml`, no dependency changes needed); reuse `generate_abn()`/`generate_tfn()` from `generators/common.py` (never real ABNs/TFNs).
 - **No renderer changes** — all 8 renderers are already fit-safe (Phase 1A); 1B is content only.
 - Tests: `conda run -n synthetic pytest tests/`; `tests/` gitignored (local-only); ≥80% coverage. Gate before every commit: `ruff check --fix --ignore ARG001,ARG002,F841` → `ruff format` → `mypy . --ignore-missing-imports` → `pytest tests/`. Never bypass the pre-commit hook. No Claude/AI attribution in commits.
@@ -289,7 +289,7 @@ def test_product_and_service_catalogs_have_positive_price_ranges():
 def test_bank_descriptions_grammar_never_embeds_the_forbidden_acronym():
     pools = load_pools()
     for template in pools["bank_descriptions"].values():
-        assert "ATO" not in template
+        assert FORBIDDEN_ACRONYM not in template
 
 
 def test_retailers_and_professional_services_are_still_the_real_pools():
