@@ -154,20 +154,16 @@ _invoice_line_items: &invoice_line_items
 # buyer_gap` states `height:` precisely because its 28px *differs*.
 _invoice_table_gap: &invoice_table_gap {type: spacer}
 
-# tax_invoice_mixed only: a taxable/GST-free split *display*. Both tables render
-# the identical LINE_ITEM_* list today -- the legacy renderer never split the
-# items between them, it just drew the same list twice under two headings -- so
-# the second suppresses geometry capture: one ground-truth value has exactly one
-# bounding box, and a second record for the same field would collide with the
-# first. Phase B splits the two lists for real, at which point this table gets
-# its own fields and capture goes back on.
-_invoice_taxable_label: &invoice_taxable_label
-  {type: text, content: "GST-Applicable Items", color: gray, line_advance: 24}
-_invoice_tax_free_label: &invoice_tax_free_label
-  {type: text, content: "GST-Free Items", color: gray, line_advance: 24}
-_invoice_line_items_uncaptured: &invoice_line_items_uncaptured
-  <<: *invoice_line_items
-  capture: false
+# `tax_invoice_mixed` used to draw two labelled tables, "GST-Applicable Items"
+# and "GST-Free Items", over the *same* LINE_ITEM_* list -- the legacy renderer
+# never split the items, it drew the identical list twice under two headings, so
+# every item appeared in both. The second table suppressed geometry capture to
+# stop its duplicate boxes colliding with the first's.
+#
+# Removed: the corpus carries no per-item GST flag, and `IS_GST_INCLUDED` is
+# `true` on all 55 invoices, so a GST-free table contradicted the scored ground
+# truth. All items are GST-inclusive; the layout now draws one table like the
+# others.
 
 # --- totals ------------------------------------------------------------------
 # A fixed 400px column at the page's right edge (legacy: right_edge - 400),
@@ -182,7 +178,7 @@ _invoice_totals_separate: &invoice_totals_separate
       - {type: pair, label: "GST (10%)", value: "{GST_AMOUNT}", value_align: right,
          separator: ":", currency: symbol, field: GST_AMOUNT, line_advance: 44}
       - {type: pair, label: "Total", value: "{TOTAL_AMOUNT}", value_align: right,
-         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true,
+         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, min_gap: 24,
          line_advance: 64}
 
 # GST-inclusive presentation: no subtotal, and GST is a component of the total
@@ -193,7 +189,7 @@ _invoice_totals_inclusive: &invoice_totals_inclusive
   children:
     - []
     - - {type: pair, label: "Total", value: "{TOTAL_AMOUNT}", value_align: right,
-         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true,
+         separator: ":", currency: symbol, field: TOTAL_AMOUNT, role: header, bold: true, min_gap: 24,
          line_advance: 64}
       # This label is far longer than the separate branch's "GST (10%)" and
       # overruns the fixed 400px totals column, so it declares a 24px min_gap:
@@ -306,11 +302,7 @@ layouts:
       - *invoice_buyer_gap
       - *invoice_date
       - *invoice_rule
-      - *invoice_taxable_label
       - *invoice_line_items
-      - *invoice_table_gap
-      - *invoice_tax_free_label
-      - *invoice_line_items_uncaptured
       - *invoice_table_gap
       - *invoice_rule
       - *invoice_totals_separate
