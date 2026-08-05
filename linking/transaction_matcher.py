@@ -99,25 +99,6 @@ def normalize_date(value: str) -> date | None:
     return None
 
 
-def normalize_tfn(value: str) -> str | None:
-    """Normalize a TFN string to 9 digits without spaces.
-
-    Handles: "123 456 789", "123456789", "NOT_FOUND", "".
-
-    Args:
-        value: TFN string.
-
-    Returns:
-        9-digit string, or None if unparseable.
-    """
-    if not value or value == "NOT_FOUND":
-        return None
-    cleaned = value.replace(" ", "").strip()
-    if len(cleaned) == 9 and cleaned.isdigit():
-        return cleaned
-    return None
-
-
 def _normalize_text(text: str) -> str:
     """Normalize text for comparison: lowercase, strip, compress whitespace."""
     return re.sub(r"\s+", " ", text.lower().strip())
