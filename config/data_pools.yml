@@ -129,8 +129,6 @@ service_catalog:
   - {description: "Cybersecurity assessment", unit: ea, price_low: 1500, price_high: 4500}
   - {description: "Employee mediation services", unit: hrs, price_low: 180, price_high: 350}
 
-payment_methods: [EFTPOS, Visa, Mastercard, Cash, AMEX, PayPal, "Google Pay", "Apple Pay", "Bank Transfer", BPAY]
-
 # EFTPOS terminal-slip constants for the receipt payment block. Every key is
 # required; generators/payment_block.py fails fast on any omission.
 payment_terminal:
@@ -290,5 +288,3 @@ professional_services:
   - {name: "Brisbane IT Solutions", address: "42 Creek St, Brisbane QLD 4000", category: it_services}
   - {name: "Adelaide Business Consulting", address: "Level 3, 77 King William St, Adelaide SA 5000", category: consulting}
   - {name: "Perth Marketing Group", address: "Level 8, 140 St Georges Tce, Perth WA 6000", category: marketing}
-
-income_years: ["2022-23", "2023-24", "2024-25"]
