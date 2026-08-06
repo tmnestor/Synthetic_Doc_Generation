@@ -102,7 +102,19 @@ rapidfuzz               # Fuzzy string matching
 docile-benchmark        # Published DocILE KILE/LIR scorer (self-score check)
 ```
 
-All dependencies are pinned in `environment.yml` (conda env `synthetic`).
+All dependencies are declared in `environment.yml` (conda env `synthetic`).
+
+**Building your own environment** — another team, a new machine, CI:
+
+```bash
+conda env create -n synthetic -f environment.yml
+conda activate synthetic
+bash scripts/post_install.sh          # REQUIRED — see below
+```
+
+The post-install step is not optional. `augraphy` declares the full GUI `opencv-python` as a hard dependency, so plain `conda env create` installs it and it **displaces the pinned `opencv-python-headless`** (both provide `cv2`). A conda YAML cannot express a per-package `--no-deps`, so the fix lives in `scripts/post_install.sh`, which is idempotent and verifies the result. `environment.yml` also carries no `name:` or `channels:` key by design — a `name:` conflicts with `--prefix` installs, and a `channels:` key would override the host's mirror configuration and break locked-down environments.
+
+Three packages — `apted`, `rapidfuzz`, `docile-benchmark` — back the local CORD/DocILE scoring tests only. Nothing in `generate`, `derive` or `eval-set` imports them, so they can be omitted when provisioning a generation-only host.
 
 ---
 
