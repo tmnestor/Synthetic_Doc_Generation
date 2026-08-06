@@ -158,7 +158,8 @@ days to react; finding it on day four does not.
 |---|---|---|
 | NumPy downgrade changes rendered output | Low | Renderers draw through PIL, not NumPy. Verified on day 1 by re-running pixel snapshots — this is proven, not assumed. |
 | Tier severity is miscalibrated | **Medium** | No real phone photos of Australian receipts exist to calibrate against, so the heavy tier is informed judgement. Mitigated by regenerating the visual comparison on day 5 and tuning; all parameters are YAML, so retuning is cheap and repeatable. |
-| Augraphy dependencies unavailable in PROD | Medium | Does not block this week's local work. The full 16-package list is documented for the Artifactory request, which should be raised in parallel. |
+| Augraphy dependencies unavailable in PROD | ~~Medium~~ **Closed** | All 17 packages (Augraphy plus its 16 transitive requirements) confirmed available in the internal mirror. One, `tifffile`, is at a different patch version — harmless, since only `augraphy` itself is pinned and `tifffile` is reached solely via `scikit-image`'s TIFF I/O, which this pipeline never uses. |
+| Pipeline reaches out to the network from an air-gapped PROD | **Low** | `requests`/`urllib3`/`idna`/`certifi` are import-time only: `import augraphy` loads every augmentation module, two of which use HTTP, but neither is in the registered allow-list. No network call is made. Registering a downloading augmentation later would change this. |
 | Augraphy conflicts with the pinned headless OpenCV | Low | Augraphy declares the full GUI OpenCV build. Installing `--no-deps` keeps the headless build; verified locally, `cv2` continued resolving to the headless package throughout. |
 
 ---
