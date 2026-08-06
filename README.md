@@ -1,6 +1,6 @@
 # Synthetic Business Document Generator
 
-YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 330 benchmark images (165 clean + 165 degraded) across 3 document types — bank statements, receipts, invoices — with transaction-linking ground truth.
+YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 165 clean images across 3 document types — bank statements, receipts, invoices — plus 165 degraded receipts (55 receipts × 3 severity tiers), with transaction-linking ground truth.
 
 ---
 
@@ -10,14 +10,11 @@ YAML-driven pipeline for generating synthetic Australian business documents with
 # Validate ground truth against schema and layout registries
 python -m generators.pipeline validate
 
-# Generate all 330 images (165 clean + 165 degraded)
+# Generate the 165 clean images (degradation is part of `eval-set`, not this)
 python -m generators.pipeline generate
 
 # Generate only one document type
 python -m generators.pipeline generate --type receipts
-
-# Generate clean images only (skip degradation)
-python -m generators.pipeline generate --clean-only
 
 # Regenerate derived CSV/JSONL from YAML ground truth
 python -m generators.pipeline derive
@@ -93,12 +90,13 @@ given, since that is what defines a fair scoring set.
 
 ```
 Pillow                  # Image rendering
-numpy                   # Noise generation for degradation
+numpy                   # Array maths for degradation (<=2.4, capped by numba)
 PyYAML                  # YAML parsing
 typer                   # CLI framework
 rich                    # Coloured console output
 Faker                   # Fictional en_AU people and addresses
 opencv-python-headless  # Camera-scan degrade/rectify (cv2 perspective warp)
+augraphy                # Receipt ink/paper damage (install --no-deps)
 apted                   # MIT tree-edit-distance backend for CORD scoring
 rapidfuzz               # Fuzzy string matching
 docile-benchmark        # Published DocILE KILE/LIR scorer (self-score check)
@@ -151,7 +149,6 @@ python -m generators.pipeline <command> [OPTIONS]
 |------|---------|------------|-------------|
 | `--config` | `config/generation_config.yml` | all | Path to generation config |
 | `--type` | all types | generate | Generate only this document type |
-| `--clean-only` | `false` | generate | Skip degraded variants |
 
 ---
 
@@ -173,7 +170,6 @@ graph TD
     GC --> G
 
     G --> CLEAN["output/clean/<br/>165 PNGs"]
-    G --> DEG["output/degraded/<br/>165 PNGs"]
 
     GT --> D["derive<br/>YAML → CSV/JSONL"]
     FD --> D
@@ -321,48 +317,50 @@ print(f"F1: {result.f1:.2f}, by difficulty: {result.by_difficulty}")
 
 ## Degradation Pipeline
 
-Simulates phone photos of printed documents with a deterministic 7-stage pipeline:
+**Receipts only, at three severity tiers.** Bank statements and invoices reach the business as clean PDFs or printouts, so degrading them would model a workflow nobody has. Receipts are the documents users actually photograph — creased, shadowed, and shot at an angle on a desk.
 
-1. **Paper tint** -- off-white/yellowed overlay
-2. **Contrast reduction**
-3. **Brightness variation**
-4. **Gaussian blur**
-5. **Rotation** (slight skew)
-6. **Salt-and-pepper noise**
-7. **JPEG compression artifacts**
+Degradation is produced by the `eval-set` export, not by `generate`. `generate` writes clean images only.
 
-All parameters are configurable in `generation_config.yml` under `degradation:`. Each entry's `degradation_seed` ensures reproducible results.
+Each clean receipt is degraded once per tier, so the degraded evaluation set is 55 receipts × 3 tiers = 165 images:
 
-### Camera-scan degradation (receipts)
+| Tier | Suffix | Models |
+|---|---|---|
+| light | `_v1` | A good phone photo of a fresh receipt: gentle tilt, even light |
+| moderate | `_v2` | A used receipt in poor light: stronger tilt, cast shadow, more compression |
+| heavy | `_v3` | Creased and photographed badly, but still legible to a careful human |
 
-The 7-stage pipeline above models a flatbed-style scan: a frame-filling page with only a slight in-plane skew. Production receipts, however, are **phone photos of a receipt lying on a flat surface** — the receipt occupies a *sub-region* of the frame and is **perspective-distorted (trapezoid) and rotated**, surrounded by background. `degrade_camera_scan.py` regenerates `output/degraded/receipts/` to model this real case.
+### How a variant is built
 
-It assumes a **cooperative capture** (the user is trying to take a good photo), so the distortion is realistic, not worst-case:
+Augraphy damages the flat page **before** the warp; camera effects apply **after**, to the whole frame:
 
-- receipt fills ~75–88% of the frame (modest background margin)
-- mild rotation (±8°) and slight perspective foreshorten (2–8%)
-- soft drop shadow, lighting gradient, mild blur, sensor noise, JPEG compression
-
-The perspective warp uses **OpenCV** (`cv2.getPerspectiveTransform` / `cv2.warpPerspective`) — the same homography a rectification preprocessor inverts, so degrade and rectify are exact numerical inverses (clean round-trip validation). Compositing and photometrics stay in PIL/NumPy, all in RGB order (no BGR swap). Output keeps the existing `CASE*_receipt_*_degraded.png` names and is deterministic (seed = CASE number).
-
-```bash
-# Regenerate all 55 degraded receipts (overwrites output/degraded/receipts/)
-python degrade_camera_scan.py --batch output
-
-# Single receipt (clean -> degraded), explicit seed
-python degrade_camera_scan.py \
-    output/clean/receipts/CASE001_receipt_fuel.png /tmp/CASE001.png 1
+```
+clean receipt (flat)
+  ↓  Augraphy ink phase     — ink bleed, faded toner      } damage to the
+  ↓  Augraphy paper phase   — creases, lighting, shadow   } paper itself
+  ↓  camera warp            — desk, perspective, shadow
+  ↓  camera photometrics    — lighting, blur, noise, JPEG } the act of
+degraded variant                                          } photographing
 ```
 
-**Dependency:** `opencv-python-headless` (cv2), in addition to the base Pillow/numpy — used by the camera-scan scripts. It is included in `environment.yml` (resolved from your configured PyPI index, e.g. an internal mirror on locked-down hosts).
+The ordering is load-bearing: a crease belongs to the paper and must be warped *with* the page. Painting one flat across an already-tilted photo would read as a defect in the image rather than in the document.
 
-Tunable knobs in `degrade()`: `pad_*` (frame coverage), `deg` (rotation range), `f` (perspective strength), and the blur/noise/JPEG ranges.
+The perspective warp uses **OpenCV** (`cv2.getPerspectiveTransform` / `cv2.warpPerspective`) — the same homography a rectification preprocessor inverts. Compositing and photometrics stay in PIL/NumPy, all in RGB order (no BGR swap). Augraphy's own geometric augmentations are deliberately unused: the warp owns geometry, and a second perspective transform would defeat the rectifier's quad detection.
+
+### Configuration
+
+Every parameter lives in `config/generation_config.yml` under `receipt_degradation:`. The tier list *is* the variant count, so the config cannot contradict itself about how many variants a receipt gets. Every key is required — a missing one fails at startup with a diagnostic naming the tier index.
+
+Retuning severity is a YAML edit, never a code change. Only the augmentations listed in `AUGMENTATIONS` (`generators/degradation/augment.py`) may be named; a typo fails against that list rather than at render time.
+
+Determinism comes from each entry's `degradation_seed` combined with the tier's index, so a tier's output is stable and independent of how the tiers are ordered.
+
+**Dependencies:** `opencv-python-headless` (cv2) and `augraphy`. Augraphy declares the full GUI `opencv-python`, so it must be installed `--no-deps` to preserve the headless build; its `numba` dependency also caps NumPy at ≤2.4. Both constraints are recorded in `environment.yml`.
 
 ### Rectification — undoing the camera scan (offline preprocessing)
 
 `rectify_camera_scan.py` is the **inverse** of the camera-scan degradation: it detects the receipt quadrilateral on the flat background and applies a 4-point perspective transform to recover an upright, cropped, frontal receipt. It runs **offline** as a preprocessing pass, so the downstream VLM consumes already-rectified images and the inference environment needs no OpenCV.
 
-Pipeline: grayscale → blur → Canny edges → dilate → largest external contour → 4-point polygon → `cv2.getPerspectiveTransform` / `cv2.warpPerspective`. It uses the **same** homography library `degrade_camera_scan.py` warps with, so degrade and rectify are exact numerical inverses (clean round-trip). **Fail-open:** if no convincing quad is found (no 4-gon, too small, or too large), the image passes through unchanged — a missed rectification is cheap; a wrong crop that drops a row is a regression.
+Pipeline: grayscale → blur → Canny edges → dilate → largest external contour → 4-point polygon → `cv2.getPerspectiveTransform` / `cv2.warpPerspective`. It uses the **same** homography library `generators/degradation/camera.py` warps with. Note the two are approximate rather than exact inverses: the rectifier re-detects the quad from pixels instead of reusing the stored homography, and the blur, noise and JPEG steps are not invertible. This is moot under value-F1 scoring and matters only for spatial round-trip checks. **Fail-open:** if no convincing quad is found (no 4-gon, too small, or too large), the image passes through unchanged — a missed rectification is cheap; a wrong crop that drops a row is a regression.
 
 ```bash
 # Rectify all degraded receipts: output/degraded/receipts/ -> output/rectified/receipts/
@@ -407,12 +405,12 @@ python -m generators.pipeline derive
 ## File Structure
 
 ```
-degrade_camera_scan.py         # Camera-scan degradation for receipts (cv2 perspective warp)
 rectify_camera_scan.py         # Offline rectification: detect quad + 4-point transform (inverse)
 
 generators/
 ├── __init__.py
-├── common.py                  # Fonts, text helpers, ABN validation, GST, degradation, fit_text
+├── common.py                  # Fonts, text helpers, ABN validation, GST, fit_text
+├── degradation/               # Receipt degradation — tier config, Augraphy registry, camera warp
 ├── content_engine.py          # Shared content generator (Faker en_AU, fictional business, blocklist, seeded sampling)
 ├── layout_budgets.py          # Per-field pixel-budget loader (fit-safety)
 ├── overflow_check.py          # Fail-fast overflow backstop — catches text that cannot fit its box (fit-safety)

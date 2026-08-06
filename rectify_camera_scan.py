@@ -1,16 +1,21 @@
 """Offline rectification — undo the camera-scan perspective of receipt photos.
 
-The inverse of ``degrade_camera_scan.py``: given a phone-photo-style receipt
-(perspective-distorted, rotated, on a flat background), detect the receipt
-quadrilateral and apply a 4-point perspective transform to produce an upright,
-cropped, frontal receipt. This runs OFFLINE (a preprocessing pass), so the
-downstream VLM receives already-rectified images and the inference env needs no
-OpenCV.
+The inverse of ``generators/degradation/camera.py``: given a phone-photo-style
+receipt (perspective-distorted, rotated, on a flat background), detect the
+receipt quadrilateral and apply a 4-point perspective transform to produce an
+upright, cropped, frontal receipt. This runs OFFLINE (a preprocessing pass), so
+the downstream VLM receives already-rectified images and the inference env needs
+no OpenCV.
 
 Pipeline: grayscale -> blur -> Canny edges -> dilate -> largest external contour
 -> 4-point polygon -> cv2.getPerspectiveTransform / warpPerspective. Uses the
-SAME homography library degrade_camera_scan.py warps with, so degrade and rectify
-are exact numerical inverses.
+SAME homography library generators/degradation/camera.py warps with.
+
+The two are *approximate*, not exact, inverses: this pass re-estimates the quad
+from pixels rather than reusing the stored homography, and sizes its output to
+the detected edge lengths, while the blur, sensor noise and JPEG steps are not
+invertible at all. That is moot under value-F1 scoring, which reads field values
+rather than positions, and matters only for spatial round-trip validation.
 
 **Fail-open**: if no convincing quad is found (no 4-gon, too small, or too large),
 the original image is returned unchanged. A missed rectification is cheap; a wrong
