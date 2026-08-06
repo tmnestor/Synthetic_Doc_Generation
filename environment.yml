@@ -34,9 +34,9 @@ dependencies:
       # Pinned: faker's version determines generated content, so pinning keeps
       # reseeded ground truth reproducible across rebuilds.
       - faker==40.8.0
-      # Camera-scan degradation / rectification (cv2) — degrade_camera_scan.py,
-      # rectify_camera_scan.py. Not used by the core generators pipeline.
-      # Pinned so camera-scan output stays byte-stable across rebuilds.
+      # Perspective warp for receipt degradation (generators/degradation/camera.py)
+      # and the offline rectifier (rectify_camera_scan.py). Pinned so camera-scan
+      # output stays byte-stable across rebuilds.
       - opencv-python-headless==4.13.0.92
       # Document-image degradation for receipts (generators/degradation/).
       # MUST be installed with --no-deps: augraphy declares `opencv-python`
