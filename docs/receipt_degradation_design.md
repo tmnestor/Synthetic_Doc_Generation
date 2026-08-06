@@ -220,13 +220,34 @@ identified. The full set for the Artifactory request:
 ```
 augraphy==8.2.6, numba, llvmlite, scikit-image, scikit-learn,
 lazy_loader, imageio, tifffile, networkx, joblib, threadpoolctl,
-narwhals, requests, urllib3, idna, certifi
+narwhals, requests, urllib3, idna, certifi, charset-normalizer
 ```
 
 `--no-deps` is required so Augraphy's declared `opencv-python` (the full GUI
 build) does not displace the pinned `opencv-python-headless==4.13.0.92`. This
 was verified locally: `cv2` continued resolving to the headless package
-throughout.
+throughout. Note `conda env update` *does* pull the full build first, so it
+must be uninstalled and Augraphy reinstalled `--no-deps`.
+
+### Why the HTTP packages are on that list
+
+`requests`, `urllib3`, `idna` and `certifi` are needed only because
+`import augraphy` loads every augmentation module, two of which use HTTP:
+`Scribbles` fetches fonts by URL, and the Figshare downloader pulls datasets.
+Neither is in the registered allow-list.
+
+**The pipeline therefore makes no network calls**, and will not hang or fail
+reaching out from an air-gapped environment. This is a property of the
+allow-list, not an accident, and it is worth preserving: registering an
+augmentation that downloads anything would silently make generation depend on
+network access.
+
+`charset-normalizer` is one step further removed — it decodes HTTP response
+bodies that are never fetched. Blocking it (and `chardet`) leaves the pipeline
+working, with only a `RequestsDependencyWarning` at import. It cannot be
+dropped from the request regardless: pip enforces it as a hard, non-extra
+requirement of `requests`, and `environment.yml` cannot express a per-package
+`--no-deps`. Needed to install; never executed.
 
 ## Error handling
 

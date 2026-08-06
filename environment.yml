@@ -55,10 +55,20 @@ dependencies:
       - joblib
       - threadpoolctl
       - narwhals
+      # These four are import-time only. `import augraphy` loads every
+      # augmentation module, two of which use HTTP (Scribbles fetches fonts by
+      # URL; the Figshare downloader pulls datasets) -- neither is in the
+      # allow-list in generators/degradation/augment.py, so the pipeline makes
+      # no network calls and works air-gapped.
       - requests
       - urllib3
       - idna
       - certifi
+      # Never executed -- it decodes HTTP response bodies that are never
+      # fetched -- but not droppable: pip enforces it as a hard (non-extra)
+      # requirement of `requests`. Listed explicitly so the mirror request
+      # covers it rather than discovering it as a resolution failure.
+      - charset-normalizer
       # Tree-edit-distance backend for the vendored CORD evaluator
       # (generators/exporters/cord_eval.py). MIT-licensed; used in place of
       # zss (non-SPDX/historically GPL) per docs/GroundTruth_Export_Spec.md.
