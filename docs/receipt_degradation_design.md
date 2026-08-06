@@ -229,6 +229,20 @@ was verified locally: `cv2` continued resolving to the headless package
 throughout. Note `conda env update` *does* pull the full build first, so it
 must be uninstalled and Augraphy reinstalled `--no-deps`.
 
+**PROD already satisfies the HTTP sub-tree.** It carries `requests` 2.34.2 --
+the same version as local -- which brings `urllib3`, `idna`, `certifi` and
+`charset-normalizer` with it. So the packages actually needing to be mirrored
+are the eleven below, plus `augraphy` and `numpy`:
+
+```
+numba, llvmlite, scikit-image, scikit-learn, lazy_loader,
+imageio, tifffile, networkx, joblib, threadpoolctl, narwhals
+```
+
+They stay listed in `environment.yml` regardless: that file is the build recipe
+for creating the environment anywhere, not a description of what one host
+happens to have. Listing an already-present package is a no-op for pip.
+
 ### Why the HTTP packages are on that list
 
 `requests`, `urllib3`, `idna` and `certifi` are needed only because
