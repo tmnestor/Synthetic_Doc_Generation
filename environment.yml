@@ -130,12 +130,13 @@ dependencies:
       - charset-normalizer
 
       # --- Local scoring / test only: NOT required in PROD -----------------
-      # PROD generates and exports; it never scores. These three back the
-      # correctness harness that proves the CORD and DocILE projections are
-      # faithful rather than merely well-formed (37 tests). Nothing in
-      # `generate`, `derive` or `eval-set` imports them, and the day-to-day
-      # scoring notebook (field_f1_standalone.ipynb) is pandas + stdlib only.
-      # Safe to omit when provisioning a generation-only host.
+      # PROD generates and exports; it never scores. Nothing in `generate`,
+      # `derive` or `eval-set` imports anything below, so the whole section is
+      # safe to omit when provisioning a generation-only host -- and omitting it
+      # is what keeps the PROD mirror request short.
+      #
+      # These three back the correctness harness that proves the CORD and DocILE
+      # projections are faithful rather than merely well-formed (37 tests).
       #
       # apted            tree-edit distance for the vendored CORD evaluator
       #                  (generators/exporters/cord_eval.py). MIT; used in
@@ -151,6 +152,25 @@ dependencies:
       - apted
       - rapidfuzz
       - docile-benchmark
+
+      # And these three are the scoring notebook's stack
+      # (score_extractions.ipynb). Declared rather than assumed: they were
+      # previously installed on this machine but absent from this file, which
+      # made `conda env update --prune` liable to remove the notebook's
+      # dependencies. The notebook imports nothing from this repo, so this is
+      # the only place its requirements are recorded.
+      #
+      # pandas           every table the notebook computes, and the parsing of
+      #                  the ground-truth CSV. BSD-3.
+      # matplotlib       the figures. seaborn draws onto it, and the two bar
+      #                  charts call it directly. PSF-based licence.
+      # seaborn          the distribution, heatmap and faceted views, which are
+      #                  a great deal more code in bare matplotlib. BSD-3.
+      #                  Colour is set explicitly from the notebook's own
+      #                  CVD-validated palette, never from a seaborn default.
+      - pandas
+      - matplotlib
+      - seaborn
 
 # =============================================================================
 # KNOWN-GOOD RESOLVED VERSIONS (macOS arm64, 2026-08-06)
@@ -169,9 +189,10 @@ dependencies:
 #   urllib3 2.7.0          idna 3.18             certifi 2026.07.22
 #   charset-normalizer 3.4.9
 #   apted 1.0.3            rapidfuzz 3.14.5      docile-benchmark 0.3.4
+#   pandas 3.0.5           matplotlib 3.11.1     seaborn 0.13.2
 #
 # Dev tooling is intentionally absent from the spec above (install separately
-# if you run the suite): pytest 9.1.1, ruff, mypy 2.3.0, pandas 3.0.5.
+# if you run the suite): pytest 9.1.1, ruff 0.15.15, mypy 2.3.0.
 #
 # =============================================================================
 # CONDA ENVIRONMENT CRUD COMMANDS - QUICK REFERENCE

@@ -24,3 +24,7 @@ docs/superpowers/
 
 # Augraphy scratch output — written during augmentation runs, never source.
 augraphy_cache/
+
+# Figures written by score_extractions.ipynb (FIGURE_DIR). Derived from a
+# model run's output, so they belong with that run, not in the repo.
+figures/
