@@ -1,49 +1,108 @@
-# Shared conda environment for the synthetic document generator.
+# Conda environment for the synthetic document generator.
 #
-# TEAM MEMBERS: you only LOAD this env — activate it by path, nothing to build:
-#     conda activate /efs/shared/.conda/envs/synthetic
+# ============================================================================
+# WHICH ARE YOU?
+# ============================================================================
 #
-# The spec below is the build recipe, used only by the env's maintainer to
-# create/refresh it at that shared prefix. There is no `name:`/`prefix:` key:
-# `conda env create` ignores a `prefix:` key, and a `name:` key is mutually
-# exclusive with the `--prefix` flag the maintainer uses to install into the
-# shared location.
+# (a) ON THE SHARED PREFIX -- you only LOAD the env, nothing to build:
 #
-# Package sources come from the host's config (kept OUT of this repo):
+#         conda activate /efs/shared/.conda/envs/synthetic
+#
+# (b) BUILDING YOUR OWN -- another team, a new machine, CI:
+#
+#         conda env create -n synthetic -f environment.yml
+#         conda activate synthetic
+#         bash scripts/post_install.sh        # <-- REQUIRED, see below
+#
+#     `-n` (or `--prefix`) is required. This file deliberately carries no
+#     `name:` key, because a `name:` is mutually exclusive with the `--prefix`
+#     flag the shared-prefix maintainer uses. Without one, conda errors with
+#     "Unable to determine environment".
+#
+# ============================================================================
+# THE POST-INSTALL STEP IS NOT OPTIONAL
+# ============================================================================
+#
+# `augraphy` declares `opencv-python` -- the full GUI build -- as a hard
+# dependency. Plain `conda env create` therefore installs it, and it DISPLACES
+# the `opencv-python-headless` pinned below (both provide `cv2`). On a
+# locked-down host it also drags in GUI system libraries that may not exist.
+#
+# There is no way to express a per-package `--no-deps` in a conda YAML file, so
+# the fix has to live outside it:
+#
+#     pip uninstall -y opencv-python
+#     pip install --no-deps augraphy==8.2.6
+#
+# `scripts/post_install.sh` does exactly that and is idempotent. Verify with:
+#
+#     pip list | grep -i opencv     # must show ONLY opencv-python-headless
+#     python -c "import cv2, augraphy; print(cv2.__version__, augraphy.__version__)"
+#
+# ============================================================================
+# PACKAGE SOURCES
+# ============================================================================
+#
+# Deliberately not pinned here -- they come from the host's own config, kept
+# OUT of this repo:
 #   - Python interpreter -> conda, from the channel in ~/.condarc
-#   - Libraries          -> pip, from the index in ~/.pip/pip.conf
-# On the locked-down PROD remote these point at the internal Artifactory conda
-# and PyPI mirrors; the public repos are unreachable there.
+#   - Libraries          -> pip,   from the index in ~/.pip/pip.conf
+#
+# On the locked-down PROD remote these point at internal Artifactory mirrors;
+# the public repos are unreachable there. That is why this file has no
+# `channels:` key -- adding one would override the host's mirror config and
+# break PROD.
+#
+# ============================================================================
+# WHAT IS PINNED, AND WHY
+# ============================================================================
+#
+#   pillow      Its bundled FreeType drives font getbbox() metrics, which drive
+#               every fit_text() shrink/wrap decision and therefore the rendered
+#               pixels. Unpinning diverges images Mac<->PROD.
+#   numpy       Ceiling, not preference: numba (an augraphy import) requires
+#               <=2.4. Pinned exactly so the constraint is visible rather than
+#               silently resolved.
+#   faker       Determines generated content, so pinning keeps a reseeded
+#               ground truth reproducible across rebuilds.
+#   opencv      Camera-scan warp output must stay byte-stable across rebuilds.
+#   augraphy    Augmentation behaviour is version-dependent, and its parameter
+#               names are mapped by hand in generators/degradation/augment.py.
+#
+# Everything else floats: whatever the host's index offers is fine.
+#
+# ============================================================================
+
 dependencies:
-  # Python 3.12 is the only hard version requirement.
+  # Python 3.12 is the only hard interpreter requirement (the codebase uses
+  # 3.12 syntax: `X | Y` unions, `contextlib.chdir`).
   - python=3.12
   - pip
   - pip:
-      # Document generation runtime (the generators/ pipeline).
-      # Pinned: Pillow's FreeType version drives font getbbox() metrics, which
-      # drive every fit_text() shrink/wrap decision and the rendered pixels.
-      # Pinning keeps images and fit results byte-stable across rebuilds / Mac<->PROD.
+
+      # --- Core runtime: generation, rendering, export ---------------------
+      # Required everywhere, PROD included.
       - pillow==12.2.0
-      # Capped at <=2.4 by numba, which augraphy imports unconditionally.
-      # Pinned exactly so the cap is visible rather than resolved silently.
       - numpy==2.3.5
       - pyyaml
       - typer
       - rich
-      # Synthetic content generation for reseeding (scripts/seed_*.py).
-      # Pinned: faker's version determines generated content, so pinning keeps
-      # reseeded ground truth reproducible across rebuilds.
+
+      # --- Content reseeding (scripts/seed_*.py) ---------------------------
       - faker==40.8.0
-      # Perspective warp for receipt degradation (generators/degradation/camera.py)
-      # and the offline rectifier (rectify_camera_scan.py). Pinned so camera-scan
-      # output stays byte-stable across rebuilds.
+
+      # --- Receipt degradation (generators/degradation/) -------------------
+      # Perspective warp for the camera model, shared with the offline
+      # rectifier (rectify_camera_scan.py).
       - opencv-python-headless==4.13.0.92
-      # Document-image degradation for receipts (generators/degradation/).
-      # MUST be installed with --no-deps: augraphy declares `opencv-python`
-      # (the full GUI build), which would displace the headless build pinned
-      # above and pull GUI system libraries into locked-down PROD. Its real
-      # transitive requirements are therefore listed explicitly below.
+      # Ink/paper damage applied to the flat page before the warp.
+      # See "THE POST-INSTALL STEP IS NOT OPTIONAL" above.
       - augraphy==8.2.6
+
+      # Augraphy's real transitive requirements, listed explicitly because it
+      # is (re)installed with --no-deps. numba and llvmlite are a MATCHED PAIR
+      # released in lockstep -- if your index carries a different numba, take
+      # the llvmlite that ships with it rather than the version here.
       - numba
       - llvmlite
       - scikit-image
@@ -55,29 +114,113 @@ dependencies:
       - joblib
       - threadpoolctl
       - narwhals
-      # These four are import-time only. `import augraphy` loads every
-      # augmentation module, two of which use HTTP (Scribbles fetches fonts by
-      # URL; the Figshare downloader pulls datasets) -- neither is in the
-      # allow-list in generators/degradation/augment.py, so the pipeline makes
-      # no network calls and works air-gapped.
+
+      # Import-time only, and usually already present. `import augraphy` loads
+      # every augmentation module, two of which use HTTP (Scribbles fetches
+      # fonts by URL; the Figshare downloader pulls datasets). Neither is in
+      # the allow-list in generators/degradation/augment.py, so THE PIPELINE
+      # MAKES NO NETWORK CALLS and runs air-gapped. charset-normalizer is a
+      # further step removed -- it decodes response bodies never fetched -- but
+      # pip enforces it as a hard requirement of requests, so it cannot be
+      # dropped.
       - requests
       - urllib3
       - idna
       - certifi
-      # Never executed -- it decodes HTTP response bodies that are never
-      # fetched -- but not droppable: pip enforces it as a hard (non-extra)
-      # requirement of `requests`. Listed explicitly so the mirror request
-      # covers it rather than discovering it as a resolution failure.
       - charset-normalizer
-      # Tree-edit-distance backend for the vendored CORD evaluator
-      # (generators/exporters/cord_eval.py). MIT-licensed; used in place of
-      # zss (non-SPDX/historically GPL) per docs/GroundTruth_Export_Spec.md.
+
+      # --- Local scoring / test only: NOT required in PROD -----------------
+      # PROD generates and exports; it never scores. These three back the
+      # correctness harness that proves the CORD and DocILE projections are
+      # faithful rather than merely well-formed (37 tests). Nothing in
+      # `generate`, `derive` or `eval-set` imports them, and the day-to-day
+      # scoring notebook (field_f1_standalone.ipynb) is pandas + stdlib only.
+      # Safe to omit when provisioning a generation-only host.
+      #
+      # apted            tree-edit distance for the vendored CORD evaluator
+      #                  (generators/exporters/cord_eval.py). MIT; used in
+      #                  place of zss (non-SPDX/historically GPL) per
+      #                  docs/GroundTruth_Export_Spec.md.
+      # rapidfuzz        leaf-node rename cost in cord_eval.py, replacing
+      #                  donut's nltk.edit_distance. MIT.
+      # docile-benchmark published DocILE KILE/LIR scorer, for the DocILE
+      #                  self-score tests. Apache-2.0. Resolves cleanly on a
+      #                  plain pip dry run -- no ancient datasets/pyarrow/numpy
+      #                  (unlike donut-python's backtrack to numpy 1.19.4), and
+      #                  every dependency ships a py3.12/arm64 wheel.
       - apted
-      # Fuzzy string-edit-distance for leaf-node rename cost in cord_eval.py
-      # (replaces donut's nltk.edit_distance). MIT-licensed.
       - rapidfuzz
-      # Published DocILE KILE/LIR scorer (generators/exporters/docile.py self-score
-      # tests). Resolved cleanly with a plain `pip install` dry run: no ancient
-      # datasets/pyarrow/numpy pulled in (unlike donut-python's backtrack to
-      # numpy 1.19.4), and every dependency ships a py3.12/arm64 wheel. Apache-2.0.
       - docile-benchmark
+
+# =============================================================================
+# KNOWN-GOOD RESOLVED VERSIONS (macOS arm64, 2026-08-06)
+# =============================================================================
+# Reference only -- the floating packages above are not pinned to these. Use
+# them to diagnose a version-skew failure, or to seed an internal mirror
+# request.
+#
+#   pillow 12.2.0          numpy 2.3.5           pyyaml 6.0.3
+#   typer 0.27.1           rich 15.0.0           faker 40.8.0
+#   opencv-python-headless 4.13.0.92             augraphy 8.2.6
+#   numba 0.66.0           llvmlite 0.48.0       scikit-image 0.24.0
+#   scikit-learn 1.9.0     lazy-loader 0.5       imageio 2.37.4
+#   tifffile 2026.7.31     networkx 2.8.8        joblib 1.5.3
+#   threadpoolctl 3.6.0    narwhals 2.24.0       requests 2.34.2
+#   urllib3 2.7.0          idna 3.18             certifi 2026.07.22
+#   charset-normalizer 3.4.9
+#   apted 1.0.3            rapidfuzz 3.14.5      docile-benchmark 0.3.4
+#
+# Dev tooling is intentionally absent from the spec above (install separately
+# if you run the suite): pytest 9.1.1, ruff, mypy 2.3.0, pandas 3.0.5.
+#
+# =============================================================================
+# CONDA ENVIRONMENT CRUD COMMANDS - QUICK REFERENCE
+# =============================================================================
+#
+# Environment Location (macOS, local):
+# /opt/homebrew/Caskroom/miniforge/base/envs/synthetic
+#
+# Environment Location (shared prefix):
+# /efs/shared/.conda/envs/synthetic
+#
+# CREATE: Create environment from this file
+# conda env create -n synthetic -f environment.yml
+# conda env create --prefix /efs/shared/.conda/envs/synthetic -f environment.yml
+#   ...then ALWAYS: bash scripts/post_install.sh
+#
+# READ: List all environments
+# conda env list
+# conda list -n synthetic          # Show packages in the environment
+#
+# UPDATE: Update existing environment from file
+# conda env update -n synthetic -f environment.yml --prune
+#   ...then ALWAYS: bash scripts/post_install.sh
+#
+# DELETE: Remove environment
+# conda env remove -n synthetic
+#
+# ACTIVATE: Activate environment
+# conda activate synthetic
+# conda activate /efs/shared/.conda/envs/synthetic
+#
+# DEACTIVATE: Deactivate environment
+# conda deactivate
+#
+# RUN WITHOUT ACTIVATING (preferred for scripting)
+# conda run -n synthetic python -m generators.pipeline validate
+#
+# EXPORT: Export environment to file
+# conda env export -n synthetic > environment.yml
+#   NOTE: a raw export overwrites everything above -- the comments, the
+#   PROD-vs-local split, and the post-install warning. Re-add them, or edit
+#   this file by hand instead.
+#
+# CLONE: Create copy of environment
+# conda create --name synthetic_probe --clone synthetic
+#
+# VERIFY: Confirm the install is correct
+# conda run -n synthetic pip list | grep -i opencv    # ONLY headless
+# conda run -n synthetic python -c "import cv2, augraphy, numpy; \
+#     print(cv2.__version__, augraphy.__version__, numpy.__version__)"
+# conda run -n synthetic python -m generators.pipeline validate
+# =============================================================================
