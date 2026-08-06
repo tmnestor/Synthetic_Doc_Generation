@@ -79,12 +79,15 @@ image directory, which is how you catch ground truth and images having drifted a
 
 ### Scoring a model against that ground truth
 
-`field_f1_standalone.ipynb` reads a model's `raw_extractions.jsonl` plus a ground-truth
-file and reports F1 per extraction field, by document type, macro and micro. It is
-fully standalone — pandas and the standard library only, no imports from this repo or
-LMM_POC — so it runs here with no other checkout. Set the paths and the per-document-type
-field lists in its config cell; the field lists must match the prompt your model was
-given, since that is what defines a fair scoring set.
+`score_extractions.ipynb` reads a model's `raw_extractions.jsonl` plus a ground-truth
+file and reports F1 per extraction field, by document type, macro and micro — plus the
+distribution those means are drawn from, a field × document-type heatmap, and an
+optional paired comparison of two runs over the same documents, which is how you
+measure what degradation cost. It imports nothing from this repo or LMM_POC — pandas,
+matplotlib, seaborn and the standard library only — so it runs here with no other
+checkout. Set the paths and the per-document-type field lists in its config cell; the
+field lists must match the prompt your model was given, since that is what defines a
+fair scoring set. Figures are saved to `figures/` at 300 dpi as well as drawn inline.
 
 ### Dependencies
 
