@@ -3,29 +3,39 @@
 `export_eval_set` produces two sibling directories under one output root::
 
     <out>/synthetic_<YYYYMMDD>/     <out>/degraded_<YYYYMMDD>/
-      CASE001_bank_statement.png      CASE001_bank_statement.png
-      CASE001_invoice.png             CASE001_invoice.png
-      ...  165 images                 ...  165 images
-      ground_truth.csv                ground_truth.csv     <- byte-identical copy
-      ground_truth.jsonl              ground_truth.jsonl   <- byte-identical copy
+      CASE001_bank_statement.png      CASE001_receipt_v1.png
+      CASE001_invoice.png             CASE001_receipt_v2.png
+      CASE001_receipt.png             CASE001_receipt_v3.png
+      ...  165 images, 3 types        ...  165 images, receipts only
+      ground_truth.csv                ground_truth.csv     <- describes THESE rows
+      ground_truth.jsonl              ground_truth.jsonl   <- describes THESE rows
 
-Three properties are load-bearing, and each is a deliberate decision rather
-than an accident of implementation:
+The two halves are NOT mirrors of each other, and the asymmetry is the whole
+design. Four properties are load-bearing:
 
-* **Filenames are identical across both directories.** A degraded image
-  carries the same ground truth as its clean counterpart, so one ground
-  truth scores both and a clean-vs-degraded comparison isolates image
-  quality as the only variable.
+* **The degraded half holds receipts only, one image per severity tier.**
+  Receipts are the only type users photograph -- bank statements and invoices
+  arrive as clean PDFs or printouts -- so degrading the other two models
+  nothing. 55 receipts x the 3 tiers declared under ``receipt_degradation:``
+  in ``config/generation_config.yml`` is again 165 images, but they are 55
+  documents at 3 severities, not 165 distinct documents.
+* **A degraded filename carries its tier**: ``CASE001_receipt.png`` becomes
+  ``CASE001_receipt_v1.png`` and up, taking the suffix from the tier's own
+  ``suffix:`` key. Anything pairing the two halves must therefore join on the
+  filename with that suffix removed, NOT on the filename itself.
 * **Filenames are generic** -- ``CASE001_bank_statement.png``, never
   ``CASE001_cba_standard.png``. The layout variant must not leak, or a model
-  could infer the template before reading a pixel. The suffix is the
+  could infer the template before reading a pixel. The type portion is the
   canonical document-type key from ``config/extraction_schema.yml``, so the
-  schema is the single source of that name.
-* **Each directory is self-contained**, carrying its own copy of both
-  ground-truth files, so a model run points at one path and finds
-  everything. The degraded copies are produced with ``shutil.copy2`` from
-  the files written into the clean directory, which is what makes them
-  byte-identical rather than merely equivalent.
+  schema is the single source of that name. Case ids stay unsuffixed so
+  ``transaction_links.yml`` keeps resolving.
+* **Each directory is self-contained**, carrying the ground truth for the
+  images IT holds, so a model run points at one path and finds everything.
+  The degraded ground truth is written rather than copied: each variant row
+  repeats its source receipt's field values verbatim and differs only in
+  ``image_file``, so a copy of the clean file would name images this
+  directory does not contain. The two ground truths are consequently NOT
+  byte-identical, and the degraded one carries only the receipt columns.
 
 The schema projection this export needs -- which fields a document type is
 scored on, in what order, and which are monetary or boolean -- comes from
