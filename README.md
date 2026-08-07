@@ -89,6 +89,13 @@ checkout. Set the paths and the per-document-type field lists in its config cell
 field lists must match the prompt your model was given, since that is what defines a
 fair scoring set. Figures are saved to `figures/` at 300 dpi as well as drawn inline.
 
+When inference runs on a remote GPU host and scoring happens locally,
+`docs/remote_extraction_runbook.md` covers the round trip — send the images up, keep the
+ground truth here, bring back one `raw_extractions.jsonl` per half. Run
+`scripts/check_extractions_match_gt.py` on whatever comes back before scoring it: it
+fails loudly when a run and a ground truth describe different image sets, which the
+notebook itself would otherwise absorb as "unmatched" and score around.
+
 ### Dependencies
 
 ```
