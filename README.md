@@ -178,28 +178,28 @@ python -m generators.pipeline <command> [OPTIONS]
 
 ```mermaid
 graph TD
-    GT["ground_truth/*.yml<br/>Field values (165 entries)"]
-    LR["config/layouts/*.yml<br/>Visual rendering specs (18 layouts)"]
-    GC["config/generation_config.yml<br/>Pipeline configuration"]
-    FD["config/field_definitions.yml<br/>20-column schema"]
+    GT["ground_truth/*.yml — 165 field-value entries"]
+    LR["config/layouts/*.yml — 18 rendering specs"]
+    GC["config/generation_config.yml — pipeline config"]
+    FD["config/field_definitions.yml — 20-column schema"]
 
-    GT --> V["validate<br/>Schema + layout checks"]
+    GT --> V["validate — schema + layout checks"]
     LR --> V
     FD --> V
 
-    GT --> G["generate<br/>Render PIL images"]
+    GT --> G["generate — render PIL images"]
     LR --> G
     GC --> G
 
-    G --> CLEAN["output/clean/<br/>165 PNGs"]
+    G --> CLEAN["output/clean/ — 165 PNGs"]
 
-    GT --> D["derive<br/>YAML → CSV/JSONL"]
+    GT --> D["derive — YAML to CSV/JSONL"]
     FD --> D
-    EC["config/export_config.yml<br/>Export policy (targets, ID form)"] --> D
+    EC["config/export_config.yml — export policy"] --> D
     D --> CSV["derived/ground_truth.csv"]
     D --> JSONL["derived/ground_truth.jsonl"]
-    D --> EXP["derived/cord.jsonl<br/>docile.jsonl<br/>native.jsonl<br/>doc_refs.jsonl"]
-    G --> GEO["derived/geometry.jsonl<br/>Field bounding boxes"]
+    D --> EXP["derived/ — cord, docile, native, doc_refs .jsonl"]
+    G --> GEO["derived/geometry.jsonl — field bounding boxes"]
     GEO -.-> D
 ```
 

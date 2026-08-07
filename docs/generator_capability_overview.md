@@ -11,12 +11,15 @@ extraction CSV/JSONL, CORD and DocILE.
 
 ```mermaid
 flowchart LR
-  A["ground_truth/*.yml<br/>authored field values"] --> B["renderers<br/>+ config/layouts/*.yml"]
-  C["config/data_pools.yml<br/>entity vocabularies"] --> B
+  A["ground_truth/*.yml"] --> B["renderers + layouts"]
+  C["config/data_pools.yml"] --> B
   B --> D["page images"]
-  B --> E["ground truth<br/>CSV · JSONL · CORD · DocILE"]
-  D --> F["degradation<br/>3 severity tiers, receipts only"]
+  B --> E["ground truth: CSV, JSONL, CORD, DocILE"]
+  D --> F["degraded receipts: 3 tiers"]
 ```
+
+*Authored field values and entity vocabularies on the left; images and ground truth
+out of one pass, so the answer key cannot drift from the page.*
 
 ## Can it carry our entities, relationships and events?
 
