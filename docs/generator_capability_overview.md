@@ -1,8 +1,9 @@
 # Synthetic document generation — capability and extension guide
 
-A YAML-driven generator for Australian business documents with pixel-perfect ground
-truth. Every value a model is scored against is authored or generated rather than
-annotated, so the answer key is exact by construction.
+A YAML-driven generator for Australian business documents. Every value a model is
+scored against is authored or generated rather than annotated: the string in the
+answer key is the string drawn on the page, and per-field bounding boxes are recorded
+by the renderer at draw time rather than estimated afterwards.
 
 The corpus is 165 documents — 55 cases, each holding a bank statement, a receipt and
 an invoice — across 18 layouts (8 bank, 6 receipt, 4 invoice), plus 165 degraded
@@ -30,7 +31,7 @@ from it.
 |---|---|---|
 | Content | `python scripts/seed_ground_truth.py` | 165 document entries with valid ABNs, correct GST arithmetic, matching line-item counts |
 | Relationships | `python scripts/seed_transaction_links.py` | 110 graded links, each with a written rationale |
-| Check | `python -m generators.pipeline validate` | Schema and layout conformance, fail-fast |
+| Check | `python -m generators.pipeline validate` | Required fields, layout references, ABN checksums, date and amount formats — fail-fast |
 | Render | `python -m generators.pipeline generate` | Page images plus per-field bounding boxes |
 | Export | `python -m generators.pipeline derive` | CSV, JSONL, CORD, DocILE projections |
 | Eval set | `python -m generators.pipeline eval-set --out <dir>` | Clean and degraded halves, each with its own ground truth |
@@ -38,29 +39,57 @@ from it.
 Corpus size and composition are therefore free once a document family exists. The
 cost sits in modelling the family once, not in producing instances of it.
 
+**One caveat for anyone hand-authoring entries.** The seeder computes GST as
+`total / 11` and keeps parallel line-item lists the same length, but `validate` does
+not check either — it enforces ABN checksums, date and amount formats, and required
+fields. Those two arithmetic invariants are asserted by the test suite, and `tests/`
+is gitignored, so a fresh clone has no automated check for them. Hand-edited ground
+truth can therefore carry a wrong GST amount or mismatched list lengths and still
+validate, render and export.
+
 ---
 
 ## 2. How entities are defined
 
 Entities exist at two levels.
 
-**Vocabularies** in [`config/data_pools.yml`](../config/data_pools.yml) are the population a corpus draws from —
-15 pools covering retailers, banks, product and service catalogues, locations and
-payment terminals:
+**Vocabularies** in [`config/data_pools.yml`](../config/data_pools.yml) are 15 pools,
+and they divide into two kinds that behave in opposite ways.
+
+Most are **drawn from** — their contents appear on generated pages. All 41 distinct
+receipt line items come from `product_catalog`, and all four bank names from `banks`:
 
 ```yaml
-retailers:
-  - name: Bunnings Warehouse
-    address: 123 Main St, Alexandria NSW 2015
-    abn: 18 634 229 001
-    category: hardware
-
 product_catalog:
   - description: Milk 2L
     unit: ea
     price_low: 2.5
     price_high: 5.5
+
+banks:
+  - code: cba
+    name: Commonwealth Bank
+    bsb_prefix: '06'
 ```
+
+Three are **never drawn from**. `retailers`, `professional_services` and
+`real_name_blocklist_extra` hold 25 real Australian businesses, and
+[`content_engine.py`](../generators/content_engine.py) reads only their `name` fields
+to build a blocklist. `fictional_business_name()` invents a name, screens it against
+that list, and fails loudly rather than emitting a real company:
+
+```yaml
+retailers:            # a blocklist, NOT a source of supplier names
+  - name: Bunnings Warehouse
+    address: 123 Main St, Alexandria NSW 2015
+    abn: 18 634 229 001
+    category: hardware
+```
+
+The distinction is load-bearing: putting a real company on a fabricated invoice with a
+fabricated ABN and a fabricated amount is a liability, so the real names exist
+precisely to be avoided. None of the 165 ground-truth supplier names is a real
+business.
 
 **Instances** in [`ground_truth/*.yml`](../ground_truth/) are one entry per document, and are the source
 of truth — hand-editable, and never regenerated behind the author:
@@ -90,9 +119,10 @@ for invoices and receipts and 5 for bank statements.
 configured in `data_pools.yml` as `locale: en_AU`, `seed_base: 42`. It is used for
 exactly two things: **person names** and **street addresses**.
 
-Everything that carries extraction meaning comes from curated pools instead.
-Retailers, banks and product catalogues have to be recognisable Australian entities
-with valid ABNs, and a name generator cannot produce that.
+Everything else comes from curated pools or from generation rules. Line items and
+bank names are drawn from pools because they have to be plausible Australian
+specifics that a name generator cannot invent; supplier names are composed from name
+parts and screened, because they have to be plausible *and* certainly fictional.
 
 Two properties of the engine matter for anyone extending it:
 
@@ -195,7 +225,11 @@ document type is written in:
   (side-by-side columns), `table`. Tables are the heaviest, at ~1,000 lines of engine,
   because transaction and line-item tables carry most of the extraction difficulty.
 - **`{FIELD}` interpolation** — `"{SUPPLIER_NAME}"` pulls from the ground-truth entry,
-  so the page cannot disagree with the answer key.
+  so a scored field cannot disagree with the answer key. Not every placeholder is
+  ground truth, though: `{POS_TIME}`, `{POS_REGISTER}`, `{POS_STAFF}` and
+  `{RECEIPT_NUMBER}` are produced at render time by
+  [field providers](../generators/layout_dsl/field_providers.py). They make a receipt
+  look like a receipt without being part of what a model is scored on.
 - **`field:`** — declares which ground-truth field this element renders. That binding
   is what produces `derived/geometry.jsonl`, the per-field bounding boxes captured at
   draw time and consumed by the DocILE export. Bounding-box ground truth is a
@@ -307,6 +341,13 @@ precision. Adding decoys means generating plausible near-matches that must *not*
 linked — tractable within the existing seeding approach, but not present today.
 
 **No event model.** As above.
+
+**Bounding boxes describe the clean page only.** `derived/geometry.jsonl` records each
+field's box in normalised coordinates, captured at draw time — but the degradation
+pipeline warps the page through a camera-scan homography and nothing transforms the
+geometry with it, and `eval-set` emits no geometry at all. So the degraded half has
+field-value ground truth but no box ground truth, and a clean-page box actively
+misdescribes a warped image.
 
 **Degradation covers receipts only**, because receipts are the document type people
 photograph. Bank statements and invoices arrive as clean PDFs, so degrading them

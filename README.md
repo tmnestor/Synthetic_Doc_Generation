@@ -1,6 +1,6 @@
 # Synthetic Business Document Generator
 
-YAML-driven pipeline for generating synthetic Australian business documents with pixel-perfect ground truth. Produces 165 clean images across 3 document types — bank statements, receipts, invoices — plus 165 degraded receipts (55 receipts × 3 severity tiers), with transaction-linking ground truth.
+YAML-driven pipeline for generating synthetic Australian business documents with ground truth that is authored rather than annotated — values are drawn on the page verbatim, and per-field bounding boxes are recorded at draw time (clean renders only). Produces 165 clean images across 3 document types — bank statements, receipts, invoices — plus 165 degraded receipts (55 receipts × 3 severity tiers), with transaction-linking ground truth.
 
 ---
 
