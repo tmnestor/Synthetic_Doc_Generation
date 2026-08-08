@@ -39,13 +39,31 @@ from it.
 Corpus size and composition are therefore free once a document family exists. The
 cost sits in modelling the family once, not in producing instances of it.
 
-**One caveat for anyone hand-authoring entries.** The seeder computes GST as
-`total / 11` and keeps parallel line-item lists the same length, but `validate` does
-not check either — it enforces ABN checksums, date and amount formats, and required
-fields. Those two arithmetic invariants are asserted by the test suite, and `tests/`
-is gitignored, so a fresh clone has no automated check for them. Hand-edited ground
-truth can therefore carry a wrong GST amount or mismatched list lengths and still
-validate, render and export.
+`validate` enforces the invariants that a hand-edited entry can otherwise break
+silently, because nothing downstream recomputes them: required fields, layout
+references, ABN checksums, date and amount formats, equal item counts across parallel
+pipe-delimited fields, and GST as one eleventh of a GST-inclusive total. Every rule is
+declared in [`config/field_definitions.yml`](../config/field_definitions.yml) rather
+than in Python, and a missing declaration fails loudly instead of quietly checking
+nothing.
+
+### A hurdle worth naming: the tests do not ship
+
+The repository's regression net — 1,115 tests covering rendering determinism, export
+fidelity, fit safety and schema rules — lives under `tests/`, which is **gitignored**.
+A clone gets the pipeline and the validators but not the suite that pins their
+behaviour.
+
+That matters for anyone extending this. Pixel-level rendering is checked by snapshot
+tests; export projections are checked by self-scoring tests that prove a CORD or
+DocILE file scores 1.0 against itself. Change a renderer or an exporter without those,
+and the failure is a subtly different image or a quietly wrong projection rather than
+an exception. `validate` catches malformed *ground truth*; it does not catch a
+regression in the *code*.
+
+A team taking this on should plan either to receive the suite out of band or to write
+their own around the parts they touch, and should treat the absence as a known gap
+rather than discovering it after the first refactor.
 
 ---
 
@@ -73,7 +91,8 @@ banks:
 ```
 
 Three are **never drawn from**. `retailers`, `professional_services` and
-`real_name_blocklist_extra` hold 25 real Australian businesses, and
+`real_name_blocklist_extra` hold 41 real Australian businesses — 20 retailers,
+5 professional services and 16 extras such as Aldi, Telstra and Origin Energy — and
 [`content_engine.py`](../generators/content_engine.py) reads only their `name` fields
 to build a blocklist. `fictional_business_name()` invents a name, screens it against
 that list, and fails loudly rather than emitting a real company:
@@ -333,7 +352,85 @@ starting point rather than a blocker — but it is design work, not configuratio
 
 ---
 
-## 7. Known limits
+## 7. Data privacy: realistic, but not real
+
+**Nothing real goes in.** There is no source corpus. No real invoice, receipt or
+statement is read, transformed, de-identified or sampled at any point — every
+document is composed from vocabularies and rules. That is a categorically different
+position from anonymised or de-identified real data, which carries re-identification
+risk precisely because a real record sits underneath. Here there is no record
+underneath to re-identify.
+
+### What is fabricated
+
+| On the page | How |
+|---|---|
+| Supplier and payer business names | Invented from name parts, then screened against a real-name blocklist. `fictional_business_name()` retries and **fails loudly** rather than emitting a blocked name |
+| ABNs | Generated to satisfy the real ABN checksum. **0 of the 110 emitted ABNs** collide with the 19 real ABNs held in the pools |
+| People, addresses | Faker `en_AU` names, with generated street numbers |
+| Amounts, dates, line items, transactions | Generated from catalogues and rules |
+
+Verified rather than assumed: **none of the 165 ground-truth supplier names is one of
+the 41 real businesses** in the blocklist pools.
+
+### Why a blocklist is needed at all
+
+Business names are not drawn from a list — they are **composed**:
+
+```
+{surname | suburb_prefix} + {category_noun}
+```
+
+from 30 surnames, 15 suburb prefixes and 14 category noun-sets, giving roughly
+**2,610 possible names**. Composition can land on a real trading name by accident.
+"Alexandria Hardware" is fine; something colliding with a real chain is not.
+
+The blocklist makes that impossible for the names it knows. Every candidate is
+lowercased and checked before it is returned, with a 20-attempt retry budget and a
+loud failure if it is exhausted — so the generator can refuse to produce a corpus, but
+it cannot quietly emit a real business.
+
+The 41 names are chosen for exactly this exposure: the chains, utilities and telcos a
+composed name is most likely to collide with, which is why
+`real_name_blocklist_extra` carries Aldi, IGA, Telstra, Optus, Origin Energy and AGL
+alongside the retailers already in the pools.
+
+### What is deliberately real, and why
+
+Two things on a generated page are genuine, and both are design decisions rather than
+oversights:
+
+- **Four bank names** — Commonwealth Bank, Westpac, ANZ and NAB appear as the issuing
+  institution on bank statements, because a statement that names no real bank does not
+  look like a statement. These are institution brands, not customer data, and bank
+  statements carry no ABN. This is a trademark consideration rather than a privacy one,
+  and worth a decision if the corpus is ever distributed externally.
+- **Suburbs and postcodes** — `Alexandria NSW 2015`, `Hawthorn East VIC 3123` and
+  similar are real Australian locations, paired with fabricated street numbers and
+  street names. A fabricated suburb would make an address obviously synthetic and
+  would break any model reasoning about geography.
+
+### Residual risks, stated plainly
+
+- **ABNs are checksum-valid, not registry-checked.** The generator has no access to
+  the ABR, so it cannot prove a generated ABN is unregistered. A collision with a real
+  registered ABN is possible by chance.
+- **Person names come from a name generator**, which draws on real name distributions.
+  A generated name coinciding with a real individual is possible, and unavoidable for
+  any plausible-looking name.
+- **The blocklist covers the 41 names it knows about, matched exactly.** It is a
+  lowercased exact-match set, so a near-miss is not caught: `Bunnings Warehouse` is
+  blocked, a hypothetical `Bunnings Hardware` would not be. An invented name could
+  still coincide with a real business absent from the list.
+
+None of these involve processing personal data: no real person's information enters
+the system, so a coincidental collision is a collision, not a disclosure. If external
+distribution is planned, the ABN and bank-brand points are the two worth an explicit
+decision.
+
+---
+
+## 8. Known limits
 
 **No negative cases in relationships.** Every link carries `match_status: FOUND`, so
 the corpus measures recall on relationship extraction but cannot currently measure
@@ -355,7 +452,7 @@ models nothing.
 
 ---
 
-## 8. What a new use case has to specify
+## 9. What a new use case has to specify
 
 1. The entity types to extract, and which are fields on a page versus derived values.
 2. The relationships, the evidence that establishes each one, and the single axis
