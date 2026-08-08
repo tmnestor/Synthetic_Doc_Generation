@@ -1,10 +1,14 @@
 """Ground truth schema validation.
 
 Validates YAML entries against field_definitions.yml: required fields per
-document type, date formats, ABN checksums, pipe-delimited list consistency.
+document type, date formats, ABN checksums, pipe-delimited list consistency,
+and GST arithmetic. Every rule is declared in that YAML rather than here, so
+the schema is readable without reading Python, and a missing rule fails loudly
+instead of silently checking nothing.
 """
 
 import re
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from pathlib import Path
 
 import yaml
@@ -131,17 +135,106 @@ def _field_type_group(group: str) -> set[str]:
     return set(defs["field_types"].get(group, []))
 
 
-_PIPE_GROUPS = {
-    "RECEIPT": [
-        ["LINE_ITEM_DESCRIPTIONS", "LINE_ITEM_QUANTITIES", "LINE_ITEM_PRICES", "LINE_ITEM_TOTAL_PRICES"],
-    ],
-    "INVOICE": [
-        ["LINE_ITEM_DESCRIPTIONS", "LINE_ITEM_QUANTITIES", "LINE_ITEM_PRICES", "LINE_ITEM_TOTAL_PRICES"],
-    ],
-    "BANK_STATEMENT": [
-        ["TRANSACTION_DATES", "TRANSACTION_DESCRIPTIONS", "TRANSACTION_AMOUNTS_PAID"],
-    ],
-}
+def _required_section(key: str, example: str) -> dict:
+    """Read a required top-level section of field_definitions.yml, or fail loudly.
+
+    Args:
+        key: The top-level key to read.
+        example: A concrete YAML snippet shown in the error.
+
+    Returns:
+        The section's mapping.
+
+    Raises:
+        SchemaError: The key is absent or is not a mapping.
+    """
+    defs = _load_field_defs()
+    section = defs.get(key)
+    if not isinstance(section, dict):
+        msg = (
+            f"  What:     config/field_definitions.yml has no '{key}:' mapping, so "
+            f"validate cannot check that invariant.\n"
+            f"  Where:    {_FIELD_DEFS_PATH.resolve()}, top-level key '{key}'.\n"
+            f"  Expected:\n{example}\n"
+            f"  Recover:  add the block above to {_FIELD_DEFS_PATH}."
+        )
+        raise SchemaError(msg)
+    return section
+
+
+def _parallel_groups(doc_type: str) -> list[list[str]]:
+    """Field groups that must carry equal item counts, for one document type."""
+    example = (
+        "            parallel_field_groups:\n"
+        "              RECEIPT:\n"
+        "                - [LINE_ITEM_DESCRIPTIONS, LINE_ITEM_PRICES]"
+    )
+    return _required_section("parallel_field_groups", example).get(doc_type, [])
+
+
+def _gst_rule() -> dict:
+    """The GST consistency rule: divisor, rounding, and the fields it relates."""
+    example = (
+        "            gst_consistency:\n"
+        "              divisor: 11\n"
+        "              decimals: 2\n"
+        "              inclusive_field: IS_GST_INCLUDED\n"
+        "              gst_field: GST_AMOUNT\n"
+        "              total_field: TOTAL_AMOUNT"
+    )
+    rule = _required_section("gst_consistency", example)
+    missing = [
+        k for k in ("divisor", "decimals", "inclusive_field", "gst_field", "total_field") if k not in rule
+    ]
+    if missing:
+        msg = (
+            f"  What:     config/field_definitions.yml 'gst_consistency:' is missing "
+            f"{', '.join(missing)}.\n"
+            f"  Where:    {_FIELD_DEFS_PATH.resolve()}, under 'gst_consistency:'.\n"
+            f"  Expected:\n{example}\n"
+            f"  Recover:  add the missing key(s) to that block."
+        )
+        raise SchemaError(msg)
+    return rule
+
+
+def _check_gst(case_id: str, fields: dict) -> list[str]:
+    """Check GST_AMOUNT against TOTAL_AMOUNT when the total is GST-inclusive.
+
+    A wrong GST amount renders happily and exports happily — nothing downstream
+    recomputes it — so an entry hand-edited to a plausible-looking figure would
+    otherwise reach a model as ground truth.
+
+    Args:
+        case_id: The CASE ID key, for the message.
+        fields: The entry's `fields` mapping.
+
+    Returns:
+        A list holding one error, or empty when the rule does not apply or holds.
+    """
+    rule = _gst_rule()
+    if str(fields.get(rule["inclusive_field"], "")).strip().lower() != "true":
+        return []
+    if rule["gst_field"] not in fields or rule["total_field"] not in fields:
+        return []
+
+    try:
+        total = Decimal(str(fields[rule["total_field"]]))
+        stated = Decimal(str(fields[rule["gst_field"]]))
+    except InvalidOperation:
+        return []  # the amount-format check above already reports this
+
+    places = Decimal(1).scaleb(-int(rule["decimals"]))
+    expected = (total / Decimal(str(rule["divisor"]))).quantize(places, rounding=ROUND_HALF_UP)
+    if stated == expected:
+        return []
+    return [
+        f"{case_id}: {rule['gst_field']} is {stated} but {rule['total_field']} is {total} "
+        f"and {rule['inclusive_field']} is true, so GST must be "
+        f"{total} / {rule['divisor']} = {expected}. "
+        f"Either correct {rule['gst_field']}, or set {rule['inclusive_field']} to false "
+        f"if the total genuinely excludes GST."
+    ]
 
 
 def validate_entry(case_id: str, entry: dict) -> list[str]:
@@ -242,8 +335,7 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                     f"expected decimal without $ (e.g. '67.32')."
                 )
 
-    pipe_groups = _PIPE_GROUPS.get(doc_type, [])
-    for group in pipe_groups:
+    for group in _parallel_groups(doc_type):
         counts: dict[str, int] = {}
         for field_name in group:
             if field_name in fields:
@@ -255,6 +347,8 @@ def validate_entry(case_id: str, entry: dict) -> list[str]:
                 f"{case_id}: pipe-delimited field count mismatch: {detail}. "
                 f"All fields in group {group} must have the same number of items."
             )
+
+    errors.extend(_check_gst(case_id, fields))
 
     return errors
 
