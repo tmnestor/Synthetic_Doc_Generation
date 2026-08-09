@@ -1,9 +1,17 @@
 # Synthetic document generation — capability and extension guide
 
-A YAML-driven generator for Australian business documents. Every value a model is
-scored against is authored or generated rather than annotated: the string in the
-answer key is the string drawn on the page, and per-field bounding boxes are recorded
-by the renderer at draw time rather than estimated afterwards.
+A YAML-driven generator for Australian business documents.
+
+The **ground truth** is the record of what each document actually says — every field a
+model will be scored on, plus where on the page it sits. It is what a prediction is
+compared against, so it is the thing that decides whether an extraction was right.
+Normally it is produced by *annotation*: somebody reads a real document and transcribes
+the answers, which is slow and is itself a source of error.
+
+Here it runs the other way. The ground truth is **authored first, and the page is drawn
+from it** — so the string on record is the string on the page, and per-field bounding
+boxes are recorded by the renderer as it draws rather than estimated afterwards. There
+is no transcription step, and therefore no transcription error.
 
 The corpus is 165 documents — 55 cases, each holding a bank statement, a receipt and
 an invoice — across 18 layouts (8 bank, 6 receipt, 4 invoice), plus 165 degraded
