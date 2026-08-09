@@ -213,6 +213,41 @@ class ContentEngine:
         }
 
 
+def reachable_blocked_names(pools: dict) -> list[str]:
+    """Blocklisted real business names the name grammar could actually emit.
+
+    `fictional_business_name` composes exactly `{surname | suburb_prefix} {noun}`
+    and rejects any candidate on the blocklist, retrying up to a budget. That
+    runtime guard is the last line of defence; this is the first one, and it is
+    the one that fails at a useful moment.
+
+    The blocklist currently cannot fire: none of its names is expressible in the
+    grammar, because the nouns are trade phrases ("business supplies",
+    "& partners lawyers") and real brands are not. It is insurance against a
+    future edit to `business_name_parts` — adding "Origin" to suburb_prefixes and
+    "Energy" to a category, say — which would silently make a real company
+    emittable. Checking reachability at startup turns that from a runtime retry
+    into a configuration error raised at the moment the pool is edited.
+
+    Args:
+        pools: The loaded config/data_pools.yml mapping.
+
+    Returns:
+        Blocked names the grammar can produce, sorted. Empty is the healthy case.
+    """
+    parts = pools["business_name_parts"]
+    prefixes = {p.lower() for p in (*parts["surnames"], *parts["suburb_prefixes"])}
+    nouns = {n.lower() for group in parts["category_nouns"].values() for n in group}
+    reachable = {f"{prefix} {noun}" for prefix in prefixes for noun in nouns}
+
+    blocked = (
+        [r["name"] for r in pools["retailers"]]
+        + [p["name"] for p in pools["professional_services"]]
+        + list(pools["real_name_blocklist_extra"])
+    )
+    return sorted({name for name in blocked if name.lower() in reachable})
+
+
 def sample(rng: random.Random, pool: list):
     """Seeded single draw from a non-empty pool."""
     if not pool:
