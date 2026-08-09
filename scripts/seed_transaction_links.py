@@ -344,18 +344,22 @@ def main() -> None:
 
     # Write updated ground truth: bank statements (injected + sorted), the
     # re-dated receipts/invoices, and the links themselves.
-    Path("ground_truth/bank_statements.yml").write_text(
-        yaml.dump(dict(bank_stmts), default_flow_style=False, sort_keys=False)
-    )
-    Path("ground_truth/receipts.yml").write_text(
-        yaml.dump(dict(receipts), default_flow_style=False, sort_keys=False)
-    )
-    Path("ground_truth/invoices.yml").write_text(
-        yaml.dump(dict(invoices), default_flow_style=False, sort_keys=False)
-    )
-    Path("ground_truth/transaction_links.yml").write_text(
-        yaml.dump(links, default_flow_style=False, sort_keys=False)
-    )
+    #
+    # allow_unicode=True matches scripts/seed_ground_truth.py. Without it PyYAML
+    # escapes every non-ASCII character, so the em dash in a generated note is
+    # written as a \\u2014 escape, which forces double-quoted style and mid-word
+    # line wrapping with trailing backslashes. The value round-trips either way, but
+    # the escaped form is unreadable in review and moves the wrap point on any
+    # edit, turning a one-word change into a multi-line diff.
+    for path, payload in (
+        ("ground_truth/bank_statements.yml", dict(bank_stmts)),
+        ("ground_truth/receipts.yml", dict(receipts)),
+        ("ground_truth/invoices.yml", dict(invoices)),
+        ("ground_truth/transaction_links.yml", links),
+    ):
+        Path(path).write_text(
+            yaml.dump(payload, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        )
 
     # Stats
     difficulties: dict[str, int] = {}

@@ -8,8 +8,7 @@ CASE001_receipt_professional.png:
   bank_amount: '216.89'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on cba standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on cba standard — exact date and amount, abbreviated merchant reference
 CASE001_tax_invoice_high_value.png:
 - bank_statement: CASE001_cba_standard.png
   supplier: Capital Legal Group
@@ -20,7 +19,7 @@ CASE001_tax_invoice_high_value.png:
   bank_amount: '157.39'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Early row on cba standard — exact date and amount, full merchant name
 CASE002_receipt_thermal_57mm.png:
 - bank_statement: CASE002_anz_modern.png
   supplier: Eastern Cellars
@@ -31,7 +30,7 @@ CASE002_receipt_thermal_57mm.png:
   bank_amount: '8.75'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Late row on anz modern — exact date and amount, full merchant name
 CASE002_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE002_anz_modern.png
   supplier: Wakeling & Associates Accounting
@@ -42,7 +41,7 @@ CASE002_tax_invoice_gst_inclusive.png:
   bank_amount: '10836.14'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz modern — exact date and amount, full merchant name
 CASE003_receipt_thermal_80mm.png:
 - bank_statement: CASE003_nab_classic.png
   supplier: Coastal Automotive Supplies
@@ -53,8 +52,8 @@ CASE003_receipt_thermal_80mm.png:
   bank_amount: '172.65'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on nab classic \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on nab classic — exact date and amount, no merchant reference in
+    description
 CASE003_tax_invoice_mixed.png:
 - bank_statement: CASE003_nab_classic.png
   supplier: Ashcroft Brand & Media
@@ -65,7 +64,7 @@ CASE003_tax_invoice_mixed.png:
   bank_amount: '519.29'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab classic — exact date and amount, full merchant name
 CASE004_receipt_fuel.png:
 - bank_statement: CASE004_anz_standard.png
   supplier: Ibbotson Automotive Supplies
@@ -76,8 +75,7 @@ CASE004_receipt_fuel.png:
   bank_amount: '26.85'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on anz standard — exact date and amount, abbreviated merchant reference
 CASE004_tax_invoice_standard.png:
 - bank_statement: CASE004_anz_standard.png
   supplier: Verrall IT Consulting
@@ -88,8 +86,7 @@ CASE004_tax_invoice_standard.png:
   bank_amount: '42805.81'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on anz standard — exact date and amount, abbreviated merchant reference
 CASE005_receipt_retail_tax.png:
 - bank_statement: CASE005_westpac_premium.png
   supplier: Statewide Fresh Market
@@ -100,8 +97,8 @@ CASE005_receipt_retail_tax.png:
   bank_amount: '192.36'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac premium \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac premium — exact date and amount, abbreviated merchant
+    reference
 CASE005_tax_invoice_mixed.png:
 - bank_statement: CASE005_westpac_premium.png
   supplier: Quennell Tax & Advisory
@@ -112,7 +109,7 @@ CASE005_tax_invoice_mixed.png:
   bank_amount: '22162.33'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
+  notes: Mid row on westpac premium — exact date and amount, full merchant name
 CASE006_receipt_hospitality.png:
 - bank_statement: CASE006_nab_dense.png
   supplier: Metro Motor Spares
@@ -123,8 +120,7 @@ CASE006_receipt_hospitality.png:
   bank_amount: '38.02'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on nab dense \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Mid row on nab dense — exact date and amount, no merchant reference in description
 CASE006_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE006_nab_dense.png
   supplier: Harrowgate Marketing Co
@@ -135,8 +131,7 @@ CASE006_tax_invoice_gst_inclusive.png:
   bank_amount: '34408.13'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on nab dense \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on nab dense — exact date and amount, abbreviated merchant reference
 CASE007_receipt_retail_tax.png:
 - bank_statement: CASE007_cba_date_grouped.png
   supplier: Riverside Grocer
@@ -147,8 +142,7 @@ CASE007_receipt_retail_tax.png:
   bank_amount: '353.38'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on cba date grouped — exact date and amount, full merchant name
 CASE007_tax_invoice_standard.png:
 - bank_statement: CASE007_cba_date_grouped.png
   supplier: Tremayne Technology Group
@@ -159,8 +153,7 @@ CASE007_tax_invoice_standard.png:
   bank_amount: '8816.90'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on cba date grouped — exact date and amount, full merchant name
 CASE008_receipt_fuel.png:
 - bank_statement: CASE008_westpac_standard.png
   supplier: Marchbank Liquor Merchants
@@ -171,8 +164,8 @@ CASE008_receipt_fuel.png:
   bank_amount: '123.20'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE008_tax_invoice_high_value.png:
 - bank_statement: CASE008_westpac_standard.png
   supplier: Statewide Legal
@@ -183,8 +176,8 @@ CASE008_tax_invoice_high_value.png:
   bank_amount: '8806.53'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on westpac standard \u2014 exact date and amount, abbreviated\
-    \ merchant reference"
+  notes: Early row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE009_receipt_thermal_57mm.png:
 - bank_statement: CASE009_cba_date_grouped.png
   supplier: National Pharmacy
@@ -195,8 +188,8 @@ CASE009_receipt_thermal_57mm.png:
   bank_amount: '82.18'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
 CASE009_tax_invoice_standard.png:
 - bank_statement: CASE009_cba_date_grouped.png
   supplier: Denholm Solicitors
@@ -207,8 +200,8 @@ CASE009_tax_invoice_standard.png:
   bank_amount: '5980.27'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
 CASE010_receipt_professional.png:
 - bank_statement: CASE010_anz_standard.png
   supplier: Ellery Provisions
@@ -219,8 +212,7 @@ CASE010_receipt_professional.png:
   bank_amount: '9.75'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on anz standard — exact date and amount, abbreviated merchant reference
 CASE010_tax_invoice_mixed.png:
 - bank_statement: CASE010_anz_standard.png
   supplier: Ibbotson Tax & Advisory
@@ -231,8 +223,7 @@ CASE010_tax_invoice_mixed.png:
   bank_amount: '19459.94'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on anz standard — exact date and amount, abbreviated merchant reference
 CASE011_receipt_hospitality.png:
 - bank_statement: CASE011_anz_modern.png
   supplier: Quennell Digital Supplies
@@ -244,7 +235,7 @@ CASE011_receipt_hospitality.png:
   bank_amount: '16.92'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz modern — exact date and amount, full merchant name
 CASE011_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE011_anz_modern.png
   supplier: Coastal Accounting Group
@@ -255,7 +246,7 @@ CASE011_tax_invoice_gst_inclusive.png:
   bank_amount: '10690.09'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz modern — exact date and amount, full merchant name
 CASE012_receipt_thermal_80mm.png:
 - bank_statement: CASE012_westpac_premium.png
   supplier: Ellery Business Supplies
@@ -266,8 +257,8 @@ CASE012_receipt_thermal_80mm.png:
   bank_amount: '26.22'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on westpac premium \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on westpac premium — exact date and amount, abbreviated merchant
+    reference
 CASE012_tax_invoice_high_value.png:
 - bank_statement: CASE012_westpac_premium.png
   supplier: Capital & Associates Accounting
@@ -278,8 +269,8 @@ CASE012_tax_invoice_high_value.png:
   bank_amount: '18472.81'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on westpac premium \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on westpac premium — exact date and amount, abbreviated merchant
+    reference
 CASE013_receipt_professional.png:
 - bank_statement: CASE013_cba_standard.png
   supplier: Harbourside Trade Supplies
@@ -290,8 +281,7 @@ CASE013_receipt_professional.png:
   bank_amount: '122.34'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on cba standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on cba standard — exact date and amount, abbreviated merchant reference
 CASE013_tax_invoice_standard.png:
 - bank_statement: CASE013_cba_standard.png
   supplier: Farrant Consulting Partners
@@ -302,8 +292,7 @@ CASE013_tax_invoice_standard.png:
   bank_amount: '23421.13'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on cba standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on cba standard — exact date and amount, abbreviated merchant reference
 CASE014_receipt_retail_tax.png:
 - bank_statement: CASE014_nab_classic.png
   supplier: Riverside Automotive Supplies
@@ -314,7 +303,7 @@ CASE014_receipt_retail_tax.png:
   bank_amount: '77.82'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab classic — exact date and amount, full merchant name
 CASE014_tax_invoice_mixed.png:
 - bank_statement: CASE014_nab_classic.png
   supplier: Metro Advisory
@@ -325,7 +314,7 @@ CASE014_tax_invoice_mixed.png:
   bank_amount: '8155.96'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab classic — exact date and amount, full merchant name
 CASE015_receipt_thermal_80mm.png:
 - bank_statement: CASE015_nab_dense.png
   supplier: Bramwell Provisions
@@ -336,7 +325,7 @@ CASE015_receipt_thermal_80mm.png:
   bank_amount: '27.45'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab dense — exact date and amount, full merchant name
 CASE015_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE015_nab_dense.png
   supplier: Denholm IT Solutions
@@ -347,7 +336,7 @@ CASE015_tax_invoice_gst_inclusive.png:
   bank_amount: '4013.50'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Mid row on nab dense — exact date and amount, full merchant name
 CASE016_receipt_thermal_57mm.png:
 - bank_statement: CASE016_westpac_standard.png
   supplier: Southern Stationery Co
@@ -358,8 +347,8 @@ CASE016_receipt_thermal_57mm.png:
   bank_amount: '53.79'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE016_tax_invoice_high_value.png:
 - bank_statement: CASE016_westpac_standard.png
   supplier: Central Consulting Partners
@@ -370,8 +359,7 @@ CASE016_tax_invoice_high_value.png:
   bank_amount: '13111.35'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on westpac standard \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on westpac standard — exact date and amount, full merchant name
 CASE017_receipt_hospitality.png:
 - bank_statement: CASE017_nab_dense.png
   supplier: Tremayne Corner Market
@@ -382,7 +370,7 @@ CASE017_receipt_hospitality.png:
   bank_amount: '16.92'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab dense — exact date and amount, full merchant name
 CASE017_tax_invoice_mixed.png:
 - bank_statement: CASE017_nab_dense.png
   supplier: Greater IT Consulting
@@ -393,8 +381,7 @@ CASE017_tax_invoice_mixed.png:
   bank_amount: '3475.78'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on nab dense \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on nab dense — exact date and amount, abbreviated merchant reference
 CASE018_receipt_fuel.png:
 - bank_statement: CASE018_anz_standard.png
   supplier: Regional Pharmacy
@@ -405,8 +392,7 @@ CASE018_receipt_fuel.png:
   bank_amount: '350.06'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on anz standard — exact date and amount, abbreviated merchant reference
 CASE018_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE018_anz_standard.png
   supplier: Northern Digital Services
@@ -417,8 +403,8 @@ CASE018_tax_invoice_gst_inclusive.png:
   bank_amount: '18498.41'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on anz standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on anz standard — exact date and amount, no merchant reference
+    in description
 CASE019_receipt_professional.png:
 - bank_statement: CASE019_anz_modern.png
   supplier: Southcott Roadhouse
@@ -429,8 +415,7 @@ CASE019_receipt_professional.png:
   bank_amount: '41.58'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on anz modern \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on anz modern — exact date and amount, abbreviated merchant reference
 CASE019_tax_invoice_standard.png:
 - bank_statement: CASE019_anz_modern.png
   supplier: Western Consulting Partners
@@ -441,7 +426,7 @@ CASE019_tax_invoice_standard.png:
   bank_amount: '25500.12'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz modern — exact date and amount, full merchant name
 CASE020_receipt_fuel.png:
 - bank_statement: CASE020_cba_standard.png
   supplier: Eastwick Roadhouse
@@ -452,7 +437,7 @@ CASE020_receipt_fuel.png:
   bank_amount: '129.12'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Early row on cba standard — exact date and amount, full merchant name
 CASE020_tax_invoice_high_value.png:
 - bank_statement: CASE020_cba_standard.png
   supplier: National Marketing Group
@@ -463,8 +448,8 @@ CASE020_tax_invoice_high_value.png:
   bank_amount: '4872.30'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on cba standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on cba standard — exact date and amount, no merchant reference
+    in description
 CASE021_receipt_hospitality.png:
 - bank_statement: CASE021_westpac_premium.png
   supplier: Yarrow Stationery Co
@@ -475,8 +460,8 @@ CASE021_receipt_hospitality.png:
   bank_amount: '162.66'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac premium \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac premium — exact date and amount, abbreviated merchant
+    reference
 CASE021_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE021_westpac_premium.png
   supplier: Western Marketing Group
@@ -487,8 +472,8 @@ CASE021_tax_invoice_gst_inclusive.png:
   bank_amount: '17196.64'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on westpac premium \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on westpac premium — exact date and amount, no merchant reference
+    in description
 CASE022_receipt_thermal_57mm.png:
 - bank_statement: CASE022_cba_date_grouped.png
   supplier: Dunmore Tech Store
@@ -499,8 +484,7 @@ CASE022_receipt_thermal_57mm.png:
   bank_amount: '286.06'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Mid row on cba date grouped — exact date and amount, full merchant name
 CASE022_tax_invoice_mixed.png:
 - bank_statement: CASE022_cba_date_grouped.png
   supplier: Carrington Creative Agency
@@ -511,8 +495,8 @@ CASE022_tax_invoice_mixed.png:
   bank_amount: '9729.37'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 exact date and amount, abbreviated\
-    \ merchant reference"
+  notes: Early row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
 CASE023_receipt_retail_tax.png:
 - bank_statement: CASE023_westpac_standard.png
   supplier: Southern Service Station
@@ -523,8 +507,8 @@ CASE023_receipt_retail_tax.png:
   bank_amount: '399.42'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on westpac standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Mid row on westpac standard — exact date and amount, no merchant reference
+    in description
 CASE023_tax_invoice_high_value.png:
 - bank_statement: CASE023_westpac_standard.png
   supplier: National Strategy Group
@@ -535,8 +519,8 @@ CASE023_tax_invoice_high_value.png:
   bank_amount: '29338.60'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on westpac standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on westpac standard — exact date and amount, no merchant reference
+    in description
 CASE024_receipt_thermal_80mm.png:
 - bank_statement: CASE024_nab_classic.png
   supplier: Coastal Petroleum
@@ -547,8 +531,7 @@ CASE024_receipt_thermal_80mm.png:
   bank_amount: '62.81'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on nab classic \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on nab classic — exact date and amount, abbreviated merchant reference
 CASE024_tax_invoice_standard.png:
 - bank_statement: CASE024_nab_classic.png
   supplier: Denholm Marketing Group
@@ -559,7 +542,7 @@ CASE024_tax_invoice_standard.png:
   bank_amount: '409.13'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab classic — exact date and amount, full merchant name
 CASE025_receipt_professional.png:
 - bank_statement: CASE025_westpac_premium.png
   supplier: Dunmore Emporium
@@ -570,7 +553,7 @@ CASE025_receipt_professional.png:
   bank_amount: '106.74'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
+  notes: Mid row on westpac premium — exact date and amount, full merchant name
 CASE025_tax_invoice_mixed.png:
 - bank_statement: CASE025_westpac_premium.png
   supplier: Norcott Accounting Group
@@ -581,8 +564,7 @@ CASE025_tax_invoice_mixed.png:
   bank_amount: '20387.07'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on westpac premium \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Early row on westpac premium — exact date and amount, full merchant name
 CASE026_receipt_hospitality.png:
 - bank_statement: CASE026_cba_standard.png
   supplier: Underhill Petroleum
@@ -593,7 +575,7 @@ CASE026_receipt_hospitality.png:
   bank_amount: '16.48'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Mid row on cba standard — exact date and amount, full merchant name
 CASE026_tax_invoice_high_value.png:
 - bank_statement: CASE026_cba_standard.png
   supplier: Northern & Associates Accounting
@@ -604,7 +586,7 @@ CASE026_tax_invoice_high_value.png:
   bank_amount: '18215.12'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Mid row on cba standard — exact date and amount, full merchant name
 CASE027_receipt_thermal_80mm.png:
 - bank_statement: CASE027_cba_date_grouped.png
   supplier: Greater Auto Parts
@@ -615,8 +597,8 @@ CASE027_receipt_thermal_80mm.png:
   bank_amount: '212.75'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
 CASE027_tax_invoice_standard.png:
 - bank_statement: CASE027_cba_date_grouped.png
   supplier: Regional Digital Services
@@ -627,8 +609,7 @@ CASE027_tax_invoice_standard.png:
   bank_amount: '31577.13'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on cba date grouped — exact date and amount, full merchant name
 CASE028_receipt_retail_tax.png:
 - bank_statement: CASE028_nab_dense.png
   supplier: Ellery Tyre & Auto
@@ -639,7 +620,7 @@ CASE028_receipt_retail_tax.png:
   bank_amount: '366.24'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Mid row on nab dense — exact date and amount, full merchant name
 CASE028_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE028_nab_dense.png
   supplier: Underhill Advisory
@@ -650,7 +631,7 @@ CASE028_tax_invoice_gst_inclusive.png:
   bank_amount: '21319.43'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab dense — exact date and amount, full merchant name
 CASE029_receipt_fuel.png:
 - bank_statement: CASE029_anz_standard.png
   supplier: Metro Office Supplies
@@ -661,7 +642,7 @@ CASE029_receipt_fuel.png:
   bank_amount: '45.85'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz standard — exact date and amount, full merchant name
 CASE029_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE029_anz_standard.png
   supplier: Greater Marketing Co
@@ -672,8 +653,8 @@ CASE029_tax_invoice_gst_inclusive.png:
   bank_amount: '9212.07'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on anz standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on anz standard — exact date and amount, no merchant reference
+    in description
 CASE030_receipt_thermal_57mm.png:
 - bank_statement: CASE030_westpac_standard.png
   supplier: Verrall Home Improvement
@@ -684,8 +665,7 @@ CASE030_receipt_thermal_57mm.png:
   bank_amount: '323.25'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac standard \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Mid row on westpac standard — exact date and amount, full merchant name
 CASE030_tax_invoice_mixed.png:
 - bank_statement: CASE030_westpac_standard.png
   supplier: Kirriemuir Strategy Group
@@ -696,8 +676,7 @@ CASE030_tax_invoice_mixed.png:
   bank_amount: '8582.39'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on westpac standard \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Early row on westpac standard — exact date and amount, full merchant name
 CASE031_receipt_retail_tax.png:
 - bank_statement: CASE031_anz_modern.png
   supplier: Calloway Health Store
@@ -708,7 +687,7 @@ CASE031_receipt_retail_tax.png:
   bank_amount: '40.53'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Mid row on anz modern — exact date and amount, full merchant name
 CASE031_tax_invoice_high_value.png:
 - bank_statement: CASE031_anz_modern.png
   supplier: National Creative Agency
@@ -719,7 +698,7 @@ CASE031_tax_invoice_high_value.png:
   bank_amount: '15163.41'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Late row on anz modern — exact date and amount, full merchant name
 CASE032_receipt_professional.png:
 - bank_statement: CASE032_nab_classic.png
   supplier: Ashcroft Grocer
@@ -730,7 +709,7 @@ CASE032_receipt_professional.png:
   bank_amount: '76.64'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Mid row on nab classic — exact date and amount, full merchant name
 CASE032_tax_invoice_standard.png:
 - bank_statement: CASE032_nab_classic.png
   supplier: Dunmore Digital Services
@@ -741,7 +720,7 @@ CASE032_tax_invoice_standard.png:
   bank_amount: '14056.61'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab classic — exact date and amount, full merchant name
 CASE033_receipt_fuel.png:
 - bank_statement: CASE033_westpac_premium.png
   supplier: Central Cellars
@@ -752,7 +731,7 @@ CASE033_receipt_fuel.png:
   bank_amount: '347.11'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
+  notes: Mid row on westpac premium — exact date and amount, full merchant name
 CASE033_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE033_westpac_premium.png
   supplier: Harbourside Brand & Media
@@ -763,7 +742,7 @@ CASE033_tax_invoice_gst_inclusive.png:
   bank_amount: '9599.79'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on westpac premium \u2014 exact date and amount, full merchant name"
+  notes: Mid row on westpac premium — exact date and amount, full merchant name
 CASE034_receipt_hospitality.png:
 - bank_statement: CASE034_nab_dense.png
   supplier: Central Cellars
@@ -774,7 +753,7 @@ CASE034_receipt_hospitality.png:
   bank_amount: '139.70'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab dense — exact date and amount, full merchant name
 CASE034_tax_invoice_high_value.png:
 - bank_statement: CASE034_nab_dense.png
   supplier: Capital Tax & Advisory
@@ -785,8 +764,7 @@ CASE034_tax_invoice_high_value.png:
   bank_amount: '2637.29'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on nab dense \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Mid row on nab dense — exact date and amount, no merchant reference in description
 CASE035_receipt_thermal_80mm.png:
 - bank_statement: CASE035_anz_modern.png
   supplier: Regional Liquor Merchants
@@ -797,8 +775,8 @@ CASE035_receipt_thermal_80mm.png:
   bank_amount: '388.56'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on anz modern \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on anz modern — exact date and amount, no merchant reference in
+    description
 CASE035_tax_invoice_standard.png:
 - bank_statement: CASE035_anz_modern.png
   supplier: Riverside Technology Group
@@ -809,8 +787,7 @@ CASE035_tax_invoice_standard.png:
   bank_amount: '4566.49'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on anz modern \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on anz modern — exact date and amount, abbreviated merchant reference
 CASE036_receipt_thermal_57mm.png:
 - bank_statement: CASE036_cba_standard.png
   supplier: Northern Digital Supplies
@@ -821,8 +798,8 @@ CASE036_receipt_thermal_57mm.png:
   bank_amount: '278.41'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on cba standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Mid row on cba standard — exact date and amount, no merchant reference in
+    description
 CASE036_tax_invoice_mixed.png:
 - bank_statement: CASE036_cba_standard.png
   supplier: Central Technology Group
@@ -833,7 +810,7 @@ CASE036_tax_invoice_mixed.png:
   bank_amount: '4971.09'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Late row on cba standard — exact date and amount, full merchant name
 CASE037_receipt_hospitality.png:
 - bank_statement: CASE037_anz_standard.png
   supplier: Bramwell Print & Office
@@ -844,8 +821,7 @@ CASE037_receipt_hospitality.png:
   bank_amount: '223.22'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on anz standard — exact date and amount, abbreviated merchant reference
 CASE037_tax_invoice_high_value.png:
 - bank_statement: CASE037_anz_standard.png
   supplier: Fenwick Marketing Co
@@ -856,7 +832,7 @@ CASE037_tax_invoice_high_value.png:
   bank_amount: '13826.89'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz standard \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz standard — exact date and amount, full merchant name
 CASE038_receipt_retail_tax.png:
 - bank_statement: CASE038_cba_date_grouped.png
   supplier: Carrington Business Supplies
@@ -867,8 +843,8 @@ CASE038_receipt_retail_tax.png:
   bank_amount: '141.07'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on cba date grouped \u2014 exact date and amount, no merchant\
-    \ reference in description"
+  notes: Early row on cba date grouped — exact date and amount, no merchant reference
+    in description
 CASE038_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE038_cba_date_grouped.png
   supplier: Central Creative Agency
@@ -879,8 +855,7 @@ CASE038_tax_invoice_gst_inclusive.png:
   bank_amount: '19852.50'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Early row on cba date grouped — exact date and amount, full merchant name
 CASE039_receipt_thermal_80mm.png:
 - bank_statement: CASE039_nab_classic.png
   supplier: Harbourside Cellars
@@ -891,7 +866,7 @@ CASE039_receipt_thermal_80mm.png:
   bank_amount: '160.48'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Early row on nab classic — exact date and amount, full merchant name
 CASE039_tax_invoice_mixed.png:
 - bank_statement: CASE039_nab_classic.png
   supplier: Southern & Associates Accounting
@@ -902,8 +877,8 @@ CASE039_tax_invoice_mixed.png:
   bank_amount: '4599.06'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on nab classic \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on nab classic — exact date and amount, no merchant reference in
+    description
 CASE040_receipt_professional.png:
 - bank_statement: CASE040_westpac_standard.png
   supplier: National Business Supplies
@@ -914,8 +889,8 @@ CASE040_receipt_professional.png:
   bank_amount: '18.22'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on westpac standard \u2014 exact date and amount, no merchant\
-    \ reference in description"
+  notes: Early row on westpac standard — exact date and amount, no merchant reference
+    in description
 CASE040_tax_invoice_standard.png:
 - bank_statement: CASE040_westpac_standard.png
   supplier: Carrington & Associates Accounting
@@ -926,8 +901,8 @@ CASE040_tax_invoice_standard.png:
   bank_amount: '10543.65'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE041_receipt_fuel.png:
 - bank_statement: CASE041_westpac_standard.png
   supplier: Central Corner Market
@@ -938,8 +913,8 @@ CASE041_receipt_fuel.png:
   bank_amount: '30.78'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Mid row on westpac standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Mid row on westpac standard — exact date and amount, no merchant reference
+    in description
 CASE041_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE041_westpac_standard.png
   supplier: Regional Legal Group
@@ -950,8 +925,8 @@ CASE041_tax_invoice_gst_inclusive.png:
   bank_amount: '18198.58'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on westpac standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE042_receipt_thermal_57mm.png:
 - bank_statement: CASE042_cba_date_grouped.png
   supplier: Norcott Grocer
@@ -962,8 +937,8 @@ CASE042_receipt_thermal_57mm.png:
   bank_amount: '8.61'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on cba date grouped \u2014 exact date and amount, no merchant\
-    \ reference in description"
+  notes: Early row on cba date grouped — exact date and amount, no merchant reference
+    in description
 CASE042_tax_invoice_mixed.png:
 - bank_statement: CASE042_cba_date_grouped.png
   supplier: Southcott & Partners Lawyers
@@ -974,8 +949,8 @@ CASE042_tax_invoice_mixed.png:
   bank_amount: '3788.17'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on cba date grouped \u2014 exact date and amount, abbreviated\
-    \ merchant reference"
+  notes: Early row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
 CASE043_receipt_hospitality.png:
 - bank_statement: CASE043_cba_standard.png
   supplier: Western Building Centre
@@ -986,7 +961,7 @@ CASE043_receipt_hospitality.png:
   bank_amount: '90.75'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on cba standard \u2014 exact date and amount, full merchant name"
+  notes: Early row on cba standard — exact date and amount, full merchant name
 CASE043_tax_invoice_standard.png:
 - bank_statement: CASE043_cba_standard.png
   supplier: Underhill Legal Group
@@ -997,8 +972,7 @@ CASE043_tax_invoice_standard.png:
   bank_amount: '20599.41'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on cba standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on cba standard — exact date and amount, abbreviated merchant reference
 CASE044_receipt_thermal_80mm.png:
 - bank_statement: CASE044_anz_standard.png
   supplier: Central Home Improvement
@@ -1009,8 +983,8 @@ CASE044_receipt_thermal_80mm.png:
   bank_amount: '105.88'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on anz standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on anz standard — exact date and amount, no merchant reference
+    in description
 CASE044_tax_invoice_high_value.png:
 - bank_statement: CASE044_anz_standard.png
   supplier: Ockendon Business Consulting
@@ -1021,8 +995,7 @@ CASE044_tax_invoice_high_value.png:
   bank_amount: '8416.75'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on anz standard — exact date and amount, abbreviated merchant reference
 CASE045_receipt_retail_tax.png:
 - bank_statement: CASE045_westpac_premium.png
   supplier: Statewide Print & Office
@@ -1033,8 +1006,8 @@ CASE045_receipt_retail_tax.png:
   bank_amount: '103.76'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac premium \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac premium — exact date and amount, abbreviated merchant
+    reference
 CASE045_tax_invoice_mixed.png:
 - bank_statement: CASE045_westpac_premium.png
   supplier: Blackwood Consulting Partners
@@ -1045,8 +1018,7 @@ CASE045_tax_invoice_mixed.png:
   bank_amount: '11984.57'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on westpac premium \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on westpac premium — exact date and amount, full merchant name
 CASE046_receipt_professional.png:
 - bank_statement: CASE046_nab_dense.png
   supplier: Harbourside Trade Supplies
@@ -1057,7 +1029,7 @@ CASE046_receipt_professional.png:
   bank_amount: '289.85'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab dense — exact date and amount, full merchant name
 CASE046_tax_invoice_high_value.png:
 - bank_statement: CASE046_nab_dense.png
   supplier: Ellery & Partners Lawyers
@@ -1068,8 +1040,8 @@ CASE046_tax_invoice_high_value.png:
   bank_amount: '3574.38'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Early row on nab dense \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Early row on nab dense — exact date and amount, no merchant reference in
+    description
 CASE047_receipt_thermal_57mm.png:
 - bank_statement: CASE047_nab_classic.png
   supplier: Ibbotson Auto Parts
@@ -1080,8 +1052,8 @@ CASE047_receipt_thermal_57mm.png:
   bank_amount: '5.66'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on nab classic \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on nab classic — exact date and amount, no merchant reference in
+    description
 CASE047_tax_invoice_standard.png:
 - bank_statement: CASE047_nab_classic.png
   supplier: Coastal Marketing Co
@@ -1092,7 +1064,7 @@ CASE047_tax_invoice_standard.png:
   bank_amount: '25814.31'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Mid row on nab classic \u2014 exact date and amount, full merchant name"
+  notes: Mid row on nab classic — exact date and amount, full merchant name
 CASE048_receipt_fuel.png:
 - bank_statement: CASE048_anz_modern.png
   supplier: Farrant Roadhouse
@@ -1103,8 +1075,7 @@ CASE048_receipt_fuel.png:
   bank_amount: '297.11'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Early row on anz modern \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Early row on anz modern — exact date and amount, abbreviated merchant reference
 CASE048_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE048_anz_modern.png
   supplier: Coastal Chartered Accountants
@@ -1115,8 +1086,7 @@ CASE048_tax_invoice_gst_inclusive.png:
   bank_amount: '991.25'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on anz modern \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on anz modern — exact date and amount, abbreviated merchant reference
 CASE049_receipt_retail_tax.png:
 - bank_statement: CASE049_westpac_standard.png
   supplier: Norcott Automotive Supplies
@@ -1127,8 +1097,7 @@ CASE049_receipt_retail_tax.png:
   bank_amount: '171.64'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on westpac standard \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on westpac standard — exact date and amount, full merchant name
 CASE049_tax_invoice_high_value.png:
 - bank_statement: CASE049_westpac_standard.png
   supplier: Greater & Partners Lawyers
@@ -1139,8 +1108,8 @@ CASE049_tax_invoice_high_value.png:
   bank_amount: '1124.82'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on westpac standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on westpac standard — exact date and amount, abbreviated merchant
+    reference
 CASE050_receipt_fuel.png:
 - bank_statement: CASE050_cba_standard.png
   supplier: Bramwell Wine & Spirits
@@ -1151,8 +1120,8 @@ CASE050_receipt_fuel.png:
   bank_amount: '108.47'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on cba standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on cba standard — exact date and amount, no merchant reference in
+    description
 CASE050_tax_invoice_gst_inclusive.png:
 - bank_statement: CASE050_cba_standard.png
   supplier: Blackwood Marketing Group
@@ -1163,8 +1132,7 @@ CASE050_tax_invoice_gst_inclusive.png:
   bank_amount: '9955.87'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Late row on cba standard \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Late row on cba standard — exact date and amount, abbreviated merchant reference
 CASE051_receipt_professional.png:
 - bank_statement: CASE051_anz_standard.png
   supplier: Yarrow Health Store
@@ -1175,7 +1143,7 @@ CASE051_receipt_professional.png:
   bank_amount: '143.38'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz standard \u2014 exact date and amount, full merchant name"
+  notes: Late row on anz standard — exact date and amount, full merchant name
 CASE051_tax_invoice_mixed.png:
 - bank_statement: CASE051_anz_standard.png
   supplier: Norcott Creative Agency
@@ -1186,8 +1154,8 @@ CASE051_tax_invoice_mixed.png:
   bank_amount: '2844.29'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on anz standard \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on anz standard — exact date and amount, no merchant reference in
+    description
 CASE052_receipt_thermal_57mm.png:
 - bank_statement: CASE052_westpac_premium.png
   supplier: Calloway Office Supplies
@@ -1198,8 +1166,7 @@ CASE052_receipt_thermal_57mm.png:
   bank_amount: '95.62'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on westpac premium \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on westpac premium — exact date and amount, full merchant name
 CASE052_tax_invoice_standard.png:
 - bank_statement: CASE052_westpac_premium.png
   supplier: Calloway & Partners Lawyers
@@ -1210,8 +1177,7 @@ CASE052_tax_invoice_standard.png:
   bank_amount: '3731.76'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on westpac premium \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Early row on westpac premium — exact date and amount, full merchant name
 CASE053_receipt_hospitality.png:
 - bank_statement: CASE053_anz_modern.png
   supplier: Metro Retail Co
@@ -1222,7 +1188,7 @@ CASE053_receipt_hospitality.png:
   bank_amount: '133.04'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Early row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Early row on anz modern — exact date and amount, full merchant name
 CASE053_tax_invoice_mixed.png:
 - bank_statement: CASE053_anz_modern.png
   supplier: Ellery Legal Group
@@ -1233,7 +1199,7 @@ CASE053_tax_invoice_mixed.png:
   bank_amount: '21374.56'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on anz modern \u2014 exact date and amount, full merchant name"
+  notes: Late row on anz modern — exact date and amount, full merchant name
 CASE054_receipt_thermal_80mm.png:
 - bank_statement: CASE054_nab_dense.png
   supplier: Yarrow Building Centre
@@ -1244,8 +1210,7 @@ CASE054_receipt_thermal_80mm.png:
   bank_amount: '145.11'
   match_status: FOUND
   match_difficulty: hard
-  notes: "Late row on nab dense \u2014 exact date and amount, no merchant reference\
-    \ in description"
+  notes: Late row on nab dense — exact date and amount, no merchant reference in description
 CASE054_tax_invoice_high_value.png:
 - bank_statement: CASE054_nab_dense.png
   supplier: Wakeling IT Consulting
@@ -1256,7 +1221,7 @@ CASE054_tax_invoice_high_value.png:
   bank_amount: '1523.32'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on nab dense \u2014 exact date and amount, full merchant name"
+  notes: Late row on nab dense — exact date and amount, full merchant name
 CASE055_receipt_professional.png:
 - bank_statement: CASE055_cba_date_grouped.png
   supplier: National Provisions
@@ -1267,8 +1232,7 @@ CASE055_receipt_professional.png:
   bank_amount: '366.12'
   match_status: FOUND
   match_difficulty: easy
-  notes: "Late row on cba date grouped \u2014 exact date and amount, full merchant\
-    \ name"
+  notes: Late row on cba date grouped — exact date and amount, full merchant name
 CASE055_tax_invoice_standard.png:
 - bank_statement: CASE055_cba_date_grouped.png
   supplier: National Chartered Accountants
@@ -1279,5 +1243,5 @@ CASE055_tax_invoice_standard.png:
   bank_amount: '22655.41'
   match_status: FOUND
   match_difficulty: medium
-  notes: "Mid row on cba date grouped \u2014 exact date and amount, abbreviated merchant\
-    \ reference"
+  notes: Mid row on cba date grouped — exact date and amount, abbreviated merchant
+    reference
