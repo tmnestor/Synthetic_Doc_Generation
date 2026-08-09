@@ -211,10 +211,17 @@ on.
 
 ## 4. How pages are described: the layout DSL
 
-A layout is not code. It is a declarative YAML document interpreted by a shared
-engine in [`generators/layout_dsl/`](../generators/layout_dsl/) — roughly 5,000 lines
-of primitives that every document type reuses. This is why the per-type renderers are
-so small: [`receipt.py`](../generators/receipt.py) is 69 lines and
+A **domain-specific language** is a small notation built for one problem rather than
+for general programming. The trade is deliberate: expressive power is given up in
+return for something that can be validated up front and read by people who do not
+write Python. This one is *declarative* — a layout states what a page contains, not
+how to draw it — and *internal*, hosted in YAML rather than having a parser of its
+own.
+
+So a layout is not code. It is a YAML document interpreted by a shared engine in
+[`generators/layout_dsl/`](../generators/layout_dsl/) — roughly 5,000 lines of
+primitives that every document type reuses. This is why the per-type renderers are so
+small: [`receipt.py`](../generators/receipt.py) is 69 lines and
 [`invoice.py`](../generators/invoice.py) is 65, because they hand the layout to the
 engine rather than drawing anything themselves.
 
