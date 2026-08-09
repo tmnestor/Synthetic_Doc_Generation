@@ -390,7 +390,8 @@ safety, and the bounding-box capture come for free.
 ### Why a DSL, and why this one
 
 The DSL replaced hand-written renderers, and the case for it was measured rather than
-asserted ([`docs/layout_dsl_design.md`](layout_dsl_design.md)):
+asserted — the figures below were taken from the design record before it was
+retired, and remain in git history:
 
 - **Duplication.** 2,283 lines across 8 layout files, most of it copy-paste — the four
   invoice layouts shared a single distinct `field_budgets` block and differed only in
