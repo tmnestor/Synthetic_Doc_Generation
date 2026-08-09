@@ -152,6 +152,20 @@ Two properties of the engine matter for anyone extending it:
   that stream per call. A reseed is therefore reproducible *and diffable* run to run,
   which is why `faker==40.8.0` is pinned — an upgrade would silently change content.
 
+That injection is visible in every signature the engine exposes:
+
+```python
+class ContentEngine:
+    def person(self, rng: random.Random) -> dict: ...
+    def address(self, rng: random.Random) -> str: ...
+    def fictional_business(self, rng: random.Random, category: str) -> dict: ...
+
+def sample(rng: random.Random, pool: list): ...
+```
+
+No primitive reaches for module-level randomness, so a caller controls the whole
+stream and the corpus is a pure function of its seed.
+
 ### Rules the generator enforces
 
 Values are constrained by invariants, not merely typed: ABNs carry a real checksum,
@@ -244,27 +258,95 @@ _receipt_body: &receipt_body
       - [{type: text, content: "Time: {POS_TIME}", align: right}]
 ```
 
-Five things in that fragment are worth naming, because they are the vocabulary a new
-document type is written in:
+### The mental model: a list, a loop, and nine functions
 
-- **`type`** — the primitive: `text`, `pair` (label/value), `rule`, `spacer`, `split`
-  (side-by-side columns), `table`. Tables are the heaviest, at ~1,000 lines of engine,
-  because transaction and line-item tables carry most of the extraction difficulty.
-- **`{FIELD}` interpolation** — `"{SUPPLIER_NAME}"` pulls from the ground-truth entry,
-  so a scored field cannot disagree with the answer key. Not every placeholder is
-  ground truth, though: `{POS_TIME}`, `{POS_REGISTER}`, `{POS_STAFF}` and
-  `{RECEIPT_NUMBER}` are produced at render time by
-  [field providers](../generators/layout_dsl/field_providers.py). They make a receipt
-  look like a receipt without being part of what a model is scored on.
-- **`field:`** — declares which ground-truth field this element renders. That binding
-  is what produces `derived/geometry.jsonl`, the per-field bounding boxes captured at
-  draw time and consumed by the DocILE export. Bounding-box ground truth is a
-  by-product of the layout, not a separate labelling pass.
-- **`when:`** — conditional rendering, so a field absent from an entry simply does not
-  draw.
-- **`budget:`** — a fit-safety constraint. Text that would overflow its budget raises
-  rather than silently clipping, which is what keeps a rendered page faithful to the
-  ground truth it claims to depict.
+A body is **a list**. The engine is **a loop**. Each primitive is **a function that
+draws something and returns where the next thing starts**. From
+[`generators/layout_dsl/engine.py`](../generators/layout_dsl/engine.py):
+
+```python
+Drawer = Callable[[dict, RenderContext, int], int]
+#                  ↑block  ↑canvas+entry  ↑y-in  →y-out
+```
+
+Every primitive has that shape: give it the block's YAML dict, the render context and
+the current vertical position; it draws, and returns the new vertical position. The
+walker threading that cursor through is one function:
+
+```python
+def render_blocks(blocks: list, ctx: RenderContext, y: int) -> int: ...
+```
+
+A nine-entry dispatch table is the whole extension point.
+
+| Group | Primitives | Role |
+|---|---|---|
+| Content | `text`, `pair`, `table`, `banner` | Draw something and consume vertical space |
+| Whitespace | `rule`, `spacer` | Draw a line, or just advance the cursor |
+| Containers | `split`, `block`, `panel` | Hold `children` and recurse; `split` places them side by side |
+
+`table` is by far the heaviest at ~1,000 lines, because transaction and line-item
+tables carry most of the extraction difficulty.
+
+### The four bindings
+
+Bindings are how an element reaches the ground-truth entry.
+[`binding.py`](../generators/layout_dsl/binding.py) states its own constraint:
+
+> Deliberately minimal: `{FIELD}` substitution and presence tests, nothing else. No
+> expressions, no arithmetic, no filters — everything a layout references must be
+> statically checkable before a single pixel is drawn.
+
+| Binding | Effect |
+|---|---|
+| `{FIELD}` | Substituted from the entry; a `NOT_FOUND` value renders as empty string |
+| `when:` | The loop **skips the block entirely** when that field is absent |
+| `field:` | Declares which ground-truth field this element renders — drives box capture |
+| `budget:` | Which pixel budget the text must fit; overflow raises rather than clips |
+
+The whole binding surface is three functions and one regex — small enough to quote in
+full, which is the point:
+
+```python
+_PLACEHOLDER = re.compile(r"\{([A-Z][A-Z0-9_]*)\}")
+
+def referenced_fields(template: str) -> list[str]: ...   # what a layout asks for
+def interpolate(template: str, fields: dict) -> str: ... # {FIELD} -> value
+def is_present(fields: dict, field: str) -> bool: ...    # backs `when:`
+```
+
+`referenced_fields` is what makes startup validation possible: every `{FIELD}` in
+every layout can be collected and checked against the schema before rendering begins.
+
+### Tracing one block
+
+Take the ABN line from the fragment above. The loop reaches it and, in order:
+
+1. **`when: BUSINESS_ABN`** — is the field present? A receipt without an ABN skips the
+   block and the cursor does not move, so there is no blank gap where it would have been.
+2. **Dispatch** on `type: text` to `draw_text_block`.
+3. **`content`** — `{BUSINESS_ABN}` is substituted, giving `ABN: 79 104 332 181`.
+4. **`budget: ABN_LINE`** — the string is fitted to that pixel budget. Too long and it
+   wraps or shrinks; genuinely impossible and it raises `FitError` rather than drawing
+   something truncated.
+5. **`field: BUSINESS_ABN`** — the `BoxRecorder` notes the rectangle just drawn under
+   that field name. This is where `derived/geometry.jsonl` comes from: bounding-box
+   ground truth is a by-product of the layout, not a separate labelling pass.
+6. The drawer **returns the new y**, and the loop moves on.
+
+Not every placeholder is ground truth. `{POS_TIME}`, `{POS_REGISTER}`, `{POS_STAFF}`
+and `{RECEIPT_NUMBER}` are produced at render time by
+[field providers](../generators/layout_dsl/field_providers.py) — they make a receipt
+look like a receipt without being part of what a model is scored on.
+
+"Interpreter" is the precise word: nothing generates code or translates the YAML into
+Python. The engine reads the data structure and executes it directly, block by block,
+the same relationship a JSON parser has to JSON. Two consequences follow. Errors are
+tagged with the block's path as they unwind, so a failure reports
+`layout_id.body[3].children[1]` rather than merely naming the layout. And because a
+binding cannot express anything — no arithmetic, no conditionals beyond presence —
+every field a layout references is checkable at startup, which is exactly the property
+Jinja2 would have destroyed.
 
 YAML anchors (`&receipt_body`, reused with `*receipt_body`) let layouts share bodies
 and vary only in page settings — which is how 18 layouts exist without 18 independent
@@ -390,6 +472,32 @@ Three cases, in ascending cost:
    - [`config/field_definitions.yml`](../config/field_definitions.yml) and [`config/extraction_schema.yml`](../config/extraction_schema.yml)
    - `generators/<type>.py` — the renderer
    - `_RENDERERS` in [`generators/pipeline.py`](../generators/pipeline.py) — one line
+
+The renderer's contract is one signature, shared by all three today — see
+[`receipt.py`](../generators/receipt.py), [`invoice.py`](../generators/invoice.py) and
+[`bank_statement.py`](../generators/bank_statement.py):
+
+```python
+def render_<type>(entry: dict, layout: dict, *, geometry_out: dict | None = None) -> Image.Image: ...
+```
+
+`entry` is the ground-truth entry, `layout` the parsed YAML spec, and `geometry_out` is
+populated in place when given — opting in is what produces the bounding boxes. A new
+renderer resolves page settings, hands the body to the engine, and returns the image;
+that is why they run to roughly 70 lines.
+
+Two other contracts a new type meets, both already generic over document type:
+
+```python
+def validate_entry(case_id: str, entry: dict) -> list[str]: ...  # generators/schema.py
+def degrade_receipt(image: Image.Image, tier: Tier, seed: int) -> Image.Image: ...
+```
+
+[`validate_entry`](../generators/schema.py) returns errors rather than raising, so one
+run reports every problem in the corpus.
+[`degrade_receipt`](../generators/degradation/__init__.py) is receipt-specific by
+name and by design, and a new photographed type would add a sibling rather than
+generalise it.
 
 This is a demonstrated path rather than a hypothesis. The repository previously
 carried four trust tax document types and credit-card statements, with compliance and
