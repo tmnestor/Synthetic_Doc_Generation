@@ -19,6 +19,29 @@ flowchart LR
   D --> F["degraded receipts: 3 tiers"]
 ```
 
+Two YAML inputs on the left, doing different jobs. `ground_truth/*.yml` holds
+per-document values — what this particular receipt says, its supplier, its line items,
+its total. `config/data_pools.yml` holds the vocabularies those values were drawn
+from, together with the real-name blocklist they were screened against. Note what is
+*not* on the left: no source corpus, no scraped documents, no external service.
+Nothing enters this diagram from outside it. In the middle, "renderers + layouts" is
+mostly YAML as well — the layouts are declarative specs, and the renderers are thin
+interpreters that walk them.
+
+**The fork out of the middle is the load-bearing part.** A single pass produces both
+the page images and the ground truth. The same traversal that draws a value onto the
+page is the one that records that value, and its bounding box, into the exports — they
+are not produced by two processes and reconciled afterwards. That is why the answer key
+cannot disagree with the pixels: not because the two are checked against each other,
+but because there is only one act of authorship and both outputs fall out of it.
+
+Degradation hangs off the *images*, not the ground truth. The three tiers
+re-photograph an already-rendered page, so field values are untouched and image
+quality is the only variable between a clean document and its degraded variants —
+which is what makes the clean-vs-degraded comparison meaningful. One caveat rides
+along: the camera warp does not carry the bounding boxes with it, so the degraded half
+has value ground truth but no box ground truth.
+
 ---
 
 ## 1. What runs today
