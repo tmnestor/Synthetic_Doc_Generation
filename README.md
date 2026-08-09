@@ -162,15 +162,32 @@ python -m generators.pipeline <command> [OPTIONS]
 
 | Command | Description |
 |---------|-------------|
-| `validate` | Validate ground truth YAML against schema + layout registries |
-| `generate` | Render document images from ground truth + layouts |
-| `derive` | Regenerate CSV/JSONL from ground truth YAML |
+| `validate` | Required fields, layout references, ABN checksums, date/amount formats, parallel-list parity, GST arithmetic, DSL layout bodies, fit-overflow backstop, and that the name grammar cannot emit a real business |
+| `generate` | Render document images from ground truth + layouts, plus `derived/geometry.jsonl` |
+| `derive` | Regenerate CSV/JSONL and the benchmark projections from ground truth YAML |
 | `eval-set` | Export the clean and degraded evaluation sets as dated sibling directories |
 
 | Flag | Default | Applies To | Description |
 |------|---------|------------|-------------|
 | `--config` | `config/generation_config.yml` | all | Path to generation config |
 | `--type` | all types | generate | Generate only this document type |
+
+### Scripts
+
+Everything outside the pipeline itself. The two seeders **rewrite the corpus**; the
+three checks are read-only.
+
+| Script | Description |
+|--------|-------------|
+| `scripts/seed_ground_truth.py` | **Destructive.** Re-seed the 165 ground-truth entries at `seed=42` |
+| `scripts/seed_transaction_links.py` | **Destructive.** Re-seed the 110 links, rewriting the three ground-truth files it reads |
+| `scripts/check_seed_reproducibility.py` | Assert the committed corpus is exactly what those two produce, run in an isolated copy |
+| `scripts/generate_extraction_gt.py` | Build an extraction ground-truth CSV from `config/extraction_schema.yml` |
+| `scripts/check_extractions_match_gt.py` | Assert a returned `raw_extractions.jsonl` and a ground truth describe the same images. Stdlib only, so it also runs on the extraction host |
+| `scripts/post_install.sh` | **Required after every `conda env create` or `env update`** — see [Dependencies](#dependencies) |
+
+See [Regenerating the Dataset](#regenerating-the-dataset) for the order the seeders
+must run in and what a re-seed invalidates.
 
 ---
 
@@ -405,13 +422,26 @@ On the 55 camera-scan receipts the quad is detected 55/55 (100%), recovering clo
 
 ### Document Generation (CASE001-CASE055)
 
+Both seeders **overwrite `ground_truth/*.yml`**, and they must run in this order — the
+second rewrites what the first wrote, so the committed corpus is the fixed point of the
+pair, not of either alone. Running the link seeder alone against an already-linked
+corpus re-links it and produces a different, self-consistent result.
+
 ```bash
 # Re-seed ground truth (165 entries, deterministic with seed=42)
 python scripts/seed_ground_truth.py
 
 # Re-seed transaction links (110 links across 3 difficulty levels)
 python scripts/seed_transaction_links.py
+
+# Confirm the committed corpus is exactly what those two produce
+python scripts/check_seed_reproducibility.py
 ```
+
+A deliberate re-seed invalidates the **content-pinned baselines** — the pixel snapshots
+and the derived baseline — which must be re-captured afterwards. Nothing else notices a
+reproducibility break: those tests render from the committed YAML rather than from a
+reseed, which is why `check_seed_reproducibility.py` exists.
 
 ### Generate and Validate
 
