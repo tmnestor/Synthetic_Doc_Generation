@@ -267,6 +267,44 @@ The practical consequence for extension: **a new layout is configuration, and a 
 document type is mostly configuration plus a thin renderer.** The engine, the fit
 safety, and the bounding-box capture come for free.
 
+### Why a DSL, and why this one
+
+The DSL replaced hand-written renderers, and the case for it was measured rather than
+asserted ([`docs/layout_dsl_design.md`](layout_dsl_design.md)):
+
+- **Duplication.** 2,283 lines across 8 layout files, most of it copy-paste — the four
+  invoice layouts shared a single distinct `field_budgets` block and differed only in
+  their sections. Today it is 1,352 lines across 3 files, though that is not a
+  like-for-like comparison: the corpus also narrowed from eight document types to
+  three in the same work, so anchoring accounts for some of the reduction and deletion
+  for the rest.
+- **Renderers that could not be extended.** `bank_statement.py` was 962 lines: four
+  hardcoded per-bank functions selected by a `layout['renderer']` flag, with about ten
+  booleans toggling blocks inside them. It is now **93 lines**, and all three renderers
+  together come to 227.
+- **A vocabulary that could not describe new documents.** The older section types were
+  *semantic* — `seller_details`, `letterhead`, `receipt_meta`. A semantic vocabulary
+  cannot express a document type it was not written for, so every new type required new
+  Python. The current primitives are *structural* — `text`, `pair`, `table`, `split`,
+  `rule`, `spacer` — and describe any document that is text in boxes.
+- **Silent drift between Python and YAML.** Transaction-column budget widths were
+  hand-computed in YAML to match x-offsets that lived in Python, and nothing checked
+  they still agreed. Binding both to one declaration removes the class of bug.
+
+Two alternatives were considered and rejected, and the reasons matter for anyone
+tempted to revisit them:
+
+- **HTML/CSS rendering** would forfeit three things this corpus depends on: the
+  draw-time bounding boxes, the pinned Pillow font metrics that keep renders identical
+  across machines, and deployability on a host with no public package mirror.
+- **Jinja2 templating of the layout spec** was rejected because control flow in a
+  template is not schema-validatable. It would move failures from startup to render
+  time, which is precisely the fail-fast guarantee the rest of the configuration is
+  built on.
+
+The trade accepted in exchange is a larger engine — about 5,000 lines of primitives —
+carried once, so that each document type costs a YAML file and roughly 70 lines.
+
 ---
 
 ## 5. Generated versus hand-authored
@@ -292,53 +330,35 @@ reimplementing it.
 
 A score is only useful if it can be situated. Scored with a bespoke scorer on a
 bespoke corpus, a result says "0.93 on our data by our method" — a number nobody
-outside the project can interpret. [`generators/exporters/`](../generators/exporters/)
-re-projects the same ground truth onto recognised document-AI schemas so a model can
-be scored with **published evaluators**, and the figure compares to public work.
+outside the project can interpret. The export layer re-projects the same ground truth
+onto recognised document-AI schemas so a model can be scored with **published
+evaluators**, and the figure compares to public work.
 
-The two schemas measure different failures, which is why both are emitted:
-
-| | Question it answers | Shape |
-|---|---|---|
-| **CORD** | Did the model *read* it? | Receipt-centric JSON tree, scored by tree-edit distance |
-| **DocILE** | Did the model *find* it? | Key-information localisation and line-item recognition, bounding-box based |
-
-A model can extract a total correctly while having no idea where it sat on the page,
-and only the localisation score catches that. This is where the geometry captured at
-draw time earns its keep: the `field:` bindings in a layout are what make the DocILE
+Both CORD and DocILE are emitted because they catch different failures. CORD asks
+whether the model *read* a field; DocILE asks whether it *found* it. A model can
+extract a total correctly with no idea where it sat on the page, and only the
+localisation score catches that — which is where the geometry captured at draw time
+earns its keep, since the `field:` bindings in a layout are what make the DocILE
 projection possible at all.
 
-[`config/export_config.yml`](../config/export_config.yml) currently lists four
-`export_targets` — `cord`, `docile`, `doc_refs` (a FinBalance-style convention for the
-cross-document links) and `native` (this repo's own shape). A target is disabled by
-removing it from that list, never by deleting the key, so the configuration always
-states what is on and what is off.
+**The decision worth understanding** is why the CORD number is trustworthy. CORD is
+receipt-body-centric and has no labelled slot for supplier, ABN, address or date.
+Those go in an `extension` subtree, scored *separately* rather than inside the tree —
+because extra nodes no public CORD prediction can contain would depress the tree-edit
+distance and destroy the comparability the export exists to buy. The result is two
+figures instead of one compromised figure: one comparable to published results, one
+complete over the fields actually extracted.
 
-### The decision that makes the CORD number worth having
+**Fidelity is proven, not assumed.** 144 exporter tests include self-scoring ones: a
+generated CORD or DocILE file scored against itself must come out at exactly 1.0.
+That is what separates a projection that is *faithful* from one that is merely
+well-formed — a subtly wrong field map still produces valid JSON.
 
-CORD is receipt-body-centric and has **no labelled slot** for supplier, ABN, address
-or date. Those are placed in an `extension` subtree, and the config sets
-`cord_extension_scoring: excluded_scored_separately` — because scoring that subtree
-*inside* the tree would add nodes no public CORD prediction can contain, depressing
-the tree-edit distance and destroying the comparability the export exists to buy.
-
-The result is two figures rather than one compromised figure: one comparable to
-published results, one complete over the fields actually being extracted.
-
-### Fidelity is proven, not assumed
-
-144 exporter tests, including **self-scoring** ones: a generated CORD or DocILE file
-scored against itself must come out at exactly 1.0. That is what distinguishes a
-projection that is *faithful* from one that is merely well-formed — a subtly wrong
-field map still produces valid JSON, and only a self-score catches it.
-
-One licensing note that travels with this: CORD scoring uses a vendored
-`apted`-backed evaluator, chosen deliberately because MIT-licensed `apted` replaces
-the GPL-adjacent `zss` used by the original Donut implementation.
-
-The authoritative field maps live in
-[`docs/GroundTruth_Export_Spec.md`](GroundTruth_Export_Spec.md); each exporter module
-cites the spec section it implements.
+The specifics live elsewhere and are not repeated here: which target covers which
+documents, the export-policy keys, and the licensing of the vendored evaluator are in
+the README's [Benchmark Export Schemas](../README.md#benchmark-export-schemas)
+section; the authoritative field maps are in
+[`docs/GroundTruth_Export_Spec.md`](GroundTruth_Export_Spec.md).
 
 ---
 

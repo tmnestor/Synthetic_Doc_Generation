@@ -132,7 +132,7 @@ Three packages — `apted`, `rapidfuzz`, `docile-benchmark` — back the local C
 
 | Output | Count | Description |
 |--------|-------|-------------|
-| Clean PNGs | 165 | Pixel-perfect rendered documents |
+| Clean PNGs | 165 | Rendered documents, drawn from the ground truth verbatim |
 | Degraded PNGs | 165 | Simulated phone photos with noise, blur, rotation, JPEG artifacts |
 | Ground truth YAML | 3 files | Field-level truth for all 165 documents |
 | Transaction links YAML | 1 file | 110 receipt/invoice-to-bank-statement links at 3 difficulty levels |
@@ -242,7 +242,7 @@ No real document is ever read, transformed or de-identified: every page is compo
 
 People and addresses come from Faker (`en_AU`); businesses are invented from curated name-parts and paired with generated ABNs (valid checksums). Every generated business name is screened against a **real-name blocklist** — the real retailers/professional services listed in `data_pools.yml` plus a curated list, which exist only to seed that blocklist and are never emitted. Entity selection uses seeded non-repeating sampling, so entities vary and de-correlate across documents instead of repeating in lockstep.
 
-Two things on the page are deliberately real: the **four bank names** that issue the statements (a statement naming no real bank does not look like one — these are institution brands, and statements carry no ABN), and **suburbs and postcodes**, paired with fabricated street numbers and names. Two residual risks are worth stating: ABNs are checksum-valid but not registry-checked, so a coincidental collision with a registered ABN is possible; and generated person names draw on real name distributions, so coincidence with a real individual is possible. Neither involves processing anyone's data. See `docs/generator_capability_overview.md` for the full account.
+Two things on the page are deliberately real — the **four bank names** that issue the statements, and **suburbs and postcodes** paired with fabricated street numbers. Two residual risks follow from generating plausible values: ABNs are checksum-valid but not registry-checked, and generated person names draw on real name distributions, so coincidence is possible in both cases. Neither involves processing anyone's data. [`docs/generator_capability_overview.md`](docs/generator_capability_overview.md) §8 carries the full account, including why the blocklist is needed at all.
 
 ### Deterministic & reproducible
 
