@@ -14,6 +14,7 @@ from rich import print as rprint
 
 from generators.bank_statement import render_bank_statement
 from generators.common import FitError
+from generators.content_engine import load_pools, reachable_blocked_names
 from generators.derive_outputs import (
     derive_cord,
     derive_csv,
@@ -127,6 +128,19 @@ def validate(
                 f"config/data_pools.yml. Known prefixes: "
                 f"{sorted(terminal_cfg['bank_description_methods'])}."
             )
+
+    # A pool edit must not make a real business name emittable. The runtime
+    # blocklist in fictional_business_name() would still catch it, but only as a
+    # retry during seeding; checked here it is a configuration error raised at
+    # the moment someone widens business_name_parts.
+    for name in reachable_blocked_names(load_pools()):
+        all_errors.append(
+            f"the business-name grammar can now emit '{name}', a real business on the "
+            f"blocklist. A prefix in business_name_parts.surnames or .suburb_prefixes "
+            f"combined with a noun in .category_nouns produces it exactly. Rename or "
+            f"remove the offending part in config/data_pools.yml so no real name is "
+            f"reachable."
+        )
 
     if all_errors:
         rprint(f"[red]Validation failed with {len(all_errors)} error(s):[/red]")

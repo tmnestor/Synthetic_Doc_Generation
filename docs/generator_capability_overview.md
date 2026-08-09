@@ -595,25 +595,51 @@ the 41 real businesses** in the blocklist pools.
 
 ### Why a blocklist is needed at all
 
-Business names are not drawn from a list — they are **composed**:
+Business names are not drawn from a list — they are **composed**, and the grammar is
+strictly two slots:
 
 ```
 {surname | suburb_prefix} + {category_noun}
 ```
 
-from 30 surnames, 15 suburb prefixes and 14 category noun-sets, giving roughly
-**2,610 possible names**. Composition can land on a real trading name by accident.
-"Alexandria Hardware" is fine; something colliding with a real chain is not.
+45 prefixes (30 surnames, 15 suburb prefixes) against 58 nouns spread over 14
+categories — about **2,610 possible names**. Composition of that kind can land on a
+real trading name by accident. "Alexandria Hardware" is fine; something colliding with
+a real chain is not.
 
-The blocklist makes that impossible for the names it knows. Every candidate is
-lowercased and checked before it is returned, with a 20-attempt retry budget and a
-loud failure if it is exhausted — so the generator can refuse to produce a corpus, but
-it cannot quietly emit a real business.
+Every candidate is lowercased and checked against the blocklist before it is returned,
+with a 20-attempt retry budget and a loud failure if it is exhausted. The generator can
+refuse to produce a corpus; it cannot quietly emit a real business.
 
-The 41 names are chosen for exactly this exposure: the chains, utilities and telcos a
-composed name is most likely to collide with, which is why
-`real_name_blocklist_extra` carries Aldi, IGA, Telstra, Optus, Origin Energy and AGL
-alongside the retailers already in the pools.
+**How much work is the blocklist doing today? Measurably none — and that is the point
+worth understanding.** Of its 41 names, **zero are reachable by the current grammar**.
+The reason is the shape of the nouns: they are long trade phrases — `business supplies`,
+`& partners lawyers`, `auto parts`, `building centre` — and real brands are not built
+that way. Only one blocklisted name gets even partway there, "Johnson Legal", whose
+last word is a known noun; its first word is not a prefix, so it too is unreachable.
+
+So the blocklist is a **tripwire, not a filter**. `business_name_parts` is hand-curated,
+and the day someone adds `Origin` to the suburb prefixes and `Energy` to a category —
+both entirely reasonable additions — the grammar starts emitting a real utility onto
+fabricated invoices carrying fabricated ABNs.
+
+That is why `pipeline validate` now checks reachability directly, rather than trusting
+the runtime retry to catch it later:
+
+```
+the business-name grammar can now emit 'Origin Energy', a real business on the
+blocklist. A prefix in business_name_parts.surnames or .suburb_prefixes combined
+with a noun in .category_nouns produces it exactly.
+```
+
+The failure arrives when the pool is edited, not when a corpus is seeded.
+
+This also explains the shape of the pools.
+[`retailers`](../config/data_pools.yml) and `professional_services` are structured
+records — name, address, ABN, category — and only businesses worth modelling as records
+belong there. `real_name_blocklist_extra` is names alone: Telstra, Optus, AGL, Qantas,
+Medicare, Australia Post, four banks and three fast-food chains. None of them fits a
+retailer record, and every one is a name nobody wants on a fake tax invoice.
 
 ### What is deliberately real, and why
 
