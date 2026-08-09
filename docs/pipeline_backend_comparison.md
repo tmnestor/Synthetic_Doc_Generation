@@ -2,7 +2,7 @@
 
 > **Status (2026-08-06).** The backend decision is still **open** — no migration has been started. What *has* shipped are the two cheap, backend-independent realism levers this document identified: the OFL font swap with a per-layout `family:` selector, and the receipt-only tiered degradation rebuilt on Augraphy plus the camera-scan homography. Sections describing those now record what was delivered and what it cost, including the places this document's own predictions were wrong.
 >
-> Related: [`receipt_degradation_design.md`](receipt_degradation_design.md) · [`tiered_receipt_degradation_pbi.md`](tiered_receipt_degradation_pbi.md) · [`tiered_receipt_degradation_plan.md`](tiered_receipt_degradation_plan.md)
+> The degradation design, its stakeholder rationale and its implementation plan have since been retired now that the work has shipped; all three remain in git history.
 
 **Purpose.** Decide whether to invest a two-week sprint re-engineering the current PIL + YAML declarative synthetic-document pipeline onto a template-DSL render backend[^dsl] (HTML/CSS, Typst, or LaTeX). The benchmark's whole value is *credibly* measuring information-extraction (IE) accuracy of competing VLMs on labelled synthetic AU business documents, so the two things that actually matter are **realism** (does the synthetic distribution resemble real documents?) and **label fidelity** (are the ground-truth boxes and values exactly right?). Everything below is judged against those two axes plus the cost and risk of the migration itself.
 
@@ -234,7 +234,7 @@ An early draft of this section assumed Augraphy was the answer. Rendering one co
 
 **Every Augraphy effect is a flat-page effect.** Ink bleed, lighting gradients, cast shadows, folds and dirty rollers all treat the document as a rectangle facing the camera square-on. None produce perspective, a background, or framing — and *that geometry* is the dominant visual difference between a flat degraded render and a real phone photo. Augraphy alone could not have closed the gap; the camera-scan warp already did, and had since it was written.
 
-The conclusion was to use both, each for what the other cannot do. See `docs/receipt_degradation_design.md` for the full design and `docs/tiered_receipt_degradation_pbi.md` for the stakeholder rationale, which embeds the comparison sheet this finding came from.
+The conclusion was to use both, each for what the other cannot do. The full design and the stakeholder rationale that embedded the comparison sheet behind this finding were retired once the work shipped; both remain in git history, and the shipped behaviour is described in `generators/degradation/`.
 
 ### What shipped
 

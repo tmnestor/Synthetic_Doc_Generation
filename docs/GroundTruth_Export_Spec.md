@@ -6,33 +6,29 @@
 
 **Date.** 23 July 2026.
 
-**Scope.** Receipts and invoices map to CORD and DocILE. Bank statements, credit-card statements, and trust-distribution documents have no public-schema equivalent and are handled as documented extensions. Transaction links and trust-distribution quads map to a `doc_refs` linking convention.
+**Scope.** Receipts and invoices map to CORD and DocILE. Bank statements have no public-schema equivalent and are handled as a documented extension. Transaction links map to a `doc_refs` linking convention.
 
 ---
 
-## 1. README discrepancies to reconcile before implementing
+## 1. Status: the corpus this spec describes
 
-> **Status: RESOLVED (verified 24 July 2026).** All five discrepancies below have been reconciled — `README.md` now agrees with `config/field_definitions.yml` (46 columns → 47 CSV) and the live `ground_truth/transaction_links.yml` (easy 52 / medium 36 / hard 22), and all worked examples use the current CASE001 (`receipt_fuel` / Ravensdale Health Store / `13.60`). The table is retained as an audit trail. The general rule still holds: **the config and data are authoritative; implement against them, not prose.**
+**Narrowed to three document types (2026-08).** This spec was written when the corpus
+carried eight document types and a 46-column schema, including credit-card statements
+and four trust-distribution types. Those were deleted; the corpus is now bank
+statements, receipts and invoices — 165 documents over a 20-column schema.
 
-The repository README was out of date against the authoritative config and data files when this spec was drafted. Implement against the code and data, not the README. All discrepancies below were verified against literal raw file bytes.
+The sections below have been updated accordingly, and the trust-distribution quad
+mapping that stood at §6.3 has been removed. Both the earlier spec and the
+reconciliation audit it carried remain in git history.
 
-| # | README claim | Location in README | Reality (authoritative source) |
-|---|---|---|---|
-| 1 | "39-column schema" | `README.md` lines 47, 109, 503 (stated three times) | **46 field columns** in `config/field_definitions.yml` → `all_columns:`. The derived CSV prepends `image_file`, giving **47 CSV columns**. The number 39 corresponds to no list present in the repository. |
-| 2 | Column-count rationale | (implicit) | `config/field_definitions.yml` line 2 header comment states **"23 base columns + trust distribution columns."** 23 base + 23 trust = 46. |
-| 3 | Transaction-link difficulty split (~50 / ~30 / ~28) | README transaction-linking section | Actual `match_difficulty` distribution in `ground_truth/transaction_links.yml` is **easy 52, medium 36, hard 22** (110 total). Verify against the live file before quoting — this set has been re-seeded at least once. |
-| 4 | Ground-truth value types (implied numeric) | (implicit) | Amounts are stored as **quoted decimal strings** (`'13.60'`); ABN and TFN are stored as **space-separated strings** (`79 104 332 181`, `890 838 614`), not integers or floats. Match logic and exact-match scorers must normalise. |
-| 5 | Worked examples quote CASE001 as "Bunnings Warehouse / 34.16 / receipt_thermal_80mm" | §4.2, §5.3, §6.1, §6.3 | Live `ground_truth/receipts.yml` CASE001 is `Ravensdale Health Store` / `13.60` / `receipt_fuel`. The repository was re-seeded after the spec was drafted. All examples refreshed in Task 1. |
-
-**Action — DONE.** `README.md` was corrected to agree with `config/field_definitions.yml` and `ground_truth/transaction_links.yml`. Re-verified 24 July 2026: no `39`-column claim remains; the CSV is described as 47 columns (46 fields + `image_file`); the difficulty split reads 52 / 36 / 22; and the stale Bunnings/34.16/thermal example is gone. By the project's YAML-as-single-source-of-truth rule, the config is authoritative and the README must not contradict it.
-
-Additional facts confirmed as correct in the README (no change needed): 110 transaction links total; `match_status` is `FOUND` for all 110; 50 trust-distribution quads split 35 compliant / 15 non-compliant.
+**The general rule still holds: the config and the data are authoritative; implement
+against them, not against prose.**
 
 ---
 
 ## 2. Authoritative schema (implement against this)
 
-### 2.1 The 46 field columns
+### 2.1 The 20 field columns
 
 Source: `config/field_definitions.yml`, key `all_columns:` (lines 112–159), exact order. The CSV header is `["image_file", *all_columns]` (47 columns).
 
@@ -41,15 +37,7 @@ DOCUMENT_TYPE, SUPPLIER_NAME, BUSINESS_ABN, BUSINESS_ADDRESS, GST_AMOUNT,
 INVOICE_DATE, IS_GST_INCLUDED, LINE_ITEM_DESCRIPTIONS, LINE_ITEM_QUANTITIES,
 LINE_ITEM_PRICES, LINE_ITEM_TOTAL_PRICES, PAYER_ADDRESS, PAYER_NAME,
 STATEMENT_DATE_RANGE, TOTAL_AMOUNT, TRANSACTION_AMOUNTS_PAID, TRANSACTION_DATES,
-TRANSACTION_DESCRIPTIONS, TRANSACTION_AMOUNTS_RECEIVED, ACCOUNT_BALANCE,
-CREDIT_LIMIT, MINIMUM_PAYMENT, PAYMENT_DUE_DATE,
-# Trust distribution fields (line 136 comment):
-TRUST_NAME, TRUST_TFN, TRUST_ABN, TRUSTEE_NAME, TRUST_ADDRESS, INCOME_YEAR,
-TOTAL_NET_INCOME, BENEFICIARY_NAME, BENEFICIARY_TFN, BENEFICIARY_ADDRESS,
-SHARE_OF_NET_INCOME, FRANKING_CREDIT, CAPITAL_GAIN_COMPONENT, FOREIGN_INCOME,
-TAX_FREE_AMOUNT, TAX_DEFERRED_AMOUNT, DATE_OF_DISTRIBUTION, INDIVIDUAL_NAME,
-INDIVIDUAL_TFN, DATE_OF_BIRTH, INDIVIDUAL_ADDRESS, TOTAL_TRUST_INCOME,
-TRUST_FRANKING_CREDIT
+TRANSACTION_DESCRIPTIONS, TRANSACTION_AMOUNTS_RECEIVED, ACCOUNT_BALANCE
 ```
 
 ### 2.2 Fields used per document type
@@ -59,13 +47,8 @@ Source: `document_fields:` map (lines 4–110). Fields not applicable to a docum
 - **bank_statement**: DOCUMENT_TYPE, SUPPLIER_NAME, STATEMENT_DATE_RANGE, TRANSACTION_DATES, TRANSACTION_DESCRIPTIONS, TRANSACTION_AMOUNTS_PAID, TRANSACTION_AMOUNTS_RECEIVED, ACCOUNT_BALANCE, PAYER_NAME
 - **receipt**: DOCUMENT_TYPE, SUPPLIER_NAME, BUSINESS_ABN, BUSINESS_ADDRESS, INVOICE_DATE, IS_GST_INCLUDED, GST_AMOUNT, TOTAL_AMOUNT, LINE_ITEM_DESCRIPTIONS, LINE_ITEM_QUANTITIES, LINE_ITEM_PRICES, LINE_ITEM_TOTAL_PRICES
 - **invoice**: receipt fields, plus PAYER_NAME, PAYER_ADDRESS
-- **cc_statement**: DOCUMENT_TYPE, SUPPLIER_NAME, STATEMENT_DATE_RANGE, TRANSACTION_DATES, TRANSACTION_DESCRIPTIONS, TRANSACTION_AMOUNTS_PAID, ACCOUNT_BALANCE, CREDIT_LIMIT, MINIMUM_PAYMENT, PAYMENT_DUE_DATE, PAYER_NAME
-- **trust_return**: DOCUMENT_TYPE, TRUST_NAME, TRUST_TFN, TRUST_ABN, TRUSTEE_NAME, TRUST_ADDRESS, INCOME_YEAR, TOTAL_NET_INCOME, BENEFICIARY_NAME, BENEFICIARY_TFN, SHARE_OF_NET_INCOME, FRANKING_CREDIT, CAPITAL_GAIN_COMPONENT, FOREIGN_INCOME
-- **distribution_statement**: DOCUMENT_TYPE, TRUST_NAME, TRUST_ABN, TRUST_ADDRESS, DATE_OF_DISTRIBUTION, INCOME_YEAR, BENEFICIARY_NAME, BENEFICIARY_TFN, BENEFICIARY_ADDRESS, SHARE_OF_NET_INCOME, FRANKING_CREDIT, CAPITAL_GAIN_COMPONENT, FOREIGN_INCOME, TAX_FREE_AMOUNT, TAX_DEFERRED_AMOUNT
-- **trust_income_schedule**: DOCUMENT_TYPE, TRUST_NAME, TRUST_ABN, BENEFICIARY_NAME, BENEFICIARY_TFN, SHARE_OF_NET_INCOME, FRANKING_CREDIT, CAPITAL_GAIN_COMPONENT, FOREIGN_INCOME
-- **beneficiary_itr**: DOCUMENT_TYPE, INDIVIDUAL_NAME, INDIVIDUAL_TFN, DATE_OF_BIRTH, INDIVIDUAL_ADDRESS, TOTAL_TRUST_INCOME, TRUST_FRANKING_CREDIT
 
-`document_type_values` (the DOCUMENT_TYPE enum): BANK_STATEMENT, RECEIPT, INVOICE, CC_STATEMENT, TRUST_RETURN, DISTRIBUTION_STATEMENT, TRUST_INCOME_SCHEDULE, BENEFICIARY_ITR.
+`document_type_values` (the DOCUMENT_TYPE enum): BANK_STATEMENT, RECEIPT, INVOICE.
 
 ### 2.3 Field types and formats
 
@@ -255,7 +238,7 @@ No `fieldtype` string in §5.1 or §5.2 remains unconfirmed.
 
 ## 6. Mapping C — Transaction links to a `doc_refs` convention
 
-**Applies to**: `transaction_links.yml` (110 links) and `trust_distribution_links.yml` (50 quads). **Public standard**: none exists; this follows the nearest convention, FinBalance's `doc_refs` ([arXiv:2606.15949](https://arxiv.org/abs/2606.15949)). This is the project's novel contribution, so the convention is defined here rather than inherited.
+**Applies to**: `transaction_links.yml` (110 links). **Public standard**: none exists; this follows the nearest convention, FinBalance's `doc_refs` ([arXiv:2606.15949](https://arxiv.org/abs/2606.15949)). This is the project's novel contribution, so the convention is defined here rather than inherited.
 
 ### 6.1 Source link shape (verbatim)
 
@@ -307,60 +290,14 @@ Emitted form:
 
 Verified counts: 110 links; difficulty easy 52 / medium 36 / hard 22; `match_status` FOUND for all 110.
 
-### 6.3 Trust-distribution quad mapping
-
-`ground_truth/trust_distribution_links.yml`, compliant entry (verbatim):
-
-```yaml
-CASE201_dist_table_plain.png:
-  trust_return: CASE201_trust_return_standard.png
-  trust_income_schedule: CASE201_trust_income_schedule_standard.png
-  beneficiary_itr: CASE201_beneficiary_itr_standard.png
-  linking_fields:
-    trust_abn: 79 104 332 181
-    beneficiary_tfn: 890 838 614
-    share_of_net_income: '73078.48'
-    franking_credit: '20985.50'
-    capital_gain_component: '6026.13'
-  compliance_status: compliant
-  discrepancy_type: null
-  discrepancy_details: null
-  match_status: FOUND
-```
-
-Mapping: the parent key (distribution statement) is the anchor `source_doc`; `trust_return`, `trust_income_schedule`, `beneficiary_itr` become the `doc_refs` list; `linking_fields` (the five: `trust_abn`, `beneficiary_tfn`, `share_of_net_income`, `franking_credit`, `capital_gain_component`) become `match_keys`; `compliance_status`, `discrepancy_type`, `discrepancy_details`, `match_status` become the label block.
-
-```json
-{
-  "link_type": "trust_distribution_quad",
-  "source_doc": "CASE201_dist_table_plain.png",
-  "doc_refs": [
-    "CASE201_trust_return_standard.png",
-    "CASE201_trust_income_schedule_standard.png",
-    "CASE201_beneficiary_itr_standard.png"
-  ],
-  "match_keys": {
-    "trust_abn": "79 104 332 181",
-    "beneficiary_tfn": "890 838 614",
-    "share_of_net_income": "73078.48",
-    "franking_credit": "20985.50",
-    "capital_gain_component": "6026.13"
-  },
-  "label": {"compliance_status": "compliant", "discrepancy_type": null,
-    "discrepancy_details": null, "match_status": "FOUND"}
-}
-```
-
-Verified counts: 50 quads; 35 compliant / 15 non-compliant. `discrepancy_type` frequencies among the non-compliant: `under_reported_income` 5, `over_claimed_franking` 4, `missing_cgt` 3, `trust_return_mismatch` 3 (35 are `null` when compliant).
-
----
+--
 
 ## 7. Document types with no public-schema home (extensions)
 
-Bank statements, credit-card statements, and all four trust-distribution document types have **no equivalent in CORD or DocILE**. Neither public schema models a statement transaction register or a trust income schedule. For these document types:
+Bank statements have **no equivalent in CORD or DocILE**. Neither public schema models a statement transaction register. For this document type:
 
 - Do not force-fit into CORD or DocILE.
-- Emit the native 46-column-derived JSON as the ground truth.
+- Emit the native 20-column-derived JSON as the ground truth.
 - Treat them as the project's differentiators; they are the whitespace no public benchmark covers.
 
 For statements, the transaction register (`TRANSACTION_DATES`, `TRANSACTION_DESCRIPTIONS`, `TRANSACTION_AMOUNTS_PAID`, `TRANSACTION_AMOUNTS_RECEIVED`, `ACCOUNT_BALANCE`) can be serialised as a per-row array (one object per index across the aligned pipe lists), analogous to the CORD `menu` unzip, but under a project-defined `transactions` schema rather than a public one.
@@ -424,35 +361,33 @@ If the goal is a leaderboard-style multi-model run rather than per-schema scorin
 ```mermaid
 flowchart LR
     subgraph SoT["Single source of truth — YAML"]
-        GT["ground_truth/*.yml<br/>46-col schema, 420 docs"]
-        TL["transaction_links.yml<br/>110 links (52/36/22)"]
-        TDL["trust_distribution_links.yml<br/>50 quads (35/15)"]
+        GT["ground_truth/*.yml — 20-col schema, 165 docs"]
+        TL["transaction_links.yml — 110 links (52/36/22)"]
     end
 
-    RENDER["Pillow renderer<br/>+ bbox capture at draw time"]
+    RENDER["Pillow renderer + bbox capture at draw time"]
     GT --> RENDER
 
     subgraph DERIVE["Derive step — generators/derive_outputs.py"]
-        CORD["CORD gt_parse<br/>Tier 1: values-only, no boxes"]
-        DOCILE["DocILE KILE / LIR<br/>Tier 2: needs bboxes"]
-        REFS["doc_refs links<br/>Tier 3: field rename"]
-        NATIVE["Native schema<br/>statements + trust docs"]
+        CORD["CORD gt_parse — Tier 1: values-only, no boxes"]
+        DOCILE["DocILE KILE / LIR — Tier 2: needs bboxes"]
+        REFS["doc_refs links — Tier 3: field rename"]
+        NATIVE["Native schema — bank statements"]
     end
 
     GT --> CORD
     GT --> DOCILE
     RENDER -. "bbox dependency" .-> DOCILE
     TL --> REFS
-    TDL --> REFS
     GT --> NATIVE
 
-    VLM["VLM under test<br/>emits predictions in same schema"]
+    VLM["VLM under test — emits predictions in same schema"]
 
     subgraph SCORE["Published scorers"]
-        JPE["Donut JSONParseEvaluator<br/>MIT — drop-in / thin"]
-        DB["docile-benchmark evaluate_dataset<br/>MIT — substantial adapter"]
-        LINK["FinBalance-style link scorer<br/>in-house (no standard)"]
-        EXT["No public scorer<br/>in-house metric"]
+        JPE["Donut JSONParseEvaluator — MIT — drop-in / thin"]
+        DB["docile-benchmark evaluate_dataset — MIT — substantial adapter"]
+        LINK["FinBalance-style link scorer — in-house (no standard)"]
+        EXT["No public scorer — in-house metric"]
     end
 
     CORD --> JPE
@@ -475,14 +410,14 @@ flowchart LR
     classDef risk fill:#fff5b1,stroke:#bf8700,color:#111;
     classDef metric fill:#f3f4f6,stroke:#6b7280,color:#111;
 
-    class GT,TL,TDL sot;
+    class GT,TL sot;
     class CORD,DOCILE,REFS,NATIVE derive;
     class JPE,DB mit;
     class LINK,EXT risk;
     class M1,M2,M3,M4 metric;
 ```
 
-The green path (CORD, DocILE) is free published MIT scoring code; the only build cost is the derive adapters plus bbox capture. The amber path (transaction links, native statement/trust schemas) has no public scorer and is where the in-house tool leads the market.
+The green path (CORD, DocILE) is free published MIT scoring code; the only build cost is the derive adapters plus bbox capture. The amber path (transaction links, the native statement schema) has no public scorer and is where the in-house tool leads the market.
 
 ## 9. The one hard dependency: bounding boxes
 
@@ -504,13 +439,12 @@ Effort tiers:
 
 ## 10. Implementer reference: source file paths
 
-- `config/field_definitions.yml` — authoritative schema: `document_fields`, `all_columns` (46-col order), `document_type_values`, `field_formats`, `field_types`.
+- `config/field_definitions.yml` — authoritative schema: `document_fields`, `all_columns` (20-col order), `document_type_values`, `field_formats`, `field_types`.
 - `generators/schema.py` — ground-truth YAML validator (doc-type enum, required-fields-per-type, date/amount/ABN/TFN format and checksum checks, pipe-list count consistency).
 - `generators/derive_outputs.py` — `derive_csv` / `derive_jsonl` (CSV column order, `NOT_FOUND` logic, JSONL layout). Add `derive_cord`, `derive_docile`, `derive_links` here.
 - `ground_truth/transaction_links.yml` — 110 receipt/invoice to bank links.
-- `ground_truth/trust_distribution_links.yml` — 50 trust-distribution quads.
-- `ground_truth/{bank_statements,receipts,invoices,cc_statements,trust_returns,distribution_statements,trust_income_schedules,beneficiary_itrs}.yml` — per-doc-type ground truth.
-- `scripts/seed_ground_truth.py`, `seed_transaction_links.py`, `seed_trust_distributions.py`, `seed_trust_distribution_links.py` — seeding scripts.
+- `ground_truth/{bank_statements,receipts,invoices}.yml` — the 165 source entries.
+- `scripts/seed_ground_truth.py`, `scripts/seed_transaction_links.py` — corpus regeneration, in that order.
 - Regeneration entry point: `python -m generators.pipeline derive`.
 
 ---

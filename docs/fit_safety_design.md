@@ -5,7 +5,8 @@
 > content widening (Phases 1–3) safe. It changes no content and is designed to
 > leave the current 220 documents byte-identical.
 
-Related: [`docs/content_variety_options.md`](../../content_variety_options.md) §3a.
+Precursor to the content-variety programme, whose options paper has since been
+retired; it remains in git history.
 
 ---
 
