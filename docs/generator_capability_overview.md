@@ -288,7 +288,61 @@ reimplementing it.
 
 ---
 
-## 6. Extending to a new Entity–Relation–Event use case
+## 6. Scoring against public benchmarks: why CORD and DocILE
+
+A score is only useful if it can be situated. Scored with a bespoke scorer on a
+bespoke corpus, a result says "0.93 on our data by our method" — a number nobody
+outside the project can interpret. [`generators/exporters/`](../generators/exporters/)
+re-projects the same ground truth onto recognised document-AI schemas so a model can
+be scored with **published evaluators**, and the figure compares to public work.
+
+The two schemas measure different failures, which is why both are emitted:
+
+| | Question it answers | Shape |
+|---|---|---|
+| **CORD** | Did the model *read* it? | Receipt-centric JSON tree, scored by tree-edit distance |
+| **DocILE** | Did the model *find* it? | Key-information localisation and line-item recognition, bounding-box based |
+
+A model can extract a total correctly while having no idea where it sat on the page,
+and only the localisation score catches that. This is where the geometry captured at
+draw time earns its keep: the `field:` bindings in a layout are what make the DocILE
+projection possible at all.
+
+[`config/export_config.yml`](../config/export_config.yml) currently lists four
+`export_targets` — `cord`, `docile`, `doc_refs` (a FinBalance-style convention for the
+cross-document links) and `native` (this repo's own shape). A target is disabled by
+removing it from that list, never by deleting the key, so the configuration always
+states what is on and what is off.
+
+### The decision that makes the CORD number worth having
+
+CORD is receipt-body-centric and has **no labelled slot** for supplier, ABN, address
+or date. Those are placed in an `extension` subtree, and the config sets
+`cord_extension_scoring: excluded_scored_separately` — because scoring that subtree
+*inside* the tree would add nodes no public CORD prediction can contain, depressing
+the tree-edit distance and destroying the comparability the export exists to buy.
+
+The result is two figures rather than one compromised figure: one comparable to
+published results, one complete over the fields actually being extracted.
+
+### Fidelity is proven, not assumed
+
+144 exporter tests, including **self-scoring** ones: a generated CORD or DocILE file
+scored against itself must come out at exactly 1.0. That is what distinguishes a
+projection that is *faithful* from one that is merely well-formed — a subtly wrong
+field map still produces valid JSON, and only a self-score catches it.
+
+One licensing note that travels with this: CORD scoring uses a vendored
+`apted`-backed evaluator, chosen deliberately because MIT-licensed `apted` replaces
+the GPL-adjacent `zss` used by the original Donut implementation.
+
+The authoritative field maps live in
+[`docs/GroundTruth_Export_Spec.md`](GroundTruth_Export_Spec.md); each exporter module
+cites the spec section it implements.
+
+---
+
+## 7. Extending to a new Entity–Relation–Event use case
 
 ### New entities
 
@@ -352,7 +406,7 @@ starting point rather than a blocker — but it is design work, not configuratio
 
 ---
 
-## 7. Data privacy: realistic, but not real
+## 8. Data privacy: realistic, but not real
 
 **Nothing real goes in.** There is no source corpus. No real invoice, receipt or
 statement is read, transformed, de-identified or sampled at any point — every
@@ -430,7 +484,7 @@ decision.
 
 ---
 
-## 8. Known limits
+## 9. Known limits
 
 **No negative cases in relationships.** Every link carries `match_status: FOUND`, so
 the corpus measures recall on relationship extraction but cannot currently measure
@@ -452,7 +506,7 @@ models nothing.
 
 ---
 
-## 9. What a new use case has to specify
+## 10. What a new use case has to specify
 
 1. The entity types to extract, and which are fields on a page versus derived values.
 2. The relationships, the evidence that establishes each one, and the single axis
