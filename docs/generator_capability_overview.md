@@ -54,9 +54,15 @@ has value ground truth but no box ground truth.
 
 ## 1. What runs today
 
-Six commands take the corpus from nothing to a scored evaluation set. There is no
-annotation step at any point: the label is the *input*, and the image is rendered
-from it.
+Six commands take the corpus from nothing to an evaluation set ready to be scored.
+There is no annotation step at any point: the label is the *input*, and the image is
+rendered from it.
+
+**This repository does not evaluate anything.** It produces the images and the ground
+truth a model is scored *against*. Running the model is a separate step on separate
+hardware, and the scoring is a separate deliverable again — see
+[the remote extraction runbook](remote_extraction_runbook.md) for the round trip and
+`score_extractions.ipynb` for the scorer.
 
 | Stage | Command | Produces |
 |---|---|---|
@@ -571,7 +577,7 @@ reimplementing it.
 
 ---
 
-## 6. Scoring against public benchmarks: why CORD and DocILE
+## 6. Making a score comparable: why CORD and DocILE
 
 A score is only useful if it can be situated. Scored with a bespoke scorer on a
 bespoke corpus, a result says "0.93 on our data by our method" — a number nobody
