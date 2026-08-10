@@ -379,9 +379,49 @@ binding cannot express anything — no arithmetic, no conditionals beyond presen
 every field a layout references is checkable at startup, which is exactly the property
 Jinja2 would have destroyed.
 
-YAML anchors (`&receipt_body`, reused with `*receipt_body`) let layouts share bodies
-and vary only in page settings — which is how 18 layouts exist without 18 independent
-descriptions.
+### How layouts share a body: YAML anchors
+
+Eighteen layouts exist without eighteen independent descriptions because YAML can name
+a node once and refer to it afterwards. Three pieces of syntax do it, and
+[`config/layouts/receipts.yml`](../config/layouts/receipts.yml) uses all three:
+
+```yaml
+_receipt_body: &receipt_body      # & defines an anchor — a label on this node
+  - {type: text, ...}
+
+  body: *receipt_body             # * is an alias — "the node labelled receipt_body"
+
+  defaults:
+    <<: *receipt_defaults_values  # << is a merge key — splice those keys in here
+    line_advance: {body: 20}      # ...then add or override alongside
+```
+
+**Alias versus merge is the distinction worth holding onto.** `*x` replaces an entire
+value: `body: *receipt_body` means this layout's body *is* that sequence, nothing
+added. `<<: *x` splices a mapping's keys into the surrounding mapping and leaves room
+for more — which is why `defaults:` can inherit twenty shared values and still declare
+its own `line_advance` and `spacer_height`. That split is deliberate: line pitch is a
+function of each layout's own type size and cannot be shared, while everything else
+can.
+
+The payoff is visible in the file. Six receipt layouts in **332 lines**, of which the
+shared body is a **108-line block written once and aliased six times**. Each layout
+supplies only what genuinely differs — page width, type size, line pitch, per-field
+budgets, footer wording. Change the body once and all six change together.
+
+**The underscore convention is enforced, not stylistic.** Top-level keys beginning with
+`_` are anchor holders rather than layouts.
+[`loader.py`](../generators/loader.py) unwraps the `layouts:` block and then inspects
+its siblings: underscore-prefixed keys are ignored, and **anything else fails fast**
+with a diagnostic telling you to indent it under `layouts:` or rename it. Without that
+rule a mistyped top-level key would silently become a seventh layout that no
+ground-truth entry references.
+
+**One gotcha worth knowing before writing code against a loaded layout.** An alias is
+the same node, not a copy. After `yaml.safe_load`, all six receipt layouts hold
+references to a single body list — verifiably so; `all(b is bodies[0] ...)` is true.
+Mutating a layout in place therefore changes every layout that shares the anchor. Copy
+first, or fix one receipt and break five.
 
 The practical consequence for extension: **a new layout is configuration, and a new
 document type is mostly configuration plus a thin renderer.** The engine, the fit
