@@ -423,6 +423,41 @@ references to a single body list — verifiably so; `all(b is bodies[0] ...)` is
 Mutating a layout in place therefore changes every layout that shares the anchor. Copy
 first, or fix one receipt and break five.
 
+#### What this is, in object terms
+
+Anchoring affords every idea concerned with **structural sharing**, and none concerned
+with **behaviour** — a division worth naming, because it is the architecture's.
+
+What it gives:
+
+- **Prototypal delegation, not class inheritance.** `_receipt_defaults_values` is not
+  an abstract type; it is a concrete object that other objects extend, as in Self or
+  JavaScript. There is no instantiation step — a layout points at a node that already
+  exists.
+- **Mixin composition with a defined precedence.** A local key beats a merged one, and
+  where several mappings are merged (`<<: [*a, *b]`, unused here) the **first wins**.
+- **Flyweight, literally rather than by analogy** — one body object, six contexts.
+- **Open/closed in the small**: a layout extends the shared defaults without editing
+  them.
+
+What it does not give:
+
+- **No encapsulation.** Nothing is private, and there is no constructor to enforce
+  invariants. `validate_layout` does that job, but externally and at startup.
+- **No polymorphism.** An alias cannot stand in for a different implementation. The
+  engine *does* dispatch polymorphically, on `type:` through `PRIMITIVE_DRAWERS` — but
+  that belongs to the interpreter, not to the anchoring.
+- **No behaviour at all.** No methods, no `super()`, no hooks. A merge key is not a
+  Template Method.
+
+That split is the reason the Jinja2 alternative was rejected. Templating would have
+put control flow — behaviour — into the data layer, and behaviour in data is precisely
+what cannot be validated before rendering begins.
+
+The analogy bites back in one place. Flyweight requires shared state to be
+**immutable**, and nothing enforces that here — which is not a quibble about patterns
+but the exact reason mutating a loaded layout corrupts its five siblings.
+
 The practical consequence for extension: **a new layout is configuration, and a new
 document type is mostly configuration plus a thin renderer.** The engine, the fit
 safety, and the bounding-box capture come for free.
