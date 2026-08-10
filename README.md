@@ -7,20 +7,31 @@ YAML-driven pipeline for generating synthetic Australian business documents with
 ## Quick Start
 
 ```bash
-# Validate ground truth against schema and layout registries
+# Check every entry before rendering: required fields, ABN checksums, date and
+# amount formats, line-item/transaction list parity, GST arithmetic, that each
+# layout reference exists, that no text overflows its budget, and that the
+# business-name grammar cannot emit a real company. Fails fast, listing every problem.
 python -m generators.pipeline validate
 
-# Generate the 165 clean images (degradation is part of `eval-set`, not this)
+# Render the 165 clean images into output/clean/, and capture each field's bounding
+# box at draw time into derived/geometry.jsonl. Filenames keep the layout
+# (CASE001_cba_standard.png). No degradation here — that belongs to `eval-set`.
 python -m generators.pipeline generate
 
 # Generate only one document type
 python -m generators.pipeline generate --type receipts
 
-# Regenerate derived CSV/JSONL from YAML ground truth
+# Re-project the ground truth into derived/: ground_truth.csv and .jsonl, plus the
+# benchmark schemas listed in export_config.yml's `export_targets` — cord.jsonl,
+# docile.jsonl, native.jsonl, doc_refs.jsonl. DocILE needs the bounding boxes
+# `generate` captures, so run that first on a fresh clone.
 python -m generators.pipeline derive
 
-# Export the evaluation datasets — the deliverable models are scored against
-python -m generators.pipeline eval_set --out /path/to/evaluation_data
+# Export the deliverable: two dated sibling directories, synthetic_<date>/ (165 clean
+# images, 3 types) and degraded_<date>/ (receipts only, 55 x 3 severity tiers). Each
+# carries its own ground_truth.csv/.jsonl for the images it holds, and filenames are
+# generic (CASE001_receipt.png) so the layout cannot leak to the model.
+python -m generators.pipeline eval-set --out /path/to/evaluation_data
 ```
 
 ### The evaluation datasets
