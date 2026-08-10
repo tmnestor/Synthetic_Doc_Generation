@@ -55,7 +55,18 @@ _DEFAULT_CONFIG = Path("config/generation_config.yml")
 def validate(
     config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
 ) -> None:
-    """Validate all ground truth YAML files against schema and layout registries."""
+    """Check every ground-truth entry before anything is rendered.
+
+    Covers required fields per document type, ABN checksums, date and amount
+    formats, equal item counts across parallel pipe-delimited fields, GST as one
+    eleventh of a GST-inclusive total, that each `layout:` names a layout the
+    registry actually holds, that the DSL bodies are well formed, that no text
+    overflows its budget, and that the business-name grammar cannot emit a real
+    company.
+
+    Errors are collected rather than raised one at a time, so a single run
+    reports every problem in the corpus.
+    """
     cfg = load_generation_config(config)
     all_errors: list[str] = []
 
@@ -155,7 +166,16 @@ def validate(
 def derive(
     config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
 ) -> None:
-    """Regenerate CSV/JSONL from ground truth YAML."""
+    """Re-project the ground truth into every derived view.
+
+    Writes `ground_truth.csv` and `.jsonl`, then each benchmark schema listed in
+    `export_targets` in config/export_config.yml — CORD, DocILE, native and
+    doc_refs. A target absent from that list is skipped, which is how one is
+    shipped as a no-op without deleting its key.
+
+    DocILE consumes the per-field bounding boxes `generate` captures into
+    `derived/geometry.jsonl`, so on a fresh tree `generate` has to run first.
+    """
     cfg = load_generation_config(config)
     derived_dir = Path(cfg["derived_dir"])
     derived_dir.mkdir(parents=True, exist_ok=True)
@@ -323,7 +343,17 @@ def eval_set(
     config: Path = typer.Option(_DEFAULT_CONFIG, help="Path to generation_config.yml"),
     force: bool = typer.Option(False, "--force", help="Replace a non-empty output directory"),
 ) -> None:
-    """Export the clean and degraded evaluation sets as sibling directories."""
+    """Export the deliverable: two dated sibling directories under one root.
+
+    `synthetic_<date>/` holds 165 clean images across the three document types;
+    `degraded_<date>/` holds receipts only, one image per severity tier. The two
+    halves are NOT mirrors — the degraded one is 55 documents at 3 severities,
+    named `CASE001_receipt_v1.png` and up, and carries its own ground truth
+    describing those files rather than a copy of the clean one.
+
+    Filenames are generic — `CASE001_receipt.png`, never `CASE001_woolworths.png`
+    — so a model cannot infer the template before reading a pixel.
+    """
     from generators.eval_set import export_eval_set
 
     try:
