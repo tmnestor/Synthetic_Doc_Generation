@@ -163,6 +163,55 @@ Editing either level changes the corpus without touching code. The constraint is
 *schema*, not the values: 20 fields exist, of which the extraction contract asks 14
 for invoices and receipts and 5 for bank statements.
 
+### How the entries are generated
+
+Those instance files are written by two scripts, and the order is part of the
+contract.
+
+[`scripts/seed_ground_truth.py`](../scripts/seed_ground_truth.py) produces the three
+per-type files, 55 entries each. Four things about it are worth knowing:
+
+**Determinism needs two seeds, not one.**
+
+```python
+rng = random.Random(_SEED)   # 42 — the injected stream every primitive uses
+random.seed(_SEED)           # generate_abn() draws from the module-global RNG
+```
+
+The second line is easy to miss and load-bearing: `generate_abn()` takes no injected
+generator, so without it the ABN digits would vary run to run while everything else
+stayed stable.
+
+**Shared entities are drawn once per case, then projected.** A holder and a location
+are generated for each case and handed to both the bank and invoice generators, so
+`PAYER_NAME` cannot desync across a case's linked documents. Receipts skip the bundle
+entirely — a receipt has no payer field.
+
+**Transaction counts come from the layout, not the seeder.** `_txn_count_range` reads
+`transaction_count` out of the bank layout registry, required and never defaulted,
+because — in the script's own words — *a statement longer than its page is content the
+benchmark hides from the model while still scoring it.*
+
+**Every entry gets a `degradation_seed`**, which is what makes a receipt's three
+degraded variants reproducible later.
+
+`--dry-run` builds the whole corpus in memory and validates it, including an overflow
+pass against the real renderers, without writing anything.
+
+[`scripts/seed_transaction_links.py`](../scripts/seed_transaction_links.py) then writes
+`transaction_links.yml` **and rewrites the other three files**. Per link it picks a
+transaction slot on the matching statement, overwrites it with the source document's
+total, a shared in-period date and a merchant description keyed to the chosen
+difficulty, re-dates the receipt or invoice to match, sorts the transactions
+chronologically and recomputes `STATEMENT_DATE_RANGE`.
+
+**The committed corpus is the fixed point of the pair in sequence, not of either
+alone.** Running the link seeder by itself against an already-linked corpus re-links
+it and yields a different, self-consistent result — which looks like a bug and is not.
+[`scripts/check_seed_reproducibility.py`](../scripts/check_seed_reproducibility.py)
+verifies the committed files are still what the two produce, running both in an
+isolated copy so the real corpus is never touched.
+
 ### Where Faker fits, and where it does not
 
 [`generators/content_engine.py`](../generators/content_engine.py) (265 lines) owns one seeded `Faker("en_AU")` instance,
