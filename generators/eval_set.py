@@ -245,7 +245,68 @@ def project_fields(
         projected[name] = (
             format_value(name, value, schema) if value is not None and str(value).strip() else NOT_FOUND
         )
-    return projected
+    # The extraction answer key is debit-only: the 5-field bank contract has no
+    # TRANSACTION_AMOUNTS_RECEIVED, so credit rows have no home in it.
+    return _drop_credit_rows(projected)
+
+
+_PAID_COLUMN = "TRANSACTION_AMOUNTS_PAID"
+_STATEMENT_TYPE = "BANK_STATEMENT"
+
+
+def _drop_credit_rows(projected: dict[str, str]) -> dict[str, str]:
+    """Drop credit rows from a projected bank statement's register columns.
+
+    The canonical register in `ground_truth/bank_statements.yml` is the FULL
+    table: index-aligned TRANSACTION_* columns where a credit row carries
+    NOT_FOUND in the paid column. That stays untouched -- it is correct for the
+    register, for `derive_native`, and for transaction linking.
+
+    The extraction contract is narrower. `config/extraction_schema.yml` gives
+    bank_statement five fields and no TRANSACTION_AMOUNTS_RECEIVED, so a credit
+    amount has nowhere to go. Projecting the full register into that answer key
+    leaves placeholder rows no model is asked to produce; a consumer scoring
+    position-by-position then finds the two lists offset by the credit count and
+    marks a correct extraction wrong.
+
+    Rows are identified by NOT_FOUND in the paid column, and every register
+    column of matching length is filtered with the same indices so the columns
+    stay aligned. Detection is by shape rather than by field name because the
+    projection renames TRANSACTION_DESCRIPTIONS to LINE_ITEM_DESCRIPTIONS; a
+    bank record's only multi-member fields are the register columns.
+
+    Returns a new dict in the original key order (the JSONL key order is the
+    contract), or the input unchanged when filtering does not apply or would
+    not be safe.
+    """
+    if projected.get("DOCUMENT_TYPE") != _STATEMENT_TYPE:
+        return projected
+
+    paid_raw = str(projected.get(_PAID_COLUMN, NOT_FOUND))
+    if "|" not in paid_raw:
+        return projected
+
+    paid_items = [item.strip() for item in paid_raw.split("|")]
+    keep = [i for i, value in enumerate(paid_items) if value.upper() != NOT_FOUND]
+
+    # Nothing to drop, or every row is a credit. Emitting an empty register
+    # would be a silently wrong answer key, so leave the record alone.
+    if len(keep) == len(paid_items) or not keep:
+        return projected
+
+    result = dict(projected)
+    for name, value in projected.items():
+        text = str(value)
+        if "|" not in text:
+            continue
+        items = [item.strip() for item in text.split("|")]
+        if len(items) != len(paid_items):
+            # Not an aligned register column -- filtering it by these indices
+            # would drop the wrong entries. Leave it whole.
+            continue
+        separator = " | " if " | " in text else "|"
+        result[name] = separator.join(items[i] for i in keep)
+    return result
 
 
 def write_jsonl(documents: list[dict], jsonl_path: Path) -> Path:
