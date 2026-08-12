@@ -247,7 +247,10 @@ def project_fields(
         )
     # The extraction answer key is debit-only: the 5-field bank contract has no
     # TRANSACTION_AMOUNTS_RECEIVED, so credit rows have no home in it.
-    return _drop_credit_rows(projected)
+    #
+    # It is also print-only: a value the document does not show cannot be an
+    # extraction answer, which on receipts means the per-unit price.
+    return _blank_unprinted_unit_prices(_drop_credit_rows(projected))
 
 
 _PAID_COLUMN = "TRANSACTION_AMOUNTS_PAID"
@@ -306,6 +309,73 @@ def _drop_credit_rows(projected: dict[str, str]) -> dict[str, str]:
             continue
         separator = " | " if " | " in text else "|"
         result[name] = separator.join(items[i] for i in keep)
+    return result
+
+
+_RECEIPT_TYPE = "RECEIPT"
+_UNIT_PRICE_COLUMN = "LINE_ITEM_PRICES"
+_QUANTITY_COLUMN = "LINE_ITEM_QUANTITIES"
+
+
+def _blank_unprinted_unit_prices(projected: dict[str, str]) -> dict[str, str]:
+    """Blank a receipt's unit prices where the receipt does not print them.
+
+    A receipt line carries ONE amount, and that amount is the line total::
+
+        3x <item name>                          9.72
+
+    The unit price (3.24) appears nowhere on the page -- the generator knows it
+    because it composed the line, but no reader can extract it. Carrying the
+    derived value in the answer key makes the field unscoreable in the honest
+    sense: a model that reports exactly what is printed is marked wrong, and the
+    only way to score well is to divide, which is arithmetic rather than
+    extraction. Measured on a 55-receipt corpus, both models under test read the
+    printed amount correctly and scored 0.20-0.46 on this field for it.
+
+    Where the quantity is 1 the two coincide, so the printed amount IS the unit
+    price and is kept. Everywhere else the position becomes NOT_FOUND.
+
+    INVOICES ARE DELIBERATELY EXCLUDED. Their layout has an explicit ``Unit
+    Price`` column, so the value is on the page and the answer key is correct as
+    generated. This filter is keyed on DOCUMENT_TYPE for exactly that reason --
+    it is a fact about the receipt template, not about the field name.
+
+    Returns a new dict in the original key order, or the input unchanged when
+    the rule does not apply.
+    """
+    if projected.get("DOCUMENT_TYPE") != _RECEIPT_TYPE:
+        return projected
+
+    prices_raw = str(projected.get(_UNIT_PRICE_COLUMN, NOT_FOUND))
+    quantities_raw = str(projected.get(_QUANTITY_COLUMN, NOT_FOUND))
+    if prices_raw.upper() == NOT_FOUND or quantities_raw.upper() == NOT_FOUND:
+        return projected
+
+    prices = [item.strip() for item in prices_raw.split("|")]
+    quantities = [item.strip() for item in quantities_raw.split("|")]
+    if len(prices) != len(quantities):
+        # Not an aligned pair -- deciding per position would be guesswork, and
+        # guessing in an answer key is worse than leaving it as generated.
+        return projected
+
+    kept = []
+    for price, quantity in zip(prices, quantities):
+        try:
+            shown = float(quantity) == 1.0
+        except ValueError:
+            # A quantity that is not a number: cannot establish that the unit
+            # price is unprinted, so leave the value alone.
+            shown = True
+        kept.append(price if shown else NOT_FOUND)
+
+    if all(value == NOT_FOUND for value in kept):
+        result = dict(projected)
+        result[_UNIT_PRICE_COLUMN] = NOT_FOUND
+        return result
+
+    separator = " | " if " | " in prices_raw else "|"
+    result = dict(projected)
+    result[_UNIT_PRICE_COLUMN] = separator.join(kept)
     return result
 
 
