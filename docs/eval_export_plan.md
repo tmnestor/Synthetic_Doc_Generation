@@ -1,5 +1,18 @@
 # Evaluation-Set Export — Implementation Plan
 
+> **⚠️ Superseded — kept as a historical record of the 2026-08-05 design.**
+> This plan describes the export as it was decided *before* the degraded half was
+> redesigned. Two later commits changed it: `a77fb7a` (2026-08-06) made the degraded
+> half receipts-only at three severity tiers, and `1076e1f` (2026-08-07) gave each
+> variant a `_v1`/`_v2`/`_v3` suffix and wrote its ground truth rather than copying it.
+>
+> The claims below that **filenames match across both directories**, that the ground
+> truths are **byte-identical copies**, and that **one ground truth scores both** are no
+> longer true. Pairing now joins on the filename with the tier suffix removed, and a
+> clean-vs-degraded comparison covers only the 55 receipts. For current behaviour see
+> the README's "The evaluation datasets" section and the module docstring in
+> `generators/eval_set.py`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** `python -m generators.pipeline eval_set` produces two self-contained sibling directories — `synthetic_<YYYYMMDD>/` and `degraded_<YYYYMMDD>/` — each holding 165 images and its own copy of `ground_truth.csv` / `ground_truth.jsonl`, with no dependency on any other repository.

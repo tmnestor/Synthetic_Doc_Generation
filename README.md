@@ -41,17 +41,37 @@ two sibling directories, stamped with today's date:
 
 ```
 <out>/synthetic_<YYYYMMDD>/        <out>/degraded_<YYYYMMDD>/
-  CASE001_bank_statement.png         CASE001_bank_statement.png
-  CASE001_invoice.png                CASE001_invoice.png
-  ...  165 images                    ...  165 images
-  ground_truth.csv                   ground_truth.csv     ← identical copy
-  ground_truth.jsonl                 ground_truth.jsonl   ← identical copy
+  CASE001_bank_statement.png         CASE001_receipt_v1.png
+  CASE001_invoice.png                CASE001_receipt_v2.png
+  CASE001_receipt.png                CASE001_receipt_v3.png
+  ...  165 images, 3 types           ...  165 images, receipts only
+  ground_truth.csv                   ground_truth.csv     ← describes THESE rows
+  ground_truth.jsonl                 ground_truth.jsonl   ← describes THESE rows
 ```
 
-No prior `generate` is needed, and no other checkout: the clean and degraded copies come
-from a single render pass, which is why the same filename means the same underlying
-document in both directories. One ground truth therefore scores both, so comparing a
-model's accuracy across them isolates image quality as the only variable.
+No prior `generate` is needed, and no other checkout: both halves come from a single
+render pass, so a degraded variant is the very same document as the receipt it derives
+from, never an independent re-roll.
+
+**The two halves are not mirrors, and the asymmetry is the design.** Both hold 165
+images, but that symmetry is a coincidence: the clean half is 55 cases × 3 document
+types, while the degraded half is 55 receipts × the 3 severity tiers declared under
+`receipt_degradation:` in `config/generation_config.yml`. Receipts are the only type a
+user photographs — bank statements and invoices arrive as clean PDFs or printouts — so
+degrading the other two would model nothing.
+
+Each directory is self-contained, carrying the ground truth for the images **it** holds,
+so a model run points at one path and finds everything. The degraded ground truth is
+written rather than copied: each variant row repeats its source receipt's field values
+verbatim and differs only in `image_file`. The two files are consequently **not**
+byte-identical, and neither one scores the other's images.
+
+Pairing the halves therefore joins on the filename with the tier suffix removed —
+`CASE001_receipt_v2.png` pairs with `CASE001_receipt.png` — and never on the filename
+itself. It follows that a degradation-effect comparison runs over the 55 clean receipts
+and their 165 variants: the 110 bank statements and invoices have no degraded
+counterpart and must be excluded from it, or document type is confounded with image
+quality.
 
 Filenames are deliberately generic — `CASE001_bank_statement.png`, never
 `CASE001_cba_standard.png`. A model must not be able to infer which layout template it
