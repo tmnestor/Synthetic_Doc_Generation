@@ -12,8 +12,15 @@ output/
 # Derived exports — regenerate with: python -m generators.pipeline derive
 derived/
 
-# Tests are local-only
-tests/
+# Test code IS tracked. It was local-only until the quality-screen corpus work,
+# where the suite is the executable spec of the degradation design -- rewriting
+# 15 tests from "receipts only, three tiers" to "whatever degrade_types says"
+# with no diff to review is how a spec change slips through unexamined.
+#
+# The fixtures are NOT tracked: 40 MB of pixel-reference PNGs and baseline
+# hashes, rebuilt from source by tests/regenerate_*.py. Binary blobs stay in git
+# history forever, and these are derived artefacts, not source.
+tests/fixtures/
 
 # Claude Code config
 .claude/
