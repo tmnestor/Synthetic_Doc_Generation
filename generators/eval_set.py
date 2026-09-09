@@ -3,26 +3,32 @@
 `export_eval_set` produces two sibling directories under one output root::
 
     <out>/synthetic_<YYYYMMDD>/     <out>/degraded_<YYYYMMDD>/
-      CASE001_bank_statement.png      CASE001_receipt_v1.png
-      CASE001_invoice.png             CASE001_receipt_v2.png
-      CASE001_receipt.png             CASE001_receipt_v3.png
-      ...  165 images, 3 types        ...  165 images, receipts only
+      CASE001_invoice.png             CASE001_invoice_moderate.png
+      CASE001_receipt.png             CASE001_invoice_heavy.png
+                                      CASE001_receipt_moderate.png
+                                      CASE001_receipt_heavy.png
+      ...  110 images, 2 types        ...  220 images, 2 types x 2 tiers
       ground_truth.csv                ground_truth.csv     <- describes THESE rows
       ground_truth.jsonl              ground_truth.jsonl   <- describes THESE rows
+      quality_ground_truth.jsonl      quality_ground_truth.jsonl
 
 The two halves are NOT mirrors of each other, and the asymmetry is the whole
 design. Four properties are load-bearing:
 
-* **The degraded half holds receipts only, one image per severity tier.**
-  Receipts are the only type users photograph -- bank statements and invoices
-  arrive as clean PDFs or printouts -- so degrading the other two models
-  nothing. 55 receipts x the 3 tiers declared under ``receipt_degradation:``
-  in ``config/generation_config.yml`` is again 165 images, but they are 55
-  documents at 3 severities, not 165 distinct documents.
+* **The degraded half holds one image per type per severity tier.** Which types
+  are degraded is declared in ``eval_set.degrade_types:``; the tiers under
+  ``document_degradation:`` in ``config/generation_config.yml`` fix how many
+  variants each gets. So the degraded half is 110 documents at 2 severities,
+  not 220 distinct documents.
 * **A degraded filename carries its tier**: ``CASE001_receipt.png`` becomes
-  ``CASE001_receipt_v1.png`` and up, taking the suffix from the tier's own
+  ``CASE001_receipt_moderate.png``, taking the suffix from the tier's own
   ``suffix:`` key. Anything pairing the two halves must therefore join on the
   filename with that suffix removed, NOT on the filename itself.
+* **Both halves carry a quality ground truth** alongside the extraction one.
+  ``quality_ground_truth.jsonl`` records, per image, which defects it actually
+  carries and the values drawn to produce them -- the labels the quality screen
+  is scored against. The clean half's rows are all-false by construction, and
+  are what measures the screen's false-positive rate.
 * **Filenames are generic** -- ``CASE001_bank_statement.png``, never
   ``CASE001_cba_standard.png``. The layout variant must not leak, or a model
   could infer the template before reading a pixel. The type portion is the
@@ -59,7 +65,8 @@ from typing import Any
 import yaml
 
 from generators.common import FitError
-from generators.degradation import degrade_receipt, load_tiers, tier_seed
+from generators.degradation import compose_clean, degrade_document, load_tiers, tier_seed
+from generators.degradation.labels import defects_for, load_defect_labels
 from generators.exporters.eval_projection import ExtractionSchema, load_extraction_schema
 from generators.loader import load_ground_truth, load_layout_registry
 from generators.overflow_check import build_overflow_error
@@ -68,16 +75,19 @@ NOT_FOUND = "NOT_FOUND"
 
 _ROOT_KEY = "eval_set"
 
-# The one extraction document type users photograph, and so the only one the
-# degraded half of the evaluation set contains. Bank statements and invoices
-# arrive as clean PDFs or printouts, so degrading them models nothing.
-_DEGRADED_TYPE = "receipt"
+# Which document types get degraded is declared in the YAML
+# (`eval_set.degrade_types:`), not here. It was a constant (`_DEGRADED_TYPE =
+# "receipt"`) until the quality screen needed invoices degraded too, at which
+# point a Python constant meant the config could not answer "what gets
+# degraded?" on its own.
 
 # Required sub-keys of eval_set, mapped to the expected shape used in diagnostics.
 _REQUIRED_KEYS: dict[str, str] = {
     "document_types": "a non-empty list of keys from the top-level document_types block",
+    "degrade_types": "a non-empty list, a subset of document_types, naming the types to degrade",
     "clean_dir_prefix": "the clean output directory's name before the date stamp, e.g. 'synthetic'",
     "degraded_dir_prefix": "the degraded output directory's name before the date stamp, e.g. 'degraded'",
+    "quality_dir_prefix": "the combined output directory's name before the date stamp, e.g. 'quality'",
     "csv_name": "the CSV filename to write into both directories, e.g. 'ground_truth.csv'",
     "jsonl_name": "the JSONL filename to write into both directories, e.g. 'ground_truth.jsonl'",
 }
@@ -433,6 +443,45 @@ def csv_from_jsonl(jsonl_path: Path, csv_path: Path) -> Path:
     return csv_path
 
 
+def _quality_record(filename: str, doc_type: str, provenance: dict, rules: dict) -> dict:
+    """Build one image's quality-screen ground-truth record.
+
+    Args:
+        filename: The image's name within its directory.
+        doc_type: The resolved extraction document type, e.g. "receipt".
+        provenance: What the generator drew for this image.
+        rules: Validated defect rules from `load_defect_labels`.
+
+    Returns:
+        A record carrying the condition, the per-defect booleans the screen is
+        scored against, and the raw drawn values behind them. The raw values are
+        kept so a disputed label can be checked, and so a threshold can be moved
+        and the labels recomputed without re-rendering 330 images.
+    """
+    return {
+        "filename": filename,
+        "document_type": doc_type,
+        "condition": provenance["tier"],
+        "defects": defects_for(provenance, rules),
+        "params": {key: value for key, value in provenance.items() if key not in ("tier", "augmentations")},
+        "augmentations": provenance["augmentations"],
+    }
+
+
+def write_quality_jsonl(records: list[dict], path: Path) -> Path:
+    """Write the quality-screen ground truth for one directory.
+
+    Args:
+        records: Records from `_quality_record`, already sorted by filename.
+        path: Where to write the JSONL.
+
+    Returns:
+        The path written.
+    """
+    path.write_text("\n".join(json.dumps(record, ensure_ascii=False) for record in records) + "\n")
+    return path
+
+
 def _prepare_dir(out_dir: Path, *, force: bool) -> None:
     """Create `out_dir`, refusing to write into a non-empty one unless forced."""
     if out_dir.exists() and any(out_dir.iterdir()):
@@ -457,42 +506,53 @@ def _render_documents(
     degraded_dir: Path,
     renderers: dict,
 ) -> tuple[list[dict], list[dict]]:
-    """Render the clean set once, and a tiered degraded set for receipts only.
+    """Render the clean set once, and a tiered degraded set for the chosen types.
 
-    Receipts are the only type users photograph, so they are the only type
-    degraded -- and each is degraded once per declared severity tier. Every
-    variant's ground-truth record carries field values identical to its source
-    receipt, differing only in `image_file`, which is the value-F1 contract:
-    distortion never changes the answer.
+    Which types are degraded comes from `eval_set.degrade_types:`; each such
+    document is degraded once per declared severity tier. Every variant's
+    ground-truth record carries field values identical to its source document,
+    differing only in `image_file`, which is the value-F1 contract: distortion
+    never changes the answer.
+
+    Clean copies are composited onto the same desk background the degraded ones
+    use, undamaged and square-on, so that background cannot by itself separate
+    clean from degraded.
 
     Args:
-        config_path: Path to generation_config.yml, for the document-type and
-            degradation-tier blocks.
+        config_path: Path to generation_config.yml, for the document-type,
+            degradation-tier and defect-label blocks.
         eval_cfg: The validated `eval_set` block.
         schema: The loaded extraction schema.
         clean_dir: Directory to save clean images into.
-        degraded_dir: Directory to save degraded receipt variants into.
+        degraded_dir: Directory to save degraded variants into.
         renderers: Document type -> renderer callable.
 
     Returns:
-        `(clean_documents, degraded_documents)`, each a list of
-        `{"filename": str, "fields": dict}` sorted by filename. The two lists
-        differ in both length and content -- the degraded one holds only
-        receipt variants.
+        `(clean_documents, degraded_documents, clean_quality, degraded_quality)`.
+        The first two are `{"filename": str, "fields": dict}` extraction records;
+        the last two are quality-screen records from `_quality_record`. All four
+        are sorted by filename. The clean and degraded lists differ in both
+        length and content.
 
     Raises:
         ValueError: any missing renderer, layout, seed, document type, or
             duplicate output filename.
-        TierConfigError: the receipt_degradation block is missing or malformed.
+        TierConfigError: the document_degradation block is missing or malformed.
+        DefectLabelError: the defect_labels block is missing or malformed.
     """
-    tiers = load_tiers(config_path)
+    tiers_by_type = load_tiers(config_path)
+    rules, _quality_filename = load_defect_labels(config_path)
 
     # Kept despite the degradation params moving out: the loop below reads
     # `doc_cfg = data["document_types"][dtype]` from this same load.
     data = yaml.safe_load(config_path.read_text())
+    clean_warp = data["document_degradation"]["clean_camera"]["warp"]
+    degrade_types = eval_cfg["degrade_types"]
 
     documents: list[dict] = []
     degraded_documents: list[dict] = []
+    clean_quality: list[dict] = []
+    degraded_quality: list[dict] = []
     seen: dict[str, str] = {}
 
     for dtype in eval_cfg["document_types"]:
@@ -559,20 +619,44 @@ def _render_documents(
                     [f"{case_id} / {layout_ref}: {str(exc).splitlines()[0]}"]
                 ) from None
 
-            img.save(clean_dir / filename)
+            # The clean copy is composited onto the same desk background the
+            # degraded ones use, square-on and undamaged. See `clean_camera:`
+            # in the config: a bare white page against page-on-a-desk lets a
+            # model split clean from degraded on background alone.
+            clean_frame, clean_provenance = compose_clean(img, clean_warp, seed)
+            clean_frame.save(clean_dir / filename)
             documents.append({"filename": filename, "fields": projected})
+            clean_quality.append(_quality_record(filename, resolved_type, clean_provenance, rules))
 
-            if resolved_type != _DEGRADED_TYPE:
+            if dtype not in degrade_types:
                 continue
 
-            for index, tier in enumerate(tiers):
+            if dtype not in tiers_by_type:
+                raise _err(
+                    f"'{dtype}' is listed in degrade_types but declares no severity tiers, so "
+                    f"it would be exported clean-only while the config says it is degraded.",
+                    path=config_path,
+                    key_path=f"document_degradation.tiers.{dtype}",
+                    expected=f"a tier list for every type in {_ROOT_KEY}.degrade_types. "
+                    f"Types with tiers: {sorted(tiers_by_type)}.",
+                    recover=f"add a '{dtype}:' tier list under document_degradation.tiers, or "
+                    f"remove '{dtype}' from {_ROOT_KEY}.degrade_types",
+                )
+
+            for index, tier in enumerate(tiers_by_type[dtype]):
                 variant_name = f"{case_id}_{resolved_type}_{tier.suffix}.png"
-                degrade_receipt(img, tier, tier_seed(seed, index)).save(degraded_dir / variant_name)
+                frame, provenance = degrade_document(img, tier, tier_seed(seed, index))
+                frame.save(degraded_dir / variant_name)
                 degraded_documents.append({"filename": variant_name, "fields": projected})
+                degraded_quality.append(
+                    _quality_record(variant_name, resolved_type, provenance, rules)
+                )
 
     documents.sort(key=lambda doc: doc["filename"])
     degraded_documents.sort(key=lambda doc: doc["filename"])
-    return documents, degraded_documents
+    clean_quality.sort(key=lambda rec: rec["filename"])
+    degraded_quality.sort(key=lambda rec: rec["filename"])
+    return documents, degraded_documents, clean_quality, degraded_quality
 
 
 def export_eval_set(
@@ -586,7 +670,7 @@ def export_eval_set(
     """Export a clean and a degraded evaluation set as sibling directories.
 
     The two are no longer parallel. The clean directory holds every document
-    type once; the degraded directory holds receipts only, one image per
+    type once; the degraded directory holds one image per degraded type per
     declared severity tier, because receipts are the only type users
     photograph. Each therefore carries its own ground truth.
 
@@ -606,7 +690,7 @@ def export_eval_set(
     Raises:
         ValueError: any configuration, directory, layout or projection failure.
         FileNotFoundError: the generation config or a ground-truth file is missing.
-        TierConfigError: the receipt_degradation block is missing or malformed.
+        TierConfigError: the document_degradation block is missing or malformed.
     """
     eval_cfg = load_eval_set_config(config_path)
     schema = load_extraction_schema()
@@ -619,13 +703,15 @@ def export_eval_set(
     stamp = (today or date.today()).strftime(_DATE_FORMAT)
     clean_dir = out_dir / f"{eval_cfg['clean_dir_prefix']}_{stamp}"
     degraded_dir = out_dir / f"{eval_cfg['degraded_dir_prefix']}_{stamp}"
+    quality_dir = out_dir / f"{eval_cfg['quality_dir_prefix']}_{stamp}"
 
-    # Both directories are cleared before anything is rendered, so a refusal
+    # Every directory is cleared before anything is rendered, so a refusal
     # never leaves half an export behind.
     _prepare_dir(clean_dir, force=force)
     _prepare_dir(degraded_dir, force=force)
+    _prepare_dir(quality_dir, force=force)
 
-    documents, degraded_documents = _render_documents(
+    documents, degraded_documents, clean_quality, degraded_quality = _render_documents(
         config_path, eval_cfg, schema, clean_dir, degraded_dir, renderers
     )
 
@@ -633,16 +719,40 @@ def export_eval_set(
     csv_path = csv_from_jsonl(jsonl_path, clean_dir / eval_cfg["csv_name"])
 
     # Written, not copied: the degraded set holds different rows entirely
-    # (receipt variants, one per tier), so it needs its own ground truth rather
-    # than a copy of the clean one.
+    # (one variant per tier), so it needs its own ground truth rather than a
+    # copy of the clean one.
     degraded_jsonl = write_jsonl(degraded_documents, degraded_dir / eval_cfg["jsonl_name"])
     csv_from_jsonl(degraded_jsonl, degraded_dir / eval_cfg["csv_name"])
+
+    # The quality-screen ground truth is separate from the extraction ground
+    # truth because it answers a different question: extraction GT says what
+    # the document reads, this says what condition the image is in. Both
+    # directories get one, so each stays self-contained.
+    _, quality_filename = load_defect_labels(config_path)
+    quality_path = write_quality_jsonl(clean_quality, clean_dir / quality_filename)
+    write_quality_jsonl(degraded_quality, degraded_dir / quality_filename)
+
+    # The combined half: every image and one ground truth, for consumers that
+    # take a single directory. Real copies rather than links, so the set stays
+    # self-contained if either source directory is moved or deleted.
+    combined_documents = sorted(documents + degraded_documents, key=lambda d: d["filename"])
+    combined_quality = sorted(clean_quality + degraded_quality, key=lambda r: r["filename"])
+    for source in (clean_dir, degraded_dir):
+        for image in source.glob("*.png"):
+            shutil.copy2(image, quality_dir / image.name)
+
+    combined_jsonl = write_jsonl(combined_documents, quality_dir / eval_cfg["jsonl_name"])
+    csv_from_jsonl(combined_jsonl, quality_dir / eval_cfg["csv_name"])
+    write_quality_jsonl(combined_quality, quality_dir / quality_filename)
 
     return {
         "images": len(documents),
         "degraded_images": len(degraded_documents),
+        "combined_images": len(combined_documents),
         "clean_dir": str(clean_dir),
         "degraded_dir": str(degraded_dir),
+        "quality_dir": str(quality_dir),
         "csv": str(csv_path),
         "jsonl": str(jsonl_path),
+        "quality_jsonl": str(quality_path),
     }

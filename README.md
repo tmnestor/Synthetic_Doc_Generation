@@ -53,12 +53,21 @@ No prior `generate` is needed, and no other checkout: both halves come from a si
 render pass, so a degraded variant is the very same document as the receipt it derives
 from, never an independent re-roll.
 
-**The two halves are not mirrors, and the asymmetry is the design.** Both hold 165
-images, but that symmetry is a coincidence: the clean half is 55 cases × 3 document
-types, while the degraded half is 55 receipts × the 3 severity tiers declared under
-`receipt_degradation:` in `config/generation_config.yml`. Receipts are the only type a
-user photographs — bank statements and invoices arrive as clean PDFs or printouts — so
-degrading the other two would model nothing.
+**The two halves are not mirrors, and the asymmetry is the design.** The clean half is
+55 cases × 2 document types (110 images); the degraded half is those same 110 documents
+× the 2 severity tiers declared under `document_degradation:` in
+`config/generation_config.yml` (220 images). Which types are degraded is declared
+separately, under `eval_set.degrade_types:` — receipts and invoices both, because the
+quality screen must judge a photographed invoice as readily as a photographed receipt.
+Bank statements are excluded from this corpus entirely: they are the one type that never
+arrives as a photograph.
+
+**Clean images are composited onto the same desk background as degraded ones**, square-on
+and undamaged. Without that, a clean image is a bare page and every degraded one is a page
+on a desk, so the background alone separates the two and a quality screen can score well
+without ever reading the document. Note the consequence for extraction benchmarking: the
+clean half is now "photographed but undamaged" rather than a flat render, so its extraction
+scores are not comparable with sets exported before this change.
 
 Each directory is self-contained, carrying the ground truth for the images **it** holds,
 so a model run points at one path and finds everything. The degraded ground truth is
@@ -422,7 +431,9 @@ The perspective warp uses **OpenCV** (`cv2.getPerspectiveTransform` / `cv2.warpP
 
 ### Configuration
 
-Every parameter lives in `config/generation_config.yml` under `receipt_degradation:`. The tier list *is* the variant count, so the config cannot contradict itself about how many variants a receipt gets. Every key is required — a missing one fails at startup with a diagnostic naming the tier index.
+Every parameter lives in `config/generation_config.yml` under `document_degradation:`. The tier list *is* the variant count, so the config cannot contradict itself about how many variants a document gets. Every key is required — a missing one fails at startup with a diagnostic naming the tier index.
+
+The same block declares `defect_labels:`, which turns the values drawn for one image into the per-defect booleans the quality screen is scored against. Labels come from what an image *actually got*, never from its tier's declared range: a heavy-tier image can draw 3.9° of rotation, and calling it "tilted" because its tier allows up to 14° would mark a correct model answer wrong. The drawn values are written out alongside the labels, so a threshold can be moved and the labels recomputed without re-rendering anything.
 
 Retuning severity is a YAML edit, never a code change. Only the augmentations listed in `AUGMENTATIONS` (`generators/degradation/augment.py`) may be named; a typo fails against that list rather than at render time.
 

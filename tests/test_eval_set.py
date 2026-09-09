@@ -1,8 +1,14 @@
-"""Eval-set export: config validation, projection, CSV/JSONL shape (local-only).
+"""Eval-set export: config validation, projection, CSV/JSONL shape.
 
-The full 165-document export is exercised once, in a session-scoped fixture,
-because rendering the whole corpus twice (clean + degraded) is the expensive
-part; every property of the products is then asserted against that one export.
+The full export is exercised once, in a module-scoped fixture, because
+rendering the whole corpus twice (clean + degraded) is the expensive part;
+every property of the products is then asserted against that one export.
+
+Counts are derived from config/generation_config.yml and from the export
+itself, never written as literals. The corpus size is an operator decision --
+it has already gone from 165 images across three types to 110 across two --
+and a test that hardcodes it fails for expressing a preference rather than a
+contract.
 """
 
 import csv as csv_module
@@ -55,10 +61,27 @@ def _config_without(tmp_path: Path, key: str | None) -> Path:
 
 
 def test_loads_real_config():
+    """Assert the config is coherent, not that it names particular types.
+
+    Which types the corpus carries is an operator decision that has already
+    changed once; pinning the list here made this test fail for expressing a
+    preference rather than a contract. What must hold is that every declared
+    type is renderable and every degraded type is one the export actually
+    produces.
+    """
     cfg = load_eval_set_config(_CONFIG)
     for key in _REQUIRED:
         assert key in cfg
-    assert cfg["document_types"] == ["bank_statements", "invoices", "receipts"]
+
+    declared = yaml.safe_load(_CONFIG.read_text())["document_types"]
+    assert cfg["document_types"], "the corpus must contain at least one document type"
+    assert set(cfg["document_types"]) <= set(declared), (
+        "eval_set.document_types names a type with no top-level document_types entry"
+    )
+    assert set(cfg["degrade_types"]) <= set(cfg["document_types"]), (
+        "eval_set.degrade_types must be a subset of document_types -- a type cannot be "
+        "degraded without also being exported"
+    )
 
 
 def test_relabel_keys_are_gone_from_the_config():
@@ -97,8 +120,10 @@ def test_unknown_document_type_is_diagnostic(tmp_path):
 
 
 # The `degradation:` block this once guarded no longer exists — degradation is
-# receipt-only and tiered now, declared under `receipt_degradation:`. Its
-# fail-fast coverage lives in tests/degradation/test_tiers.py.
+# tiered now, declared under `document_degradation:`, and which types it applies
+# to is declared separately under `eval_set.degrade_types:`. Its fail-fast
+# coverage lives in tests/degradation/test_tiers.py, and the defect-label rules
+# that read a tier's output are covered in tests/test_labels.py.
 
 
 # --------------------------------------------------------------------------
@@ -177,9 +202,31 @@ def test_write_jsonl_preserves_field_order(tmp_path):
 # --------------------------------------------------------------------------
 
 
+def _rungs(cfg: dict) -> list[dict]:
+    """The severity rungs, read from any one document type's ladder.
+
+    Tiers are declared per document type and the loader guarantees every type
+    declares the same rungs, so one type's list describes them all. Counting
+    `tiers` directly would count TYPES, not rungs -- which happens to give the
+    same number today (2 types, 2 rungs) and would therefore pass while
+    measuring the wrong thing.
+    """
+    return next(iter(cfg["document_degradation"]["tiers"].values()))
+
+
+@pytest.fixture(scope="module")
+def expected_counts() -> dict:
+    """Corpus dimensions implied by the config, so no count is a literal."""
+    cfg = yaml.safe_load(_CONFIG.read_text())
+    types = len(cfg["eval_set"]["document_types"])
+    degraded_types = len(cfg["eval_set"]["degrade_types"])
+    tiers = len(_rungs(cfg))
+    return {"types": types, "degraded_types": degraded_types, "tiers": tiers}
+
+
 @pytest.fixture(scope="module")
 def exported(tmp_path_factory) -> dict:
-    """Run the real 165-document export once and share it across the module."""
+    """Run the real export once and share it across the module."""
     out = tmp_path_factory.mktemp("eval_export")
     summary = export_eval_set(_CONFIG, out, today=date(2026, 1, 2))
     return {
@@ -187,15 +234,37 @@ def exported(tmp_path_factory) -> dict:
         "summary": summary,
         "clean": Path(summary["clean_dir"]),
         "degraded": Path(summary["degraded_dir"]),
+        "cases": len({p.name.split("_")[0] for p in Path(summary["clean_dir"]).glob("*.png")}),
     }
 
 
-def test_export_creates_two_dated_sibling_directories(exported):
+def test_export_creates_dated_sibling_directories(exported, expected_counts):
+    """One directory per declared prefix, all sharing the same date stamp.
+
+    Was `..._two_dated_sibling_directories`, pinning the count at two. A third
+    was added -- the combined half, for consumers that take a single input
+    directory -- so the assertion now derives the expected names from the
+    configured prefixes rather than listing them.
+    """
     out = exported["out"]
-    assert exported["clean"] == out / "synthetic_20260102"
-    assert exported["degraded"] == out / "degraded_20260102"
-    assert sorted(p.name for p in out.iterdir()) == ["degraded_20260102", "synthetic_20260102"]
-    assert exported["summary"]["images"] == 165
+    cfg = yaml.safe_load(_CONFIG.read_text())["eval_set"]
+    expected = sorted(
+        f"{cfg[key]}_20260102"
+        for key in ("clean_dir_prefix", "degraded_dir_prefix", "quality_dir_prefix")
+    )
+
+    assert exported["clean"] == out / f"{cfg['clean_dir_prefix']}_20260102"
+    assert exported["degraded"] == out / f"{cfg['degraded_dir_prefix']}_20260102"
+    assert sorted(p.name for p in out.iterdir()) == expected
+    assert exported["summary"]["images"] == exported["cases"] * expected_counts["types"]
+
+
+def test_the_three_directories_share_one_date_stamp(exported):
+    """A mismatched stamp would let a run score new images against an older
+    answer key and report plausible numbers."""
+    out = exported["out"]
+    stamps = {p.name.rsplit("_", 1)[1] for p in out.iterdir()}
+    assert len(stamps) == 1, f"directories disagree on the date stamp: {sorted(stamps)}"
 
 
 def test_export_matches_pinned_format(exported):
@@ -209,14 +278,25 @@ def test_export_matches_pinned_format(exported):
     assert_eval_export_matches_baseline(exported["clean"])
 
 
-def test_the_two_directories_no_longer_mirror_each_other(exported):
-    """Same image count, different contents: 165 documents across three types
-    versus 55 receipts at three severity tiers."""
+def test_the_two_directories_no_longer_mirror_each_other(exported, expected_counts):
+    """Different counts and different contents.
+
+    The two halves used to happen to share a count; they no longer do, and
+    asserting equality was pinning a coincidence. What is load-bearing is that
+    every degraded name carries a tier suffix declared in the config, so the
+    two halves can be joined by stripping it.
+    """
+    cfg = yaml.safe_load(_CONFIG.read_text())
+    suffixes = tuple(f"_{t['suffix']}.png" for t in _rungs(cfg))
     clean = sorted(p.name for p in exported["clean"].glob("*.png"))
     degraded = sorted(p.name for p in exported["degraded"].glob("*.png"))
-    assert len(clean) == len(degraded) == 165
+
+    assert len(clean) == exported["cases"] * expected_counts["types"]
+    assert len(degraded) == (
+        exported["cases"] * expected_counts["degraded_types"] * expected_counts["tiers"]
+    )
     assert clean != degraded
-    assert all(name.endswith(("_v1.png", "_v2.png", "_v3.png")) for name in degraded)
+    assert all(name.endswith(suffixes) for name in degraded)
 
 
 def test_export_filenames_carry_no_layout_variant(exported):
@@ -246,7 +326,7 @@ def test_every_csv_image_file_exists_in_its_own_directory(exported, half):
     directory = exported[half]
     rows = (directory / "ground_truth.csv").read_text().splitlines()[1:]
     names = [row.split(",")[0] for row in rows]
-    assert len(names) == 165
+    assert len(names) == len(list(directory.glob("*.png")))
     missing = [name for name in names if not (directory / name).exists()]
     assert not missing, f"CSV names {len(missing)} images absent from {directory}: {missing[:5]}"
 
@@ -268,7 +348,7 @@ def test_jsonl_and_csv_agree_row_for_row(exported):
     ]
     with (directory / "ground_truth.csv").open(newline="") as handle:
         rows = list(csv_module.DictReader(handle))
-    assert len(records) == len(rows) == 165
+    assert len(records) == len(rows) == len(list(directory.glob("*.png")))
     for record, row in zip(records, rows, strict=True):
         assert row["image_file"] == record["filename"]
         for key, value in record.items():

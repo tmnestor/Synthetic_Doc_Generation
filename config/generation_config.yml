@@ -19,10 +19,18 @@ document_types:
     output_subdir: invoices
     generate_clean: true
 
-# Receipt degradation. Receipts are the only type users photograph -- bank
-# statements and invoices arrive as clean PDFs or printouts -- so they are the
-# only type degraded. Each tier below produces one variant per receipt, so the
-# length of this list IS the variant count.
+# Document degradation. Receipts AND invoices are both degraded, through the
+# same severity ladder: the quality screen must judge a photographed invoice as
+# readily as a photographed receipt, so both need degraded examples and both
+# need clean ones as negatives. (Earlier revisions degraded receipts only, on
+# the reasoning that only receipts get photographed. That is no longer the
+# scope: scanned and faxed invoices arrive creased, shadowed and skewed too.)
+# Which types are degraded is declared under `eval_set.degrade_types:` -- it is
+# not a property of this block.
+#
+# Each tier below produces one variant per document, so the length of this list
+# IS the variant count. Two tiers plus the clean render give three conditions
+# per document: clean / moderate / heavy.
 #
 # Ordering is significant: a tier's index fixes its seed offset, so reordering
 # the list changes every rendered image.
@@ -31,49 +39,196 @@ document_types:
 # photocopier damage, a different story from a phone photograph. Also excluded:
 # Augraphy's geometric augmentations -- the warp owns geometry, and stacking a
 # second perspective transform would defeat the rectifier's quad detection.
-receipt_degradation:
+#
+# The `light` tier was removed when the clean render became part of the corpus:
+# at rotation [-3, 3] and blur [0.2, 0.5] its output was not reliably
+# distinguishable from a clean image, so it manufactured label noise on exactly
+# the borderline criteria the screen is meant to call.
+#
+# Every count and sigma below was checked against rendered output, in situ --
+# stacked with the rest of its tier, never judged in isolation. Alone, 250
+# dropout lines look light; behind InkBleed, a lighting gradient, a cast shadow,
+# blur and JPEG they do the work of far more. Per-tier notes sit with the tiers.
+document_degradation:
+  # ---------------------------------------------------------------------
+  # Tiers are declared PER DOCUMENT TYPE.
+  # ---------------------------------------------------------------------
+  # Every value in a tier is in PIXELS -- a blur sigma, a line count, a noise
+  # sigma -- and the two document types are not the same size:
+  #
+  #     receipt   440 x  674   (296k px)
+  #     invoice  1900 x 3508   (6.7M px, 22x the area, 5.2x the height)
+  #
+  # So identical numbers do NOT mean identical severity. Measured on the same
+  # source document, "clearly faded but readable" needs 200-300 dropout lines
+  # on a receipt and 1800-2200 on an invoice; "hard to read" needs blur sigma
+  # 0.7-1.3 on a receipt and 1.5-2.0 on an invoice. One shared ladder made
+  # `heavy` mean two different things, and would have labelled `faded: true`
+  # on invoices carrying no visible fading at all.
+  #
+  # Note the ratios disagree with each other -- fade scales ~10x while blur
+  # scales ~2x -- so no single derived scaling rule reproduces both. Hence
+  # measured values per type rather than one set multiplied by a factor.
+  #
+  # The tier NAMES and SUFFIXES must match across types: a name is a rung on a
+  # shared severity ladder, and `heavy` has to mean "heavy" for both or the
+  # OVERALL label means nothing. The loader enforces this.
+  #
+  # Scale-INVARIANT parameters are deliberately identical across types, and
+  # should stay that way: rotation_deg and foreshorten are angles, margin is a
+  # fraction of the page, and ShadowCast/LightingGradient/Folding are
+  # parameterised by proportion rather than pixels.
+  #
+  # The standard every tier is held to: hard to read, never impossible. A field
+  # a careful human cannot read is measuring noise rather than robustness.
   tiers:
-    - name: light
-      suffix: v1
-      ink:    [{augmentation: InkBleed, intensity: [0.05, 0.15], kernel: 3}]
-      paper:  [{augmentation: LightingGradient, max_brightness: 255, direction: 90}]
-      warp:   {foreshorten: [0.01, 0.03], rotation_deg: [-3, 3], margin: [0.05, 0.10]}
-      camera: {blur: [0.2, 0.5], noise_sigma: [1, 3], jpeg: [85, 95]}
+    receipts:
+      - name: moderate
+        suffix: moderate
+        ink:
+          - {augmentation: InkBleed, intensity: [0.15, 0.30], kernel: 5}
+          # 60 lines is indistinguishable from clean at this page size; 120 is
+          # the first count that visibly patches the print.
+          - {augmentation: LowInkRandomLines, count: [120, 200], consistent: false}
+        paper:
+          - {augmentation: LightingGradient, max_brightness: 245, direction: 45}
+          - {augmentation: ShadowCast, side: bottom, opacity: [0.25, 0.45]}
+        warp:   {foreshorten: [0.03, 0.06], rotation_deg: [-8, 8], margin: [0.07, 0.14]}
+        camera: {blur: [0.4, 0.8], noise_sigma: [2, 5], jpeg: [65, 80]}
 
-    - name: moderate
-      suffix: v2
-      ink:    [{augmentation: InkBleed, intensity: [0.15, 0.30], kernel: 5}]
-      paper:
-        - {augmentation: LightingGradient, max_brightness: 245, direction: 45}
-        - {augmentation: ShadowCast, side: bottom, opacity: [0.25, 0.45]}
-      warp:   {foreshorten: [0.03, 0.06], rotation_deg: [-8, 8], margin: [0.07, 0.14]}
-      camera: {blur: [0.4, 0.8], noise_sigma: [2, 5], jpeg: [65, 80]}
+      # Calibrated against rendered output, not guessed. Three constraints the
+      # first pass violated, all on the same principle -- heavy must be hard to
+      # read, never impossible:
+      #
+      #   fold_count 2 -> 1   Augraphy renders a fold as a hard black wedge, not
+      #                       a shaded crease. Two folds put one across the
+      #                       supplier name; one keeps it clear of the header.
+      #   max_brightness      230 -> 240. At 230 the gradient compounded with the
+      #                       cast shadow and buried the top-left corner.
+      #   shadow opacity      [0.40, 0.60] -> [0.30, 0.45], same reason -- the two
+      #                       darkening effects stack, so neither can sit at its
+      #                       own limit.
+      #
+      # The steep warp is untouched: geometry is what makes this tier hard, and
+      # it costs no legibility.
+      #
+      # This tier had NO headroom left when LowInkRandomLines was added: above
+      # ~400 lines the line-item descriptions stop being inferable. Anything
+      # further added here has to be paid for by easing something else.
+      - name: heavy
+        suffix: heavy
+        ink:
+          - {augmentation: InkBleed, intensity: [0.30, 0.50], kernel: 5}
+          - {augmentation: LowInkRandomLines, count: [200, 300], consistent: false}
+        paper:
+          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1}
+          - {augmentation: LightingGradient, max_brightness: 240, direction: 135}
+          - {augmentation: ShadowCast, side: left, opacity: [0.30, 0.45]}
+        warp:   {foreshorten: [0.06, 0.10], rotation_deg: [-14, 14], margin: [0.10, 0.18]}
+        camera: {blur: [0.7, 1.3], noise_sigma: [4, 8], jpeg: [50, 65]}
 
-    # Calibrated against rendered output, not guessed. Three constraints the
-    # first pass violated, all on the same principle -- heavy must be hard to
-    # read, never impossible, because a field a careful human cannot read is
-    # measuring noise rather than robustness:
-    #
-    #   fold_count 2 -> 1   Augraphy renders a fold as a hard black wedge, not
-    #                       a shaded crease. Two folds put one across the
-    #                       supplier name; one keeps it clear of the header.
-    #   max_brightness      230 -> 240. At 230 the gradient compounded with the
-    #                       cast shadow and buried the top-left corner.
-    #   shadow opacity      [0.40, 0.60] -> [0.30, 0.45], same reason -- the two
-    #                       darkening effects stack, so neither can sit at its
-    #                       own limit.
-    #
-    # The steep warp is untouched: geometry is what makes this tier hard, and
-    # it costs no legibility.
-    - name: heavy
-      suffix: v3
-      ink:    [{augmentation: InkBleed, intensity: [0.30, 0.50], kernel: 5}]
-      paper:
-        - {augmentation: Folding, fold_count: 1, fold_noise: 0.1}
-        - {augmentation: LightingGradient, max_brightness: 240, direction: 135}
-        - {augmentation: ShadowCast, side: left, opacity: [0.30, 0.45]}
-      warp:   {foreshorten: [0.06, 0.10], rotation_deg: [-14, 14], margin: [0.10, 0.18]}
-      camera: {blur: [0.7, 1.3], noise_sigma: [4, 8], jpeg: [50, 65]}
+    invoices:
+      - name: moderate
+        suffix: moderate
+        ink:
+          - {augmentation: InkBleed, intensity: [0.15, 0.30], kernel: 5}
+          # ~10x the receipt count for the same visible effect: the lines are a
+          # fixed pixel thickness spread over a page 5x taller, and the larger
+          # glyphs lose proportionally less of each stroke.
+          - {augmentation: LowInkRandomLines, count: [800, 1400], consistent: false}
+        paper:
+          - {augmentation: LightingGradient, max_brightness: 245, direction: 45}
+          - {augmentation: ShadowCast, side: bottom, opacity: [0.25, 0.45]}
+        warp:   {foreshorten: [0.03, 0.06], rotation_deg: [-8, 8], margin: [0.07, 0.14]}
+        # Blur scales ~2x, not ~10x: a bigger glyph tolerates a wider kernel
+        # before its strokes merge. Checked at 1.5 -- soft, every field legible.
+        camera: {blur: [0.9, 1.5], noise_sigma: [3, 6], jpeg: [60, 75]}
+
+      # Ceiling found by sweep on the same source document: blur 2.3 with 2600
+      # lines takes the supplier address and ABN past inferable, and blur 5.0
+      # erases the heading. 2.0/2200 sits at the edge, so the range tops out
+      # just below it.
+      - name: heavy
+        suffix: heavy
+        ink:
+          - {augmentation: InkBleed, intensity: [0.30, 0.50], kernel: 5}
+          - {augmentation: LowInkRandomLines, count: [1800, 2200], consistent: false}
+        paper:
+          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1}
+          - {augmentation: LightingGradient, max_brightness: 240, direction: 135}
+          - {augmentation: ShadowCast, side: left, opacity: [0.30, 0.45]}
+        warp:   {foreshorten: [0.06, 0.10], rotation_deg: [-14, 14], margin: [0.10, 0.18]}
+        camera: {blur: [1.5, 2.0], noise_sigma: [5, 10], jpeg: [45, 60]}
+
+  # ---------------------------------------------------------------------
+  # Defect labels -- the quality-screen ground truth
+  # ---------------------------------------------------------------------
+  # Turns the parameters actually drawn for one image into booleans saying
+  # which defects that image carries. These are polarity-free facts about what
+  # the generator did: "this image is blurred", not "the answer to question 1
+  # is NO". The prompt's wording decides whether a defect means YES or NO, and
+  # that wording lives with the prompt -- duplicating it here would leave two
+  # places to keep in step.
+  #
+  # Two kinds of criterion:
+  #   categorical  the effect is either in the tier's ink/paper list or not
+  #                (ShadowCast -> shadowed, Folding -> creased). No threshold.
+  #   continuous   the tier declares a range and the generator draws a value
+  #                per image, compared against the threshold below.
+  #
+  # The continuous thresholds are why per-image provenance is recorded at all.
+  # A moderate image draws rotation from [-8, 8], so it can land at 0.4 deg --
+  # not a rotated document by any reading. Labelling it "rotated" because its
+  # tier *could* have rotated it puts noise into exactly the borderline cases
+  # the screen exists to call.
+  # The six defect names below are exactly the six questions the quality-screen
+  # prompt asks (prompts/quality_screen.yaml -> quality_screen_v5). One
+  # vocabulary across the generator and the prompt means the scorer needs no
+  # translation table; if a name changes on one side it must change on both.
+  defect_labels:
+    # defect name -> how it is decided.
+    #   augmentation: <Name>   present iff the tier declares that augmentation
+    #   drawn: <param> <op> <threshold>   compares the value drawn for THIS
+    #                                     image against the threshold
+    #   any_of: [...]          true if any listed rule is true
+    rules:
+      # Camera blur. Not Augraphy -- camera.py applies it after the warp.
+      blur:    {drawn: blur_sigma, at_least: 0.60}
+      # ShadowCast lays a shadow ACROSS the paper. Distinct from the drop
+      # shadow camera.py paints under every composited page, which is on the
+      # desk rather than on the document and is deliberately not labelled --
+      # the prompt asks about shadow "lying across the paper".
+      shadow:  {augmentation: ShadowCast}
+      # Augraphy renders a fold as a hard wedge across the page.
+      crease:  {augmentation: Folding}
+      # Patchy horizontal print dropout, i.e. genuine fading. InkBleed is NOT
+      # a source here: it spreads and darkens ink, which is smudging, and
+      # labelling it "faded" described something the images do not show.
+      faded:   {augmentation: LowInkRandomLines}
+      # Rotation of the whole page away from vertical, drawn per image.
+      tilt:    {drawn: rotation_deg_abs, at_least: 5.0}
+      # Sensor grain and JPEG blocking -- either alone makes the image speckled.
+      speckle:
+        any_of:
+          - {drawn: noise_sigma, at_least: 3.0}
+          - {drawn: jpeg_quality, at_most: 70}
+
+    # Filename of the per-image defect record written into the degraded and
+    # clean directories alike.
+    filename: quality_ground_truth.jsonl
+
+  # Geometry for compositing the CLEAN render onto the same desk background the
+  # degraded images use. Without this a clean image is a bare white page and
+  # every degraded one is a page on a desk, so the background alone predicts the
+  # label and the screen can score well without ever reading the document.
+  #
+  # Zero rotation and zero foreshortening: a clean image is "photographed but
+  # undamaged", square-on and flat. The margin range is kept non-zero so the
+  # page still sits within a frame rather than filling it edge to edge.
+  # No ink or paper phase and no photometrics run on the clean copy -- those
+  # are the defects.
+  clean_camera:
+    warp: {foreshorten: [0.0, 0.0], rotation_deg: [0.0, 0.0], margin: [0.07, 0.14]}
 
 derived_formats:
   csv: true
@@ -87,10 +242,33 @@ derived_formats:
 # ground truth into both directories so each is self-contained.
 # Every key is required — the export fails fast on any omission.
 eval_set:
-  # config/extraction_schema.yml declares exactly these three document types —
-  # the whole surviving corpus.
-  document_types: [bank_statements, invoices, receipts]
+  # The quality-screen corpus is receipts and invoices only. Bank statements
+  # are deliberately excluded: they are the one type that never arrives as a
+  # photograph, and carrying them would add 55 clean images the screen is never
+  # asked about. config/extraction_schema.yml still declares all three — this
+  # list is the export's scope, not the schema's.
+  document_types: [invoices, receipts]
+  # Which of the above are put through the degradation ladder. Both, here, so
+  # every document gets a clean / moderate / heavy triple. Declared rather than
+  # assumed: this used to be a Python constant (`_DEGRADED_TYPE = "receipt"`),
+  # which meant the YAML could not answer "what gets degraded?" on its own.
+  degrade_types: [invoices, receipts]
   clean_dir_prefix: synthetic
   degraded_dir_prefix: degraded
+  # A third directory holding BOTH halves together, for consumers that take one
+  # image directory and one ground truth. The downstream extraction pipeline
+  # points every stage at a single input directory and scores against a single
+  # ground-truth file, so an image-quality screen -- which must see clean and
+  # degraded images in one run to have a false-positive rate at all -- cannot
+  # use the split halves.
+  #
+  # The split halves are kept because they are what makes clean-vs-degraded A/B
+  # extraction runs a path swap rather than a filtering problem.
+  #
+  # NOTE for anyone pointing an extraction benchmark here: this set carries
+  # three rows per document (clean + each tier) with identical field values, so
+  # a headline accuracy over it is an average ACROSS conditions, not a figure
+  # for any one of them. Use the split halves for that.
+  quality_dir_prefix: quality
   csv_name: ground_truth.csv
   jsonl_name: ground_truth.jsonl

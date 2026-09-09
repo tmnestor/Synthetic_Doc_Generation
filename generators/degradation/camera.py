@@ -26,7 +26,7 @@ def _rot(point: list[float], cx: float, cy: float, degrees: float) -> list[float
     return [cx + x * np.cos(theta) - y * np.sin(theta), cy + x * np.sin(theta) + y * np.cos(theta)]
 
 
-def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> Image.Image:
+def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> tuple[Image.Image, dict]:
     """Warp a flat page onto a desk background, as if photographed off-axis.
 
     Args:
@@ -36,8 +36,13 @@ def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> I
         rng: Seeded generator; all randomness is drawn from it.
 
     Returns:
-        An RGB frame larger than the input, with the page occupying a
-        perspective-distorted sub-region over a desk background.
+        A (frame, provenance) pair. The frame is an RGB image larger than the
+        input, with the page occupying a perspective-distorted sub-region over
+        a desk background. The provenance records the values actually drawn --
+        `foreshorten`, `rotation_deg` and the edge pushed away -- because the
+        quality-screen ground truth labels each image on what it actually got,
+        not on what its tier's range allowed. A tier declaring [-8, 8] degrees
+        can draw 0.4, which is not a tilted document.
     """
     page = image.convert("RGB")
     w, h = page.size
@@ -100,10 +105,18 @@ def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> I
     bg = bg * (1 - shadow) + np.array([25, 22, 20]) * shadow
 
     composite = bg * (1 - alpha) + warped[:, :, :3].astype(np.float32) * alpha
-    return Image.fromarray(np.clip(composite, 0, 255).astype(np.uint8), "RGB")
+    frame = Image.fromarray(np.clip(composite, 0, 255).astype(np.uint8), "RGB")
+    provenance = {
+        "foreshorten": float(f),
+        "rotation_deg": float(degrees),
+        "foreshortened_edge": ("top", "right", "bottom", "left")[edge],
+    }
+    return frame, provenance
 
 
-def apply_photometrics(image: Image.Image, camera: dict, rng: np.random.Generator) -> Image.Image:
+def apply_photometrics(
+    image: Image.Image, camera: dict, rng: np.random.Generator
+) -> tuple[Image.Image, dict]:
     """Apply lens and sensor artefacts to a whole frame.
 
     Runs after the warp: blur, sensor noise and JPEG blocking are properties of
@@ -116,14 +129,18 @@ def apply_photometrics(image: Image.Image, camera: dict, rng: np.random.Generato
         rng: Seeded generator; all randomness is drawn from it.
 
     Returns:
-        The photographed-looking frame, same dimensions as the input.
+        A (frame, provenance) pair. The frame is the photographed-looking image,
+        same dimensions as the input. The provenance records the blur sigma,
+        noise sigma and JPEG quality actually drawn, which is what the
+        quality-screen labels for `blur` and `speckle` are decided on.
     """
     frame = image.convert("RGB")
     frame = ImageEnhance.Brightness(frame).enhance(rng.uniform(0.92, 1.05))
     frame = ImageEnhance.Contrast(frame).enhance(rng.uniform(0.90, 1.0))
 
     blur_lo, blur_hi = camera["blur"]
-    frame = frame.filter(ImageFilter.GaussianBlur(rng.uniform(blur_lo, blur_hi)))
+    blur_sigma = rng.uniform(blur_lo, blur_hi)
+    frame = frame.filter(ImageFilter.GaussianBlur(blur_sigma))
 
     noise_lo, noise_hi = camera["noise_sigma"]
     sigma = rng.uniform(noise_lo, noise_hi)
@@ -132,7 +149,13 @@ def apply_photometrics(image: Image.Image, camera: dict, rng: np.random.Generato
     frame = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
 
     jpeg_lo, jpeg_hi = camera["jpeg"]
+    jpeg_quality = int(rng.integers(jpeg_lo, jpeg_hi + 1))
     buf = io.BytesIO()
-    frame.save(buf, format="JPEG", quality=int(rng.integers(jpeg_lo, jpeg_hi + 1)))
+    frame.save(buf, format="JPEG", quality=jpeg_quality)
     buf.seek(0)
-    return Image.open(buf).convert("RGB")
+    provenance = {
+        "blur_sigma": float(blur_sigma),
+        "noise_sigma": float(sigma),
+        "jpeg_quality": jpeg_quality,
+    }
+    return Image.open(buf).convert("RGB"), provenance

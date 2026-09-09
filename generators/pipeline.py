@@ -345,11 +345,18 @@ def eval_set(
 ) -> None:
     """Export the deliverable: two dated sibling directories under one root.
 
-    `synthetic_<date>/` holds 165 clean images across the three document types;
-    `degraded_<date>/` holds receipts only, one image per severity tier. The two
-    halves are NOT mirrors — the degraded one is 55 documents at 3 severities,
-    named `CASE001_receipt_v1.png` and up, and carries its own ground truth
-    describing those files rather than a copy of the clean one.
+    `synthetic_<date>/` holds one clean image per case per type in
+    `eval_set.document_types`; `degraded_<date>/` holds one image per severity
+    tier for each type in `eval_set.degrade_types`, named
+    `CASE001_receipt_moderate.png` after the tier's own `suffix`. The two halves
+    are NOT mirrors, and each carries its own ground truth describing its own
+    files rather than a copy of the other's.
+
+    Both halves also carry `quality_ground_truth.jsonl`: per image, which
+    defects it actually has and the values drawn to produce them.
+
+    Clean images are composited onto the same desk background as degraded ones,
+    undamaged and square-on, so background alone cannot separate the two.
 
     Filenames are generic — `CASE001_receipt.png`, never `CASE001_woolworths.png`
     — so a model cannot infer the template before reading a pixel.
@@ -362,11 +369,15 @@ def eval_set(
         rprint(f"[red]{exc}[/red]")
         raise typer.Exit(1) from None
 
+    # `degraded_images`, not `images`: the two halves used to hold the same
+    # count, so printing `images` twice was invisibly wrong until the corpus
+    # stopped being symmetric.
     rprint(f"[green]Clean:    {summary['images']} images in {summary['clean_dir']}[/green]")
-    rprint(f"[green]Degraded: {summary['images']} images in {summary['degraded_dir']}[/green]")
+    rprint(f"[green]Degraded: {summary['degraded_images']} images in {summary['degraded_dir']}[/green]")
+    rprint(f"[green]Combined: {summary['combined_images']} images in {summary['quality_dir']}[/green]")
     rprint(
-        f"[green]Ground truth written into both: {Path(summary['csv']).name}, "
-        f"{Path(summary['jsonl']).name}[/green]"
+        f"[green]Ground truth written into each: {Path(summary['csv']).name}, "
+        f"{Path(summary['jsonl']).name}, {Path(summary['quality_jsonl']).name}[/green]"
     )
 
 

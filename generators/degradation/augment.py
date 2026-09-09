@@ -17,11 +17,18 @@ from PIL import Image
 from generators.degradation.tiers import Tier
 
 try:
-    from augraphy import AugraphyPipeline, Folding, InkBleed, LightingGradient, ShadowCast
+    from augraphy import (
+        AugraphyPipeline,
+        Folding,
+        InkBleed,
+        LightingGradient,
+        LowInkRandomLines,
+        ShadowCast,
+    )
 except ImportError as err:  # pragma: no cover - environment failure, not logic
     raise ImportError(
         "Augraphy is not installed.\n"
-        f"  What:     receipt degradation needs augraphy, which failed to import: {err}.\n"
+        f"  What:     document degradation needs augraphy, which failed to import: {err}.\n"
         "  Where:    environment.yml -> dependencies.pip\n"
         "  Expected: augraphy==8.2.6 installed WITHOUT its declared dependencies, "
         "since it requires `opencv-python` (the full GUI build) which would displace "
@@ -35,9 +42,17 @@ except ImportError as err:  # pragma: no cover - environment failure, not logic
 # YAML name -> Augraphy class. Deliberately excludes DirtyRollers and
 # BadPhotoCopy (photocopier damage, not phone photography) and every geometric
 # augmentation (camera.py owns geometry).
+#
+# LowInkRandomLines is what makes the quality screen's FADED criterion real.
+# InkBleed was standing in for it, but InkBleed spreads and darkens ink -- that
+# is smudging, and labelling it "faded" made the ground truth describe
+# something the images did not show. LowInkRandomLines drops patchy horizontal
+# bands out of the print, which is what a failing thermal printer produces and
+# what "faded or patchy" actually means.
 AUGMENTATIONS: dict[str, Callable[..., object]] = {
     "InkBleed": InkBleed,
     "LightingGradient": LightingGradient,
+    "LowInkRandomLines": LowInkRandomLines,
     "ShadowCast": ShadowCast,
     "Folding": Folding,
 }
@@ -50,6 +65,7 @@ AUGMENTATIONS: dict[str, Callable[..., object]] = {
 _PARAM_NAMES: dict[str, dict[str, str]] = {
     "InkBleed": {"intensity": "intensity_range", "kernel": "kernel_size"},
     "LightingGradient": {"max_brightness": "max_brightness", "direction": "direction"},
+    "LowInkRandomLines": {"count": "count_range", "consistent": "use_consistent_lines"},
     "ShadowCast": {"side": "shadow_side", "opacity": "shadow_opacity_range"},
     "Folding": {"fold_count": "fold_count", "fold_noise": "fold_noise"},
 }
@@ -84,7 +100,7 @@ def _build(spec: dict, *, tier_name: str, phase: str) -> object:
             f"  What:     a {phase}-phase entry of tier '{tier_name}' has no "
             f"'augmentation:' key, so there is nothing to construct.\n"
             f"  Where:    config/generation_config.yml -> "
-            f"receipt_degradation.tiers[{tier_name}].{phase}\n"
+            f"document_degradation.tiers[{tier_name}].{phase}\n"
             f"  Expected: every entry to name one of {sorted(AUGMENTATIONS)}, e.g.\n"
             "              {augmentation: InkBleed, intensity: [0.05, 0.15], kernel: 3}\n"
             f"  Recover:  add an 'augmentation:' key to the {phase} entry."
@@ -97,7 +113,7 @@ def _build(spec: dict, *, tier_name: str, phase: str) -> object:
             f"  What:     tier '{tier_name}' names '{name}' in its {phase} phase, "
             f"which is not registered.\n"
             f"  Where:    config/generation_config.yml -> "
-            f"receipt_degradation.tiers[{tier_name}].{phase}\n"
+            f"document_degradation.tiers[{tier_name}].{phase}\n"
             f"  Expected: one of {sorted(AUGMENTATIONS)}.\n"
             "  Recover:  use a registered augmentation, or add the class to "
             "AUGMENTATIONS in generators/degradation/augment.py."
