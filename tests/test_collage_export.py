@@ -26,7 +26,7 @@ VALID_COLLAGE = {
     "count": 90,
     "documents_per_image": [2, 5],
     "arrangements": list(ARRANGEMENTS),
-    "overlap_fraction": [0.0, 0.55],
+    "overlap_fraction": [0.0, 0.18],
     "per_document_rotation_deg": [-18, 18],
     "hard_negatives": {"folded_long_receipt": {"count": 30}},
 }
@@ -107,6 +107,30 @@ class TestConfigRejections:
             load_eval_set_config(write_config(tmp_path, collage))
 
         assert_diagnostic_error(str(exc_info.value))
+
+    def test_an_overlap_that_buries_the_totals_is_refused(self, tmp_path):
+        """A taxpayer photographing receipts is SUBSTANTIATING an expense --
+        they lay them out so the business name, date and total can be read.
+        Deep overlap models someone working against their own interest.
+
+        Checked in config because the failure is invisible downstream: an
+        obscured plate still labels correctly as MULTIPLE, still crosses the
+        severity ladder, and still scores. Only looking at it shows the total
+        is gone. The first corpus built had 54 of 90 plates like that.
+        """
+        collage = {**VALID_COLLAGE, "overlap_fraction": [0.0, 0.55]}
+
+        with pytest.raises(ValueError) as exc_info:
+            load_eval_set_config(write_config(tmp_path, collage))
+
+        message = str(exc_info.value)
+        assert_diagnostic_error(message)
+        assert "0.55" in message
+
+    def test_the_shipped_overlap_is_within_the_ceiling(self):
+        cfg = load_eval_set_config(CONFIG)
+
+        assert max(cfg["collage"]["overlap_fraction"]) <= 0.25
 
     def test_dropping_the_folded_hard_negative_is_refused(self, tmp_path):
         """Without it every collage is an obvious MULTIPLE, the screen scores

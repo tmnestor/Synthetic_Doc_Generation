@@ -71,21 +71,36 @@ class TestThePlate:
 
 
 class TestArrangementsDiffer:
-    def test_overlapping_is_not_piled(self):
-        """They were the same code path once. Two config names for one
-        behaviour is a choice the operator does not actually have."""
-        pages = receipts(600, 900, 450)
-        over, _ = compose(pages, arrangement="overlapping", overlap=0.4)
-        piled, _ = compose(pages, arrangement="piled", overlap=0.4)
+    def test_there_is_no_piled_arrangement(self):
+        """It existed and was removed.
 
-        assert np.array(over).tobytes() != np.array(piled).tobytes()
+        A pile buries the totals of the receipts underneath, which models a
+        taxpayer working against their own interest: someone photographing
+        receipts is SUBSTANTIATING an expense and lays them out so the business
+        name, date and total show. That is not a hard case, it is a wrong one --
+        and it accounted for a quarter of the plates.
+        """
+        assert "piled" not in ARRANGEMENTS
 
-    def test_piled_is_tighter_than_overlapping(self):
-        pages = receipts(600, 900, 450)
-        over, _ = compose(pages, arrangement="overlapping", overlap=0.4)
-        piled, _ = compose(pages, arrangement="piled", overlap=0.4)
+        with pytest.raises(ValueError):
+            compose(receipts(600, 900), arrangement="piled")
 
-        assert piled.width * piled.height < over.width * over.height
+    def test_every_arrangement_keeps_the_receipts_readable(self):
+        """The property that replaced it. At the configured ceiling the
+        receipts touch at their margins -- where a receipt carries "Thank you
+        for shopping with us" rather than an amount -- and no receipt loses a
+        meaningful share of itself to a neighbour.
+        """
+        pages = receipts(700, 700, 700)
+        for arrangement in ARRANGEMENTS:
+            plate, provenance = compose(pages, arrangement=arrangement, overlap=0.18)
+
+            covered = 1.0 - (np.array(plate)[:, :, 3] > 0).sum() / (3 * 240 * 700)
+            assert covered < 0.25, (
+                f"{arrangement} hides {covered:.0%} of the paper; a taxpayer laying out "
+                f"receipts to be read would not"
+            )
+            assert provenance["overlap_fraction"] <= 0.18, "no arrangement may deepen the overlap"
 
     def test_side_by_side_is_one_row(self):
         plate, _ = compose(receipts(700, 700, 700), arrangement="side_by_side")
@@ -101,13 +116,14 @@ class TestArrangementsDiffer:
 
 
 class TestProvenance:
-    def test_it_records_what_was_drawn_not_what_was_asked(self):
-        """`piled` deepens the overlap it is given. The label must reflect the
-        plate that exists, not the config range that permitted it."""
-        _, provenance = compose(receipts(600, 600), arrangement="piled", overlap=0.4)
+    def test_it_records_the_overlap_that_was_used(self):
+        """The label must reflect the plate that exists, not the config range
+        that permitted it: a range of [0.0, 0.18] can draw 0.02, and that is
+        not an overlapping collage."""
+        _, provenance = compose(receipts(600, 600), arrangement="overlapping", overlap=0.15)
 
-        assert provenance["overlap_requested"] == 0.4
-        assert provenance["overlap_fraction"] > 0.4
+        assert provenance["overlap_fraction"] == 0.15
+        assert provenance["overlap_requested"] == 0.15
 
     def test_every_placement_is_recorded(self):
         _, provenance = compose(receipts(600, 900, 450), arrangement="grid")

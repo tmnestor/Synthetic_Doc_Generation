@@ -300,11 +300,18 @@ eval_set:
     # independently.
     count: 90
     documents_per_image: [2, 5]
-    # `piled` deepens whatever overlap it is given and jitters hard enough to
-    # break up the grid; `overlapping` keeps the grid visible. They are not the
-    # same layout with a different number.
-    arrangements: [side_by_side, grid, overlapping, piled]
-    overlap_fraction: [0.0, 0.55]
+    # All three keep every receipt readable, which is the whole point: someone
+    # photographing receipts is trying to SUBSTANTIATE an expense, so they lay
+    # them out where the business name, date and total can be seen.
+    #
+    # A `piled` arrangement was removed for that reason, and the overlap
+    # ceiling dropped from 0.55 to 0.18. At 0.55, 54 of 90 plates buried the
+    # totals of the receipts underneath -- a taxpayer working against their own
+    # interest, which is not a hard case but a wrong one. At 0.18 receipts
+    # touch at their margins, where a receipt carries "Thank you for shopping
+    # with us" rather than an amount.
+    arrangements: [side_by_side, grid, overlapping]
+    overlap_fraction: [0.0, 0.18]
     per_document_rotation_deg: [-18, 18]
 
     # Truth SINGLE, and the reason this measurement means anything. A set of

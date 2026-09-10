@@ -259,6 +259,29 @@ def _validate_collage(cfg: dict, config_path: Path) -> None:
             recover="swap the bounds",
         )
 
+    # How much one receipt may cover another. Capped because a taxpayer
+    # photographing receipts is SUBSTANTIATING an expense: they lay them out so
+    # the business name, date and total show. Past roughly a fifth, the receipt
+    # underneath loses its total, and the corpus starts teaching from images no
+    # taxpayer would submit.
+    #
+    # Checked here rather than left to judgement because the failure is
+    # invisible downstream: an obscured plate still labels correctly as
+    # MULTIPLE, still crosses the severity ladder, and still scores. Only
+    # looking at it shows the total is gone.
+    _OVERLAP_CEILING = 0.25
+    if max(collage["overlap_fraction"]) > _OVERLAP_CEILING:
+        raise _err(
+            f"'{_ROOT_KEY}.collage.overlap_fraction' allows up to "
+            f"{max(collage['overlap_fraction'])}, which buries the totals of the receipts "
+            f"underneath.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage.overlap_fraction",
+            expected=f"a maximum of {_OVERLAP_CEILING} or less, e.g. [0.0, 0.18]. A taxpayer "
+            f"photographing receipts lays them out so the amounts can be read.",
+            recover="lower the upper bound",
+        )
+
     if "folded_long_receipt" not in collage["hard_negatives"]:
         raise _err(
             f"'{_ROOT_KEY}.collage.hard_negatives' declares no folded_long_receipt.",

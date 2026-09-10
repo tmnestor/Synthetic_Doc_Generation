@@ -23,10 +23,20 @@ from dataclasses import dataclass
 import numpy as np
 from PIL import Image
 
-# Arrangements, in the order a taxpayer is likely to produce them. `piled` is
-# the hard one and `grid` the easy one; a set of only grids would score well
-# and prove nothing.
-ARRANGEMENTS = ("side_by_side", "grid", "overlapping", "piled")
+# Arrangements a taxpayer actually produces.
+#
+# All three keep every receipt readable, and that is the point. Someone
+# photographing receipts is trying to SUBSTANTIATE an expense: they lay the
+# receipts out so the business name, the date and the total can be seen. They
+# do not stack them.
+#
+# A `piled` arrangement existed here and was removed. It buried the totals of
+# the receipts underneath -- modelling a taxpayer working against their own
+# interest, which is not a hard case, just a wrong one. `overlap_fraction` is
+# capped low for the same reason: receipts placed close together touch at their
+# margins, where a receipt carries "Thank you for shopping with us" rather than
+# an amount.
+ARRANGEMENTS = ("side_by_side", "grid", "overlapping")
 
 
 @dataclass(frozen=True)
@@ -197,10 +207,10 @@ def compose_collage(
 
     Args:
         pages: The rendered receipts, at least one. Order is z-order: later
-            pages are drawn on top, which is what makes `piled` look piled.
+            pages are drawn on top, so a later receipt covers an earlier one.
         arrangement: One of `ARRANGEMENTS`.
         overlap_fraction: How much of a slot neighbouring receipts may intrude
-            into, 0.0 (clear gaps) to ~0.7 (heavily piled). Drawn per plate by
+            into, 0.0 (clear gaps) up to the configured ceiling. Drawn per plate by
             the caller, recorded here as what was actually used.
         rotation_deg: `(min, max)` for each receipt's own rotation. Per
             receipt, not per plate -- a plate where every receipt is turned by
@@ -255,20 +265,16 @@ def compose_collage(
         columns, rows = _slot_grid(len(rotated))
 
     # Overlap pulls the slots together. At 0.0 the receipts sit in clean cells
-    # with a gap; at 0.7 they intrude deep into each other.
+    # with a gap; at the configured ceiling they touch and intrude slightly
+    # into one another's margins.
     #
-    # `piled` is not `overlapping` with a bigger number. A pile is receipts
-    # pushed towards one another into a heap, so it takes the overlap it was
-    # given and adds to it, and jitters hard enough that the underlying grid
-    # stops being visible. Without that the two arrangements render identically
-    # and the config offers a choice that does not exist.
+    # The ceiling is deliberately low and enforced in config rather than here,
+    # because "how much may a receipt cover its neighbour?" is a question about
+    # the domain, not about layout. Past roughly a fifth, the receipt
+    # underneath starts losing its total -- and a taxpayer photographing
+    # receipts to substantiate a claim lays them out so the totals show.
     effective_overlap = overlap_fraction
-    jitter = 0.03
-    if arrangement == "overlapping":
-        jitter = 0.08
-    elif arrangement == "piled":
-        effective_overlap = min(0.75, overlap_fraction + 0.25)
-        jitter = 0.18
+    jitter = 0.08 if arrangement == "overlapping" else 0.03
 
     step_x = int(slot_w * (1.0 - effective_overlap))
     step_y = int(slot_h * (1.0 - effective_overlap))
@@ -297,8 +303,8 @@ def compose_collage(
     provenance = {
         "document_count": len(pages),
         "arrangement": arrangement,
-        # Both, because they differ for `piled` and the LABEL must be derived
-        # from what was actually used, not from what was asked for.
+        # Both recorded, because the LABEL must be derived from what was
+        # actually used, never from the config range that permitted it.
         "overlap_fraction": float(effective_overlap),
         "overlap_requested": float(overlap_fraction),
         "placements": [
