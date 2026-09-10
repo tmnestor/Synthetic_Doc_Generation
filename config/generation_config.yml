@@ -289,6 +289,10 @@ eval_set:
   # denominator quietly grows.
   collage:
     enabled: true
+    # Fixed, so the plates regenerate identically and a disputed label can be
+    # re-examined. Separate from the per-case degradation_seed values because
+    # a collage is not tied to one case.
+    seed: 20260910
     # Crossed with the severity ladder, not correlated with it. If every
     # collage were clean, MULTIPLE would coincide with "no defects" and the
     # screen could score well by reading the wrong cue, with no way to tell.

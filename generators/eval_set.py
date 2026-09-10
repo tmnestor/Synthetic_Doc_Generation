@@ -191,6 +191,7 @@ _COLLAGE_KEYS = {
     "arrangements": f"a list drawn from {list(ARRANGEMENTS)}",
     "overlap_fraction": "a [min, max] pair between 0.0 and 1.0, e.g. [0.0, 0.55]",
     "per_document_rotation_deg": "a [min, max] pair, e.g. [-18, 18]",
+    "seed": "a fixed integer, so the plates regenerate identically, e.g. 20260910",
     "hard_negatives": "a mapping declaring at least folded_long_receipt",
 }
 
@@ -588,6 +589,54 @@ def write_quality_jsonl(records: list[dict], path: Path) -> Path:
     """
     path.write_text("\n".join(json.dumps(record, ensure_ascii=False) for record in records) + "\n")
     return path
+
+
+def _flat_receipt_pages(config_path: Path, renderers: dict) -> list:
+    """Render the receipts a collage draws from, flat and undamaged.
+
+    FLAT is the requirement, and the reason this exists rather than reusing the
+    images `_render_documents` has already written. Those have been through
+    `compose_clean`, which composites each page onto a desk background -- build
+    a plate from them and every receipt arrives carrying its own coloured
+    rectangle, desk upon desk. It is glaring in a render and invisible in the
+    provenance, which is exactly the kind of mistake this corpus cannot afford.
+
+    Re-rendering costs a few seconds against a build measured in minutes, and
+    buys a function that cannot be handed the wrong images.
+
+    Args:
+        config_path: Path to generation_config.yml.
+        renderers: Document type -> renderer callable.
+
+    Returns:
+        Flat receipt renders, in ground-truth order.
+
+    Raises:
+        ValueError: The receipts type declares no renderer.
+    """
+    data = yaml.safe_load(config_path.read_text())
+    doc_cfg = data["document_types"]["receipts"]
+    renderer = renderers.get("receipts")
+    if renderer is None:
+        raise _err(
+            "no renderer is registered for 'receipts', which collages are built from.",
+            path=config_path,
+            key_path="document_types.receipts",
+            expected=f"a type with a renderer: {sorted(renderers)}.",
+            recover="register a receipts renderer, or set eval_set.collage.enabled: false",
+        )
+
+    gt_data = load_ground_truth(Path(doc_cfg["ground_truth"]))
+    layouts = load_layout_registry(Path(doc_cfg["layouts"]))
+
+    pages = []
+    for case_id, entry in gt_data.items():
+        layout = layouts.get(entry.get("layout", ""), {})
+        if not layout:
+            continue
+        entry["case_id"] = str(case_id)
+        pages.append(renderer(entry, layout))
+    return pages
 
 
 def _render_collages(
@@ -1036,6 +1085,35 @@ def export_eval_set(
         for image in source.glob("*.png"):
             shutil.copy2(image, quality_dir / image.name)
 
+    # Multi-receipt photographs, into the combined directory only.
+    #
+    # They belong HERE and not in the clean or degraded halves because those
+    # two are paired with an extraction ground truth, and a collage has no
+    # extraction answer: three receipts carry three sets of fields, and the
+    # point of the image is that extraction cannot read it. So the combined
+    # directory gains images its extraction CSV does not describe -- deliberate,
+    # and the reason the quality ground truth is a separate file rather than a
+    # column on the extraction one.
+    #
+    # Note this changes the combined set's denominator. Figures measured on the
+    # 330-image corpus are not comparable to figures measured on this one; the
+    # first run against it is a new baseline, not a continuation.
+    collage_cfg = eval_cfg["collage"]
+    collage_quality: list[dict] = []
+    if collage_cfg.get("enabled"):
+        rules, _ = load_defect_labels(config_path)
+        raw = yaml.safe_load(config_path.read_text())
+        collage_quality = _render_collages(
+            _flat_receipt_pages(config_path, renderers),
+            collage_cfg,
+            load_tiers(config_path)["receipts"],
+            raw["document_degradation"]["clean_camera"]["warp"],
+            rules,
+            quality_dir,
+            seed=int(collage_cfg["seed"]),
+        )
+        combined_quality = sorted(combined_quality + collage_quality, key=lambda r: r["filename"])
+
     combined_jsonl = write_jsonl(combined_documents, quality_dir / eval_cfg["jsonl_name"])
     csv_from_jsonl(combined_jsonl, quality_dir / eval_cfg["csv_name"])
     write_quality_jsonl(combined_quality, quality_dir / quality_filename)
@@ -1043,7 +1121,8 @@ def export_eval_set(
     return {
         "images": len(documents),
         "degraded_images": len(degraded_documents),
-        "combined_images": len(combined_documents),
+        "collage_images": len(collage_quality),
+        "combined_images": len(combined_documents) + len(collage_quality),
         "clean_dir": str(clean_dir),
         "degraded_dir": str(degraded_dir),
         "quality_dir": str(quality_dir),
