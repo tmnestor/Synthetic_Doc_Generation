@@ -44,7 +44,15 @@ def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> t
         not on what its tier's range allowed. A tier declaring [-8, 8] degrees
         can draw 0.4, which is not a tilted document.
     """
-    page = image.convert("RGB")
+    # An RGBA input keeps its alpha; anything else becomes fully opaque RGB.
+    #
+    # This is what lets a COLLAGE reuse this function unchanged. A collage
+    # arrives as one canvas carrying several receipts on a transparent
+    # background, so preserving alpha means the whole plate gets one
+    # perspective and one camera -- which is what a photograph of a table is --
+    # and the drop shadow below, derived from the alpha, falls under each
+    # receipt separately without any code knowing there is more than one.
+    page = image if image.mode == "RGBA" else image.convert("RGB")
     w, h = page.size
 
     margin_lo, margin_hi = warp["margin"]
@@ -87,7 +95,8 @@ def warp_to_photo(image: Image.Image, warp: dict, rng: np.random.Generator) -> t
     src = np.array([[0, 0], [w, 0], [w, h], [0, h]], dtype=np.float32)
 
     m = cv2.getPerspectiveTransform(src, dst)
-    rgba = np.dstack([np.array(page), np.full((h, w), 255, np.uint8)])
+    pixels = np.array(page)
+    rgba = pixels if pixels.shape[2] == 4 else np.dstack([pixels, np.full((h, w), 255, np.uint8)])
     warped = cv2.warpPerspective(
         rgba,
         m,
