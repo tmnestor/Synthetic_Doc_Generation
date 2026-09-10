@@ -62,16 +62,24 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import yaml
 
 from generators.common import FitError
 from generators.degradation import compose_clean, degrade_document, load_tiers, tier_seed
+from generators.degradation.augment import apply_augraphy
+from generators.degradation.camera import apply_photometrics, warp_to_photo
+from generators.degradation.collage import ARRANGEMENTS, compose_collage, compose_folded
 from generators.degradation.labels import defects_for, load_defect_labels
 from generators.exporters.eval_projection import ExtractionSchema, load_extraction_schema
 from generators.loader import load_ground_truth, load_layout_registry
 from generators.overflow_check import build_overflow_error
 
 NOT_FOUND = "NOT_FOUND"
+
+# What a clean image records for jpeg_quality: no compression applied. Mirrors
+# generators.degradation._NO_JPEG, which is private to that module.
+_CLEAN_JPEG = 100
 
 _ROOT_KEY = "eval_set"
 
@@ -172,7 +180,93 @@ def load_eval_set_config(config_path: Path) -> dict:
                 recover=f"remove '{dtype}' or add it to document_types",
             )
 
+    _validate_collage(cfg, config_path)
     return cfg
+
+
+_COLLAGE_KEYS = {
+    "enabled": "true or false",
+    "count": "how many multi-receipt plates to render, e.g. 90",
+    "documents_per_image": "a [min, max] pair, e.g. [2, 5]",
+    "arrangements": f"a list drawn from {list(ARRANGEMENTS)}",
+    "overlap_fraction": "a [min, max] pair between 0.0 and 1.0, e.g. [0.0, 0.55]",
+    "per_document_rotation_deg": "a [min, max] pair, e.g. [-18, 18]",
+    "hard_negatives": "a mapping declaring at least folded_long_receipt",
+}
+
+
+def _validate_collage(cfg: dict, config_path: Path) -> None:
+    """Validate `eval_set.collage`.
+
+    Every key is required even when `enabled: false`, so that turning collages
+    back on is a one-word change rather than an archaeology exercise, and so
+    the YAML answers "what would this generate?" without being run.
+
+    Args:
+        cfg: The `eval_set` mapping.
+        config_path: For diagnostics.
+
+    Raises:
+        ValueError: The block is missing, or a key is absent or unusable.
+    """
+    collage = cfg.get("collage")
+    if not isinstance(collage, dict):
+        raise _err(
+            f"'{_ROOT_KEY}.collage' is missing or not a mapping.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage",
+            expected="a mapping with keys " + ", ".join(_COLLAGE_KEYS) + ".",
+            recover=f"add a 'collage:' block under {_ROOT_KEY}, with 'enabled: false' to generate none",
+        )
+
+    for key, expected in _COLLAGE_KEYS.items():
+        if key not in collage:
+            raise _err(
+                f"'{_ROOT_KEY}.collage.{key}' is missing.",
+                path=config_path,
+                key_path=f"{_ROOT_KEY}.collage.{key}",
+                expected=expected + ".",
+                recover=f"set '{key}' under {_ROOT_KEY}.collage",
+            )
+
+    unknown = sorted(set(collage["arrangements"]) - set(ARRANGEMENTS))
+    if unknown:
+        raise _err(
+            f"'{_ROOT_KEY}.collage.arrangements' names layouts that do not exist: {unknown}.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage.arrangements",
+            expected=f"a list drawn from {list(ARRANGEMENTS)}.",
+            recover="correct the names, or add the arrangement to generators/degradation/collage.py",
+        )
+
+    low, high = collage["documents_per_image"]
+    if low < 2:
+        raise _err(
+            f"'{_ROOT_KEY}.collage.documents_per_image' starts at {low}, so some plates "
+            f"would hold a single receipt and be labelled MULTIPLE.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage.documents_per_image",
+            expected="a minimum of 2 or more, e.g. [2, 5].",
+            recover="raise the minimum to 2",
+        )
+    if high < low:
+        raise _err(
+            f"'{_ROOT_KEY}.collage.documents_per_image' is [{low}, {high}], which is empty.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage.documents_per_image",
+            expected="a [min, max] pair with max >= min, e.g. [2, 5].",
+            recover="swap the bounds",
+        )
+
+    if "folded_long_receipt" not in collage["hard_negatives"]:
+        raise _err(
+            f"'{_ROOT_KEY}.collage.hard_negatives' declares no folded_long_receipt.",
+            path=config_path,
+            key_path=f"{_ROOT_KEY}.collage.hard_negatives.folded_long_receipt",
+            expected="a mapping with count, fold_position and fold_angle_deg.",
+            recover="add folded_long_receipt -- without it every collage is an obvious "
+            "MULTIPLE, the screen scores near 1.0 and the measurement means nothing",
+        )
 
 
 def format_value(field_name: str, raw: Any, schema: ExtractionSchema) -> str:
@@ -462,6 +556,20 @@ def _quality_record(filename: str, doc_type: str, provenance: dict, rules: dict)
         "filename": filename,
         "document_type": doc_type,
         "condition": provenance["tier"],
+        # How many documents are in the picture, on its own axis.
+        #
+        # SEPARATE from `defects` and from `condition`, because it answers a
+        # different question with a different remedy: a photograph of four
+        # receipts is often sharp, evenly lit and undamaged -- nothing is wrong
+        # with the picture -- and the fix is to split it, not to re-take it.
+        # Folding it into the defect rules would be the same conflation the
+        # screen's prompt already refuses.
+        #
+        # Written on EVERY record, including single-document ones, and never by
+        # omission. An absent key means "this corpus predates the label", which
+        # is what makes the screen's scorer report NOT SCORED instead of a
+        # number; a corpus that has been labelled must say SINGLE out loud.
+        "composition": "MULTIPLE" if provenance.get("document_count", 1) > 1 else "SINGLE",
         "defects": defects_for(provenance, rules),
         "params": {key: value for key, value in provenance.items() if key not in ("tier", "augmentations")},
         "augmentations": provenance["augmentations"],
@@ -480,6 +588,195 @@ def write_quality_jsonl(records: list[dict], path: Path) -> Path:
     """
     path.write_text("\n".join(json.dumps(record, ensure_ascii=False) for record in records) + "\n")
     return path
+
+
+def _render_collages(
+    flat_pages: list,
+    collage_cfg: dict,
+    tiers: list,
+    clean_warp: dict,
+    rules: dict,
+    out_dir: Path,
+    seed: int,
+) -> list[dict]:
+    """Render the multi-receipt plates and the folded hard negatives.
+
+    Quality records only. A collage has no meaningful extraction answer -- three
+    receipts carry three sets of fields, and the whole point of the image is
+    that extraction cannot process it -- so emitting one would put rows in the
+    ground truth that nothing can ever score.
+
+    Args:
+        flat_pages: Rendered receipts, BEFORE compose_clean. This matters: the
+            clean corpus images already sit on a desk background, and building
+            a plate from those gives every receipt its own coloured rectangle,
+            desk on desk. It is obvious in a render and invisible in the
+            provenance.
+        collage_cfg: The validated `eval_set.collage` block.
+        tiers: Receipt severity tiers, so composition is crossed with quality
+            rather than correlated with it. A corpus where every collage is
+            clean lets the screen score well by reading "no defects" as
+            "several documents".
+        clean_warp: The clean camera settings, for plates drawn at the clean
+            rung.
+        rules: Validated defect rules, for `_quality_record`.
+        out_dir: Where to write the images.
+        seed: Base seed. Every plate derives from it, so the set regenerates
+            identically and a disputed label can be re-examined.
+
+    Returns:
+        Quality records, sorted by filename.
+    """
+    if not collage_cfg.get("enabled"):
+        return []
+
+    rng = np.random.default_rng(seed)
+    records: list[dict] = []
+    low, high = collage_cfg["documents_per_image"]
+    arrangements = list(collage_cfg["arrangements"])
+    overlap_lo, overlap_hi = collage_cfg["overlap_fraction"]
+    rotation = tuple(collage_cfg["per_document_rotation_deg"])
+    # Clean plus every declared tier, cycled, so the three conditions come out
+    # even without a second config knob to keep in step with the ladder.
+    rungs = [None, *tiers]
+
+    for index in range(int(collage_cfg["count"])):
+        count = int(rng.integers(low, high + 1))
+        pages = [flat_pages[int(rng.integers(0, len(flat_pages)))] for _ in range(count)]
+        arrangement = arrangements[index % len(arrangements)]
+        overlap = float(rng.uniform(overlap_lo, overlap_hi))
+
+        rung = rungs[index % len(rungs)]
+
+        def layout(ready, _a=arrangement, _o=overlap):
+            return compose_collage(
+                ready, arrangement=_a, overlap_fraction=_o, rotation_deg=rotation, rng=rng
+            )
+
+        frame, provenance = _photograph_plate(pages, layout, rung, clean_warp, seed + index)
+        stem = f"COLLAGE{index + 1:03d}_receipts"
+        filename = f"{stem}.png" if rung is None else f"{stem}_{rung.suffix}.png"
+        frame.save(out_dir / filename)
+        records.append(_quality_record(filename, "receipt", provenance, rules))
+
+    folded_cfg = collage_cfg["hard_negatives"]["folded_long_receipt"]
+    # The longest receipts, because a fold only reads as a second document when
+    # there is enough paper either side of the crease.
+    longest = sorted(flat_pages, key=lambda page: page.height, reverse=True)
+    position_lo, position_hi = folded_cfg["fold_position"]
+    angle_lo, angle_hi = folded_cfg["fold_angle_deg"]
+
+    for index in range(int(folded_cfg["count"])):
+        page = longest[index % max(1, len(longest) // 3)]
+        rung = rungs[index % len(rungs)]
+        position = float(rng.uniform(position_lo, position_hi))
+        angle = float(rng.uniform(angle_lo, angle_hi))
+
+        def layout(ready, _p=position, _a=angle):
+            return compose_folded(ready[0], fold_position=_p, fold_angle_deg=_a, rng=rng)
+
+        frame, provenance = _photograph_plate([page], layout, rung, clean_warp, seed + 1000 + index)
+        stem = f"FOLDED{index + 1:03d}_receipt"
+        filename = f"{stem}.png" if rung is None else f"{stem}_{rung.suffix}.png"
+        frame.save(out_dir / filename)
+        records.append(_quality_record(filename, "receipt", provenance, rules))
+
+    records.sort(key=lambda record: record["filename"])
+    return records
+
+
+def _photograph_plate(pages: list, layout, tier, clean_warp: dict, seed: int) -> tuple:
+    """Damage the paper, lay it out, then photograph it once.
+
+    A collage CANNOT go through `degrade_document`, and the reason is worth
+    stating because it is a physical distinction rather than a plumbing one.
+
+    `degrade_document` runs augraphy on a flat page and then photographs it,
+    which is right for one document. For a plate it is wrong twice over.
+    Augraphy works on opaque RGB, so it would flatten the transparency the
+    layout depends on and hand back a collage on a black rectangle. And it
+    would apply one ink/paper condition to a canvas holding several separate
+    receipts.
+
+    Ink and paper damage -- fading, bleed, low ink -- belongs to EACH RECEIPT.
+    Every receipt on a table has its own history. Blur, noise and jpeg
+    artefacts belong to the PHOTOGRAPH: one camera, one exposure, one blur
+    across everything in frame. So the augmentation runs per page, before the
+    layout, and the photometrics run once, after it.
+
+    Args:
+        pages: Flat rendered receipts, before any degradation.
+        layout: Callable taking the (possibly damaged) pages and returning
+            `(plate, provenance)` -- `compose_collage` or `compose_folded`,
+            already bound to their arguments.
+        tier: Severity tier, or None for the clean rung.
+        clean_warp: Clean camera settings, used when *tier* is None.
+        seed: Seed for this image.
+
+    Returns:
+        `(frame, provenance)`, the provenance carrying the same keys a single
+        document's does plus the layout's, so one code path can label both.
+    """
+    rng = np.random.default_rng(seed)
+
+    if tier is None:
+        plate, layout_provenance = layout(pages)
+        frame, warp_provenance = warp_to_photo(plate, clean_warp, rng)
+        provenance = {
+            "tier": "clean",
+            "augmentations": [],
+            **warp_provenance,
+            "blur_sigma": 0.0,
+            "noise_sigma": 0.0,
+            "jpeg_quality": _CLEAN_JPEG,
+            **layout_provenance,
+        }
+        provenance["rotation_deg"] = _effective_rotation(provenance)
+        return frame, provenance
+
+    damaged = [apply_augraphy(page, tier, seed + offset) for offset, page in enumerate(pages)]
+    plate, layout_provenance = layout(damaged)
+    warped, warp_provenance = warp_to_photo(plate, tier.warp, rng)
+    frame, camera_provenance = apply_photometrics(warped, tier.camera, rng)
+    provenance = {
+        "tier": tier.name,
+        "augmentations": [spec["augmentation"] for spec in (*tier.ink, *tier.paper)],
+        **warp_provenance,
+        **camera_provenance,
+        **layout_provenance,
+    }
+    provenance["rotation_deg"] = _effective_rotation(provenance)
+    return frame, provenance
+
+
+def _effective_rotation(provenance: dict) -> float:
+    """The rotation a viewer would actually judge TILT by.
+
+    The tilt label is `rotation_deg_abs at_least 5.0`, taken from the whole
+    page's rotation. For a single document that is the whole story. For a plate
+    it is not: the layout turns each receipt independently, so a plate sitting
+    square with its receipts at 15 degrees records `rotation_deg` near zero and
+    is labelled tilt-free, while every receipt in it is visibly crooked.
+
+    A wrong label is wrong whatever it is later used for, so the recorded
+    rotation is the largest angle any single receipt ends up at -- plate
+    rotation plus its own -- which is what the question "is the paper
+    noticeably turned or crooked in the picture?" is actually asking about.
+
+    Args:
+        provenance: The merged warp, camera and layout provenance.
+
+    Returns:
+        The signed angle of the most-turned receipt, or the plate's own
+        rotation when there are no placements to consider.
+    """
+    plate_rotation = float(provenance.get("rotation_deg", 0.0))
+    placements = provenance.get("placements") or []
+    if not placements:
+        return plate_rotation
+
+    angles = [plate_rotation + float(p.get("rotation_deg", 0.0)) for p in placements]
+    return max(angles, key=abs)
 
 
 def _prepare_dir(out_dir: Path, *, force: bool) -> None:
@@ -648,9 +945,7 @@ def _render_documents(
                 frame, provenance = degrade_document(img, tier, tier_seed(seed, index))
                 frame.save(degraded_dir / variant_name)
                 degraded_documents.append({"filename": variant_name, "fields": projected})
-                degraded_quality.append(
-                    _quality_record(variant_name, resolved_type, provenance, rules)
-                )
+                degraded_quality.append(_quality_record(variant_name, resolved_type, provenance, rules))
 
     documents.sort(key=lambda doc: doc["filename"])
     degraded_documents.sort(key=lambda doc: doc["filename"])

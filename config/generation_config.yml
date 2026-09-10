@@ -272,3 +272,45 @@ eval_set:
   quality_dir_prefix: quality
   csv_name: ground_truth.csv
   jsonl_name: ground_truth.jsonl
+
+  # Multi-receipt photographs, for the screen's COMPOSITION question.
+  #
+  # Taxpayers spread several receipts on a table and photograph them in one
+  # shot; downstream extraction handles those badly. The screen asks how many
+  # documents are in a picture, and until this block existed there was nothing
+  # in the corpus for it to find -- it answered SINGLE 330 times, which
+  # establishes that it does not false-alarm and nothing else.
+  #
+  # RECEIPTS ONLY. Invoices always arrive as full pages, one per photograph.
+  #
+  # These images carry a quality ground truth and NO extraction record. Three
+  # receipts have three sets of fields, and the point of the image is that
+  # extraction cannot process it; emitting rows nothing can score is how a
+  # denominator quietly grows.
+  collage:
+    enabled: true
+    # Crossed with the severity ladder, not correlated with it. If every
+    # collage were clean, MULTIPLE would coincide with "no defects" and the
+    # screen could score well by reading the wrong cue, with no way to tell.
+    # Each plate draws a condition, so composition and quality vary
+    # independently.
+    count: 90
+    documents_per_image: [2, 5]
+    # `piled` deepens whatever overlap it is given and jitters hard enough to
+    # break up the grid; `overlapping` keeps the grid visible. They are not the
+    # same layout with a different number.
+    arrangements: [side_by_side, grid, overlapping, piled]
+    overlap_fraction: [0.0, 0.55]
+    per_document_rotation_deg: [-18, 18]
+
+    # Truth SINGLE, and the reason this measurement means anything. A set of
+    # obvious four-up grids would score near 1.0 and prove nothing; these are
+    # the images a naive detector calls MULTIPLE when they are not.
+    hard_negatives:
+      # A long supermarket receipt folded across itself. The two halves lie at
+      # different angles to the light, so the crease shows as a tonal step that
+      # reads convincingly as a gap between two separate receipts.
+      folded_long_receipt:
+        count: 30
+        fold_position: [0.35, 0.65]
+        fold_angle_deg: [-12, 12]
