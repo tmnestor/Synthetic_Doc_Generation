@@ -62,6 +62,30 @@ _INVOICE_LAYOUTS = [
     "tax_invoice_mixed",
 ]
 
+# Every third invoice, in case order, is drawn with its seller and buyer blocks
+# in one horizontal band instead of stacked. Each layout maps to its own mirror,
+# so the case keeps the register it was drawn with and only the parties geometry
+# moves.
+#
+# Applied after the layout draw rather than by widening _INVOICE_LAYOUTS to
+# eight. The sampler shares its rng with every content draw below, so a pool of
+# eight would consume different rng state and reseed all 55 invoices -- new
+# supplier names, dates and amounts -- invalidating the extraction ground truth
+# that is paired with this corpus. Rewriting the drawn layout consumes no rng,
+# so the content is bit-for-bit what it was and only the 18 layouts change.
+_INVOICE_SIDE_BY_SIDE = {
+    "tax_invoice_standard": "tax_invoice_standard_side_by_side",
+    "tax_invoice_gst_inclusive": "tax_invoice_gst_inclusive_side_by_side",
+    "tax_invoice_high_value": "tax_invoice_high_value_side_by_side",
+    "tax_invoice_mixed": "tax_invoice_mixed_side_by_side",
+}
+
+# Every third case: deterministic, so a reseed reproduces the same assignment,
+# and spread through the corpus rather than clustered at one end -- a run that
+# sampled the first twenty cases would otherwise never see a side-by-side
+# invoice at all.
+_INVOICE_SIDE_BY_SIDE_EVERY = 3
+
 
 def _fmt_date(day: int, month: int, year: int) -> str:
     """Format date as DD/MM/YYYY."""
@@ -304,6 +328,20 @@ def _generate_invoice_entries(
     for i in range(count):
         case_id = f"CASE{i + 1:03d}"
         layout = layout_draw.draw()
+
+        if i % _INVOICE_SIDE_BY_SIDE_EVERY == _INVOICE_SIDE_BY_SIDE_EVERY - 1:
+            if layout not in _INVOICE_SIDE_BY_SIDE:
+                raise KeyError(
+                    "seed_ground_truth: invoice layout has no side-by-side mirror.\n"
+                    f"  What:     '{layout}' was drawn for {case_id}, which is a side-by-side "
+                    "case, but no mirror is declared for it.\n"
+                    "  Where:    scripts/seed_ground_truth.py -> _INVOICE_SIDE_BY_SIDE.\n"
+                    "  Expected: every layout in _INVOICE_LAYOUTS maps to a side-by-side twin, "
+                    "e.g. 'tax_invoice_standard': 'tax_invoice_standard_side_by_side'.\n"
+                    f"  Recover:  add a '{layout}' entry to _INVOICE_SIDE_BY_SIDE and the "
+                    "matching layout to config/layouts/invoices.yml."
+                )
+            layout = _INVOICE_SIDE_BY_SIDE[layout]
 
         category = sample(rng, engine.pools["service_categories"])
         provider = engine.fictional_business(rng, category)

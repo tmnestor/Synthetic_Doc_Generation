@@ -29,6 +29,23 @@ _invoice_field_budgets: &invoice_field_budgets
   PAYER_ADDRESS: {width: 1700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
   LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
 
+# The same budgets for the side-by-side-parties layouts, where the seller and
+# buyer blocks no longer own the full 1700px content box but a 920px and a
+# 700px column either side of an 80px gutter. Widths must match those columns:
+# a budget wider than its region is what lets a long supplier name pass the fit
+# check and then draw across the gutter into the payer's name -- so the layout
+# validator rejects it outright rather than letting it render.
+#
+# The line-item table below the parties band is still full width, so
+# LINE_ITEM_DESC is unchanged.
+_invoice_field_budgets_side_by_side: &invoice_field_budgets_side_by_side
+  SUPPLIER_NAME: {width: 920, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+  BUSINESS_ADDRESS: {width: 920, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+  ABN_LINE: {width: 920, fit: shrink, min_font: 12, max_lines: 1}
+  PAYER_NAME: {width: 700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+  PAYER_ADDRESS: {width: 700, fit: shrink_then_wrap, min_font: 12, max_lines: 2}
+  LINE_ITEM_DESC: {width: 870, fit: shrink, min_font: 12, max_lines: 1}
+
 # The ex-GST subtotal exists nowhere in ground truth: the legacy renderer
 # computed TOTAL_AMOUNT - GST_AMOUNT inline. See generators/layout_dsl/
 # field_providers.py's computed_totals, which every receipt already uses.
@@ -118,6 +135,33 @@ _invoice_payer_address: &invoice_payer_address
   {type: text, content: "{PAYER_ADDRESS}", budget: PAYER_ADDRESS,
    field: PAYER_ADDRESS, line_advance: 44, when: PAYER_ADDRESS}
 _invoice_buyer_gap: &invoice_buyer_gap {type: spacer, height: 28, when: PAYER_NAME}
+
+# --- parties side by side ----------------------------------------------------
+# Seller left, buyer right, sharing one horizontal band.
+#
+# Real invoices do this at least as often as they stack the two blocks, and
+# until this anchor existed all four layouts stacked them -- so every invoice in
+# the corpus shared one parties geometry. A model that assigns SUPPLIER_NAME and
+# PAYER_NAME correctly only because the seller always comes FIRST has not been
+# tested on the question, and the corpus could not tell the difference. That is
+# the layout most likely to expose the supplier/payer swap already seen in the
+# extraction results.
+#
+# Same anchors as the stacked form, reused rather than restated: the two
+# arrangements must carry identical content, or a difference in extraction
+# between them says something about the text rather than the geometry.
+#
+# `widths` rather than an equal divide. A seller block carries a business name,
+# an address and an ABN line; a buyer block carries a name and an address. Equal
+# columns leave the right one visibly short, which reads as a rendering fault
+# rather than a layout choice.
+_invoice_parties_side_by_side: &invoice_parties_side_by_side
+  type: split
+  gap: 80
+  widths: [920, 700]
+  children:
+    - [*invoice_seller_name, *invoice_seller_address, *invoice_seller_abn]
+    - [*invoice_bill_to, *invoice_payer_name, *invoice_payer_address]
 
 # A pair, not a text: legacy recorded only the value's own box, offset past the
 # "Date: " label it drew in the same string.
@@ -305,6 +349,96 @@ layouts:
       - *invoice_bill_to
       - *invoice_payer_name
       - *invoice_payer_address
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_separate
+      - *invoice_payment_terms
+
+  # --- parties side by side -------------------------------------------------
+  # Australian tax invoices put the seller and buyer blocks in one horizontal
+  # band at least as often as they stack them, so parties geometry is a real
+  # axis of variation and the corpus previously had only one end of it.
+  #
+  # There is one mirror per stacked layout rather than a single side-by-side
+  # layout everything maps onto. Collapsing four onto one would have quietly
+  # dropped tax_invoice_high_value's delivery line and the two typographic
+  # registers, and any extraction difference would then confound geometry with
+  # those. Mirrored one-for-one, geometry is orthogonal to register: each pair
+  # differs in where the parties sit and in nothing else.
+  tax_invoice_standard_side_by_side:
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets_side_by_side
+    field_providers: *invoice_field_providers
+    defaults:
+      <<: *invoice_defaults_values
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_parties_side_by_side
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_separate
+      - *invoice_payment_terms
+
+  tax_invoice_gst_inclusive_side_by_side:
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets_side_by_side
+    field_providers: *invoice_field_providers
+    defaults:
+      <<: *invoice_defaults_values
+      family: liberation_sans     # Arial register, against carlito elsewhere
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_parties_side_by_side
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_inclusive
+      - *invoice_payment_terms
+
+  tax_invoice_high_value_side_by_side:
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets_side_by_side
+    field_providers: *invoice_field_providers
+    defaults:
+      <<: *invoice_defaults_values
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_parties_side_by_side
+      - *invoice_buyer_gap
+      - *invoice_date
+      - *invoice_rule
+      - *invoice_line_items
+      - *invoice_table_gap
+      - *invoice_rule
+      - *invoice_totals_separate
+      - *invoice_payment_terms
+      - *invoice_delivery
+
+  tax_invoice_mixed_side_by_side:
+    <<: *invoice_page
+    field_budgets: *invoice_field_budgets_side_by_side
+    field_providers: *invoice_field_providers
+    defaults:
+      <<: *invoice_defaults_values
+      family: liberation_sans     # Arial register, against carlito elsewhere
+    body:
+      - *invoice_title
+      - *invoice_rule
+      - *invoice_parties_side_by_side
       - *invoice_buyer_gap
       - *invoice_date
       - *invoice_rule

@@ -54,7 +54,7 @@ CASE003_receipt_thermal_80mm.png:
   match_difficulty: hard
   notes: Late row on nab classic — exact date and amount, no merchant reference in
     description
-CASE003_tax_invoice_mixed.png:
+CASE003_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE003_nab_classic.png
   supplier: Ashcroft Brand & Media
   receipt_date: 29/11/2024
@@ -121,7 +121,7 @@ CASE006_receipt_hospitality.png:
   match_status: FOUND
   match_difficulty: hard
   notes: Mid row on nab dense — exact date and amount, no merchant reference in description
-CASE006_tax_invoice_gst_inclusive.png:
+CASE006_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE006_nab_dense.png
   supplier: Harrowgate Marketing Co
   receipt_date: 09/06/2024
@@ -190,7 +190,7 @@ CASE009_receipt_thermal_57mm.png:
   match_difficulty: medium
   notes: Mid row on cba date grouped — exact date and amount, abbreviated merchant
     reference
-CASE009_tax_invoice_standard.png:
+CASE009_tax_invoice_standard_side_by_side.png:
 - bank_statement: CASE009_cba_date_grouped.png
   supplier: Denholm Solicitors
   receipt_date: 27/05/2024
@@ -259,7 +259,7 @@ CASE012_receipt_thermal_80mm.png:
   match_difficulty: medium
   notes: Late row on westpac premium — exact date and amount, abbreviated merchant
     reference
-CASE012_tax_invoice_high_value.png:
+CASE012_tax_invoice_high_value_side_by_side.png:
 - bank_statement: CASE012_westpac_premium.png
   supplier: Capital & Associates Accounting
   receipt_date: 24/05/2024
@@ -326,7 +326,7 @@ CASE015_receipt_thermal_80mm.png:
   match_status: FOUND
   match_difficulty: easy
   notes: Late row on nab dense — exact date and amount, full merchant name
-CASE015_tax_invoice_gst_inclusive.png:
+CASE015_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE015_nab_dense.png
   supplier: Denholm IT Solutions
   receipt_date: 23/11/2023
@@ -393,7 +393,7 @@ CASE018_receipt_fuel.png:
   match_status: FOUND
   match_difficulty: medium
   notes: Mid row on anz standard — exact date and amount, abbreviated merchant reference
-CASE018_tax_invoice_gst_inclusive.png:
+CASE018_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE018_anz_standard.png
   supplier: Northern Digital Services
   receipt_date: 01/06/2023
@@ -462,7 +462,7 @@ CASE021_receipt_hospitality.png:
   match_difficulty: medium
   notes: Mid row on westpac premium — exact date and amount, abbreviated merchant
     reference
-CASE021_tax_invoice_gst_inclusive.png:
+CASE021_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE021_westpac_premium.png
   supplier: Western Marketing Group
   receipt_date: 08/01/2024
@@ -532,7 +532,7 @@ CASE024_receipt_thermal_80mm.png:
   match_status: FOUND
   match_difficulty: medium
   notes: Mid row on nab classic — exact date and amount, abbreviated merchant reference
-CASE024_tax_invoice_standard.png:
+CASE024_tax_invoice_standard_side_by_side.png:
 - bank_statement: CASE024_nab_classic.png
   supplier: Denholm Marketing Group
   receipt_date: 13/12/2024
@@ -599,7 +599,7 @@ CASE027_receipt_thermal_80mm.png:
   match_difficulty: medium
   notes: Mid row on cba date grouped — exact date and amount, abbreviated merchant
     reference
-CASE027_tax_invoice_standard.png:
+CASE027_tax_invoice_standard_side_by_side.png:
 - bank_statement: CASE027_cba_date_grouped.png
   supplier: Regional Digital Services
   receipt_date: 30/01/2024
@@ -666,7 +666,7 @@ CASE030_receipt_thermal_57mm.png:
   match_status: FOUND
   match_difficulty: easy
   notes: Mid row on westpac standard — exact date and amount, full merchant name
-CASE030_tax_invoice_mixed.png:
+CASE030_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE030_westpac_standard.png
   supplier: Kirriemuir Strategy Group
   receipt_date: 07/01/2023
@@ -732,7 +732,7 @@ CASE033_receipt_fuel.png:
   match_status: FOUND
   match_difficulty: easy
   notes: Mid row on westpac premium — exact date and amount, full merchant name
-CASE033_tax_invoice_gst_inclusive.png:
+CASE033_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE033_westpac_premium.png
   supplier: Harbourside Brand & Media
   receipt_date: 13/05/2024
@@ -800,7 +800,7 @@ CASE036_receipt_thermal_57mm.png:
   match_difficulty: hard
   notes: Mid row on cba standard — exact date and amount, no merchant reference in
     description
-CASE036_tax_invoice_mixed.png:
+CASE036_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE036_cba_standard.png
   supplier: Central Technology Group
   receipt_date: 22/08/2023
@@ -867,7 +867,7 @@ CASE039_receipt_thermal_80mm.png:
   match_status: FOUND
   match_difficulty: easy
   notes: Early row on nab classic — exact date and amount, full merchant name
-CASE039_tax_invoice_mixed.png:
+CASE039_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE039_nab_classic.png
   supplier: Southern & Associates Accounting
   receipt_date: 29/06/2024
@@ -939,7 +939,7 @@ CASE042_receipt_thermal_57mm.png:
   match_difficulty: hard
   notes: Early row on cba date grouped — exact date and amount, no merchant reference
     in description
-CASE042_tax_invoice_mixed.png:
+CASE042_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE042_cba_date_grouped.png
   supplier: Southcott & Partners Lawyers
   receipt_date: 10/02/2023
@@ -1008,7 +1008,7 @@ CASE045_receipt_retail_tax.png:
   match_difficulty: medium
   notes: Mid row on westpac premium — exact date and amount, abbreviated merchant
     reference
-CASE045_tax_invoice_mixed.png:
+CASE045_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE045_westpac_premium.png
   supplier: Blackwood Consulting Partners
   receipt_date: 24/02/2024
@@ -1076,7 +1076,7 @@ CASE048_receipt_fuel.png:
   match_status: FOUND
   match_difficulty: medium
   notes: Early row on anz modern — exact date and amount, abbreviated merchant reference
-CASE048_tax_invoice_gst_inclusive.png:
+CASE048_tax_invoice_gst_inclusive_side_by_side.png:
 - bank_statement: CASE048_anz_modern.png
   supplier: Coastal Chartered Accountants
   receipt_date: 12/08/2023
@@ -1144,7 +1144,7 @@ CASE051_receipt_professional.png:
   match_status: FOUND
   match_difficulty: easy
   notes: Late row on anz standard — exact date and amount, full merchant name
-CASE051_tax_invoice_mixed.png:
+CASE051_tax_invoice_mixed_side_by_side.png:
 - bank_statement: CASE051_anz_standard.png
   supplier: Norcott Creative Agency
   receipt_date: 26/04/2024
@@ -1211,7 +1211,7 @@ CASE054_receipt_thermal_80mm.png:
   match_status: FOUND
   match_difficulty: hard
   notes: Late row on nab dense — exact date and amount, no merchant reference in description
-CASE054_tax_invoice_high_value.png:
+CASE054_tax_invoice_high_value_side_by_side.png:
 - bank_statement: CASE054_nab_dense.png
   supplier: Wakeling IT Consulting
   receipt_date: 27/01/2023

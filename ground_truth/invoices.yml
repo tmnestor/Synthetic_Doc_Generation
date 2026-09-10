@@ -35,7 +35,7 @@ CASE002:
     PAYER_NAME: Juan Taylor
     PAYER_ADDRESS: 241 Sutton Way, Subiaco WA 6008
 CASE003:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 2394
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -91,7 +91,7 @@ CASE005:
     PAYER_NAME: David Smith
     PAYER_ADDRESS: 281 Guerrero Blvd, New Farm QLD 4005
 CASE006:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 7662
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -148,7 +148,7 @@ CASE008:
     PAYER_NAME: Norma Cross
     PAYER_ADDRESS: 170 Jones Dr, Parramatta NSW 2150
 CASE009:
-  layout: tax_invoice_standard
+  layout: tax_invoice_standard_side_by_side
   degradation_seed: 3383
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -205,7 +205,7 @@ CASE011:
     PAYER_NAME: Jeffrey Harrison
     PAYER_ADDRESS: 223 Ray Dr, Prospect SA 5082
 CASE012:
-  layout: tax_invoice_high_value
+  layout: tax_invoice_high_value_side_by_side
   degradation_seed: 6091
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -261,7 +261,7 @@ CASE014:
     PAYER_NAME: Tiffany Stanley
     PAYER_ADDRESS: 58 Tran Blvd, Manuka ACT 2603
 CASE015:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 7489
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -316,7 +316,7 @@ CASE017:
     PAYER_NAME: Eric Phillips
     PAYER_ADDRESS: 183 Clark Rd, Norwood SA 5067
 CASE018:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 2390
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -370,7 +370,7 @@ CASE020:
     PAYER_NAME: Emily Rice
     PAYER_ADDRESS: 124 Reyes Blvd, St Kilda VIC 3182
 CASE021:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 8784
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -426,7 +426,7 @@ CASE023:
     PAYER_NAME: Andrew Richardson
     PAYER_ADDRESS: 216 Jacobs Pl, Subiaco WA 6008
 CASE024:
-  layout: tax_invoice_standard
+  layout: tax_invoice_standard_side_by_side
   degradation_seed: 4768
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -481,7 +481,7 @@ CASE026:
     PAYER_NAME: Christopher Gonzalez
     PAYER_ADDRESS: 37 Dominguez St, Parramatta NSW 2150
 CASE027:
-  layout: tax_invoice_standard
+  layout: tax_invoice_standard_side_by_side
   degradation_seed: 1025
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -537,7 +537,7 @@ CASE029:
     PAYER_NAME: Kimberly Garcia
     PAYER_ADDRESS: 94 Turner Cres, Paddington QLD 4064
 CASE030:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 7309
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -594,7 +594,7 @@ CASE032:
     PAYER_NAME: Jonathan Yates
     PAYER_ADDRESS: 91 Hubbard Rd, Richmond VIC 3121
 CASE033:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 2079
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -650,7 +650,7 @@ CASE035:
     PAYER_NAME: Allison Davis
     PAYER_ADDRESS: 366 Cooper Ave, Unley SA 5061
 CASE036:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 6444
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -707,7 +707,7 @@ CASE038:
     PAYER_NAME: Crystal Sanford
     PAYER_ADDRESS: 91 Johnson Cres, Hawthorn East VIC 3123
 CASE039:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 7355
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -763,7 +763,7 @@ CASE041:
     PAYER_NAME: Jacob Williamson
     PAYER_ADDRESS: 2 Gonzalez Cres, Leederville WA 6007
 CASE042:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 1514
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -820,7 +820,7 @@ CASE044:
     PAYER_NAME: Rick Wilson
     PAYER_ADDRESS: 394 Lee Way, New Farm QLD 4005
 CASE045:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 3448
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -876,7 +876,7 @@ CASE047:
     PAYER_NAME: Edward Foster
     PAYER_ADDRESS: 67 Foster Pl, Manuka ACT 2603
 CASE048:
-  layout: tax_invoice_gst_inclusive
+  layout: tax_invoice_gst_inclusive_side_by_side
   degradation_seed: 8289
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -930,7 +930,7 @@ CASE050:
     PAYER_NAME: Angela Gardner
     PAYER_ADDRESS: 317 Sullivan Blvd, Battery Point TAS 7004
 CASE051:
-  layout: tax_invoice_mixed
+  layout: tax_invoice_mixed_side_by_side
   degradation_seed: 4746
   fields:
     DOCUMENT_TYPE: INVOICE
@@ -985,7 +985,7 @@ CASE053:
     PAYER_NAME: Blake Dennis
     PAYER_ADDRESS: 61 Church Cl, Subiaco WA 6008
 CASE054:
-  layout: tax_invoice_high_value
+  layout: tax_invoice_high_value_side_by_side
   degradation_seed: 2163
   fields:
     DOCUMENT_TYPE: INVOICE
