@@ -61,6 +61,130 @@ def _slot_grid(count: int) -> tuple[int, int]:
     return columns, rows
 
 
+def compose_folded(
+    page: Image.Image,
+    *,
+    fold_position: float,
+    fold_angle_deg: float,
+    rng: np.random.Generator,
+) -> tuple[Image.Image, dict]:
+    """Fold one long receipt across itself, so it reads as two pieces of paper.
+
+    This is the hard negative the whole exercise turns on. A four-up grid of
+    receipts is an obvious MULTIPLE and scoring 1.0 on it proves nothing; a
+    folded supermarket receipt is a genuine SINGLE that looks like two, it
+    happens constantly, and it is what a naive detector gets wrong.
+
+    Not a collage, despite living here: it produces ONE document. It lives
+    beside `compose_collage` because the two exist for the same question and
+    return the same provenance shape, so `_render_collages` can treat them
+    alike and the label falls out of `document_count` either way.
+
+    The fold is modelled the way a real one photographs: the far half is
+    slightly darker, because it lies at a different angle to the light, and the
+    crease is a hard edge rather than a blur. That darker band is the cue a
+    detector is most likely to misread as a gap between two receipts, which is
+    exactly what makes it worth rendering.
+
+    Args:
+        page: One rendered receipt, ideally a long one.
+        fold_position: Where along the height to fold, 0.0-1.0. Around 0.5 is
+            the classic in-half fold; further out gives the short flap that
+            reads most convincingly as a second, smaller receipt.
+        fold_angle_deg: How far the folded half is turned relative to the rest.
+            Zero is a flat fold; a few degrees is a real one lying on a table.
+        rng: Seeded generator.
+
+    Returns:
+        `(plate, provenance)` in `compose_collage`'s shape, with
+        `document_count` of 1 and a `fold` block recording what was drawn.
+
+    Raises:
+        ValueError: `fold_position` is not strictly inside the page.
+    """
+    if not 0.05 < fold_position < 0.95:
+        raise ValueError(
+            f"fold_position {fold_position!r} is outside the page.\n"
+            f"  What:        a fold at or beyond an edge produces no visible crease.\n"
+            f"  Where:       eval_set.collage.hard_negatives, folded_long_receipt.\n"
+            f"  Expected:    a fraction strictly between 0.05 and 0.95, e.g. 0.45.\n"
+            f"  Recover:     move the fold inside the page."
+        )
+
+    page = page.convert("RGBA")
+    width, height = page.size
+    split = int(height * fold_position)
+
+    near = page.crop((0, 0, width, split))
+    far = page.crop((0, split, width, height))
+
+    # The far half lies at a different angle to the light. Darkening it is what
+    # makes the crease read as a fold rather than a cut.
+    shade = float(rng.uniform(0.82, 0.93))
+    far_pixels = np.array(far).astype(np.float32)
+    far_pixels[:, :, :3] *= shade
+    far = Image.fromarray(np.clip(far_pixels, 0, 255).astype(np.uint8), "RGBA")
+
+    # Rotate the far half about the CREASE, not about its own centre.
+    #
+    # Centre-rotation swings the far half's top edge away from the fold and
+    # leaves a gap, which renders as two separate receipts lying near each
+    # other -- a MULTIPLE, labelled SINGLE. That is the worst possible mistake
+    # here, because this image exists precisely to be a SINGLE that merely
+    # LOOKS like two. Caught by looking at a render; nothing in the provenance
+    # would have shown it.
+    #
+    # PIL rotates about the image centre and then expands, so the crease point
+    # moves. Rather than trust a sign convention, track where it went: the
+    # original top-centre is mapped through the same rotation and the paste is
+    # offset to put it back on the fold line.
+    far_w, far_h = far.size
+    far = far.rotate(fold_angle_deg, resample=Image.BICUBIC, expand=True, fillcolor=(0, 0, 0, 0))
+
+    radians = np.deg2rad(fold_angle_deg)
+    cos, sin = np.cos(radians), np.sin(radians)
+    # Crease point relative to the far half's centre, before rotation.
+    vx, vy = 0.0, -far_h / 2.0
+    crease_x = far.width / 2.0 + (vx * cos + vy * sin)
+    crease_y = far.height / 2.0 + (-vx * sin + vy * cos)
+
+    near_crease_x = width / 2.0
+    plate_w = int(max(width, far.width) + abs(near_crease_x - crease_x) + 2)
+    plate_h = int(split + far.height + 2)
+    plate = Image.new("RGBA", (plate_w, plate_h), (0, 0, 0, 0))
+
+    near_left = int((plate_w - width) / 2)
+    plate.paste(near, (near_left, 0), near)
+    # Put the far half's crease point exactly where the near half's bottom edge
+    # centre is, so the two halves meet along the fold.
+    far_left = int(near_left + near_crease_x - crease_x)
+    far_top = int(split - crease_y)
+    plate.paste(far, (far_left, far_top), far)
+
+    provenance = {
+        "document_count": 1,
+        "arrangement": "folded",
+        "overlap_fraction": 0.0,
+        "overlap_requested": 0.0,
+        "fold": {
+            "position": float(fold_position),
+            "angle_deg": float(fold_angle_deg),
+            "far_half_shade": shade,
+        },
+        "placements": [
+            {"left": near_left, "top": 0, "width": width, "height": split, "rotation_deg": 0.0},
+            {
+                "left": far_left,
+                "top": far_top,
+                "width": far.width,
+                "height": far.height,
+                "rotation_deg": float(fold_angle_deg),
+            },
+        ],
+    }
+    return plate, provenance
+
+
 def compose_collage(
     pages: list[Image.Image],
     *,

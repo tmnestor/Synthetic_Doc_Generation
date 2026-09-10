@@ -174,6 +174,79 @@ class TestRejections:
         assert "side_by_side" in message
 
 
+class TestFoldedReceipt:
+    """One receipt that looks like two -- the hard negative that decides
+    whether measuring COMPOSITION is worth anything.
+
+    A four-up grid is an obvious MULTIPLE and scoring 1.0 on it proves nothing.
+    A folded supermarket receipt is a genuine SINGLE that reads as two pieces
+    of paper, it happens constantly, and it is what a naive detector gets
+    wrong.
+    """
+
+    def fold(self, position=0.45, angle=6.0, seed=3, height=1400):
+        from generators.degradation.collage import compose_folded
+
+        page = Image.new("RGB", (240, height), "white")
+        return compose_folded(
+            page, fold_position=position, fold_angle_deg=angle, rng=np.random.default_rng(seed)
+        )
+
+    def test_it_is_one_document(self):
+        """The label falls out of this. Getting it wrong makes the corpus teach
+        the opposite of what it is for."""
+        _, provenance = self.fold()
+
+        assert provenance["document_count"] == 1
+
+    def test_the_halves_are_joined_at_the_crease(self):
+        """The bug this replaced: the far half was rotated about its own centre,
+        which swung its top edge away from the fold and left a transparent gap.
+        That renders as two separate receipts lying near each other -- a
+        MULTIPLE, labelled SINGLE, which is the worst error this corpus could
+        contain. Nothing in the provenance showed it; only the pixels do.
+        """
+        for angle in (-12.0, -6.0, 0.0, 6.0, 12.0):
+            plate, _ = self.fold(angle=angle)
+            opaque_rows = np.where((np.array(plate)[:, :, 3] > 0).any(axis=1))[0]
+
+            spanned = np.arange(opaque_rows.min(), opaque_rows.max() + 1)
+            missing = set(spanned.tolist()) - set(opaque_rows.tolist())
+            assert not missing, (
+                f"at {angle} degrees the fold leaves {len(missing)} blank row(s) "
+                f"between the halves, so it reads as two receipts"
+            )
+
+    def test_the_far_half_is_shaded(self):
+        """A fold shows as a tonal step, because the two halves lie at
+        different angles to the light. Without it the crease reads as a cut."""
+        _, provenance = self.fold()
+
+        assert 0.8 <= provenance["fold"]["far_half_shade"] < 1.0
+
+    def test_the_provenance_records_the_fold_that_was_drawn(self):
+        _, provenance = self.fold(position=0.62, angle=-9.0)
+
+        assert provenance["fold"]["position"] == 0.62
+        assert provenance["fold"]["angle_deg"] == -9.0
+        assert provenance["arrangement"] == "folded"
+
+    def test_it_reads_like_a_collage_to_the_caller(self):
+        """Same provenance shape as compose_collage, so the render pass can
+        treat both alike and the label falls out of document_count."""
+        _, folded = self.fold()
+        _, collaged = compose(receipts(600, 900))
+
+        assert set(folded) >= set(collaged)
+
+    @pytest.mark.parametrize("position", [0.0, 0.04, 0.96, 1.0])
+    def test_a_fold_outside_the_page_is_refused(self, position):
+        with pytest.raises(ValueError) as exc_info:
+            self.fold(position=position)
+
+        assert_diagnostic_error(str(exc_info.value))
+
+
 def test_the_plate_survives_the_single_page_camera():
     """The whole design rests on this: a collage is handed to the SAME
     warp_to_photo a single page uses, so it gets one perspective and one desk,
