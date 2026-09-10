@@ -258,9 +258,7 @@ def test_clean_images_carry_no_defects(quality):
 
 def test_every_degraded_row_names_a_declared_tier(cfg, quality):
     _, degraded_q = quality
-    tier_names = {
-        t["name"] for tiers in cfg["document_degradation"]["tiers"].values() for t in tiers
-    }
+    tier_names = {t["name"] for tiers in cfg["document_degradation"]["tiers"].values() for t in tiers}
     assert {r["condition"] for r in degraded_q.values()} == tier_names
 
 
@@ -304,11 +302,25 @@ def test_categorical_defects_follow_their_tier_declaration(cfg, quality):
 # cannot consume the split halves.
 
 
-def test_combined_dir_is_exactly_the_union_of_both_halves(exported, combined):
-    """No image missing, and none invented."""
+def test_combined_dir_holds_both_halves_plus_the_collages(exported, combined):
+    """No image missing, and none invented.
+
+    It used to be exactly the union. It is now the union PLUS the
+    multi-receipt plates and folded receipts, which exist only here: they have
+    no extraction answer, so they have no place in the clean or degraded halves
+    that are paired with one. Everything from those two halves must still
+    arrive, which is what the subset check below is for -- the collages must be
+    an addition, never a substitution.
+    """
     _, clean_dir, degraded_dir = exported
-    expected = {p.name for p in clean_dir.glob("*.png")} | {p.name for p in degraded_dir.glob("*.png")}
-    assert {p.name for p in combined.glob("*.png")} == expected
+    halves = {p.name for p in clean_dir.glob("*.png")} | {p.name for p in degraded_dir.glob("*.png")}
+    present = {p.name for p in combined.glob("*.png")}
+
+    assert halves <= present, "an image from one of the halves did not arrive"
+    extra = present - halves
+    assert all(name.startswith(("COLLAGE", "FOLDED")) for name in extra), (
+        f"the combined directory invented images that are not collages: {sorted(extra)[:5]}"
+    )
 
 
 def test_combined_images_are_real_copies_not_links(exported, combined):
@@ -323,14 +335,38 @@ def test_combined_images_are_real_copies_not_links(exported, combined):
     assert copied.read_bytes() == sample.read_bytes()
 
 
-def test_combined_ground_truths_have_one_row_per_image(cfg, combined):
+def test_the_quality_ground_truth_covers_every_image(cfg, combined):
+    """This directory is the SCREEN's, so its quality ground truth is the one
+    that must be complete. An image with no quality row is an image the screen
+    is asked about and cannot be scored on."""
     images = {p.name for p in combined.glob("*.png")}
-    rows = list(csv.DictReader((combined / "ground_truth.csv").open()))
-    assert {r["image_file"] for r in rows} == images
-
     name = cfg["document_degradation"]["defect_labels"]["filename"]
     quality_rows = [json.loads(line) for line in (combined / name).read_text().splitlines()]
+
     assert {r["filename"] for r in quality_rows} == images
+
+
+def test_the_extraction_ground_truth_covers_exactly_the_extractable_images(cfg, combined):
+    """The asymmetry, stated rather than weakened.
+
+    Collages carry NO extraction row, deliberately: three receipts on a table
+    have three sets of fields, and the point of the image is that extraction
+    cannot read it. So the extraction ground truth describes fewer images than
+    this directory holds, and the difference must be exactly the collages --
+    not one more, which would be an image silently missing its answer key.
+    """
+    images = {p.name for p in combined.glob("*.png")}
+    rows = list(csv.DictReader((combined / "ground_truth.csv").open()))
+    described = {r["image_file"] for r in rows}
+
+    unscoreable = {name for name in images if name.startswith(("COLLAGE", "FOLDED"))}
+    assert described == images - unscoreable
+
+    # And every one of those DOES have a quality row -- being unextractable is
+    # not the same as being unlabelled.
+    name = cfg["document_degradation"]["defect_labels"]["filename"]
+    quality_rows = [json.loads(line) for line in (combined / name).read_text().splitlines()]
+    assert unscoreable <= {r["filename"] for r in quality_rows}
 
 
 def test_combined_set_holds_every_condition(cfg, combined):
@@ -349,9 +385,7 @@ def test_a_case_carries_identical_extraction_values_across_conditions(exported, 
     rows = {r["image_file"]: r for r in csv.DictReader((combined / "ground_truth.csv").open())}
     for case in shape["cases"][:: max(1, len(shape["cases"]) // 3)]:
         for doc_type in shape["degrade_types"]:
-            names = [f"{case}_{doc_type}.png"] + [
-                f"{case}_{doc_type}_{s}.png" for s in shape["suffixes"]
-            ]
+            names = [f"{case}_{doc_type}.png"] + [f"{case}_{doc_type}_{s}.png" for s in shape["suffixes"]]
             first = rows[names[0]]
             for other in names[1:]:
                 for column, value in first.items():

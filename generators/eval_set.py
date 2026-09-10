@@ -1100,7 +1100,13 @@ def export_eval_set(
     # first run against it is a new baseline, not a continuation.
     collage_cfg = eval_cfg["collage"]
     collage_quality: list[dict] = []
-    if collage_cfg.get("enabled"):
+    # Receipts must actually be in this export. A narrowed run -- bank
+    # statements only, say -- has no receipt renderer, and building plates from
+    # a type the export does not include would fail on a document nobody asked
+    # for. Skipped rather than raised: not exporting receipts is a legitimate
+    # request, and refusing it would make `collage.enabled` a global switch
+    # instead of a property of receipt exports.
+    if collage_cfg.get("enabled") and "receipts" in eval_cfg["document_types"]:
         rules, _ = load_defect_labels(config_path)
         raw = yaml.safe_load(config_path.read_text())
         collage_quality = _render_collages(
