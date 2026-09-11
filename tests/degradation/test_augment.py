@@ -55,6 +55,51 @@ def test_spec_without_an_augmentation_key_is_a_diagnostic():
     assert_diagnostic_error(str(exc.value))
 
 
+def test_unmapped_parameter_is_a_diagnostic_not_a_bare_keyerror():
+    """The trap for whoever next reaches for an Augraphy knob.
+
+    Augraphy's parameter names are longer and less consistent than the YAML's,
+    so every one has to be mapped by hand. An unmapped key used to raise a bare
+    KeyError naming only the key -- no file, no list of what IS accepted, and no
+    hint that the mapping table is where to look.
+    """
+    tier = _tier(paper=[{"augmentation": "Folding", "gradient_height": [0.3, 0.4]}])
+    with pytest.raises(AugmentationError) as exc:
+        apply_augraphy(_page(), tier, seed=1)
+
+    message = str(exc.value)
+    assert_diagnostic_error(message)
+    assert "gradient_height" in message
+    assert "gradient_width" in message, "must list the parameters that ARE accepted"
+    assert "_PARAM_NAMES" in message, "must say where the mapping lives"
+
+
+def test_the_fold_width_is_configurable():
+    """Regression guard on the CREASE fix.
+
+    The crease was invisible in finished photographs because gradient_width sat
+    at Augraphy's default, drawing a narrow band of fine speckle that the heavy
+    tier's blur, noise and JPEG then erased. If this parameter stops reaching
+    Augraphy the fold silently narrows again and the screen's CREASE recall
+    collapses back to near zero -- with nothing failing to say so.
+    """
+    narrow = apply_augraphy(
+        _page(),
+        _tier(paper=[{"augmentation": "Folding", "fold_count": 1, "gradient_width": [0.1, 0.15]}]),
+        seed=11,
+    )
+    wide = apply_augraphy(
+        _page(),
+        _tier(paper=[{"augmentation": "Folding", "fold_count": 1, "gradient_width": [0.5, 0.6]}]),
+        seed=11,
+    )
+
+    assert np.array(narrow).shape == np.array(wide).shape
+    assert not np.array_equal(np.array(narrow), np.array(wide)), (
+        "gradient_width did not reach Augraphy: the two folds are identical"
+    )
+
+
 def test_same_seed_gives_identical_output():
     tier = _tier(ink=[{"augmentation": "InkBleed", "intensity": [0.2, 0.4], "kernel": 3}])
     first = apply_augraphy(_page(), tier, seed=7)

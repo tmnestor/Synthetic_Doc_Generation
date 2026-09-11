@@ -121,7 +121,18 @@ document_degradation:
           - {augmentation: InkBleed, intensity: [0.30, 0.50], kernel: 5}
           - {augmentation: LowInkRandomLines, count: [200, 300], consistent: false}
         paper:
-          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1}
+          # gradient_width was 0.1-0.2 (Augraphy's default) and the crease was
+          # then invisible in the finished photograph: a narrow band of fine
+          # speckle, erased by the blur, noise and JPEG below. The quality
+          # screen scored CREASE recall 0.07 on 150 creased images, which was
+          # correct perception of a fold that no longer survived. Widened so the
+          # crease zone is coarse enough to live through the camera.
+          #
+          # Calibrated against rendered output at 0.25/0.40/0.55: 0.40-0.55 is
+          # where the fold reads as a fold. Checked in situ -- every amount on
+          # the receipt stays legible, and the worst local ink-to-paper contrast
+          # RISES from 28 to 32, so the fold does not eat the print.
+          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1, gradient_width: [0.40, 0.55]}
           - {augmentation: LightingGradient, max_brightness: 240, direction: 135}
           - {augmentation: ShadowCast, side: left, opacity: [0.30, 0.45]}
         warp:   {foreshorten: [0.06, 0.10], rotation_deg: [-14, 14], margin: [0.10, 0.18]}
@@ -154,7 +165,10 @@ document_degradation:
           - {augmentation: InkBleed, intensity: [0.30, 0.50], kernel: 5}
           - {augmentation: LowInkRandomLines, count: [1800, 2200], consistent: false}
         paper:
-          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1}
+          # Same width as the receipt tier, and deliberately so: gradient_width
+          # is a fraction of page width, one of the scale-invariant parameters
+          # this file keeps identical across document types.
+          - {augmentation: Folding, fold_count: 1, fold_noise: 0.1, gradient_width: [0.40, 0.55]}
           - {augmentation: LightingGradient, max_brightness: 240, direction: 135}
           - {augmentation: ShadowCast, side: left, opacity: [0.30, 0.45]}
         warp:   {foreshorten: [0.06, 0.10], rotation_deg: [-14, 14], margin: [0.10, 0.18]}
@@ -199,7 +213,10 @@ document_degradation:
       # desk rather than on the document and is deliberately not labelled --
       # the prompt asks about shadow "lying across the paper".
       shadow:  {augmentation: ShadowCast}
-      # Augraphy renders a fold as a hard wedge across the page.
+      # Augraphy renders a fold as a band of displaced, speckled paper rather
+      # than a hard wedge -- the earlier description here overstated it, and the
+      # overstatement is why a crease invisible in the finished photograph went
+      # unquestioned for so long. See the gradient_width note on the heavy tiers.
       crease:  {augmentation: Folding}
       # Patchy horizontal print dropout, i.e. genuine fading. InkBleed is NOT
       # a source here: it spreads and darkens ink, which is smudging, and

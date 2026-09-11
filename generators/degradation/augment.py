@@ -67,7 +67,24 @@ _PARAM_NAMES: dict[str, dict[str, str]] = {
     "LightingGradient": {"max_brightness": "max_brightness", "direction": "direction"},
     "LowInkRandomLines": {"count": "count_range", "consistent": "use_consistent_lines"},
     "ShadowCast": {"side": "shadow_side", "opacity": "shadow_opacity_range"},
-    "Folding": {"fold_count": "fold_count", "fold_noise": "fold_noise"},
+    # gradient_width is how wide the fold zone is, as a fraction of page width.
+    # At Augraphy's default (0.1, 0.2) the crease is a narrow band of fine
+    # speckle, and the heavy tier's camera -- blur up to 1.3, noise sigma up to
+    # 8, JPEG down to 50 -- erases exactly that fine detail. The fold was being
+    # drawn and then destroyed, which is why the screen's CREASE recall of 0.07
+    # was correct perception of something no longer there. Widening the zone
+    # gives the camera something coarse enough to survive it.
+    #
+    # gradient_height, the fold's depth, is deliberately NOT exposed. Augraphy
+    # implements depth geometrically: past about 0.3 it tears the page open and
+    # fills the gap with backdrop_color, which on a receipt wipes out the whole
+    # amounts column. That fails the standard every tier here is held to --
+    # hard to read, never impossible -- so the knob is not offered.
+    "Folding": {
+        "fold_count": "fold_count",
+        "fold_noise": "fold_noise",
+        "gradient_width": "gradient_width",
+    },
 }
 
 # InkBleed wants a (w, h) kernel; the YAML declares a single int, since a
@@ -124,6 +141,18 @@ def _build(spec: dict, *, tier_name: str, phase: str) -> object:
     for key, value in spec.items():
         if key == "augmentation":
             continue
+        if key not in mapping:
+            raise AugmentationError(
+                "Unknown augmentation parameter.\n"
+                f"  What:     tier '{tier_name}' passes '{key}' to {name}, which is not "
+                f"mapped to any of its constructor arguments.\n"
+                f"  Where:    config/generation_config.yml -> "
+                f"document_degradation.tiers[{tier_name}].{phase}\n"
+                f"  Expected: one of {sorted(mapping)}.\n"
+                f"  Recover:  use a mapped parameter, or add '{key}' to _PARAM_NAMES['{name}'] "
+                f"in generators/degradation/augment.py after checking the real argument name "
+                f"with inspect.signature({name}.__init__).parameters."
+            )
         param = mapping[key]
         if param in _SQUARE_KERNEL_KEYS:
             kwargs[param] = (int(value), int(value))
