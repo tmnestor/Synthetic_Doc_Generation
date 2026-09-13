@@ -1,6 +1,7 @@
 """YAML loading utilities for ground truth, layout registries, and generation config.
 
-All loaders fail fast with diagnostic errors per CLAUDE.md requirements.
+All loaders fail fast with diagnostic errors per the project's engineering
+standards.
 """
 
 from pathlib import Path

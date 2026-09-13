@@ -1,6 +1,6 @@
 """Startup validation for a layout's `body:` tree.
 
-Every layout is fully checked before any rendering begins, per CLAUDE.md's
+Every layout is fully checked before any rendering begins, per the project's
 fail-fast rule: unknown primitives, missing keys, unknown field references and
 unregistered row providers all fail here with a four-element diagnostic.
 """

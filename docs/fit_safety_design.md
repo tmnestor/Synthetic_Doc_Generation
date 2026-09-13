@@ -1,6 +1,6 @@
 # Phase 0 — Fit Safety: Design Spec
 
-> Status: approved design (brainstorming output). Precursor to the content-variety
+> Status: approved design. Precursor to the content-variety
 > programme. This spec covers **fit safety only** — the guardrail that makes later
 > content widening (Phases 1–3) safe. It changes no content and is designed to
 > leave the current 220 documents byte-identical.

@@ -2,7 +2,7 @@
 
 Resolution order is block key -> the layout's `defaults:` -> fail fast. There is
 deliberately no fourth step: a Python literal supplying a value YAML omitted is
-exactly what CLAUDE.md's "every config key is required" rule forbids, and it is
+exactly what the project's "every config key is required" rule forbids, and it is
 how `role`, `color`, `align` and 28 other pixel decisions came to live in Python
 rather than in the layout files.
 """

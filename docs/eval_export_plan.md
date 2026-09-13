@@ -13,7 +13,7 @@
 > the README's "The evaluation datasets" section and the module docstring in
 > `generators/eval_set.py`.
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> Steps use checkbox (`- [ ]`) syntax for tracking; work through them in order.
 
 **Goal:** `python -m generators.pipeline eval_set` produces two self-contained sibling directories — `synthetic_<YYYYMMDD>/` and `degraded_<YYYYMMDD>/` — each holding 165 images and its own copy of `ground_truth.csv` / `ground_truth.jsonl`, with no dependency on any other repository.
 
@@ -54,8 +54,7 @@ Decided by the repo owner:
 - Every commit passes, in order: `pytest tests/`, `ruff check --fix --ignore ARG001,ARG002,F841 *.py`, `ruff format .`, `mypy . --ignore-missing-imports`. Never `--no-verify`.
 - Line length 108. Google-style docstrings. `pathlib.Path`. Python 3.12 types. B904 in except blocks.
 - Every config key is required; a missing one fails fast with a four-element diagnostic (WHAT / WHERE with path and dotted key / WHAT IT SHOULD LOOK LIKE / HOW TO RECOVER). Tests assert all four via `assert_diagnostic_error`.
-- Never write the Australian tax authority's three-letter acronym anywhere.
-- No commit attribution to Claude.
+- Refer to the production environment as PROD; never name the organisation.
 - **`environment.yml` carries an uncommitted change owned by the repo owner.** Never stage, revert or touch it. Stage by explicit path only.
 - Work on `main`. Commit only when asked.
 
