@@ -22,13 +22,6 @@ derived/
 # history forever, and these are derived artefacts, not source.
 tests/fixtures/
 
-# Claude Code config
-.claude/
-CLAUDE.md
-
-# Superpowers plans/specs — local workflow docs, not for the tracked repo
-docs/superpowers/
-
 # Augraphy scratch output — written during augmentation runs, never source.
 augraphy_cache/
 

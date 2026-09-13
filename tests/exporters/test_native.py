@@ -86,7 +86,7 @@ def test_ragged_transaction_lists_are_rejected() -> None:
 def test_ragged_transaction_lists_raise_a_four_element_diagnostic() -> None:
     """The mismatch error must be a fail-fast diagnostic, not a bare ValueError:
     it must name what disagrees, where to fix it, what a valid entry looks
-    like, and how to recover — per CLAUDE.md's fail-fast standard.
+    like, and how to recover — per the project's fail-fast standard.
     """
     broken = {**BANK, "TRANSACTION_DATES": "02/03/2023"}
     with pytest.raises(ValueError) as exc:

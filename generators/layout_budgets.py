@@ -1,7 +1,8 @@
 """Load and fail-fast-validate per-field pixel budgets from a layout dict.
 
 Budgets are the single source of truth for how a variable field is allowed to
-fit its box. Every key is required — no silent defaults (see CLAUDE.md).
+fit its box. Every key is required — no silent defaults (see the project's
+engineering standards).
 """
 
 REQUIRED_BUDGET_KEYS = ("width", "fit", "min_font", "max_lines")

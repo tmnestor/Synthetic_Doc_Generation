@@ -219,7 +219,8 @@ def test_doc_refs_receipt_to_bank_unchanged():
 
 def test_row_counts_match_the_known_corpus_size():
     """Sanity-anchors the baseline itself against the documented corpus shape
-    (CLAUDE.md: 55 cases per business type) so a baseline captured against a
+    (the project's engineering standards: 55 cases per business type) so a
+    baseline captured against a
     corrupted tree can't silently pass everything else in this file.
     """
     assert BASELINE["ground_truth.csv"]["by_type"]["BANK_STATEMENT"]["row_count"] == 55

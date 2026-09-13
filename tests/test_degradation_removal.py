@@ -2,7 +2,7 @@
 
 A leftover `degrade_image` would be a second, silently-diverging way to
 degrade a document, and its Python-side DEFAULT_DEGRADATION_PARAMS merge is
-exactly the "silent fallback" CLAUDE.md forbids.
+exactly the "silent fallback" the project's engineering standards forbid.
 """
 
 from pathlib import Path

@@ -19,7 +19,7 @@ One deliberate divergence from the LMM_POC contract: LMM_POC's
 for an unresolved document type. ``config/extraction_schema.yml`` has no
 such superset -- this repo has exactly three extraction document types, no
 more -- so an unresolved type fails fast here instead of silently returning
-the wrong field list (or an empty one). Per CLAUDE.md's fail-fast pattern, a
+the wrong field list (or an empty one). Per the project's fail-fast pattern, a
 document type this schema does not know is a configuration error, not a
 degraded-but-working case.
 """

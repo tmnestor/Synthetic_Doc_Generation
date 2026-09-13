@@ -17,7 +17,8 @@ def assert_diagnostic_error(
 ) -> None:
     """Assert a fail-fast diagnostic carries all four required elements.
 
-    Per CLAUDE.md, every fail-fast diagnostic must name (1) WHAT is wrong,
+    Per the project's engineering standards, every fail-fast diagnostic must
+    name (1) WHAT is wrong,
     (2) WHERE to fix it, (3) WHAT IT SHOULD LOOK LIKE, and (4) HOW TO RECOVER.
     This helper supports the two labeling conventions already in use across
     this project's fail-fast paths, selected by which arguments are given:
